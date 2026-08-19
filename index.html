@@ -321,11 +321,11 @@
 
   <main style="max-width: 480px; margin: 0 auto; padding: 18px; display: flex; flex-direction: column; gap: 20px;">
 
-    <!-- شريط Gemini Pro التفاعلي -->
+    <!-- شريط المساعد الذكي -->
     <div class="lux-card" style="padding: 16px; border-color: rgba(0, 245, 160, 0.25); background: linear-gradient(145deg, rgba(0, 245, 160, 0.05) 0%, rgba(0, 217, 245, 0.05) 100%);">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <span style="font-size: 12px; font-weight: 900; color: var(--emerald); display: flex; align-items: center; gap: 6px;">
-          ✨ المساعد الذكي (Gemini)
+          ✨ المساعد الذكي (Gemini AI)
         </span>
         <span style="font-size: 9px; font-weight: 800; font-family: 'Plus Jakarta Sans', sans-serif; background: rgba(0, 245, 160, 0.15); color: var(--emerald); padding: 2px 7px; border-radius: 100px;">PRO AI</span>
       </div>
@@ -629,11 +629,11 @@
     const SUPABASE_URL = "https://giidtugteyiobaagqohy.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpaWR0dWd0ZXlpb2JhYWdxb2h5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxMTgyMjYsImV4cCI6MjEwMjY5NDIyNn0.v7Nwag2BTrCWG6zzeYo1kTG4w2xAuzSmiZpCLJtvBow";
     
-    // مفتاح Gemini
-    const _p1 = "AQ.Ab8RN6K0no2Ol";
-    const _p2 = "Zifwe2zaGcgBDLhVf7IFDE1GPthJSX7FOaqRQ";
-    const DEFAULT_GEMINI_KEY = _p1 + _p2;
+    // مفتاح Gemini المعتمد
+    const GEMINI_DIRECT_KEY = "AQ.Ab8RN6K0no2Ol" + "Zifwe2zaGcgBDLhVf7IFDE1GPthJSX7FOaqRQ";
     
+    localStorage.removeItem('gemini_api_key');
+
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let currentUser = null;
@@ -967,7 +967,7 @@
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px solid var(--card-border); padding-top: 14px;">
               <button onclick="shareWA('${tx.id}')" class="btn-lux-secondary" style="padding: 11px;">
-                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
                 نسخ للواتساب
               </button>
               <button onclick="completeTx('${tx.id}')" class="btn-lux-emerald" style="padding: 11px;">
@@ -1087,10 +1087,45 @@
       showToast("تم نسخ تقرير الموقف للواتساب 💬");
     }
 
-    /* تكامل Gemini الرسمي المستقر */
+    /* محرك استدعاء الذكاء الاصطناعي التكيفي (Auto-Fallback Engine) */
+    async function requestGeminiAI(promptText) {
+      const endpoints = [
+        { v: 'v1beta', m: 'gemini-2.5-flash' },
+        { v: 'v1beta', m: 'gemini-2.0-flash' },
+        { v: 'v1', m: 'gemini-1.5-flash' },
+        { v: 'v1beta', m: 'gemini-1.5-flash-latest' },
+        { v: 'v1beta', m: 'gemini-pro' }
+      ];
+
+      let lastErrMsg = "تعذر الاتصال بالخادم";
+
+      for (const ep of endpoints) {
+        try {
+          const url = `https://generativelanguage.googleapis.com/${ep.v}/models/${ep.m}:generateContent?key=${GEMINI_DIRECT_KEY}`;
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: promptText }] }]
+            })
+          });
+
+          const data = await res.json();
+          if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
+            return data.candidates[0].content.parts[0].text;
+          }
+          if (data.error) {
+            lastErrMsg = data.error.message;
+          }
+        } catch (e) {
+          lastErrMsg = e.message;
+        }
+      }
+      throw new Error(lastErrMsg);
+    }
+
     async function executeGeminiAgent() {
       const p = document.getElementById('aiPrompt').value.trim();
-      const apiKey = localStorage.getItem('gemini_api_key') || DEFAULT_GEMINI_KEY;
       const btn = document.getElementById('btnAiExec');
 
       if (!p) return;
@@ -1099,29 +1134,11 @@
       btn.disabled = true;
 
       try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{
-              parts: [{
-                text: `أنت خبير ومستشار معتمد في شؤون تأسيس وتعديل الشركات والمعاملات القانونية والتجارية والضريبية في العراق. أجب باختصار واحترافية وبشكل مباشر على الاستفسار التالي:\n\n${p}`
-              }]
-            }]
-          })
-        });
-
-        const resData = await response.json();
-        
-        if (resData.candidates && resData.candidates[0].content && resData.candidates[0].content.parts[0].text) {
-          alert("✨ إجابة وتوجيه الذكاء الاصطناعي:\n\n" + resData.candidates[0].content.parts[0].text);
-        } else if (resData.error) {
-          alert("خطأ من السيرفر: " + resData.error.message);
-        } else {
-          showToast("تعذر استلام الرد، حاول مجدداً", "❌");
-        }
+        const fullPrompt = `أنت مستشار قانوني وإداري عراقي خبير في الشركات والمعاملات والضرائب. أجب باختصار واحترافية وبشكل مباشر على السؤال التالي:\n\n${p}`;
+        const answer = await requestGeminiAI(fullPrompt);
+        alert("✨ إجابة وتوجيه الذكاء الاصطناعي:\n\n" + answer);
       } catch (err) {
-        showToast("خطأ في الاتصال بالخدمة", "❌");
+        alert("⚠️ خطأ في الاستجابة: " + err.message);
       }
 
       btn.innerText = "تنفيذ";
@@ -1131,7 +1148,6 @@
 
     async function autoSuggestChecklistWithAI() {
       const txType = document.getElementById('txType').value.trim();
-      const apiKey = localStorage.getItem('gemini_api_key') || DEFAULT_GEMINI_KEY;
 
       if (!txType) {
         showToast("اكتب نوع المعاملة أولاً ليقترح الذكاء الاصطناعي متطلباتها", "⚠️");
@@ -1141,28 +1157,12 @@
       showToast("جاري استخراج المتطلبات الرسمية بالذكاء الاصطناعي... ⏳");
 
       try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{
-              parts: [{
-                text: `أعطني قائمة نقطية بمتطلبات وإجراءات المعاملة التالية في الدوائر الرسمية العراقية: (${txType}). اكتب فقط المتطلبات مباشرة، كل متطلب في سطر مستقل بدون مقدمات أو خاتمة وبدون أرقام أو رموز.`
-              }]
-            }]
-          })
-        });
-
-        const resData = await response.json();
-        if (resData.candidates && resData.candidates[0].content && resData.candidates[0].content.parts[0].text) {
-          const suggestions = resData.candidates[0].content.parts[0].text.trim();
-          document.getElementById('txChecklist').value = suggestions;
-          showToast("تم توليد المتطلبات بنجاح ✨");
-        } else if (resData.error) {
-          alert("خطأ: " + resData.error.message);
-        }
+        const prompt = `أعطني قائمة نقطية بمتطلبات وإجراءات المعاملة التالية في الدوائر الرسمية العراقية: (${txType}). اكتب فقط المتطلبات مباشرة، كل متطلب في سطر مستقل بدون مقدمات أو خاتمة وبدون أرقام أو رموز.`;
+        const suggestions = await requestGeminiAI(prompt);
+        document.getElementById('txChecklist').value = suggestions.trim();
+        showToast("تم توليد المتطلبات بنجاح ✨");
       } catch (err) {
-        showToast("تعذر استخراج المتطلبات", "❌");
+        alert("⚠️ تعذر استخراج المتطلبات: " + err.message);
       }
     }
 
