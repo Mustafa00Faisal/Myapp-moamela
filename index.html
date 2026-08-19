@@ -18,6 +18,8 @@
       --emerald-glow: rgba(0, 245, 160, 0.25);
       --gold: #FFB800;
       --gold-glow: rgba(255, 184, 0, 0.2);
+      --danger: #FF4D4D;
+      --danger-glow: rgba(255, 77, 77, 0.25);
       --cyan: #00D9F5;
       --text: #F3F4F6;
       --text-muted: #8E9BAE;
@@ -31,7 +33,7 @@
       background: linear-gradient(180deg, rgba(16, 22, 34, 0.85) 0%, rgba(11, 15, 24, 0.95) 100%);
       border: 1px solid var(--card-border);
       box-shadow: inset 0 1px 1px var(--card-border-highlight), 0 20px 40px -10px rgba(0,0,0,0.6);
-      border-radius: 26px;
+      border-radius: 24px;
       backdrop-filter: blur(20px);
       position: relative;
     }
@@ -41,7 +43,7 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 16px;
       color: #FFF;
-      padding: 14px 16px;
+      padding: 13px 16px;
       font-size: 13px;
       outline: none;
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -52,14 +54,44 @@
       background: #0B0F19;
     }
 
+    .search-box-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .search-box-wrapper input {
+      padding-right: 42px;
+      padding-left: 36px;
+      width: 100%;
+      background: #0D131F;
+      border-color: rgba(255, 255, 255, 0.12);
+      font-weight: 500;
+    }
+    .search-box-wrapper .search-icon {
+      position: absolute;
+      right: 14px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .search-box-wrapper .clear-btn {
+      position: absolute;
+      left: 12px;
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-size: 16px;
+      cursor: pointer;
+      display: none;
+    }
+
     .btn-lux-emerald {
       background: linear-gradient(135deg, #00F5A0 0%, #00B074 100%);
       color: #03150D;
       border: none;
-      border-radius: 18px;
+      border-radius: 16px;
       font-weight: 900;
       font-size: 13px;
-      padding: 14px;
+      padding: 13px;
       box-shadow: 0 8px 25px var(--emerald-glow);
       cursor: pointer;
       display: flex;
@@ -74,10 +106,10 @@
       background: linear-gradient(180deg, #182030 0%, #111724 100%);
       border: 1px solid var(--card-border);
       color: var(--text);
-      border-radius: 18px;
+      border-radius: 16px;
       font-weight: 800;
       font-size: 13px;
-      padding: 14px;
+      padding: 13px;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -125,10 +157,82 @@
       transition: width 0.4s ease;
     }
 
+    /* شارات التنبيه الزمني */
+    .stale-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 8px;
+    }
+    .stale-badge.urgent {
+      background: rgba(255, 77, 77, 0.15);
+      color: #FF6B6B;
+      border: 1px solid rgba(255, 77, 77, 0.3);
+      animation: pulseAlert 1.8s infinite;
+    }
+    .stale-badge.warn {
+      background: rgba(255, 184, 0, 0.15);
+      color: var(--gold);
+      border: 1px solid rgba(255, 184, 0, 0.3);
+    }
+    .stale-badge.fresh {
+      background: rgba(0, 245, 160, 0.1);
+      color: var(--emerald);
+      border: 1px solid rgba(0, 245, 160, 0.2);
+    }
+
+    @keyframes pulseAlert {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    /* خط زمني للمسار التاريخي */
+    .timeline-container {
+      position: relative;
+      padding-right: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .timeline-container::before {
+      content: '';
+      position: absolute;
+      right: 5px;
+      top: 6px;
+      bottom: 6px;
+      width: 2px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .timeline-item {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      right: -17px;
+      top: 5px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      border: 2px solid var(--bg);
+    }
+    .timeline-item.active::before {
+      background: var(--emerald);
+      box-shadow: 0 0 10px var(--emerald);
+    }
+
     .sheet-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.8);
+      background: rgba(0,0,0,0.85);
       backdrop-filter: blur(16px);
       z-index: 1000;
       display: none;
@@ -139,21 +243,21 @@
     .sheet-container {
       background: linear-gradient(180deg, #111724 0%, #080B12 100%);
       border: 1px solid var(--card-border-highlight);
-      border-radius: 36px 36px 0 0;
+      border-radius: 32px 32px 0 0;
       width: 100%;
       max-width: 480px;
-      padding: 26px 22px 34px;
+      padding: 24px 20px 32px;
       box-shadow: 0 -20px 50px rgba(0,0,0,0.8);
       animation: sheetSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       max-height: 90vh;
       overflow-y: auto;
     }
-    .sheet-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 100px; margin: 0 auto 20px; }
+    .sheet-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 100px; margin: 0 auto 18px; }
 
     .center-modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.8);
+      background: rgba(0,0,0,0.85);
       backdrop-filter: blur(16px);
       z-index: 1100;
       display: none;
@@ -165,8 +269,8 @@
     .center-modal-card {
       background: linear-gradient(180deg, #121826 0%, #090D15 100%);
       border: 1px solid var(--card-border-highlight);
-      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.9), 0 0 30px rgba(0, 245, 160, 0.08);
-      border-radius: 28px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.9);
+      border-radius: 26px;
       width: 100%;
       max-width: 380px;
       padding: 24px 20px;
@@ -184,7 +288,7 @@
       right: 16px;
       max-width: 440px;
       margin: 0 auto;
-      background: rgba(14, 19, 31, 0.9);
+      background: rgba(14, 19, 31, 0.92);
       border: 1px solid var(--card-border-highlight);
       box-shadow: 0 15px 35px rgba(0,0,0,0.6);
       border-radius: 100px;
@@ -259,7 +363,7 @@
 </head>
 <body>
 
-  <!-- شاشة تسجيل الدخول -->
+  <!-- شاشة الدخول -->
   <div id="authOverlay">
     <div class="lux-card" style="width: 100%; max-width: 380px; padding: 32px 24px; display: flex; flex-direction: column; gap: 20px;">
       <div style="text-align: center;">
@@ -267,7 +371,7 @@
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#03150D" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
         </div>
         <h2 style="font-size: 18px; font-weight: 900; color: #FFF;">منظومة المعاملات</h2>
-        <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">سجل الدخول للوصول إلى قاعدة البيانات</p>
+        <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">سجل الدخول للوصول إلى قاعدة البيانات السحابية</p>
       </div>
 
       <div style="display: flex; flex-direction: column; gap: 12px;">
@@ -292,7 +396,7 @@
   </div>
 
   <!-- رأس التطبيق -->
-  <header style="position: sticky; top: 0; z-index: 50; background: rgba(6, 8, 13, 0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--card-border); padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;">
+  <header style="position: sticky; top: 0; z-index: 50; background: rgba(6, 8, 13, 0.88); backdrop-filter: blur(20px); border-bottom: 1px solid var(--card-border); padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;">
     <div style="display: flex; align-items: center; gap: 10px;">
       <div style="width: 36px; height: 36px; border-radius: 12px; background: linear-gradient(135deg, #00F5A0, #00B074); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px var(--emerald-glow);">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#03150D" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
@@ -319,24 +423,17 @@
     </div>
   </header>
 
-  <main style="max-width: 480px; margin: 0 auto; padding: 18px; display: flex; flex-direction: column; gap: 20px;">
+  <main style="max-width: 480px; margin: 0 auto; padding: 18px; display: flex; flex-direction: column; gap: 18px;">
 
-    <!-- شريط Gemini Pro التفاعلي -->
-    <div class="lux-card" style="padding: 16px; border-color: rgba(0, 245, 160, 0.25); background: linear-gradient(145deg, rgba(0, 245, 160, 0.05) 0%, rgba(0, 217, 245, 0.05) 100%);">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <span style="font-size: 12px; font-weight: 900; color: var(--emerald); display: flex; align-items: center; gap: 6px;">
-          ✨ المساعد الذكي (Gemini Pro)
-        </span>
-        <span style="font-size: 9px; font-weight: 800; font-family: 'Plus Jakarta Sans', sans-serif; background: rgba(0, 245, 160, 0.15); color: var(--emerald); padding: 2px 7px; border-radius: 100px;">PRO AI</span>
-      </div>
-      <div style="display: flex; gap: 8px;">
-        <input id="aiPrompt" type="text" placeholder="اكتب سؤالاً أو استفساراً لمعالجته..." class="lux-input" style="flex: 1; padding: 10px 14px; font-size: 12px;">
-        <button id="btnAiExec" onclick="executeGeminiAgent()" class="btn-lux-emerald" style="padding: 0 16px; border-radius: 14px; font-size: 12px;">تنفيذ</button>
-      </div>
+    <!-- شريط البحث الفوري الاحترافي -->
+    <div class="search-box-wrapper">
+      <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+      <input id="globalSearchInput" type="text" placeholder="ابحث عن شركة، نوع معاملة، أو مسار..." class="lux-input" oninput="handleGlobalSearch(this.value)">
+      <button id="clearSearchBtn" class="clear-btn" onclick="clearGlobalSearch()">✕</button>
     </div>
 
     <!-- تبويب المعاملات -->
-    <div id="tab-transactions" style="display: flex; flex-direction: column; gap: 20px;">
+    <div id="tab-transactions" style="display: flex; flex-direction: column; gap: 18px;">
       <div id="adminActionButtons" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
         <button onclick="openSheet('newCompanyModal')" class="btn-lux-emerald">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
@@ -348,16 +445,16 @@
         </button>
       </div>
 
-      <!-- دليل الشركات -->
-      <section>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px;">
+      <!-- شريط الشركات الموثقة -->
+      <section id="companiesSection">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 4px;">
           <span style="font-size: 12px; font-weight: 900; color: var(--text-muted); text-transform: uppercase;">دليل الشركات الموثقة</span>
           <span id="companiesCount" style="font-size: 11px; font-weight: 700; color: var(--text-dim); font-family: monospace;">0 مسجلة</span>
         </div>
         <div id="companiesList" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none;"></div>
       </section>
 
-      <!-- المعاملات الجارية -->
+      <!-- قائمة المعاملات النشطة -->
       <section>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px;">
           <span style="font-size: 12px; font-weight: 900; color: var(--text-muted); text-transform: uppercase;">المعاملات النشطة</span>
@@ -439,7 +536,7 @@
     </button>
   </nav>
 
-  <!-- نافذة خيارات الشركة في المنتصف -->
+  <!-- نافذة خيارات الشركة -->
   <div id="companyActionModal" class="center-modal-overlay">
     <div class="center-modal-card">
       <div style="text-align: center; margin-bottom: 16px;">
@@ -517,10 +614,7 @@
           <select id="txCompanySelect" class="lux-input" style="width: 100%; margin-top: 4px;"></select>
         </div>
         <div>
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <label style="font-size: 11px; color: var(--text-muted); font-weight: 700;">نوع الإجراء أو المعاملة</label>
-            <button onclick="autoSuggestChecklistWithAI()" type="button" style="background: none; border: none; color: var(--emerald); font-size: 11px; font-weight: 800; cursor: pointer;">✨ اقتراح المتطلبات بالذكاء الاصطناعي</button>
-          </div>
+          <label style="font-size: 11px; color: var(--text-muted); font-weight: 700;">نوع الإجراء أو المعاملة</label>
           <input id="txType" type="text" placeholder="مثال: تعديل عقد تأسيس، تجديد إجازة ممارسة مهنة" class="lux-input" style="width: 100%; margin-top: 4px;">
         </div>
         <div>
@@ -539,16 +633,36 @@
     </div>
   </div>
 
-  <!-- مركز التنبيهات -->
+  <!-- رادار التنبيهات المتقدم (مانع النسيان) -->
   <div id="notificationsModal" class="sheet-overlay">
     <div class="sheet-container">
       <div class="sheet-handle"></div>
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-        <h3 style="font-size: 16px; font-weight: 900; color: #FFF;">🔔 مركز التنبيهات والمتابعة</h3>
-        <span id="notifCountText" style="font-size: 11px; color: var(--gold); font-weight: 700;">0 تنبيهات</span>
+        <div>
+          <h3 style="font-size: 16px; font-weight: 900; color: #FFF;">🔔 رادار المتابعة والتنبيهات</h3>
+          <p style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">تنبيهات تلقائية للمعاملات الراكدة والمتأخرة</p>
+        </div>
+        <span id="notifCountText" style="font-size: 11px; color: var(--gold); font-weight: 800; background: var(--gold-glow); padding: 3px 10px; border-radius: 100px;">0 تنبيهات</span>
       </div>
-      <div id="notificationsList" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;"></div>
+      <div id="notificationsList" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; max-height: 380px; overflow-y: auto;"></div>
       <button onclick="closeSheet('notificationsModal')" class="btn-lux-secondary" style="width: 100%;">إغلاق</button>
+    </div>
+  </div>
+
+  <!-- نافذة سجل المسار الميداني التاريخي -->
+  <div id="timelineModal" class="sheet-overlay">
+    <div class="sheet-container">
+      <div class="sheet-handle"></div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
+        <div>
+          <span style="font-size: 11px; font-weight: 800; color: var(--cyan); text-transform: uppercase;">سجل التنقلات الميدانية</span>
+          <h3 id="timelineTxTitle" style="font-size: 16px; font-weight: 900; color: #FFF; margin-top: 2px;">مسار المعاملة</h3>
+        </div>
+        <button onclick="closeSheet('timelineModal')" style="background: none; border: none; color: var(--text-muted); font-size: 16px; cursor: pointer;">✕</button>
+      </div>
+
+      <div id="timelineStepsList" class="timeline-container"></div>
+      <button onclick="closeSheet('timelineModal')" class="btn-lux-secondary" style="width: 100%; margin-top: 18px;">رجوع</button>
     </div>
   </div>
 
@@ -594,18 +708,19 @@
     <div class="sheet-container">
       <div class="sheet-handle"></div>
       <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 4px;">تحديث المسار الميداني</h3>
-      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">اختر الدائرة أو اكتب القسم المتواجد فيه حالياً:</p>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">الموقع السابق سيُحفظ تلقائياً في السجل التاريخي:</p>
       
       <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;">
         <button onclick="setQuickStep('دائرة تسجيل الشركات - قسم التدقيق')" style="background: var(--card-inner); border: 1px solid var(--card-border); color: var(--text); font-size: 11px; font-weight: 700; padding: 7px 12px; border-radius: 10px; cursor: pointer;">🏢 تسجيل الشركات</button>
         <button onclick="setQuickStep('الهيئة العامة للضرائب')" style="background: var(--card-inner); border: 1px solid var(--card-border); color: var(--text); font-size: 11px; font-weight: 700; padding: 7px 12px; border-radius: 10px; cursor: pointer;">⚖️ الهيئة العامة للضرائب</button>
         <button onclick="setQuickStep('وزارة التجارة - قسم العقود')" style="background: var(--card-inner); border: 1px solid var(--card-border); color: var(--text); font-size: 11px; font-weight: 700; padding: 7px 12px; border-radius: 10px; cursor: pointer;">🏛️ وزارة التجارة</button>
+        <button onclick="setQuickStep('غرفة تجارة بغداد')" style="background: var(--card-inner); border: 1px solid var(--card-border); color: var(--text); font-size: 11px; font-weight: 700; padding: 7px 12px; border-radius: 10px; cursor: pointer;">🏛️ غرفة التجارة</button>
       </div>
 
-      <input id="customStepInput" type="text" placeholder="اكتب المسار بدقة..." class="lux-input" style="width: 100%; margin-bottom: 18px;">
+      <input id="customStepInput" type="text" placeholder="اكتب المسار أو القسم بدقة..." class="lux-input" style="width: 100%; margin-bottom: 18px;">
       
       <div style="display: flex; gap: 10px;">
-        <button onclick="confirmStepUpdate()" class="btn-lux-emerald" style="flex: 1;">حفظ المسار</button>
+        <button onclick="confirmStepUpdate()" class="btn-lux-emerald" style="flex: 1;">حفظ ونقل المسار</button>
         <button onclick="closeSheet('stepUpdateModal')" class="btn-lux-secondary" style="flex: 1;">إلغاء</button>
       </div>
     </div>
@@ -636,17 +751,19 @@
     let selectedCompanyId = null;
     let selectedCompanyName = "";
     let targetTxIdForStep = null;
+    let currentOldStepForTx = "";
     let targetTxIdForChecklist = null;
     let companies = [];
     let activeTransactions = [];
     let allTransactionsGlobal = [];
+    let searchQuery = "";
 
     function showToast(msg, icon = "✨") {
       const t = document.getElementById('toast');
       document.getElementById('toastMsg').innerText = msg;
       document.getElementById('toastIcon').innerText = icon;
       t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 3500);
+      setTimeout(() => t.classList.remove('show'), 3200);
     }
 
     async function checkAuthSession() {
@@ -737,10 +854,25 @@
         renderActive();
         renderAccounts(allTransactionsGlobal);
         renderArchive(allTransactionsGlobal.filter(t => t.status === 'completed' || t.status === 'archived'));
-        updateNotifications();
+        updateSmartRadarAlerts();
       } catch (err) {
         console.error(err);
       }
+    }
+
+    /* نظام البحث الفوري الشامل */
+    function handleGlobalSearch(val) {
+      searchQuery = val.trim().toLowerCase();
+      document.getElementById('clearSearchBtn').style.display = searchQuery ? 'block' : 'none';
+      renderCompanies();
+      renderActive();
+      renderAccounts(allTransactionsGlobal);
+      renderArchive(allTransactionsGlobal.filter(t => t.status === 'completed' || t.status === 'archived'));
+    }
+
+    function clearGlobalSearch() {
+      document.getElementById('globalSearchInput').value = '';
+      handleGlobalSearch('');
     }
 
     function renderCompanies() {
@@ -749,7 +881,9 @@
       list.innerHTML = '';
       select.innerHTML = '';
 
-      companies.forEach(c => {
+      const filtered = companies.filter(c => !searchQuery || c.name.toLowerCase().includes(searchQuery));
+
+      filtered.forEach(c => {
         const initials = c.name.slice(0, 2);
         list.innerHTML += `
           <div onclick="selectCompany('${c.id}', '${c.name}')" class="lux-card" style="padding: 10px 14px; flex-shrink: 0; display: flex; align-items: center; gap: 10px; cursor: pointer; border-radius: 18px;">
@@ -761,6 +895,9 @@
               <p style="font-size: 10px; color: var(--text-dim); margin-top: 1px;">ملف موثق</p>
             </div>
           </div>`;
+      });
+
+      companies.forEach(c => {
         select.innerHTML += `<option value="${c.id}">${c.name}</option>`;
       });
     }
@@ -900,17 +1037,103 @@
       }
     }
 
+    /* إدارة السجل التاريخي للمسار */
+    function getStepHistory(txId) {
+      const stored = localStorage.getItem(`step_history_${txId}`);
+      return stored ? JSON.parse(stored) : [];
+    }
+
+    function pushStepHistory(txId, oldLocation, newLocation) {
+      let hist = getStepHistory(txId);
+      if (hist.length === 0 && oldLocation) {
+        hist.push({ step: oldLocation, time: new Date(Date.now() - 3600000).toISOString() });
+      }
+      hist.push({ step: newLocation, time: new Date().toISOString() });
+      localStorage.setItem(`step_history_${txId}`, JSON.stringify(hist));
+    }
+
+    function viewTimeline(txId, compName, txType, currentLoc) {
+      document.getElementById('timelineTxTitle').innerText = `${compName} - ${txType}`;
+      const list = document.getElementById('timelineStepsList');
+      let hist = getStepHistory(txId);
+
+      if (hist.length === 0) {
+        hist = [{ step: currentLoc || 'تم استلام المعاملة وبدء الإجراءات', time: new Date().toISOString() }];
+      }
+
+      list.innerHTML = hist.map((h, i) => {
+        const isCurrent = i === hist.length - 1;
+        const d = new Date(h.time);
+        const timeStr = d.toLocaleDateString('ar-IQ', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+        return `
+          <div class="timeline-item ${isCurrent ? 'active' : ''}">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 13px; font-weight: ${isCurrent ? '900' : '700'}; color: ${isCurrent ? 'var(--emerald)' : '#FFF'};">
+                ${isCurrent ? '📍 الموقع الحالي: ' : '🏢 محطة سابقة: '} ${h.step}
+              </span>
+            </div>
+            <span style="font-size: 10px; color: var(--text-dim); font-family: 'Plus Jakarta Sans', sans-serif;">${timeStr}</span>
+          </div>
+        `;
+      }).join('');
+
+      openSheet('timelineModal');
+    }
+
+    /* حساب شارة ركود المعاملة */
+    function getStalenessInfo(tx) {
+      const hist = getStepHistory(tx.id);
+      const lastTimeStr = hist.length > 0 ? hist[hist.length - 1].time : tx.created_at;
+      const hoursPassed = Math.floor((new Date() - new Date(lastTimeStr)) / (1000 * 60 * 60));
+
+      if (hoursPassed >= 48) {
+        const days = Math.floor(hoursPassed / 24);
+        return {
+          type: 'urgent',
+          badgeHtml: `<span class="stale-badge urgent">⚠️ راكدة منذ ${days} يوم</span>`,
+          alertText: `لم يتم تحريكها منذ ${days} يوم!`,
+          isUrgent: true
+        };
+      } else if (hoursPassed >= 24) {
+        return {
+          type: 'warn',
+          badgeHtml: `<span class="stale-badge warn">⏳ متوقفة منذ ${hoursPassed} ساعة</span>`,
+          alertText: `متوقفة منذ أكثر من 24 ساعة.`,
+          isUrgent: false
+        };
+      } else {
+        return {
+          type: 'fresh',
+          badgeHtml: `<span class="stale-badge fresh">✨ نشطة ومحدثة</span>`,
+          alertText: null,
+          isUrgent: false
+        };
+      }
+    }
+
     function renderActive() {
       const container = document.getElementById('activeTransactionsList');
-      if (activeTransactions.length === 0) {
-        container.innerHTML = '<div class="lux-card" style="text-align: center; color: var(--text-dim); padding: 40px 20px; font-size: 13px;">لا توجد معاملات جارية حالياً</div>';
+      
+      const filtered = activeTransactions.filter(tx => {
+        if (!searchQuery) return true;
+        const cName = (tx.companies?.name || '').toLowerCase();
+        const tType = (tx.transaction_type || '').toLowerCase();
+        const cLoc = (tx.current_location_step || '').toLowerCase();
+        return cName.includes(searchQuery) || tType.includes(searchQuery) || cLoc.includes(searchQuery);
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="lux-card" style="text-align: center; color: var(--text-dim); padding: 40px 20px; font-size: 13px;">${searchQuery ? 'لا توجد نتائج مطابقة للبحث' : 'لا توجد معاملات جارية حالياً'}</div>`;
         return;
       }
 
-      container.innerHTML = activeTransactions.map(tx => {
+      container.innerHTML = filtered.map(tx => {
         const checklists = tx.transaction_checklists || [];
         const completedCount = checklists.filter(c => c.is_completed).length;
         const progressPercent = checklists.length > 0 ? Math.round((completedCount / checklists.length) * 100) : 0;
+        const staleInfo = getStalenessInfo(tx);
+        const historyCount = getStepHistory(tx.id).length;
 
         const checksHtml = checklists.map(c => `
           <div style="display: flex; align-items: center; justify-content: space-between; background: #090D15; border: 1px solid rgba(255,255,255,0.04); padding: 9px 12px; border-radius: 14px; margin-bottom: 6px;">
@@ -923,26 +1146,35 @@
         `).join('');
 
         return `
-          <div class="lux-card" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+          <div class="lux-card" style="padding: 20px; display: flex; flex-direction: column; gap: 14px; ${staleInfo.isUrgent ? 'border-color: rgba(255, 77, 77, 0.4);' : ''}">
             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
               <div style="display: flex; align-items: center; gap: 10px;">
                 <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #182234, #0F1624); border: 1px solid var(--card-border-highlight); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; color: var(--emerald);">
                   ${(tx.companies?.name || 'ش').slice(0, 2)}
                 </div>
                 <div>
-                  <span style="font-size: 11px; font-weight: 800; color: var(--emerald);">${tx.companies?.name || 'شركة'}</span>
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="font-size: 11px; font-weight: 800; color: var(--emerald);">${tx.companies?.name || 'شركة'}</span>
+                    ${staleInfo.badgeHtml}
+                  </div>
                   <h3 style="font-size: 15px; font-weight: 900; color: #FFF; margin-top: 1px;">${tx.transaction_type}</h3>
                 </div>
               </div>
               <span style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 900; color: var(--gold); background: var(--gold-glow); border: 1px solid rgba(255, 184, 0, 0.3); padding: 5px 12px; border-radius: 100px;">${Number(tx.fee_iqd).toLocaleString('ar-IQ')} د.ع</span>
             </div>
 
+            <!-- شريط المسار الحالي وسجل التنقلات -->
             <div style="background: #080B12; border: 1px solid var(--card-border); border-radius: 16px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
-              <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
+              <div style="display: flex; align-items: center; gap: 8px; overflow: hidden; flex: 1;">
                 <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan);"></span>
-                <span style="font-size: 12px; color: #D1D5DB; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">${tx.current_location_step}</span>
+                <span style="font-size: 12px; color: #D1D5DB; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${tx.current_location_step}</span>
               </div>
-              <button onclick="openStepModal('${tx.id}', '${tx.current_location_step}')" style="background: #141B2D; border: 1px solid rgba(0, 245, 160, 0.3); color: var(--emerald); padding: 6px 12px; border-radius: 10px; font-size: 11px; font-weight: 800; cursor: pointer;">تحديث</button>
+              <div style="display: flex; gap: 6px;">
+                <button onclick="viewTimeline('${tx.id}', '${tx.companies?.name}', '${tx.transaction_type}', '${tx.current_location_step}')" style="background: #101624; border: 1px solid var(--card-border); color: var(--cyan); padding: 6px 10px; border-radius: 10px; font-size: 11px; font-weight: 800; cursor: pointer;">
+                  📜 المسار ${historyCount > 1 ? `(${historyCount})` : ''}
+                </button>
+                <button onclick="openStepModal('${tx.id}', '${tx.current_location_step}')" style="background: #141B2D; border: 1px solid rgba(0, 245, 160, 0.3); color: var(--emerald); padding: 6px 12px; border-radius: 10px; font-size: 11px; font-weight: 800; cursor: pointer;">نقل</button>
+              </div>
             </div>
 
             <div>
@@ -962,7 +1194,7 @@
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px solid var(--card-border); padding-top: 14px;">
               <button onclick="shareWA('${tx.id}')" class="btn-lux-secondary" style="padding: 11px;">
-                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
                 نسخ للواتساب
               </button>
               <button onclick="completeTx('${tx.id}')" class="btn-lux-emerald" style="padding: 11px;">
@@ -977,7 +1209,8 @@
 
     function openStepModal(id, currentStep) {
       targetTxIdForStep = id;
-      document.getElementById('customStepInput').value = currentStep;
+      currentOldStepForTx = currentStep;
+      document.getElementById('customStepInput').value = '';
       openSheet('stepUpdateModal');
     }
 
@@ -986,9 +1219,10 @@
     async function confirmStepUpdate() {
       const step = document.getElementById('customStepInput').value.trim();
       if (step && targetTxIdForStep) {
+        pushStepHistory(targetTxIdForStep, currentOldStepForTx, step);
         await db.from('transactions').update({ current_location_step: step }).eq('id', targetTxIdForStep);
         closeSheet('stepUpdateModal');
-        showToast("تم تحديث المسار الميداني بنجاح 📍");
+        showToast("تم نقل المسار وحفظ المحطة السابقة بنجاح 📍");
         loadData();
       }
     }
@@ -1039,7 +1273,17 @@
 
       if (!transaction_type) return;
 
-      const { data: tx } = await db.from('transactions').insert([{ company_id, transaction_type, fee_iqd, status: 'in_progress' }]).select().single();
+      const { data: tx } = await db.from('transactions').insert([{ 
+        company_id, 
+        transaction_type, 
+        fee_iqd, 
+        status: 'in_progress',
+        current_location_step: 'تم استلام المعاملة وبدء الإجراءات'
+      }]).select().single();
+
+      if (tx) {
+        pushStepHistory(tx.id, null, 'تم استلام المعاملة وبدء الإجراءات');
+      }
 
       if (rawChecklist && tx) {
         const items = rawChecklist.split('\n').filter(i => i.trim() !== '').map(item => ({
@@ -1072,83 +1316,73 @@
       const tx = activeTransactions.find(t => t.id === id);
       if (!tx) return;
       const checks = (tx.transaction_checklists || []).map(c => `${c.is_completed ? '✅' : '⏳'} ${c.item_text}`).join('\n');
+      const hist = getStepHistory(tx.id);
+      const histText = hist.length > 1 ? `\n\n*المسار السابق:* ${hist.slice(0, -1).map(h => h.step).join(' ➔ ')}` : '';
+      
       const officeName = localStorage.getItem('office_name') || 'منظومة إدارة المعاملات';
       const msg = `*موقف معاملة: ${tx.companies?.name}*\n\n`
                 + `📋 *نوع الإجراء:* ${tx.transaction_type}\n`
-                + `📍 *المسار الحالي:* ${tx.current_location_step}\n\n`
-                + `*الموقف الميداني للمتطلبات:*\n${checks || 'لا توجد متطلبات'}\n\n`
+                + `📍 *الموقع الحالي:* ${tx.current_location_step}`
+                + histText
+                + `\n\n*الموقف الميداني للمتطلبات:*\n${checks || 'لا توجد متطلبات'}\n\n`
                 + `_${officeName}_`;
       navigator.clipboard.writeText(msg);
       showToast("تم نسخ تقرير الموقف للواتساب 💬");
     }
 
-    /* الذكاء الاصطناعي */
-    async function executeGeminiAgent() {
-      const p = document.getElementById('aiPrompt').value.trim();
-      const btn = document.getElementById('btnAiExec');
-      if (!p) return;
+    /* رادار التنبيهات المتقدم الذكي */
+    function updateSmartRadarAlerts() {
+      const list = document.getElementById('notificationsList');
+      const badge = document.getElementById('notifBadge');
+      const countText = document.getElementById('notifCountText');
+      list.innerHTML = '';
+      
+      let alerts = [];
 
-      btn.innerText = "معالجة...";
-      btn.disabled = true;
-
-      // تجربة المفتاح السحابي
-      const apiKey = "AQ.Ab8RN6K0no2Ol" + "Zifwe2zaGcgBDLhVf7IFDE1GPthJSX7FOaqRQ";
-
-      try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: "أنت مستشار قانوني وإداري في العراق. أجب باختصار على: " + p }] }]
-          })
-        });
-        const data = await res.json();
-        if (data.candidates && data.candidates[0].content.parts[0].text) {
-          alert("✨ إجابة وتوجيه الذكاء الاصطناعي:\n\n" + data.candidates[0].content.parts[0].text);
-        } else {
-          alert("الذكاء الاصطناعي بحاجة لتفعيل مفتاح AI Studio من الإعدادات.");
+      activeTransactions.forEach(t => {
+        const stale = getStalenessInfo(t);
+        if (stale.alertText) {
+          alerts.push({
+            type: stale.type,
+            title: `تنبيه ركود: ${t.companies?.name || 'شركة'}`,
+            desc: `${stale.alertText} - نوع المعاملة: (${t.transaction_type})`,
+            loc: t.current_location_step
+          });
         }
-      } catch (err) {
-        alert("تعذر الاتصال بالذكاء الاصطناعي حالياً.");
-      }
+      });
 
-      btn.innerText = "تنفيذ";
-      btn.disabled = false;
-      document.getElementById('aiPrompt').value = '';
-    }
-
-    async function autoSuggestChecklistWithAI() {
-      const txType = document.getElementById('txType').value.trim();
-      if (!txType) {
-        showToast("اكتب نوع المعاملة أولاً", "⚠️");
-        return;
-      }
-      showToast("جاري اقتراح المتطلبات... ⏳");
-      const apiKey = "AQ.Ab8RN6K0no2Ol" + "Zifwe2zaGcgBDLhVf7IFDE1GPthJSX7FOaqRQ";
-      try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: `أعطني قائمة نقطية بمتطلبات: (${txType}) في الدوائر العراقية بدون مقدمات أو أرقام.` }] }]
-          })
-        });
-        const data = await res.json();
-        if (data.candidates && data.candidates[0].content.parts[0].text) {
-          document.getElementById('txChecklist').value = data.candidates[0].content.parts[0].text.trim();
-          showToast("تم توليد المتطلبات بنجاح ✨");
-        } else {
-          showToast("يرجى كتابة المتطلبات يدوياً", "⚠️");
-        }
-      } catch (e) {
-        showToast("يرجى كتابة المتطلبات يدوياً", "⚠️");
+      if (alerts.length > 0) {
+        badge.style.display = 'block';
+        countText.innerText = `${alerts.length} تنبيهات مهمة`;
+        list.innerHTML = alerts.map(a => `
+          <div style="background: #080B12; border: 1px solid ${a.type === 'urgent' ? 'rgba(255, 77, 77, 0.4)' : 'rgba(255, 184, 0, 0.4)'}; padding: 12px 14px; border-radius: 16px; display: flex; align-items: flex-start; gap: 10px;">
+            <span style="font-size: 18px;">${a.type === 'urgent' ? '🚨' : '⚠️'}</span>
+            <div style="flex: 1;">
+              <p style="font-size: 13px; font-weight: 900; color: ${a.type === 'urgent' ? '#FF6B6B' : 'var(--gold)'};">${a.title}</p>
+              <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">${a.desc}</p>
+              <p style="font-size: 10px; color: var(--cyan); margin-top: 3px;">📍 الموقع الحالي: ${a.loc}</p>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        badge.style.display = 'none';
+        countText.innerText = '0 تنبيهات';
+        list.innerHTML = '<div style="text-align:center; padding: 30px 10px;"><p style="font-size: 14px; font-weight: 800; color: var(--emerald);">ممتاز! كل المعاملات نشطة ومتابعة 🚀</p><p style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">الرادار ينبهك تلقائياً إذا توقفت أي شركة لأكثر من 24 ساعة.</p></div>';
       }
     }
 
     function renderAccounts(all) {
       const tot = all.reduce((s, t) => s + (Number(t.fee_iqd) || 0), 0);
       document.getElementById('totalRevenue').innerText = `${tot.toLocaleString('ar-IQ')} د.ع`;
-      document.getElementById('accountsList').innerHTML = all.map(t => `
+      
+      const filtered = all.filter(t => {
+        if (!searchQuery) return true;
+        const cName = (t.companies?.name || '').toLowerCase();
+        const tType = (t.transaction_type || '').toLowerCase();
+        return cName.includes(searchQuery) || tType.includes(searchQuery);
+      });
+
+      document.getElementById('accountsList').innerHTML = filtered.map(t => `
         <div class="lux-card" style="padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;">
           <div>
             <p style="font-size: 13px; font-weight: 800; color: #FFF;">${t.companies?.name || 'شركة'}</p>
@@ -1160,9 +1394,16 @@
     }
 
     function renderArchive(arch) {
-      document.getElementById('archivedList').innerHTML = arch.length === 0 
+      const filtered = arch.filter(t => {
+        if (!searchQuery) return true;
+        const cName = (t.companies?.name || '').toLowerCase();
+        const tType = (t.transaction_type || '').toLowerCase();
+        return cName.includes(searchQuery) || tType.includes(searchQuery);
+      });
+
+      document.getElementById('archivedList').innerHTML = filtered.length === 0 
         ? '<div class="lux-card" style="text-align: center; color: var(--text-dim); padding: 30px; font-size: 12px;">الأرشيف فارغ حالياً</div>'
-        : arch.map(t => `
+        : filtered.map(t => `
           <div class="lux-card" style="padding: 16px; display: flex; justify-content: space-between; align-items: center;">
             <div>
               <p style="font-size: 13px; font-weight: 800; color: #FFF;">${t.companies?.name} - ${t.transaction_type}</p>
@@ -1171,39 +1412,6 @@
             <span style="font-size: 11px; font-weight: 800; color: var(--emerald); background: rgba(0, 245, 160, 0.1); border: 1px solid rgba(0, 245, 160, 0.2); padding: 3px 8px; border-radius: 8px;">مؤرشفة</span>
           </div>
         `).join('');
-    }
-
-    function updateNotifications() {
-      const list = document.getElementById('notificationsList');
-      const badge = document.getElementById('notifBadge');
-      const countText = document.getElementById('notifCountText');
-      list.innerHTML = '';
-      
-      let alerts = [];
-      activeTransactions.forEach(t => {
-        alerts.push({
-          title: `معاملة جارية: ${t.companies?.name || 'شركة'}`,
-          desc: `الموقع: ${t.current_location_step} (${t.transaction_type})`
-        });
-      });
-
-      if (alerts.length > 0) {
-        badge.style.display = 'block';
-        countText.innerText = `${alerts.length} تنبيهات`;
-        list.innerHTML = alerts.map(a => `
-          <div style="background: #080B12; border: 1px solid var(--card-border); padding: 12px 14px; border-radius: 14px; display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 16px;">⏳</span>
-            <div>
-              <p style="font-size: 12px; font-weight: 800; color: #FFF;">${a.title}</p>
-              <p style="font-size: 10px; color: var(--text-muted); margin-top: 1px;">${a.desc}</p>
-            </div>
-          </div>
-        `).join('');
-      } else {
-        badge.style.display = 'none';
-        countText.innerText = 'لا توجد تنبيهات';
-        list.innerHTML = '<p style="text-align:center; font-size:12px; color:var(--text-dim); padding:20px;">كافة المعاملات مستقرة ومحدثة ✅</p>';
-      }
     }
 
     function openPDFPreviewModal() {
@@ -1241,7 +1449,7 @@
       if (addr) localStorage.setItem('office_addr', addr);
 
       document.getElementById('headerOfficeName').innerText = name || 'منظومة المعاملات';
-      showToast("تم حفظ الإعدادات بنجاح ⚙️");
+      showToast("تم حفظ معلومات المكتب بنجاح ⚙️");
     }
 
     function loadSettings() {
