@@ -185,16 +185,19 @@
 
     main { max-width: 520px; margin: 0 auto; padding: 24px; display: flex; flex-direction: column; gap: 24px; }
 
+    /* تنسيقات الطباعة المعززة والنظيفة */
     @media print {
       body * { visibility: hidden; }
-      #printableReceiptArea, #printableReceiptArea *, #printableWeeklyArea, #printableWeeklyArea *, #printableCustomArea, #printableCustomArea * { visibility: visible; }
-      #printableReceiptArea, #printableWeeklyArea, #printableCustomArea { position: absolute; left: 0; top: 0; width: 100%; background: #fff; color: #000; padding: 20px; font-family: 'Tajawal', sans-serif; }
+      body { background-color: #FFF !important; }
+      .sheet-content { background: #FFF !important; box-shadow: none !important; padding: 0 !important; }
+      #printableReceiptArea, #printableReceiptArea *, #printableWeeklyArea, #printableWeeklyArea *, #printableCustomArea, #printableCustomArea *, #printableArea, #printableArea * { visibility: visible; color: #000 !important; }
+      #printableReceiptArea, #printableWeeklyArea, #printableCustomArea, #printableArea { position: absolute; left: 0; top: 0; width: 100%; background: #fff; padding: 20px; font-family: 'Tajawal', sans-serif; border: none !important; }
     }
   </style>
 </head>
 <body>
 
-  <!-- شاشة تسجيل الدخول -->
+  <!-- شاشة الدخول -->
   <div id="authOverlay" style="position: fixed; inset: 0; background: var(--bg-color); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 24px;">
     <div style="width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 32px;">
       <div style="text-align: center;">
@@ -217,7 +220,7 @@
     <span id="toastMsg">تم الإجراء بنجاح</span>
   </div>
 
-  <!-- الهيدر العلوي (تم إزالة زر الميدان والمكتب وإضافة التاريخ) -->
+  <!-- الهيدر -->
   <header>
     <div style="display: flex; align-items: center; gap: 12px;">
       <div class="avatar-logo">M</div>
@@ -230,11 +233,9 @@
       </div>
     </div>
     <div style="display: flex; gap: 12px; align-items: center;">
-      <!-- شريحة التاريخ الفاخرة بدلاً من زر المكتب -->
       <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 8px 16px; display: flex; align-items: center;">
         <span id="headerDateDisplay" class="num-font" style="font-size: 12px; font-weight: 800; color: var(--gold);">التاريخ</span>
       </div>
-      
       <button onclick="openSheet('notificationsModal')" style="background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-main); width: 44px; height: 44px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; transition: 0.2s;">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
         <span id="notifBadge" style="position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; background: var(--danger); border-radius: 50%; display: none;"></span>
@@ -245,8 +246,6 @@
   <main>
     <!-- تبويب 1: الرئيسية -->
     <div id="tab-transactions" class="tab-section active">
-      
-      <!-- شريط البحث ككتلة صلبة فاخرة -->
       <div class="search-block">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
         <input id="globalSearchInput" type="text" placeholder="بحث شامل عن معاملة أو شركة..." oninput="handleGlobalSearch(this.value)">
@@ -257,7 +256,6 @@
         <button onclick="openSheet('newCompanyModal')" class="btn-outline">شركة جديدة</button>
       </div>
 
-      <!-- الشركات الموثقة (بطاقات أفقية راقية وبدون "شر") -->
       <section>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
           <span style="font-size: 14px; font-weight: 900; color: var(--text-muted);">الشركات الموثقة</span>
@@ -266,7 +264,6 @@
         <div id="companiesList" style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none;"></div>
       </section>
 
-      <!-- المعاملات النشطة -->
       <section>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; margin-top: 8px;">
           <span style="font-size: 14px; font-weight: 900; color: var(--text-muted);">المعاملات الجارية</span>
@@ -416,7 +413,7 @@
     </nav>
   </div>
 
-  <!-- ================= النوافذ المنبثقة الفاخرة ================= -->
+  <!-- ================= النوافذ المنبثقة ================= -->
 
   <!-- خيارات الشركة -->
   <div id="companyActionModal" class="sheet-overlay">
@@ -532,7 +529,7 @@
         <button onclick="setQuickStep('دائرة تسجيل الشركات')" class="btn-ghost" style="border: 1px solid var(--border-color);">تسجيل الشركات</button>
         <button onclick="setQuickStep('الهيئة العامة للضرائب')" class="btn-ghost" style="border: 1px solid var(--border-color);">الضرائب</button>
         <button onclick="setQuickStep('غرفة تجارة بغداد')" class="btn-ghost" style="border: 1px solid var(--border-color);">غرفة التجارة</button>
-        <button onclick="setQuickStep('وزارة التجارة')" class="btn-ghost" style="border: 1px solid var(--border-color);">وزارة التجارة</button>
+        <button onclick="setQuickStep('محافظة كركوك')" class="btn-ghost" style="border: 1px solid var(--border-color); color: var(--gold);">محافظة كركوك</button>
       </div>
       <input id="customStepInput" type="text" placeholder="أو اكتب اسم الدائرة/القسم يدوياً..." class="editorial-input" style="margin-bottom: 24px;">
       <div style="display: flex; gap: 12px;">
@@ -870,14 +867,12 @@
     </div>
   </div>
 
-  <!-- السكربتات -->
   <script>
     const SUPABASE_URL = "https://giidtugteyiobaagqohy.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpaWR0dWd0ZXlpb2JhYWdxb2h5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxMTgyMjYsImV4cCI6MjEwMjY5NDIyNn0.v7Nwag2BTrCWG6zzeYo1kTG4w2xAuzSmiZpCLJtvBow";
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let currentUser = null;
-    let isOfficeMode = true; // تم تثبيت الصلاحية كمدير أساسي لعدم الحاجة لزر التبديل
     let selectedCompanyId = null;
     let selectedCompanyName = "";
     
@@ -902,19 +897,19 @@
     let searchQuery = "";
     let statusChartInstance = null;
     let financeChartInstance = null;
+    let toastTimeout = null;
 
-    // تم إنشاء أيقونة مؤسسية فاخرة بديلة للنص المشوه "شر"
     const companyIconSVG = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 21h18M5 21V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14M9 9h6M9 13h6M9 17h6"/></svg>`;
 
-    // --- تحديث التاريخ في الهيدر ---
-    document.getElementById('headerDateDisplay').innerText = new Date().toLocaleDateString('ar-IQ', { day: 'numeric', month: 'short' });
+    document.getElementById('headerDateDisplay').innerText = new Date().toLocaleDateString('ar-IQ', { day: 'numeric', month: 'long' });
 
     function showToast(msg, icon = "✨") {
       const t = document.getElementById('toast');
       document.getElementById('toastMsg').innerText = msg;
       document.getElementById('toastIcon').innerText = icon;
       t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 3200);
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => t.classList.remove('show'), 3000);
     }
 
     function switchTab(t) {
@@ -944,7 +939,6 @@
       if (session) {
         currentUser = session.user;
         document.getElementById('authOverlay').style.display = 'none';
-        document.getElementById('currentUserEmail').innerText = currentUser.email;
         loadData();
       } else {
         document.getElementById('authOverlay').style.display = 'flex';
@@ -957,7 +951,6 @@
       const btn = document.getElementById('btnLogin');
 
       if (!email || !password) return showToast("أدخل البريد وكلمة المرور", "⚠️");
-
       btn.innerText = "جاري التحقق..."; btn.disabled = true;
 
       const { data, error } = await db.auth.signInWithPassword({ email, password });
@@ -967,7 +960,6 @@
       } else {
         currentUser = data.user;
         document.getElementById('authOverlay').style.display = 'none';
-        document.getElementById('currentUserEmail').innerText = currentUser.email;
         logActivity("دخول", `تسجيل دخول: ${currentUser.email}`);
         showToast("مرحباً بك!");
         loadData();
@@ -1011,9 +1003,6 @@
       renderArchive(allTransactionsGlobal.filter(t => t.status === 'completed' || t.status === 'archived'));
     }
 
-    /* 
-      تم استبدال دالة قص الحروف المزعجة (شر) بالأيقونة الهندسية الفاخرة للشركات
-    */
     function renderCompanies() {
       const list = document.getElementById('companiesList');
       const select = document.getElementById('txCompanySelect');
@@ -1023,12 +1012,12 @@
 
       filtered.forEach(c => {
         list.innerHTML += `
-          <div onclick="selectCompany('${c.id}', '${c.name}')" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 14px 20px; min-width: 180px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: 0.2s;">
-            <div style="width: 38px; height: 38px; border-radius: 10px; background: var(--card-elevated); border: 1px solid var(--border-light); display: flex; align-items: center; justify-content: center; color: var(--gold);">
+          <div onclick="selectCompany('${c.id}', '${c.name}')" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 14px 20px; min-width: 200px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: 0.2s;">
+            <div style="width: 38px; height: 38px; border-radius: 10px; background: var(--card-elevated); border: 1px solid var(--border-light); display: flex; align-items: center; justify-content: center; color: var(--gold); flex-shrink: 0;">
               ${companyIconSVG}
             </div>
-            <div>
-              <p style="font-size: 14px; font-weight: 900; color: #FFF; white-space: nowrap; max-width: 130px; overflow: hidden; text-overflow: ellipsis;">${c.name}</p>
+            <div style="overflow: hidden;">
+              <p style="font-size: 14px; font-weight: 900; color: #FFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${c.name}</p>
               <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">ملف موثق</p>
             </div>
           </div>`;
@@ -1036,9 +1025,6 @@
       });
     }
 
-    /* 
-      تم استبدال دالة قص الحروف المزعجة (شر) بالأيقونة الهندسية في المعاملات النشطة أيضاً
-    */
     function renderActive() {
       const container = document.getElementById('activeTransactionsList');
       const filtered = activeTransactions.filter(tx => {
@@ -1197,7 +1183,7 @@
       });
 
       document.getElementById('licensesAlertCountBadge').innerText = totalAlerts;
-      container.innerHTML = html || '<div class="bento-card" style="text-align:center; color:var(--text-muted); font-size:14px; font-weight:800;">لم يتم إدخال تواريخ نفاذية التراخيص للشركات بعد</div>';
+      container.innerHTML = html || '<div class="bento-card" style="text-align:center; color:var(--text-muted); font-size:14px; font-weight:800;">لم يتم إدخال تواريخ التراخيص للشركات بعد</div>';
     }
 
     function renderAccounts(all) {
@@ -1537,7 +1523,7 @@
           </div>
           <div style="display: flex; gap: 8px;">
             <a href="${d.file_url}" target="_blank" class="btn-ghost" style="padding: 8px 16px; text-decoration: none;">عرض</a>
-            ${isOfficeMode ? `<button onclick="deleteCompanyDocument('${d.id}')" class="btn-ghost" style="color: var(--danger); padding: 8px 16px;">✕</button>` : ''}
+            <button onclick="deleteCompanyDocument('${d.id}')" class="btn-ghost" style="color: var(--danger); padding: 8px 16px;">✕</button>
           </div>
         </div>`).join('') : '<p style="font-size:13px; font-weight:700; color:var(--text-muted); text-align:center; padding:16px;">لا وثائق محفوظة لهذه الشركة</p>';
     }
@@ -1678,7 +1664,7 @@
       const fee = Number(tx.fee_iqd) || 0; const paid = Number(localStorage.getItem(`tx_paid_${tx.id}`)) || 0; const debt = Math.max(0, fee - paid);
       const recNumber = `REC-${Date.now().toString().slice(-6)}`;
       
-      document.getElementById('recRepOfficeName').innerText = localStorage.getItem('office_name') || 'مكتب إنجاز';
+      document.getElementById('recRepOfficeName').innerText = localStorage.getItem('office_name') || 'مكتب مصطفى فيصل للمعاملات';
       document.getElementById('recRepOfficePhone').innerText = localStorage.getItem('office_phone') || 'هاتف: 07800000000';
       document.getElementById('recRepNumber').innerText = recNumber;
       document.getElementById('recEditCompanyName').value = compName;
@@ -1727,7 +1713,7 @@
       currentWeeklyData = { compId, compName, totalWeeklyDue, txList: txsToCount, dateRange: workWeek.dateRangeText };
       
       const recNumber = `WEEK-${Date.now().toString().slice(-6)}`;
-      document.getElementById('weeklyRecOfficeName').innerText = localStorage.getItem('office_name') || 'مكتب إنجاز';
+      document.getElementById('weeklyRecOfficeName').innerText = localStorage.getItem('office_name') || 'مكتب مصطفى فيصل للمعاملات';
       document.getElementById('weeklyRecOfficePhone').innerText = localStorage.getItem('office_phone') || 'هاتف: 07800000000';
       document.getElementById('weeklyRecNumber').innerText = recNumber;
       document.getElementById('weeklyRecEditCompanyName').value = compName;
@@ -1772,7 +1758,7 @@
     }
 
     function renderCustomStatementUI(clientTitle, txArray) {
-      document.getElementById('custRepOfficeName').innerText = localStorage.getItem('office_name') || 'مكتب إنجاز';
+      document.getElementById('custRepOfficeName').innerText = localStorage.getItem('office_name') || 'مكتب مصطفى فيصل للمعاملات';
       document.getElementById('custRepOfficePhone').innerText = localStorage.getItem('office_phone') || 'هاتف: 07800000000';
       document.getElementById('custRepClientName').innerText = clientTitle;
       document.getElementById('custRepDate').innerText = new Date().toLocaleDateString('ar-IQ', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -1805,7 +1791,7 @@
     }
 
     function openPDFPreviewModal() {
-      document.getElementById('pdfRepOfficeName').innerText = localStorage.getItem('office_name') || 'مكتب إنجاز';
+      document.getElementById('pdfRepOfficeName').innerText = localStorage.getItem('office_name') || 'مكتب مصطفى فيصل للمعاملات';
       document.getElementById('pdfRepOfficePhone').innerText = localStorage.getItem('office_phone') || 'هاتف: 07800000000';
       document.getElementById('pdfRepDate').innerText = new Date().toLocaleDateString('ar-IQ', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -1838,7 +1824,7 @@
     function generateWAMessage(type) {
       if (!targetTxForWA) return;
       const comp = targetTxForWA.companies?.name || 'حضرة العميل'; const txName = targetTxForWA.transaction_type;
-      const loc = targetTxForWA.current_location_step; const office = localStorage.getItem('office_name') || 'مكتب إنجاز';
+      const loc = targetTxForWA.current_location_step; const office = localStorage.getItem('office_name') || 'إدارة المعاملات';
       const paid = Number(localStorage.getItem(`tx_paid_${targetTxForWA.id}`) || 0); const total = Number(targetTxForWA.fee_iqd) || 0; const debt = Math.max(0, total - paid);
 
       let msg = "";
