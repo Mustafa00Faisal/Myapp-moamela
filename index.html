@@ -3,9 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>منظومة إدارة المعاملات</title>
+  <title>منظومة إدارة المعاملات المتقدمة</title>
+  
+  <!-- المكتبات السحابية المعتمدة -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+  
   <style>
     :root {
       --bg: #06080D;
@@ -21,6 +25,7 @@
       --danger: #FF4D4D;
       --danger-glow: rgba(255, 77, 77, 0.25);
       --cyan: #00D9F5;
+      --cyan-glow: rgba(0, 217, 245, 0.2);
       --text: #F3F4F6;
       --text-muted: #8E9BAE;
       --text-dim: #546075;
@@ -30,7 +35,7 @@
     body { background-color: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 110px; overflow-x: hidden; }
 
     .lux-card {
-      background: linear-gradient(180deg, rgba(16, 22, 34, 0.85) 0%, rgba(11, 15, 24, 0.95) 100%);
+      background: linear-gradient(180deg, rgba(16, 22, 34, 0.88) 0%, rgba(11, 15, 24, 0.96) 100%);
       border: 1px solid var(--card-border);
       box-shadow: inset 0 1px 1px var(--card-border-highlight), 0 20px 40px -10px rgba(0,0,0,0.6);
       border-radius: 24px;
@@ -117,6 +122,22 @@
       gap: 8px;
     }
     .btn-lux-secondary:active { transform: scale(0.97); }
+
+    .btn-lux-danger {
+      background: linear-gradient(180deg, rgba(255, 77, 77, 0.15) 0%, rgba(200, 30, 30, 0.2) 100%);
+      border: 1px solid rgba(255, 77, 77, 0.35);
+      color: #FF7B7B;
+      border-radius: 16px;
+      font-weight: 800;
+      font-size: 13px;
+      padding: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-lux-danger:active { transform: scale(0.97); }
 
     .segment-switch {
       background: #080B12;
@@ -229,6 +250,21 @@
       box-shadow: 0 0 10px var(--emerald);
     }
 
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .kpi-card {
+      background: #090D15;
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
     .sheet-overlay {
       position: fixed;
       inset: 0;
@@ -284,9 +320,9 @@
     .dock-nav {
       position: fixed;
       bottom: 18px;
-      left: 16px;
-      right: 16px;
-      max-width: 440px;
+      left: 14px;
+      right: 14px;
+      max-width: 450px;
       margin: 0 auto;
       background: rgba(14, 19, 31, 0.92);
       border: 1px solid var(--card-border-highlight);
@@ -295,7 +331,7 @@
       backdrop-filter: blur(25px);
       display: flex;
       justify-content: space-around;
-      padding: 8px 10px;
+      padding: 8px 6px;
       z-index: 100;
     }
     .dock-btn {
@@ -308,7 +344,7 @@
       color: var(--text-dim);
       font-size: 10px;
       font-weight: 800;
-      padding: 6px 12px;
+      padding: 6px 10px;
       border-radius: 100px;
       cursor: pointer;
       transition: all 0.25s;
@@ -363,7 +399,7 @@
 </head>
 <body>
 
-  <!-- شاشة الدخول -->
+  <!-- شاشة تسجيل الدخول -->
   <div id="authOverlay">
     <div class="lux-card" style="width: 100%; max-width: 380px; padding: 32px 24px; display: flex; flex-direction: column; gap: 20px;">
       <div style="text-align: center;">
@@ -428,11 +464,11 @@
     <!-- شريط البحث الفوري الاحترافي -->
     <div class="search-box-wrapper">
       <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
-      <input id="globalSearchInput" type="text" placeholder="ابحث عن شركة، نوع معاملة، أو مسار..." class="lux-input" oninput="handleGlobalSearch(this.value)">
+      <input id="globalSearchInput" type="text" placeholder="ابحث عن شركة، نوع معاملة، مسار، أو مستند..." class="lux-input" oninput="handleGlobalSearch(this.value)">
       <button id="clearSearchBtn" class="clear-btn" onclick="clearGlobalSearch()">✕</button>
     </div>
 
-    <!-- تبويب المعاملات -->
+    <!-- تبويب 1: المعاملات الميدانية -->
     <div id="tab-transactions" style="display: flex; flex-direction: column; gap: 18px;">
       <div id="adminActionButtons" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
         <button onclick="openSheet('newCompanyModal')" class="btn-lux-emerald">
@@ -445,7 +481,7 @@
         </button>
       </div>
 
-      <!-- شريط الشركات الموثقة -->
+      <!-- دليل الشركات -->
       <section id="companiesSection">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 4px;">
           <span style="font-size: 12px; font-weight: 900; color: var(--text-muted); text-transform: uppercase;">دليل الشركات الموثقة</span>
@@ -454,7 +490,7 @@
         <div id="companiesList" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none;"></div>
       </section>
 
-      <!-- قائمة المعاملات النشطة -->
+      <!-- المعاملات النشطة -->
       <section>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px;">
           <span style="font-size: 12px; font-weight: 900; color: var(--text-muted); text-transform: uppercase;">المعاملات النشطة</span>
@@ -464,29 +500,82 @@
       </section>
     </div>
 
-    <!-- تبويب الحسابات -->
+    <!-- تبويب 2: لوحة التحليلات والداشبورد (Dashboard) -->
+    <div id="tab-analytics" style="display: none; flex-direction: column; gap: 16px;">
+      
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <span style="font-size: 11px; color: var(--text-muted); font-weight: 700;">إجمالي الأتعاب المقدرة</span>
+          <h3 id="kpiTotalRevenue" style="font-size: 17px; font-weight: 900; color: var(--emerald); margin-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">0 د.ع</h3>
+        </div>
+        <div class="kpi-card">
+          <span style="font-size: 11px; color: var(--text-muted); font-weight: 700;">المبالغ المقبوضة</span>
+          <h3 id="kpiPaidRevenue" style="font-size: 17px; font-weight: 900; color: var(--cyan); margin-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">0 د.ع</h3>
+        </div>
+        <div class="kpi-card">
+          <span style="font-size: 11px; color: var(--text-muted); font-weight: 700;">المتبقي بذمة الشركات</span>
+          <h3 id="kpiRemainingDebt" style="font-size: 17px; font-weight: 900; color: var(--danger); margin-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">0 د.ع</h3>
+        </div>
+        <div class="kpi-card">
+          <span style="font-size: 11px; color: var(--text-muted); font-weight: 700;">نسبة إنجاز المعاملات</span>
+          <h3 id="kpiCompletionRate" style="font-size: 17px; font-weight: 900; color: var(--gold); margin-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">0%</h3>
+        </div>
+      </div>
+
+      <div class="lux-card" style="padding: 18px;">
+        <h4 style="font-size: 13px; font-weight: 800; color: #FFF; margin-bottom: 14px;">📊 توزيع حالات المعاملات</h4>
+        <div style="max-height: 220px; position: relative;">
+          <canvas id="txStatusChart"></canvas>
+        </div>
+      </div>
+
+      <div class="lux-card" style="padding: 18px;">
+        <h4 style="font-size: 13px; font-weight: 800; color: #FFF; margin-bottom: 14px;">📈 الموقف المالي للمكتب</h4>
+        <div style="max-height: 220px; position: relative;">
+          <canvas id="financeChart"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- تبويب 3: الحسابات والذمم المالية -->
     <div id="tab-accounts" style="display: none; flex-direction: column; gap: 16px;">
-      <div class="lux-card" style="padding: 22px; background: linear-gradient(135deg, #101624 0%, #151D30 100%);">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+      <div class="lux-card" style="padding: 20px; background: linear-gradient(135deg, #101624 0%, #151D30 100%);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
           <div>
-            <p style="font-size: 11px; color: var(--text-muted); font-weight: 700;">إجمالي الأتعاب المحصلة</p>
-            <h2 id="totalRevenue" style="font-size: 26px; font-weight: 900; color: var(--emerald); margin-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">0 د.ع</h2>
+            <p style="font-size: 11px; color: var(--text-muted); font-weight: 700;">إجمالي الأتعاب الكلية</p>
+            <h2 id="totalRevenue" style="font-size: 24px; font-weight: 900; color: var(--emerald); margin-top: 2px; font-family: 'Plus Jakarta Sans', sans-serif;">0 د.ع</h2>
           </div>
-          <button onclick="openPDFPreviewModal()" class="btn-lux-emerald" style="padding: 10px 18px; font-size: 12px; border-radius: 14px;">
-            📄 تقرير PDF عربي
-          </button>
+          <div style="display: flex; gap: 8px;">
+            <button onclick="exportAccountsToCSV()" class="btn-lux-secondary" style="padding: 9px 12px; font-size: 11px; border-radius: 12px;">
+              📊 تصدير Excel
+            </button>
+            <button onclick="openPDFPreviewModal()" class="btn-lux-emerald" style="padding: 9px 14px; font-size: 11px; border-radius: 12px;">
+              📄 تقرير PDF
+            </button>
+          </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; border-top: 1px solid var(--card-border); padding-top: 10px; font-size: 11px;">
+          <span style="color: var(--cyan);">المقبوض: <b id="accPaidSummary">0 د.ع</b></span>
+          <span style="color: #FF7B7B;">المتبقي: <b id="accDebtSummary">0 د.ع</b></span>
         </div>
       </div>
       <div id="accountsList" style="display: flex; flex-direction: column; gap: 10px;"></div>
     </div>
 
-    <!-- تبويب الأرشيف -->
-    <div id="tab-archive" style="display: none; flex-direction: column; gap: 12px;">
-      <span style="font-size: 12px; font-weight: 800; color: var(--text-muted); padding: 0 4px;">سجل المعاملات المؤرشفة</span>
-      <div id="archivedList" style="display: flex; flex-direction: column; gap: 10px;"></div>
+    <!-- تبويب 4: الأرشيف السحابي الموحد للوثائق -->
+    <div id="tab-documents" style="display: none; flex-direction: column; gap: 14px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 4px;">
+        <div>
+          <h3 style="font-size: 15px; font-weight: 900; color: #FFF;">📁 خزانة الوثائق السحابية العامة</h3>
+          <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">جميع الوصولات والمستندات المحفوظة لكافة الشركات</p>
+        </div>
+        <span id="allDocsTotalBadge" style="font-size: 11px; color: var(--emerald); font-weight: 800; background: rgba(0, 245, 160, 0.1); border: 1px solid rgba(0, 245, 160, 0.2); padding: 4px 10px; border-radius: 100px;">0 مستند</span>
+      </div>
+      <div id="allDocumentsList" style="display: flex; flex-direction: column; gap: 10px;"></div>
     </div>
 
-    <!-- تبويب الإعدادات -->
+    <!-- تبويب 5: الإعدادات والأرشيف -->
     <div id="tab-settings" style="display: none; flex-direction: column; gap: 16px;">
       <div class="lux-card" style="padding: 18px; display: flex; flex-direction: column; gap: 12px;">
         <h3 style="font-size: 14px; font-weight: 900; color: var(--emerald);">🏢 معلومات المكتب والمعقب</h3>
@@ -505,6 +594,12 @@
         <button onclick="saveSettings()" class="btn-lux-emerald" style="padding: 12px; margin-top: 4px;">حفظ الإعدادات</button>
       </div>
 
+      <!-- قسم الأرشيف المنجز -->
+      <div class="lux-card" style="padding: 18px; display: flex; flex-direction: column; gap: 12px;">
+        <h3 style="font-size: 14px; font-weight: 900; color: var(--gold);">📦 سجل المعاملات المؤرشفة والمنجزة</h3>
+        <div id="archivedList" style="display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto;"></div>
+      </div>
+
       <div class="lux-card" style="padding: 18px; display: flex; flex-direction: column; gap: 12px;">
         <h3 style="font-size: 14px; font-weight: 900; color: #FFF;">👤 الحساب الحالي والأمان</h3>
         <p id="currentUserEmail" style="font-size: 12px; color: var(--text-muted); font-family: monospace;">-</p>
@@ -519,24 +614,28 @@
   <!-- شريط التنقل السفلي -->
   <nav class="dock-nav">
     <button onclick="switchTab('transactions')" id="nav-transactions" class="dock-btn active">
-      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
       <span>المعاملات</span>
     </button>
+    <button onclick="switchTab('analytics')" id="nav-analytics" class="dock-btn">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"></path></svg>
+      <span>التحليلات</span>
+    </button>
     <button onclick="switchTab('accounts')" id="nav-accounts" class="dock-btn">
-      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v12M17 10h-7.5a2.5 2.5 0 0 0 0 5H15"></path></svg>
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v12M17 10h-7.5a2.5 2.5 0 0 0 0 5H15"></path></svg>
       <span>الحسابات</span>
     </button>
-    <button onclick="switchTab('archive')" id="nav-archive" class="dock-btn">
-      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"></path></svg>
-      <span>الأرشيف</span>
+    <button onclick="switchTab('documents')" id="nav-documents" class="dock-btn">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+      <span>الوثائق</span>
     </button>
     <button onclick="switchTab('settings')" id="nav-settings" class="dock-btn">
-      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
       <span>الإعدادات</span>
     </button>
   </nav>
 
-  <!-- نافذة خيارات الشركة -->
+  <!-- نافذة خيارات الشركة المحدثة (مع زر الحذف) -->
   <div id="companyActionModal" class="center-modal-overlay">
     <div class="center-modal-card">
       <div style="text-align: center; margin-bottom: 16px;">
@@ -550,12 +649,13 @@
       <div style="display: flex; flex-direction: column; gap: 10px;">
         <button onclick="startTxForSelectedComp()" class="btn-lux-emerald">+ بدء معاملة جديدة لهذه الشركة</button>
         <button onclick="openDocVault()" class="btn-lux-secondary">📁 فتح خزانة الوثائق والأرشيف</button>
-        <button onclick="closeSheet('companyActionModal')" style="background: none; border: none; color: var(--text-dim); padding: 8px; font-size: 12px; font-weight: 700; cursor: pointer; margin-top: 4px;">إلغاء</button>
+        <button onclick="deleteSelectedCompany()" class="btn-lux-danger">🗑️ حذف ملف الشركة بالكامل</button>
+        <button onclick="closeSheet('companyActionModal')" style="background: none; border: none; color: var(--text-dim); padding: 8px; font-size: 12px; font-weight: 700; cursor: pointer; margin-top: 2px;">إلغاء</button>
       </div>
     </div>
   </div>
 
-  <!-- خزانة الوثائق السحابية -->
+  <!-- خزانة الوثائق الخاصة بشركة -->
   <div id="docVaultModal" class="sheet-overlay">
     <div class="sheet-container">
       <div class="sheet-handle"></div>
@@ -617,9 +717,15 @@
           <label style="font-size: 11px; color: var(--text-muted); font-weight: 700;">نوع الإجراء أو المعاملة</label>
           <input id="txType" type="text" placeholder="مثال: تعديل عقد تأسيس، تجديد إجازة ممارسة مهنة" class="lux-input" style="width: 100%; margin-top: 4px;">
         </div>
-        <div>
-          <label style="font-size: 11px; color: var(--text-muted); font-weight: 700;">الأتعاب (د.ع - يقبل 0)</label>
-          <input id="txFee" type="number" value="0" min="0" step="250" class="lux-input" style="width: 100%; margin-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div>
+            <label style="font-size: 11px; color: var(--text-muted); font-weight: 700;">الأتعاب الكلية (د.ع)</label>
+            <input id="txFee" type="number" value="0" min="0" step="250" class="lux-input" style="width: 100%; margin-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">
+          </div>
+          <div>
+            <label style="font-size: 11px; color: var(--text-muted); font-weight: 700;">الدفعة المقبوضة (د.ع)</label>
+            <input id="txPaid" type="number" value="0" min="0" step="250" class="lux-input" style="width: 100%; margin-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">
+          </div>
         </div>
         <div>
           <label style="font-size: 11px; color: var(--text-muted); font-weight: 700;">المتطلبات الأولية (كل متطلب بسطر)</label>
@@ -640,7 +746,7 @@
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
         <div>
           <h3 style="font-size: 16px; font-weight: 900; color: #FFF;">🔔 رادار المتابعة والتنبيهات</h3>
-          <p style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">تنبيهات تلقائية للمعاملات الراكدة والمتأخرة</p>
+          <p style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">تنبيهات فورية للمعاملات المتوقفة والمستحقة</p>
         </div>
         <span id="notifCountText" style="font-size: 11px; color: var(--gold); font-weight: 800; background: var(--gold-glow); padding: 3px 10px; border-radius: 100px;">0 تنبيهات</span>
       </div>
@@ -666,7 +772,7 @@
     </div>
   </div>
 
-  <!-- تقرير الحسابات العربي -->
+  <!-- تقرير الحسابات الرسمي العربي -->
   <div id="pdfModal" class="sheet-overlay">
     <div class="sheet-container" style="max-width: 520px;">
       <div class="sheet-handle"></div>
@@ -679,7 +785,7 @@
         <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 14px;">
           <h2 id="pdfRepOfficeName" style="font-size: 18px; font-weight: 900; margin-bottom: 2px;">مكتب إنجاز المعاملات</h2>
           <p id="pdfRepOfficePhone" style="font-size: 11px; color: #555;">هاتف: 07800000000 | بغداد - العراق</p>
-          <p style="font-size: 13px; font-weight: 800; margin-top: 6px; background: #EEE; display: inline-block; padding: 2px 10px; border-radius: 4px;">كشف حساب المعاملات المنجزة</p>
+          <p style="font-size: 13px; font-weight: 800; margin-top: 6px; background: #EEE; display: inline-block; padding: 2px 10px; border-radius: 4px;">كشف الذمم والمواقف المالية</p>
           <p style="font-size: 10px; color: #666; margin-top: 4px;">تاريخ الاستخراج: <span id="pdfRepDate"></span></p>
         </div>
 
@@ -688,22 +794,25 @@
             <tr style="background: #F3F4F6; border-bottom: 1px solid #000;">
               <th style="padding: 6px; text-align: right;">الشركة</th>
               <th style="padding: 6px; text-align: right;">نوع المعاملة</th>
-              <th style="padding: 6px; text-align: left;">الأتعاب (د.ع)</th>
+              <th style="padding: 6px; text-align: center;">الأتعاب</th>
+              <th style="padding: 6px; text-align: center;">المقبوض</th>
+              <th style="padding: 6px; text-align: left;">المتبقي</th>
             </tr>
           </thead>
           <tbody id="pdfTableBody"></tbody>
         </table>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #000; padding-top: 10px; font-weight: 900; font-size: 13px;">
-          <span>المجموع الإجمالي للأتعاب:</span>
-          <span id="pdfTotalRevenue" style="font-family: sans-serif; color: #047857;">0 د.ع</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #000; padding-top: 10px; font-weight: 900; font-size: 12px;">
+          <span>المجموع الكلي: <b id="pdfTotalRevenue">0</b></span>
+          <span style="color: #047857;">المقبوض: <b id="pdfTotalPaid">0</b></span>
+          <span style="color: #B91C1C;">الديون المتبقية: <b id="pdfTotalDebt">0</b></span>
         </div>
       </div>
       <button onclick="closeSheet('pdfModal')" class="btn-lux-secondary" style="width: 100%; margin-top: 14px;">رجوع</button>
     </div>
   </div>
 
-  <!-- نافذة تحديث المسار -->
+  <!-- نافذة تحديث المسار الميداني -->
   <div id="stepUpdateModal" class="sheet-overlay">
     <div class="sheet-container">
       <div class="sheet-handle"></div>
@@ -740,6 +849,31 @@
     </div>
   </div>
 
+  <!-- تحديث الدفعة المالية للمعاملة -->
+  <div id="updatePaymentModal" class="sheet-overlay">
+    <div class="sheet-container">
+      <div class="sheet-handle"></div>
+      <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 4px;">تحديث الدفعات المالية</h3>
+      <p id="updatePaymentTxInfo" style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">تعديل المبلغ المقبوض</p>
+      
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px;">
+        <div>
+          <label style="font-size: 11px; color: var(--text-muted);">الأتعاب الإجمالية (د.ع)</label>
+          <input id="payModalTotalFee" type="number" class="lux-input" style="width: 100%; margin-top: 4px;">
+        </div>
+        <div>
+          <label style="font-size: 11px; color: var(--text-muted);">المبلغ المقبوض حالياً (د.ع)</label>
+          <input id="payModalPaidFee" type="number" class="lux-input" style="width: 100%; margin-top: 4px;">
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px;">
+        <button onclick="confirmPaymentUpdate()" class="btn-lux-emerald" style="flex: 1;">حفظ وتحديث الحساب</button>
+        <button onclick="closeSheet('updatePaymentModal')" class="btn-lux-secondary" style="flex: 1;">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const SUPABASE_URL = "https://giidtugteyiobaagqohy.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpaWR0dWd0ZXlpb2JhYWdxb2h5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxMTgyMjYsImV4cCI6MjEwMjY5NDIyNn0.v7Nwag2BTrCWG6zzeYo1kTG4w2xAuzSmiZpCLJtvBow";
@@ -753,10 +887,14 @@
     let targetTxIdForStep = null;
     let currentOldStepForTx = "";
     let targetTxIdForChecklist = null;
+    let targetTxForPayment = null;
     let companies = [];
     let activeTransactions = [];
     let allTransactionsGlobal = [];
+    let allDocumentsGlobal = [];
     let searchQuery = "";
+    let statusChartInstance = null;
+    let financeChartInstance = null;
 
     function showToast(msg, icon = "✨") {
       const t = document.getElementById('toast');
@@ -827,13 +965,14 @@
     }
 
     function switchTab(t) {
-      ['transactions', 'accounts', 'archive', 'settings'].forEach(x => {
+      ['transactions', 'analytics', 'accounts', 'documents', 'settings'].forEach(x => {
         document.getElementById(`tab-${x}`).style.display = 'none';
         document.getElementById(`nav-${x}`).classList.remove('active');
       });
       document.getElementById(`tab-${t}`).style.display = 'flex';
       document.getElementById(`nav-${t}`).classList.add('active');
-      if (t === 'accounts' || t === 'archive') loadData();
+      if (t === 'analytics') renderAnalyticsCharts();
+      if (t === 'documents') renderAllDocuments();
     }
 
     function openSheet(id) { document.getElementById(id).style.display = 'flex'; }
@@ -855,9 +994,18 @@
         renderAccounts(allTransactionsGlobal);
         renderArchive(allTransactionsGlobal.filter(t => t.status === 'completed' || t.status === 'archived'));
         updateSmartRadarAlerts();
+        fetchAllDocuments();
       } catch (err) {
         console.error(err);
       }
+    }
+
+    /* جلب كل الوثائق لتبويب الخزانة العامة */
+    async function fetchAllDocuments() {
+      const { data: docs } = await db.from('company_documents').select('*, companies(name)').order('created_at', { ascending: false });
+      allDocumentsGlobal = docs || [];
+      document.getElementById('allDocsTotalBadge').innerText = `${allDocumentsGlobal.length} مستند`;
+      renderAllDocuments();
     }
 
     /* نظام البحث الفوري الشامل */
@@ -867,6 +1015,7 @@
       renderCompanies();
       renderActive();
       renderAccounts(allTransactionsGlobal);
+      renderAllDocuments();
       renderArchive(allTransactionsGlobal.filter(t => t.status === 'completed' || t.status === 'archived'));
     }
 
@@ -907,6 +1056,26 @@
       selectedCompanyName = name;
       document.getElementById('modalCompTitle').innerText = name;
       openSheet('companyActionModal');
+    }
+
+    /* حذف الشركة بالكامل مع كافة متعلقاتها */
+    async function deleteSelectedCompany() {
+      if (!selectedCompanyId) return;
+
+      const confirmDel = confirm(`تحذير نهائي:\nهل تريد بالتأكيد حذف ملف (${selectedCompanyName}) بالكامل؟\nسيتم حذف كافة معاملاتها ووثائقها المرتبطة بها.`);
+      if (!confirmDel) return;
+
+      try {
+        await db.from('company_documents').delete().eq('company_id', selectedCompanyId);
+        await db.from('transactions').delete().eq('company_id', selectedCompanyId);
+        await db.from('companies').delete().eq('id', selectedCompanyId);
+        
+        closeSheet('companyActionModal');
+        showToast("تم حذف ملف الشركة وسجلاتها بنجاح 🗑️");
+        loadData();
+      } catch (err) {
+        showToast("خطأ أثناء حذف الشركة: " + err.message, "❌");
+      }
     }
 
     function startTxForSelectedComp() {
@@ -1023,6 +1192,7 @@
         document.getElementById('docFileInput').value = '';
         document.getElementById('selectedFileNameLabel').innerText = '📁 اختر صورة أو ملف من الهاتف';
         loadCompanyDocuments(selectedCompanyId);
+        fetchAllDocuments();
       }
 
       btn.innerText = "تأكيد الرفع والحفظ بالسحابة";
@@ -1034,7 +1204,37 @@
         await db.from('company_documents').delete().eq('id', docId);
         showToast("تم حذف المستند بنجاح 🗑️");
         loadCompanyDocuments(selectedCompanyId);
+        fetchAllDocuments();
       }
+    }
+
+    /* عرض كل الوثائق في تبويب الوثائق الموحد */
+    function renderAllDocuments() {
+      const list = document.getElementById('allDocumentsList');
+      const filtered = allDocumentsGlobal.filter(d => {
+        if (!searchQuery) return true;
+        const name = (d.document_name || '').toLowerCase();
+        const cName = (d.companies?.name || '').toLowerCase();
+        return name.includes(searchQuery) || cName.includes(searchQuery);
+      });
+
+      if (filtered.length === 0) {
+        list.innerHTML = '<div class="lux-card" style="text-align: center; color: var(--text-dim); padding: 40px 20px; font-size: 13px;">لا توجد وثائق محفوظة حالياً</div>';
+        return;
+      }
+
+      list.innerHTML = filtered.map(d => `
+        <div class="lux-card" style="padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="overflow: hidden; max-width: 230px;">
+            <span style="font-size: 10px; font-weight: 800; color: var(--emerald);">${d.companies?.name || 'شركة موثقة'}</span>
+            <p style="font-size: 13px; font-weight: 900; color: #FFF; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">📄 ${d.document_name}</p>
+            <p style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">تاريخ الرفع: ${new Date(d.created_at).toLocaleDateString('ar-IQ')}</p>
+          </div>
+          <a href="${d.file_url}" target="_blank" class="btn-lux-emerald" style="padding: 8px 14px; font-size: 11px; text-decoration: none; border-radius: 12px;">
+            معاينة
+          </a>
+        </div>
+      `).join('');
     }
 
     /* إدارة السجل التاريخي للمسار */
@@ -1134,6 +1334,9 @@
         const progressPercent = checklists.length > 0 ? Math.round((completedCount / checklists.length) * 100) : 0;
         const staleInfo = getStalenessInfo(tx);
         const historyCount = getStepHistory(tx.id).length;
+        const paid = Number(localStorage.getItem(`tx_paid_${tx.id}`) || 0);
+        const total = Number(tx.fee_iqd) || 0;
+        const debt = Math.max(0, total - paid);
 
         const checksHtml = checklists.map(c => `
           <div style="display: flex; align-items: center; justify-content: space-between; background: #090D15; border: 1px solid rgba(255,255,255,0.04); padding: 9px 12px; border-radius: 14px; margin-bottom: 6px;">
@@ -1160,10 +1363,14 @@
                   <h3 style="font-size: 15px; font-weight: 900; color: #FFF; margin-top: 1px;">${tx.transaction_type}</h3>
                 </div>
               </div>
-              <span style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 900; color: var(--gold); background: var(--gold-glow); border: 1px solid rgba(255, 184, 0, 0.3); padding: 5px 12px; border-radius: 100px;">${Number(tx.fee_iqd).toLocaleString('ar-IQ')} د.ع</span>
+              <div style="text-align: left; cursor: pointer;" onclick="openPaymentUpdateModal('${tx.id}', '${tx.companies?.name}', ${total}, ${paid})">
+                <span style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 900; color: var(--gold); background: var(--gold-glow); border: 1px solid rgba(255, 184, 0, 0.3); padding: 4px 10px; border-radius: 100px; display: inline-block;">${total.toLocaleString('ar-IQ')} د.ع</span>
+                <p style="font-size: 10px; color: ${debt === 0 ? 'var(--emerald)' : '#FF7B7B'}; margin-top: 4px; font-weight: 700;">
+                  ${debt === 0 ? 'مقبوضة بالكامل ✅' : `متبقي: ${debt.toLocaleString('ar-IQ')} د.ع ✍️`}
+                </p>
+              </div>
             </div>
 
-            <!-- شريط المسار الحالي وسجل التنقلات -->
             <div style="background: #080B12; border: 1px solid var(--card-border); border-radius: 16px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
               <div style="display: flex; align-items: center; gap: 8px; overflow: hidden; flex: 1;">
                 <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan);"></span>
@@ -1227,6 +1434,27 @@
       }
     }
 
+    function openPaymentUpdateModal(txId, compName, total, paid) {
+      targetTxForPayment = txId;
+      document.getElementById('updatePaymentTxInfo').innerText = `شركة: ${compName}`;
+      document.getElementById('payModalTotalFee').value = total;
+      document.getElementById('payModalPaidFee').value = paid;
+      openSheet('updatePaymentModal');
+    }
+
+    async function confirmPaymentUpdate() {
+      if (!targetTxForPayment) return;
+      const newTotal = parseFloat(document.getElementById('payModalTotalFee').value) || 0;
+      const newPaid = parseFloat(document.getElementById('payModalPaidFee').value) || 0;
+
+      await db.from('transactions').update({ fee_iqd: newTotal }).eq('id', targetTxForPayment);
+      localStorage.setItem(`tx_paid_${targetTxForPayment}`, newPaid);
+
+      closeSheet('updatePaymentModal');
+      showToast("تم تحديث الموقف المالي للمعاملة 💰");
+      loadData();
+    }
+
     function openAddChecklistModal(txId) {
       targetTxIdForChecklist = txId;
       document.getElementById('newChecklistInput').value = '';
@@ -1269,6 +1497,7 @@
       const company_id = document.getElementById('txCompanySelect').value;
       const transaction_type = document.getElementById('txType').value.trim();
       const fee_iqd = parseFloat(document.getElementById('txFee').value) || 0;
+      const paid_iqd = parseFloat(document.getElementById('txPaid').value) || 0;
       const rawChecklist = document.getElementById('txChecklist').value.trim();
 
       if (!transaction_type) return;
@@ -1283,6 +1512,9 @@
 
       if (tx) {
         pushStepHistory(tx.id, null, 'تم استلام المعاملة وبدء الإجراءات');
+        if (paid_iqd > 0) {
+          localStorage.setItem(`tx_paid_${tx.id}`, paid_iqd);
+        }
       }
 
       if (rawChecklist && tx) {
@@ -1296,6 +1528,7 @@
 
       document.getElementById('txType').value = '';
       document.getElementById('txChecklist').value = '';
+      document.getElementById('txPaid').value = '0';
       closeSheet('newTxModal');
       showToast("تمت المباشرة بالمعاملة 🚀");
       loadData();
@@ -1371,9 +1604,75 @@
       }
     }
 
+    /* لوحة الرسوم البيانية التفاعلية (Chart.js) */
+    function renderAnalyticsCharts() {
+      const activeCount = activeTransactions.length;
+      const completedCount = allTransactionsGlobal.filter(t => t.status === 'completed' || t.status === 'archived').length;
+      
+      const totalRev = allTransactionsGlobal.reduce((s, t) => s + (Number(t.fee_iqd) || 0), 0);
+      const totalPaid = allTransactionsGlobal.reduce((s, t) => s + (Number(localStorage.getItem(`tx_paid_${t.id}`)) || 0), 0);
+      const totalDebt = Math.max(0, totalRev - totalPaid);
+      const completionRate = allTransactionsGlobal.length > 0 ? Math.round((completedCount / allTransactionsGlobal.length) * 100) : 0;
+
+      document.getElementById('kpiTotalRevenue').innerText = `${totalRev.toLocaleString('ar-IQ')} د.ع`;
+      document.getElementById('kpiPaidRevenue').innerText = `${totalPaid.toLocaleString('ar-IQ')} د.ع`;
+      document.getElementById('kpiRemainingDebt').innerText = `${totalDebt.toLocaleString('ar-IQ')} د.ع`;
+      document.getElementById('kpiCompletionRate').innerText = `${completionRate}%`;
+
+      // رسم الحالات الدائري
+      const ctxStatus = document.getElementById('txStatusChart').getContext('2d');
+      if (statusChartInstance) statusChartInstance.destroy();
+      statusChartInstance = new Chart(ctxStatus, {
+        type: 'doughnut',
+        data: {
+          labels: ['معاملات جارية', 'معاملات منجزة'],
+          datasets: [{
+            data: [activeCount, completedCount],
+            backgroundColor: ['#FFB800', '#00F5A0'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: '#F3F4F6', font: { family: 'Tajawal' } } } }
+        }
+      });
+
+      // رسم الموقف المالي الشريطي
+      const ctxFinance = document.getElementById('financeChart').getContext('2d');
+      if (financeChartInstance) financeChartInstance.destroy();
+      financeChartInstance = new Chart(ctxFinance, {
+        type: 'bar',
+        data: {
+          labels: ['المقبوض', 'المتبقي'],
+          datasets: [{
+            label: 'المبلغ (د.ع)',
+            data: [totalPaid, totalDebt],
+            backgroundColor: ['#00D9F5', '#FF4D4D'],
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { ticks: { color: '#8E9BAE', font: { family: 'Tajawal' } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            x: { ticks: { color: '#F3F4F6', font: { family: 'Tajawal' } }, grid: { display: false } }
+          }
+        }
+      });
+    }
+
     function renderAccounts(all) {
       const tot = all.reduce((s, t) => s + (Number(t.fee_iqd) || 0), 0);
+      const paidTot = all.reduce((s, t) => s + (Number(localStorage.getItem(`tx_paid_${t.id}`)) || 0), 0);
+      const debtTot = Math.max(0, tot - paidTot);
+
       document.getElementById('totalRevenue').innerText = `${tot.toLocaleString('ar-IQ')} د.ع`;
+      document.getElementById('accPaidSummary').innerText = `${paidTot.toLocaleString('ar-IQ')} د.ع`;
+      document.getElementById('accDebtSummary').innerText = `${debtTot.toLocaleString('ar-IQ')} د.ع`;
       
       const filtered = all.filter(t => {
         if (!searchQuery) return true;
@@ -1382,15 +1681,55 @@
         return cName.includes(searchQuery) || tType.includes(searchQuery);
       });
 
-      document.getElementById('accountsList').innerHTML = filtered.map(t => `
-        <div class="lux-card" style="padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;">
-          <div>
-            <p style="font-size: 13px; font-weight: 800; color: #FFF;">${t.companies?.name || 'شركة'}</p>
-            <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">${t.transaction_type} • <span style="color: ${t.status === 'completed' ? 'var(--emerald)' : 'var(--gold)'}">${t.status === 'completed' ? 'منجزة ومحصلة' : 'قيد الإنجاز'}</span></p>
+      document.getElementById('accountsList').innerHTML = filtered.map(t => {
+        const fee = Number(t.fee_iqd) || 0;
+        const paid = Number(localStorage.getItem(`tx_paid_${t.id}`)) || 0;
+        const remaining = Math.max(0, fee - paid);
+
+        return `
+          <div class="lux-card" style="padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <p style="font-size: 13px; font-weight: 800; color: #FFF;">${t.companies?.name || 'شركة'}</p>
+              <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">${t.transaction_type} • <span style="color: ${t.status === 'completed' ? 'var(--emerald)' : 'var(--gold)'}">${t.status === 'completed' ? 'منجزة' : 'جارية'}</span></p>
+              <p style="font-size: 10px; color: var(--cyan); margin-top: 2px;">المقبوض: ${paid.toLocaleString('ar-IQ')} د.ع</p>
+            </div>
+            <div style="text-align: left; cursor: pointer;" onclick="openPaymentUpdateModal('${t.id}', '${t.companies?.name}', ${fee}, ${paid})">
+              <span style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 800; color: var(--emerald);">${fee.toLocaleString('ar-IQ')} د.ع</span>
+              <p style="font-size: 10px; color: ${remaining === 0 ? 'var(--emerald)' : '#FF7B7B'}; margin-top: 2px; font-weight: 800;">
+                ${remaining === 0 ? 'خالص بالكامل' : `متبقي: ${remaining.toLocaleString('ar-IQ')} د.ع`}
+              </p>
+            </div>
           </div>
-          <span style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 800; color: var(--emerald);">${Number(t.fee_iqd).toLocaleString('ar-IQ')} د.ع</span>
-        </div>
-      `).join('');
+        `;
+      }).join('');
+    }
+
+    function exportAccountsToCSV() {
+      if (allTransactionsGlobal.length === 0) {
+        showToast("لا توجد بيانات لتصديرها", "⚠️");
+        return;
+      }
+
+      let csv = "\uFEFFالشركة,نوع المعاملة,الحالة,الأتعاب الكلية (د.ع),المبلغ المقبوض (د.ع),المتبقي (د.ع),تاريخ التسجيل\n";
+      
+      allTransactionsGlobal.forEach(t => {
+        const fee = Number(t.fee_iqd) || 0;
+        const paid = Number(localStorage.getItem(`tx_paid_${t.id}`)) || 0;
+        const debt = Math.max(0, fee - paid);
+        const status = t.status === 'completed' ? 'منجزة' : 'قيد الإنجاز';
+        const date = new Date(t.created_at).toLocaleDateString('ar-IQ');
+
+        csv += `"${t.companies?.name || 'شركة'}","${t.transaction_type}","${status}",${fee},${paid},${debt},"${date}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.setAttribute('download', `كشف_حسابات_المعاملات_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast("تم تصدير ملف Excel بنجاح 📊");
     }
 
     function renderArchive(arch) {
@@ -1402,14 +1741,14 @@
       });
 
       document.getElementById('archivedList').innerHTML = filtered.length === 0 
-        ? '<div class="lux-card" style="text-align: center; color: var(--text-dim); padding: 30px; font-size: 12px;">الأرشيف فارغ حالياً</div>'
+        ? '<p style="text-align: center; color: var(--text-dim); padding: 10px; font-size: 12px;">الأرشيف فارغ حالياً</p>'
         : filtered.map(t => `
-          <div class="lux-card" style="padding: 16px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="background: #080B12; border: 1px solid var(--card-border); padding: 10px 14px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
             <div>
-              <p style="font-size: 13px; font-weight: 800; color: #FFF;">${t.companies?.name} - ${t.transaction_type}</p>
-              <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">أرشفت بتاريخ: ${t.completed_at ? new Date(t.completed_at).toLocaleDateString('ar-IQ') : 'مؤخراً'}</p>
+              <p style="font-size: 12px; font-weight: 800; color: #FFF;">${t.companies?.name} - ${t.transaction_type}</p>
+              <p style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">أنجزت: ${t.completed_at ? new Date(t.completed_at).toLocaleDateString('ar-IQ') : 'مؤخراً'}</p>
             </div>
-            <span style="font-size: 11px; font-weight: 800; color: var(--emerald); background: rgba(0, 245, 160, 0.1); border: 1px solid rgba(0, 245, 160, 0.2); padding: 3px 8px; border-radius: 8px;">مؤرشفة</span>
+            <span style="font-size: 10px; font-weight: 800; color: var(--emerald); background: rgba(0, 245, 160, 0.1); padding: 2px 6px; border-radius: 6px;">مؤرشفة</span>
           </div>
         `).join('');
     }
@@ -1422,17 +1761,29 @@
       document.getElementById('pdfRepOfficePhone').innerText = officePhone;
       document.getElementById('pdfRepDate').innerText = new Date().toLocaleDateString('ar-IQ', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-      const tbody = document.getElementById('pdfTableBody');
-      tbody.innerHTML = allTransactionsGlobal.map(t => `
-        <tr style="border-bottom: 1px solid #E5E7EB;">
-          <td style="padding: 8px 6px; font-weight: 700;">${t.companies?.name || 'شركة'}</td>
-          <td style="padding: 8px 6px; color: #4B5563;">${t.transaction_type} (${t.status === 'completed' ? 'منجزة' : 'جارية'})</td>
-          <td style="padding: 8px 6px; text-align: left; font-weight: 700;">${Number(t.fee_iqd).toLocaleString('ar-IQ')} د.ع</td>
-        </tr>
-      `).join('');
+      let tot = 0, paidTot = 0, debtTot = 0;
 
-      const total = allTransactionsGlobal.reduce((s, t) => s + (Number(t.fee_iqd) || 0), 0);
-      document.getElementById('pdfTotalRevenue').innerText = `${total.toLocaleString('ar-IQ')} دينار عراقي`;
+      const tbody = document.getElementById('pdfTableBody');
+      tbody.innerHTML = allTransactionsGlobal.map(t => {
+        const fee = Number(t.fee_iqd) || 0;
+        const paid = Number(localStorage.getItem(`tx_paid_${t.id}`)) || 0;
+        const debt = Math.max(0, fee - paid);
+        tot += fee; paidTot += paid; debtTot += debt;
+
+        return `
+          <tr style="border-bottom: 1px solid #E5E7EB;">
+            <td style="padding: 8px 6px; font-weight: 700;">${t.companies?.name || 'شركة'}</td>
+            <td style="padding: 8px 6px; color: #4B5563;">${t.transaction_type}</td>
+            <td style="padding: 8px 6px; text-align: center; font-weight: 700;">${fee.toLocaleString('ar-IQ')}</td>
+            <td style="padding: 8px 6px; text-align: center; color: #047857;">${paid.toLocaleString('ar-IQ')}</td>
+            <td style="padding: 8px 6px; text-align: left; font-weight: 700; color: #B91C1C;">${debt.toLocaleString('ar-IQ')}</td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('pdfTotalRevenue').innerText = `${tot.toLocaleString('ar-IQ')} د.ع`;
+      document.getElementById('pdfTotalPaid').innerText = `${paidTot.toLocaleString('ar-IQ')} د.ع`;
+      document.getElementById('pdfTotalDebt').innerText = `${debtTot.toLocaleString('ar-IQ')} د.ع`;
 
       openSheet('pdfModal');
     }
@@ -1470,3 +1821,4 @@
   </script>
 </body>
 </html>
+ظ
