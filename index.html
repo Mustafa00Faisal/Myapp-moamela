@@ -27,7 +27,6 @@
       --danger-glow: rgba(255, 77, 77, 0.25);
       --cyan: #00D9F5;
       --cyan-glow: rgba(0, 217, 245, 0.2);
-      --purple: #A78BFA;
       --text: #F3F4F6;
       --text-muted: #8E9BAE;
       --text-dim: #546075;
@@ -147,14 +146,14 @@
       border: none;
       border-radius: 16px;
       font-weight: 900;
-      font-size: 13px;
-      padding: 13px;
+      font-size: 12px;
+      padding: 11px;
       box-shadow: 0 8px 25px var(--cyan-glow);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
     }
     .btn-lux-cyan:active { transform: scale(0.97); }
 
@@ -407,11 +406,10 @@
       padding: 20px;
     }
 
-    /* أنماط الطباعة */
     @media print {
       body * { visibility: hidden; }
-      #printableArea, #printableArea * { visibility: visible; }
-      #printableArea { position: absolute; left: 0; top: 0; width: 100%; color: #000; background: #fff; padding: 20px; font-family: 'Tajawal', sans-serif; }
+      #printableReceiptArea, #printableReceiptArea * { visibility: visible; }
+      #printableReceiptArea { position: absolute; left: 0; top: 0; width: 100%; color: #000; background: #fff; padding: 20px; font-family: 'Tajawal', sans-serif; }
     }
   </style>
 </head>
@@ -630,7 +628,6 @@
         <button onclick="saveSettings()" class="btn-lux-emerald" style="padding: 12px; margin-top: 4px;">حفظ الإعدادات</button>
       </div>
 
-      <!-- أدوات النسخ الاحتياطي وسجل الرقابة -->
       <div class="lux-card" style="padding: 18px; display: flex; flex-direction: column; gap: 12px;">
         <h3 style="font-size: 14px; font-weight: 900; color: var(--cyan);">💾 النسخ الاحتياطي وسجل العمليات</h3>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -643,7 +640,6 @@
         </button>
       </div>
 
-      <!-- قسم الأرشيف المنجز -->
       <div class="lux-card" style="padding: 18px; display: flex; flex-direction: column; gap: 12px;">
         <h3 style="font-size: 14px; font-weight: 900; color: var(--gold);">📦 سجل المعاملات المؤرشفة والمنجزة</h3>
         <div id="archivedList" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto;"></div>
@@ -660,7 +656,7 @@
 
   </main>
 
-  <!-- شريط التنقل السفلي الاحترافي -->
+  <!-- شريط التنقل السفلي -->
   <nav class="dock-nav">
     <button onclick="switchTab('transactions')" id="nav-transactions" class="dock-btn active">
       <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
@@ -867,16 +863,19 @@
     </div>
   </div>
 
-  <!-- محرك توليد وطباعة سند القبض الرسمي -->
+  <!-- محرك توليد وطباعة سند القبض الرسمي المباشر -->
   <div id="receiptVoucherModal" class="sheet-overlay">
     <div class="sheet-container" style="max-width: 500px;">
       <div class="sheet-handle"></div>
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
         <h3 style="font-size: 16px; font-weight: 900; color: #FFF;">سند قبض مالي رسمي</h3>
-        <button onclick="printReceiptVoucher()" class="btn-lux-emerald" style="padding: 8px 14px; font-size: 12px;">طباعة السند</button>
+        <div style="display: flex; gap: 6px;">
+          <button onclick="shareReceiptViaWA()" class="btn-lux-secondary" style="padding: 8px 12px; font-size: 11px;">💬 واتساب</button>
+          <button onclick="printReceiptVoucher()" class="btn-lux-emerald" style="padding: 8px 14px; font-size: 11px;">🖨️ طباعة</button>
+        </div>
       </div>
 
-      <div id="printableArea" style="background: #FFF; color: #000; padding: 22px; border-radius: 14px; font-size: 12px; line-height: 1.6; border: 2px solid #000;">
+      <div id="printableReceiptArea" style="background: #FFF; color: #000; padding: 22px; border-radius: 14px; font-size: 12px; line-height: 1.6; border: 2px solid #000;">
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 12px;">
           <div>
             <h2 id="recRepOfficeName" style="font-size: 17px; font-weight: 900;">مكتب إنجاز المعاملات</h2>
@@ -925,7 +924,7 @@
     </div>
   </div>
 
-  <!-- باقي النوافذ المساعدة (المسار، الدفعات، إضافة متطلب) -->
+  <!-- نافذة المسار التاريخي -->
   <div id="timelineModal" class="sheet-overlay">
     <div class="sheet-container">
       <div class="sheet-handle"></div>
@@ -941,6 +940,7 @@
     </div>
   </div>
 
+  <!-- نافذة نقل المسار الميداني -->
   <div id="stepUpdateModal" class="sheet-overlay">
     <div class="sheet-container">
       <div class="sheet-handle"></div>
@@ -963,6 +963,7 @@
     </div>
   </div>
 
+  <!-- إضافة متطلب -->
   <div id="addChecklistModal" class="sheet-overlay">
     <div class="sheet-container">
       <div class="sheet-handle"></div>
@@ -976,40 +977,50 @@
     </div>
   </div>
 
+  <!-- نافذة تعديل وتسديد الدفعات المالية -->
   <div id="updatePaymentModal" class="sheet-overlay">
     <div class="sheet-container">
       <div class="sheet-handle"></div>
-      <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 4px;">تحديث الدفعات المالية</h3>
-      <p id="updatePaymentTxInfo" style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">تعديل المبلغ المقبوض</p>
+      <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 4px;">إدارة وتسديد أتعاب المعاملة</h3>
+      <p id="updatePaymentTxInfo" style="font-size: 12px; color: var(--gold); margin-bottom: 14px;">شركة</p>
       
-      <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px;">
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px;">
         <div>
           <label style="font-size: 11px; color: var(--text-muted);">الأتعاب الإجمالية (د.ع)</label>
-          <input id="payModalTotalFee" type="number" class="lux-input" style="width: 100%; margin-top: 4px;">
+          <input id="payModalTotalFee" type="number" class="lux-input" style="width: 100%; margin-top: 4px;" oninput="calculateDebtPreview()">
         </div>
         <div>
           <label style="font-size: 11px; color: var(--text-muted);">المبلغ المقبوض حالياً (د.ع)</label>
-          <input id="payModalPaidFee" type="number" class="lux-input" style="width: 100%; margin-top: 4px;">
+          <input id="payModalPaidFee" type="number" class="lux-input" style="width: 100%; margin-top: 4px;" oninput="calculateDebtPreview()">
         </div>
+        <div style="background:#080B12; border:1px solid var(--card-border); padding:10px 14px; border-radius:12px; display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:12px; color:var(--text-muted);">المتبقي بذمة العميل:</span>
+          <b id="payModalDebtPreview" style="color:#FF7B7B; font-size:13px;">0 د.ع</b>
+        </div>
+        
+        <!-- زر التسديد الكامل بنقرة واحدة -->
+        <button onclick="quickPayFullAmount()" class="btn-lux-cyan" style="width:100%; margin-top:2px;">
+          ✅ تسديد المبلغ بالكامل (جعلها واصل خالص)
+        </button>
       </div>
 
       <div style="display: flex; gap: 10px;">
-        <button onclick="confirmPaymentUpdate()" class="btn-lux-emerald" style="flex: 1;">حفظ وتحديث الحساب</button>
+        <button onclick="confirmPaymentUpdate()" class="btn-lux-emerald" style="flex: 1;">حفظ الحساب</button>
         <button onclick="closeSheet('updatePaymentModal')" class="btn-lux-secondary" style="flex: 1;">إلغاء</button>
       </div>
     </div>
   </div>
 
-  <!-- كشف الحسابات PDF -->
+  <!-- كشف الحسابات PDF العام -->
   <div id="pdfModal" class="sheet-overlay">
     <div class="sheet-container" style="max-width: 520px;">
       <div class="sheet-handle"></div>
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
         <h3 style="font-size: 16px; font-weight: 900; color: #FFF;">كشف الحسابات الرسمي</h3>
-        <button onclick="printReceiptVoucher()" class="btn-lux-emerald" style="padding: 8px 14px; font-size: 12px;">طباعة / حفظ PDF</button>
+        <button onclick="window.print()" class="btn-lux-emerald" style="padding: 8px 14px; font-size: 12px;">طباعة / حفظ PDF</button>
       </div>
 
-      <div id="pdfReportContent" style="background: #FFF; color: #000; padding: 20px; border-radius: 12px; font-size: 12px; line-height: 1.6;">
+      <div id="printableArea" style="background: #FFF; color: #000; padding: 20px; border-radius: 12px; font-size: 12px; line-height: 1.6;">
         <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 14px;">
           <h2 id="pdfRepOfficeName" style="font-size: 18px; font-weight: 900; margin-bottom: 2px;">مكتب إنجاز المعاملات</h2>
           <p id="pdfRepOfficePhone" style="font-size: 11px; color: #555;">هاتف: 07800000000 | بغداد - العراق</p>
@@ -1055,6 +1066,7 @@
     let targetTxIdForChecklist = null;
     let targetTxForPayment = null;
     let targetTxForWA = null;
+    let currentReceiptTx = null;
     let companies = [];
     let activeTransactions = [];
     let allTransactionsGlobal = [];
@@ -1071,7 +1083,6 @@
       setTimeout(() => t.classList.remove('show'), 3200);
     }
 
-    /* نظام الرقابة وسجل العمليات */
     function logActivity(action, details) {
       let logs = JSON.parse(localStorage.getItem('sys_audit_logs') || '[]');
       logs.unshift({
@@ -1463,7 +1474,6 @@
       `).join('');
     }
 
-    /* الموجه الميداني لفرز الدوائر */
     function renderRoutePlanner() {
       const container = document.getElementById('routeGroupedList');
       const groups = {};
@@ -1503,7 +1513,6 @@
       `).join('');
     }
 
-    /* رادار نفاذية التراخيص */
     function renderLicensesTracker() {
       const container = document.getElementById('licensesCardsList');
       let totalAlerts = 0;
@@ -1556,8 +1565,8 @@
       container.innerHTML = html || '<div class="lux-card" style="text-align:center; padding:30px; color:var(--text-dim);">لم يتم إدخال تواريخ نفاذية التراخيص بعد</div>';
     }
 
-    /* محرك التفقيط بالدينار العراقي */
     function tafqeetIraqiDinar(number) {
+      number = parseInt(number, 10);
       if (!number || isNaN(number) || number === 0) return "صفر دينار عراقي";
       const ones = ["", "واحد", "اثنان", "ثلاثة", "أربعة", "خمسة", "ستة", "سبعة", "ثمانية", "تسعة", "عشرة", "أحد عشر", "اثنا عشر", "ثلاثة عشر", "أربعة عشر", "خمسة عشر", "ستة عشر", "سبعة عشر", "ثمانية عشر", "تسعة عشر"];
       const tens = ["", "", "عشرون", "ثلاثون", "أربعون", "خمسون", "ستون", "سبعون", "ثمانون", "تسعون"];
@@ -1609,10 +1618,19 @@
       return "فقط " + numStr.trim() + " دينار عراقي لا غير";
     }
 
-    /* محرك سندات القبض */
-    function generateReceiptVoucher(txId, compName, txType, fee, paid) {
-      const recNumber = `REC-${Date.now().toString().slice(-6)}`;
+    /* استدعاء وتوليد سند القبض الفوري */
+    function openReceiptVoucherModalById(txId) {
+      const tx = allTransactionsGlobal.find(t => t.id === txId);
+      if (!tx) return;
+
+      currentReceiptTx = tx;
+      const compName = tx.companies?.name || 'شركة موثقة';
+      const txType = tx.transaction_type;
+      const fee = Number(tx.fee_iqd) || 0;
+      const paid = Number(localStorage.getItem(`tx_paid_${tx.id}`)) || 0;
       const debt = Math.max(0, fee - paid);
+
+      const recNumber = `REC-${Date.now().toString().slice(-6)}`;
       const officeName = localStorage.getItem('office_name') || 'مكتب إنجاز المعاملات الرسمية';
       const officePhone = localStorage.getItem('office_phone') || 'هاتف: 07800000000 | بغداد';
 
@@ -1620,30 +1638,57 @@
       document.getElementById('recRepOfficePhone').innerText = officePhone;
       document.getElementById('recRepNumber').innerText = recNumber;
       document.getElementById('recRepCompanyName').innerText = compName;
-      document.getElementById('recRepAmountNum').innerText = Number(paid).toLocaleString('ar-IQ');
+      document.getElementById('recRepAmountNum').innerText = paid.toLocaleString('ar-IQ');
       document.getElementById('recRepAmountText').innerText = tafqeetIraqiDinar(paid);
       document.getElementById('recRepTxType').innerText = txType;
-      document.getElementById('recRepTotalFee').innerText = Number(fee).toLocaleString('ar-IQ');
-      document.getElementById('recRepRemaining').innerText = Number(debt).toLocaleString('ar-IQ');
+      document.getElementById('recRepTotalFee').innerText = fee.toLocaleString('ar-IQ');
+      document.getElementById('recRepRemaining').innerText = debt.toLocaleString('ar-IQ');
 
-      // توليد الباركود
-      const qrContainer = document.getElementById('receiptQRCode');
-      qrContainer.innerHTML = '';
-      new QRCode(qrContainer, {
-        text: `سند قبض: ${recNumber} | الشركة: ${compName} | المبلغ: ${paid} د.ع | التاريخ: ${new Date().toLocaleDateString('ar-IQ')}`,
-        width: 60,
-        height: 60,
-        colorDark : "#000000",
-        colorLight : "#ffffff"
-      });
+      try {
+        const qrContainer = document.getElementById('receiptQRCode');
+        qrContainer.innerHTML = '';
+        if (typeof QRCode !== 'undefined') {
+          new QRCode(qrContainer, {
+            text: `سند قبض: ${recNumber} | الشركة: ${compName} | الواصل: ${paid} د.ع | المتبقي: ${debt} د.ع`,
+            width: 60,
+            height: 60,
+            colorDark : "#000000",
+            colorLight : "#ffffff"
+          });
+        }
+      } catch(e) { console.log(e); }
 
-      logActivity("إصدار سند قبض", `سند رقم (${recNumber}) للشركة: ${compName} بمبلغ ${paid} د.ع`);
+      logActivity("إصدار سند قبض", `سند رقم (${recNumber}) لشركة (${compName})`);
       openSheet('receiptVoucherModal');
+    }
+
+    function shareReceiptViaWA() {
+      if (!currentReceiptTx) return;
+      const comp = currentReceiptTx.companies?.name || 'العميل المحترم';
+      const txName = currentReceiptTx.transaction_type;
+      const fee = Number(currentReceiptTx.fee_iqd) || 0;
+      const paid = Number(localStorage.getItem(`tx_paid_${currentReceiptTx.id}`)) || 0;
+      const debt = Math.max(0, fee - paid);
+      const office = localStorage.getItem('office_name') || 'مكتب إنجاز المعاملات';
+      const recNumber = document.getElementById('recRepNumber').innerText;
+
+      const msg = `🧾 *سند قبض رسمي - ${office}*\n\n`
+                + `▫️ *رقم السند:* ${recNumber}\n`
+                + `▫️ *السادة:* ${comp}\n`
+                + `▫️ *نوع المعاملة:* ${txName}\n`
+                + `▫️ *المبلغ المقبوض:* ${paid.toLocaleString('ar-IQ')} دينار عراقي\n`
+                + `▫️ *كتابة:* ${tafqeetIraqiDinar(paid)}\n`
+                + `▫️ *المتبقي بذمتكم:* ${debt.toLocaleString('ar-IQ')} د.ع\n\n`
+                + `_تم استلام المبلغ وتوثيق الحساب رسمياً._\n`
+                + `_${office}_`;
+
+      navigator.clipboard.writeText(msg);
+      showToast("تم نسخ سند القبض وجاري فتح الواتساب 💬");
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
     }
 
     function printReceiptVoucher() { window.print(); }
 
-    /* محرك رسائل الواتساب */
     function openWhatsAppQuickModal(txId) {
       targetTxForWA = activeTransactions.find(t => t.id === txId);
       if (!targetTxForWA) return;
@@ -1684,7 +1729,6 @@
       window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
     }
 
-    /* إدارة السجل التاريخي للمسار */
     function getStepHistory(txId) {
       const stored = localStorage.getItem(`step_history_${txId}`);
       return stored ? JSON.parse(stored) : [];
@@ -1809,10 +1853,10 @@
                   <h3 style="font-size: 15px; font-weight: 900; color: #FFF; margin-top: 1px;">${tx.transaction_type}</h3>
                 </div>
               </div>
-              <div style="text-align: left; cursor: pointer;" onclick="openPaymentUpdateModal('${tx.id}', '${tx.companies?.name}', ${total}, ${paid})">
+              <div style="text-align: left; cursor: pointer;" onclick="openPaymentUpdateModalById('${tx.id}')">
                 <span style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 900; color: var(--gold); background: var(--gold-glow); border: 1px solid rgba(255, 184, 0, 0.3); padding: 4px 10px; border-radius: 100px; display: inline-block;">${total.toLocaleString('ar-IQ')} د.ع</span>
                 <p style="font-size: 10px; color: ${debt === 0 ? 'var(--emerald)' : '#FF7B7B'}; margin-top: 4px; font-weight: 700;">
-                  ${debt === 0 ? 'مقبوضة بالكامل ✅' : `متبقي: ${debt.toLocaleString('ar-IQ')} د.ع ✍️`}
+                  ${debt === 0 ? 'واصل خالص ✅' : `متبقي: ${debt.toLocaleString('ar-IQ')} د.ع ✍️`}
                 </p>
               </div>
             </div>
@@ -1846,13 +1890,13 @@
             </div>
 
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; border-top: 1px solid var(--card-border); padding-top: 14px;">
-              <button onclick="openWhatsAppQuickModal('${tx.id}')" class="btn-lux-secondary" style="padding: 10px 6px; font-size: 11px;">
+              <button onclick="openWhatsAppQuickModal('${tx.id}')" class="btn-lux-secondary" style="padding: 10px 4px; font-size: 11px;">
                 💬 واتساب
               </button>
-              <button onclick="generateReceiptVoucher('${tx.id}', '${tx.companies?.name}', '${tx.transaction_type}', ${total}, ${paid})" class="btn-lux-cyan" style="padding: 10px 6px; font-size: 11px;">
+              <button onclick="openReceiptVoucherModalById('${tx.id}')" class="btn-lux-cyan" style="padding: 10px 4px; font-size: 11px;">
                 🧾 سند قبض
               </button>
-              <button onclick="completeTx('${tx.id}')" class="btn-lux-emerald" style="padding: 10px 6px; font-size: 11px;">
+              <button onclick="completeTx('${tx.id}')" class="btn-lux-emerald" style="padding: 10px 4px; font-size: 11px;">
                 إنجاز ✅
               </button>
             </div>
@@ -1883,12 +1927,34 @@
       }
     }
 
-    function openPaymentUpdateModal(txId, compName, total, paid) {
+    function openPaymentUpdateModalById(txId) {
+      const tx = allTransactionsGlobal.find(t => t.id === txId);
+      if (!tx) return;
+
       targetTxForPayment = txId;
-      document.getElementById('updatePaymentTxInfo').innerText = `شركة: ${compName}`;
+      const compName = tx.companies?.name || 'شركة موثقة';
+      const total = Number(tx.fee_iqd) || 0;
+      const paid = Number(localStorage.getItem(`tx_paid_${tx.id}`)) || 0;
+
+      document.getElementById('updatePaymentTxInfo').innerText = `شركة: ${compName} - ${tx.transaction_type}`;
       document.getElementById('payModalTotalFee').value = total;
       document.getElementById('payModalPaidFee').value = paid;
+      calculateDebtPreview();
       openSheet('updatePaymentModal');
+    }
+
+    function calculateDebtPreview() {
+      const total = parseFloat(document.getElementById('payModalTotalFee').value) || 0;
+      const paid = parseFloat(document.getElementById('payModalPaidFee').value) || 0;
+      const debt = Math.max(0, total - paid);
+      document.getElementById('payModalDebtPreview').innerText = `${debt.toLocaleString('ar-IQ')} د.ع`;
+    }
+
+    function quickPayFullAmount() {
+      const total = parseFloat(document.getElementById('payModalTotalFee').value) || 0;
+      document.getElementById('payModalPaidFee').value = total;
+      calculateDebtPreview();
+      showToast("تم تحديد المبلغ بالكامل كواصل ✅");
     }
 
     async function confirmPaymentUpdate() {
@@ -2019,7 +2085,6 @@
         }
       });
 
-      // تنبيهات التراخيص
       companies.forEach(c => {
         const lics = JSON.parse(localStorage.getItem(`lic_${c.id}`) || '{}');
         Object.keys(lics).forEach(k => {
@@ -2142,11 +2207,14 @@
               <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">${t.transaction_type} • <span style="color: ${t.status === 'completed' ? 'var(--emerald)' : 'var(--gold)'}">${t.status === 'completed' ? 'منجزة' : 'جارية'}</span></p>
               <p style="font-size: 10px; color: var(--cyan); margin-top: 2px;">المقبوض: ${paid.toLocaleString('ar-IQ')} د.ع</p>
             </div>
-            <div style="text-align: left; cursor: pointer;" onclick="openPaymentUpdateModal('${t.id}', '${t.companies?.name}', ${fee}, ${paid})">
-              <span style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 800; color: var(--emerald);">${fee.toLocaleString('ar-IQ')} د.ع</span>
-              <p style="font-size: 10px; color: ${remaining === 0 ? 'var(--emerald)' : '#FF7B7B'}; margin-top: 2px; font-weight: 800;">
-                ${remaining === 0 ? 'خالص بالكامل' : `متبقي: ${remaining.toLocaleString('ar-IQ')} د.ع`}
-              </p>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div style="text-align: left; cursor: pointer;" onclick="openPaymentUpdateModalById('${t.id}')">
+                <span style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 800; color: var(--emerald);">${fee.toLocaleString('ar-IQ')} د.ع</span>
+                <p style="font-size: 10px; color: ${remaining === 0 ? 'var(--emerald)' : '#FF7B7B'}; margin-top: 2px; font-weight: 800;">
+                  ${remaining === 0 ? 'واصل خالص ✅' : `متبقي: ${remaining.toLocaleString('ar-IQ')} د.ع`}
+                </p>
+              </div>
+              <button onclick="openReceiptVoucherModalById('${t.id}')" class="btn-lux-cyan" style="padding:6px 10px; font-size:11px; border-radius:10px;">🧾 سند</button>
             </div>
           </div>
         `;
@@ -2180,7 +2248,6 @@
       showToast("تم تصدير ملف Excel بنجاح 📊");
     }
 
-    /* نظام النسخ الاحتياطي والاستعادة JSON */
     function exportJSONBackup() {
       const backupData = {
         timestamp: new Date().toISOString(),
