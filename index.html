@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>المنظومة السيادية للإدارة المكتبية</title>
+  <title>المنظومة السيادية للإدارة المكتبية - محرك التتبع المتقدم</title>
   
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -27,6 +27,7 @@
       --danger: #F43F5E;
       --blue: #3B82F6;
       --purple: #8B5CF6;
+      --amber: #F59E0B;
       
       --text-main: #FFFFFF;
       --text-muted: #8A8F98;
@@ -234,7 +235,7 @@
   </header>
 
   <main>
-    <!-- نظام 1: التتبع المعاملاتي -->
+    <!-- نظام 1: التتبع المعاملاتي المتقدم -->
     <div id="tab-tracking" class="tab-section active">
       <div class="search-block">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
@@ -256,7 +257,7 @@
 
       <section>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; margin-top: 8px;">
-          <span style="font-size: 14px; font-weight: 900; color: var(--text-muted);">نظام التتبع الجاري (مسجل الشركات والاستيراد)</span>
+          <span style="font-size: 14px; font-weight: 900; color: var(--text-muted);">نظام التتبع الهندسي الجاري</span>
           <span id="activeCountBadge" class="num-font" style="font-size: 12px; font-weight: 800; color: var(--gold); background: var(--gold-dim); padding: 4px 12px; border-radius: var(--radius-sm);">0</span>
         </div>
         <div id="activeTransactionsList" style="display: flex; flex-direction: column; gap: 24px;"></div>
@@ -350,7 +351,7 @@
 
   <!-- ================= النوافذ المنبثقة للأنظمة المتكاملة ================= -->
 
-  <!-- نافذة تفاصيل المعاملة -->
+  <!-- نافذة تفاصيل المعاملة والخط الزمني المتقدم -->
   <div id="transactionDetailsModal" class="sheet-overlay">
     <div class="sheet-content" style="max-width: 560px;">
       <div class="sheet-drag"></div>
@@ -366,11 +367,17 @@
 
       <div style="background: var(--card-elevated); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 20px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <span style="font-size: 13px; font-weight: 800; color: var(--text-muted);">المسار الميداني (حصر الدوائر)</span>
-          <button onclick="openStepModal(currentDetailTxId, currentDetailCurrentLoc)" class="btn-ghost" style="padding: 6px 12px;">تحديث الدائرة</button>
+          <span style="font-size: 13px; font-weight: 800; color: var(--text-muted);">المسار الميداني الهندسي</span>
+          <button onclick="openAdvancedStepModal(currentDetailTxId)" class="btn-ghost" style="padding: 6px 12px; color: var(--gold);">تحديث المحطة والحالة</button>
         </div>
-        <p id="dtCurrentLocText" style="font-size: 15px; font-weight: 900; color: #FFF; margin-bottom: 16px;">المحطة...</p>
-        <div id="dtTimelineList" style="display: flex; flex-direction: column; gap: 8px; max-height: 140px; overflow-y: auto;"></div>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+          <span id="dtStatusIndicator" style="width: 10px; height: 10px; border-radius: 50%; background: var(--blue);"></span>
+          <p id="dtCurrentLocText" style="font-size: 15px; font-weight: 900; color: #FFF;">المحطة...</p>
+        </div>
+        <p id="dtLastNoteText" style="font-size: 12px; color: var(--text-muted); background: var(--bg-color); padding: 10px; border-radius: var(--radius-sm); margin-bottom: 16px; border: 1px solid var(--border-color);"></p>
+        
+        <h5 style="font-size: 12px; font-weight: 800; color: var(--text-muted); margin-bottom: 8px;">السجل التاريخي للمحطات:</h5>
+        <div id="dtTimelineList" style="display: flex; flex-direction: column; gap: 8px; max-height: 160px; overflow-y: auto;"></div>
       </div>
 
       <div style="background: var(--card-elevated); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 20px;">
@@ -390,6 +397,53 @@
     </div>
   </div>
 
+  <!-- محرك تحديث المسار المتقدم (بديل النوافذ السطحية) -->
+  <div id="advancedStepModal" class="sheet-overlay">
+    <div class="sheet-content">
+      <div class="sheet-drag"></div>
+      <h3 style="font-size: 20px; font-weight: 900; margin-bottom: 20px;">محرك التتبع الميداني المتقدم</h3>
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div>
+          <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px;">الدائرة الرسمية الرئيسية</label>
+          <select id="advDeptSelect" class="editorial-input" style="color: #FFF; background: var(--bg-color);">
+            <option value="دائرة مسجل الشركات">دائرة مسجل الشركات</option>
+            <option value="دائرة الاستيراد">دائرة الاستيراد</option>
+            <option value="الهيئة العامة للضرائب">الهيئة العامة للضرائب</option>
+            <option value="دائرة التنمية الصناعية">دائرة التنمية الصناعية</option>
+            <option value="كاتب العدل">كاتب العدل</option>
+            <option value="وزارة العمل والشؤون الاجتماعية">وزارة العمل والشؤون الاجتماعية</option>
+            <option value="أخرى (جهة خارجية)">أخرى (جهة خارجية)</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px;">المحطة أو الشعبة الفرعية</label>
+          <input id="advStageInput" type="text" placeholder="مثال: الشعبة القانونية / التدقيق المالي / توقيع المدير" class="editorial-input">
+        </div>
+
+        <div>
+          <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px;">حالة المعاملة الحالية</label>
+          <select id="advStatusSelect" class="editorial-input" style="color: #FFF; background: var(--bg-color);">
+            <option value="active">تحت الإجراء الاعتيادي (مستمرة)</option>
+            <option value="pending">معلقة / بانتظار نقص أو مستمسك من العميل</option>
+            <option value="objection">وجود اعتراض أو كتاب استفسار رسمي</option>
+            <option value="ready">جاهزة للإصدار أو التسليم النهائي</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px;">ملاحظات المراجعة الميدانية</label>
+          <textarea id="advNoteInput" rows="3" placeholder="سجل تفاصيل ما جرى في هذه الدائرة..." class="editorial-input"></textarea>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 8px;">
+          <button onclick="confirmAdvancedStepUpdate()" class="btn-gold" style="flex: 1;">اعتماد وتحديث المسار</button>
+          <button onclick="closeSheet('advancedStepModal')" class="btn-outline" style="flex: 1;">إلغاء</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- نظام استلام معاملة -->
   <div id="newTxModal" class="sheet-overlay">
     <div class="sheet-content">
@@ -401,7 +455,7 @@
         <input id="txFee" type="number" placeholder="الأتعاب الكلية (د.ع)" class="editorial-input num-font">
         <textarea id="txChecklist" rows="3" placeholder="المستمسكات المطلوبة (كل مستمسك بسطر)" class="editorial-input"></textarea>
         <div style="display: flex; gap: 12px;">
-          <button onclick="saveTransaction()" class="btn-gold" style="flex: 1;">حفظ بالظام</button>
+          <button onclick="saveTransaction()" class="btn-gold" style="flex: 1;">حفظ بالنظام</button>
           <button onclick="closeSheet('newTxModal')" class="btn-outline" style="flex: 1;">إلغاء</button>
         </div>
       </div>
@@ -420,23 +474,6 @@
           <button onclick="saveCompany()" class="btn-gold" style="flex: 1;">حفظ</button>
           <button onclick="closeSheet('newCompanyModal')" class="btn-outline" style="flex: 1;">إلغاء</button>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- تحديث المسار (محصور بدائرتين فقط) -->
-  <div id="stepUpdateModal" class="sheet-overlay">
-    <div class="sheet-content">
-      <div class="sheet-drag"></div>
-      <h3 style="font-size: 20px; font-weight: 900; margin-bottom: 12px;">تحديد المسار الميداني</h3>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
-        <button onclick="setQuickStep('دائرة مسجل الشركات')" class="btn-ghost" style="border: 1px solid var(--border-color); padding: 16px;">مسجل الشركات</button>
-        <button onclick="setQuickStep('دائرة الاستيراد')" class="btn-ghost" style="border: 1px solid var(--border-color); padding: 16px;">دائرة الاستيراد</button>
-      </div>
-      <input id="customStepInput" type="text" placeholder="أو القسم الفرعي..." class="editorial-input" style="margin-bottom: 24px;">
-      <div style="display: flex; gap: 12px;">
-        <button onclick="confirmStepUpdate()" class="btn-gold" style="flex: 1;">تحديث المسار</button>
-        <button onclick="closeSheet('stepUpdateModal')" class="btn-outline" style="flex: 1;">إلغاء</button>
       </div>
     </div>
   </div>
@@ -509,26 +546,6 @@
     </div>
   </div>
 
-  <!-- كشف الحساب المستقل -->
-  <div id="customStatementModal" class="sheet-overlay">
-    <div class="sheet-content" style="max-width: 600px;">
-      <div class="sheet-drag"></div>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-        <h3 id="customStatementTitle" style="font-size: 20px; font-weight: 900;">كشف حساب مستقل</h3>
-        <button onclick="printCustomStatement()" class="btn-gold" style="padding: 10px 16px; font-size: 12px;">طباعة</button>
-      </div>
-      <div id="printableCustomArea" style="background: #FFF; color: #000; padding: 24px; border-radius: 12px; font-size: 13px; line-height: 1.8;">
-        <h2>كشف حساب: <span id="custRepClientName"></span></h2>
-        <table style="width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 12px;">
-          <thead><tr style="border-bottom: 2px solid #000;"><th style="text-align:right; padding:8px;">الجهة</th><th style="text-align:right; padding:8px;">المعاملة</th><th style="text-align:center; padding:8px;">الأتعاب</th><th style="text-align:left; padding:8px;">الديون</th></tr></thead>
-          <tbody id="custRepTableBody"></tbody>
-        </table>
-        <div style="margin-top: 16px; font-weight: 900;">إجمالي الديون المعلقة: <span id="custRepTotalDebt"></span></div>
-      </div>
-      <button onclick="closeSheet('customStatementModal')" class="btn-ghost" style="width: 100%; margin-top: 24px;">رجوع</button>
-    </div>
-  </div>
-
   <!-- سجل النظام -->
   <div id="auditLogModal" class="sheet-overlay">
     <div class="sheet-content">
@@ -559,7 +576,7 @@
     </div>
   </div>
 
-  <!-- السكربتات البرمجية المتكاملة والمحدثة -->
+  <!-- السكربتات البرمجية المتكاملة مع محرك التتبع المتقدم -->
   <script>
     const SUPABASE_URL = "https://giidtugteyiobaagqohy.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpaWR0dWd0ZXlpb2JhYWdxb2h5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxMTgyMjYsImV4cCI6MjEwMjY5NDIyNn0.v7Nwag2BTrCWG6zzeYo1kTG4w2xAuzSmiZpCLJtvBow";
@@ -568,17 +585,13 @@
     let currentUser = null;
     let selectedCompanyId = null;
     let selectedCompanyName = "";
-    let targetTxIdForStep = null;
-    let currentOldStepForTx = "";
     let targetTxIdForChecklist = null;
     let targetTxForWA = null;
     let currentWeeklyCompanyId = null;
     let currentWeeklyData = null;
-    let currentCustomStatementData = null;
     let searchQuery = "";
     
     let currentDetailTxId = null;
-    let currentDetailCurrentLoc = "";
 
     let companies = [];
     let activeTransactions = [];
@@ -727,6 +740,15 @@
         const completedCount = checklists.filter(c => c.is_completed).length;
         const progressPercent = checklists.length > 0 ? Math.round((completedCount / checklists.length) * 100) : 0;
         const fee = Number(tx.fee_iqd) || 0;
+        
+        let hist = getStepHistory(tx.id);
+        let latestStep = hist.length > 0 ? hist[hist.length - 1] : { dept: tx.current_location_step || 'مسجل الشركات', stage: 'قيد المراجعة', status: 'active', note: 'بدء المعاملة' };
+
+        let statusColor = "var(--blue)";
+        let statusTextBadge = "مستمرة";
+        if (latestStep.status === 'pending') { statusColor = "var(--amber)"; statusTextBadge = "بانتظار نقص"; }
+        else if (latestStep.status === 'objection') { statusColor = "var(--danger)"; statusTextBadge = "معترضة / استفسار"; }
+        else if (latestStep.status === 'ready') { statusColor = "var(--emerald)"; statusTextBadge = "جاهزة للإصدار"; }
 
         return `
           <div class="bento-card">
@@ -738,6 +760,7 @@
                   </div>
                   <span style="font-size: 15px; font-weight: 900; color: #FFF;">${tx.companies?.name || 'شركة'}</span>
                 </div>
+                <span style="font-size: 11px; font-weight: 800; background: rgba(255,255,255,0.05); color: ${statusColor}; padding: 4px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">${statusTextBadge}</span>
               </div>
 
               <h3 style="font-size: 20px; font-weight: 900; line-height: 1.4; margin-bottom: 16px;">${tx.transaction_type}</h3>
@@ -749,9 +772,12 @@
                 </div>
               </div>
 
-              <div style="background: var(--card-elevated); border-radius: var(--radius-sm); padding: 12px 14px; display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
-                <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--blue);"></span>
-                <span style="font-size: 12px; font-weight: 700; color: var(--text-muted);">${tx.current_location_step || 'مسجل الشركات'}</span>
+              <div style="background: var(--card-elevated); border-radius: var(--radius-sm); padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; margin-bottom: 20px; border: 1px solid var(--border-color);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="width: 8px; height: 8px; border-radius: 50%; background: ${statusColor};"></span>
+                  <span style="font-size: 13px; font-weight: 900; color: #FFF;">${latestStep.dept}</span>
+                </div>
+                <p style="font-size: 11px; color: var(--text-muted); padding-right: 16px;">${latestStep.stage || 'متابعة ميدانية'}</p>
               </div>
             </div>
 
@@ -773,19 +799,30 @@
       }).join('');
     }
 
+    // تفاصيل المعاملة والخط الزمني الهندسي
     window.openTransactionFullDetails = function(txId) {
       const tx = allTransactionsGlobal.find(t => t.id === txId);
       if (!tx) return;
 
       currentDetailTxId = txId;
-      currentDetailCurrentLoc = tx.current_location_step || 'مسجل الشركات';
 
       document.getElementById('dtCompNameBadge').innerText = tx.companies?.name || 'شركة';
       document.getElementById('dtTxTitle').innerText = tx.transaction_type;
-      document.getElementById('dtCurrentLocText').innerText = currentDetailCurrentLoc;
 
       const fee = Number(tx.fee_iqd) || 0;
       document.getElementById('dtFinancialSummary').innerText = `${fee.toLocaleString('ar-IQ')} د.ع`;
+
+      let hist = getStepHistory(txId);
+      let latest = hist.length > 0 ? hist[hist.length - 1] : { dept: tx.current_location_step || 'مسجل الشركات', stage: 'قيد المراجعة', status: 'active', note: 'بدء المعاملة' };
+
+      let statusColor = "var(--blue)";
+      if (latest.status === 'pending') statusColor = "var(--amber)";
+      else if (latest.status === 'objection') statusColor = "var(--danger)";
+      else if (latest.status === 'ready') statusColor = "var(--emerald)";
+
+      document.getElementById('dtStatusIndicator').style.background = statusColor;
+      document.getElementById('dtCurrentLocText').innerText = `${latest.dept} ‹ ${latest.stage || 'متابعة'}`;
+      document.getElementById('dtLastNoteText').innerText = `ملاحظة ميدانية: ${latest.note || 'لا توجد ملاحظات مسجلة'}`;
 
       const checklists = tx.transaction_checklists || [];
       const completedCount = checklists.filter(c => c.is_completed).length;
@@ -801,18 +838,57 @@
         </div>
       `).join('') : '<p style="font-size:12px; color:var(--text-muted); text-align:center;">لا توجد متطلبات</p>';
 
-      let hist = getStepHistory(txId);
-      if (hist.length === 0) hist = [{ step: currentDetailCurrentLoc, time: new Date().toISOString() }];
-      
-      document.getElementById('dtTimelineList').innerHTML = hist.map((h, i) => `
-        <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-color); padding: 8px 12px; border-radius: var(--radius-sm);">
-          <span style="font-size: 12px; font-weight: ${i === hist.length - 1 ? '900' : '500'}; color: ${i === hist.length - 1 ? 'var(--gold)' : 'var(--text-main)'};">${h.step}</span>
-          <span class="num-font" style="font-size: 10px; color: var(--text-muted);">${new Date(h.time).toLocaleDateString('ar-IQ')}</span>
+      document.getElementById('dtTimelineList').innerHTML = hist.slice().reverse().map((h, i) => `
+        <div style="background: var(--bg-color); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 4px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 13px; font-weight: 900; color: ${i === 0 ? 'var(--gold)' : '#FFF'};">${h.dept} (${h.stage || ''})</span>
+            <span class="num-font" style="font-size: 10px; color: var(--text-muted);">${new Date(h.time).toLocaleDateString('ar-IQ')}</span>
+          </div>
+          <p style="font-size: 11px; color: var(--text-muted);">${h.note || 'لا توجد ملاحظات'}</p>
         </div>
-      `).join('');
+      `).join('') || '<p style="font-size:12px; color:var(--text-muted); text-align:center;">لا يوجد سجل حركات سابق</p>';
 
       openSheet('transactionDetailsModal');
     };
+
+    // إدارة محرك التتبع المتقدم (Modal)
+    function openAdvancedStepModal(txId) {
+      currentDetailTxId = txId;
+      const tx = allTransactionsGlobal.find(t => t.id === txId);
+      if (tx) {
+        let hist = getStepHistory(txId);
+        let latest = hist.length > 0 ? hist[hist.length - 1] : { dept: tx.current_location_step || 'دائرة مسجل الشركات', stage: '', status: 'active', note: '' };
+        document.getElementById('advDeptSelect').value = latest.dept;
+        document.getElementById('advStageInput').value = latest.stage || '';
+        document.getElementById('advStatusSelect').value = latest.status || 'active';
+        document.getElementById('advNoteInput').value = '';
+      }
+      openSheet('advancedStepModal');
+    }
+
+    async function confirmAdvancedStepUpdate() {
+      const dept = document.getElementById('advDeptSelect').value;
+      const stage = document.getElementById('advStageInput').value.trim();
+      const status = document.getElementById('advStatusSelect').value;
+      const note = document.getElementById('advNoteInput').value.trim();
+
+      if (!currentDetailTxId) return;
+
+      pushStepHistory(currentDetailTxId, { dept, stage, status, note, time: new Date().toISOString() });
+      await db.from('transactions').update({ current_location_step: dept }).eq('id', currentDetailTxId);
+
+      closeSheet('advancedStepModal');
+      showToast("تم تحديث المحطة الهندسية بنجاح 🚀");
+      loadData();
+      openTransactionFullDetails(currentDetailTxId);
+    }
+
+    function getStepHistory(txId) { return JSON.parse(localStorage.getItem(`step_history_v2_${txId}`) || '[]'); }
+    function pushStepHistory(txId, stepObj) {
+      let hist = getStepHistory(txId);
+      hist.push(stepObj);
+      localStorage.setItem(`step_history_v2_${txId}`, JSON.stringify(hist));
+    }
 
     function selectCompany(id, name) {
       selectedCompanyId = id; selectedCompanyName = name;
@@ -842,7 +918,7 @@
       }]).select().single();
 
       if (tx) {
-        pushStepHistory(tx.id, null, 'دائرة مسجل الشركات');
+        pushStepHistory(tx.id, { dept: 'دائرة مسجل الشركات', stage: 'الاستلام المبدئي', status: 'active', note: 'بدء دورة المعاملة', time: new Date().toISOString() });
         if (rawChecklist) {
           const items = rawChecklist.split('\n').filter(i => i.trim() !== '').map(item => ({ transaction_id: tx.id, item_text: item.trim(), is_completed: false }));
           await db.from('transaction_checklists').insert(items);
@@ -856,26 +932,8 @@
 
     async function completeTx(id) { 
       await db.from('transactions').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', id); 
+      pushStepHistory(id, { dept: 'الإنجاز النهائي', stage: 'تسليم المعاملة', status: 'ready', note: 'تم إنجاز وتسليم العمل كلياً', time: new Date().toISOString() });
       showToast("تم إنجاز المعاملة ✅"); loadData(); 
-    }
-
-    function openStepModal(id, currentStep) { targetTxIdForStep = id; currentOldStepForTx = currentStep; openSheet('stepUpdateModal'); }
-    function setQuickStep(val) {
-      if (val && targetTxIdForStep) {
-        pushStepHistory(targetTxIdForStep, currentOldStepForTx, val);
-        db.from('transactions').update({ current_location_step: val }).eq('id', targetTxIdForStep).then(() => {
-          closeSheet('stepUpdateModal'); showToast("تم تحديث المسار"); loadData();
-          if (currentDetailTxId) openTransactionFullDetails(currentDetailTxId);
-        });
-      }
-    }
-    
-    function getStepHistory(txId) { return JSON.parse(localStorage.getItem(`step_history_${txId}`) || '[]'); }
-    function pushStepHistory(txId, oldLoc, newLoc) {
-      let hist = getStepHistory(txId);
-      if (hist.length === 0 && oldLoc) hist.push({ step: oldLoc, time: new Date(Date.now() - 3600000).toISOString() });
-      hist.push({ step: newLoc, time: new Date().toISOString() });
-      localStorage.setItem(`step_history_${txId}`, JSON.stringify(hist));
     }
 
     function openAddChecklistModal(txId) { targetTxIdForChecklist = txId; openSheet('addChecklistModal'); }
@@ -902,7 +960,7 @@
         const lastTime = hist.length > 0 ? new Date(hist[hist.length - 1].time) : new Date(t.created_at);
         const days = Math.floor((new Date() - lastTime) / (1000 * 60 * 60 * 24));
         if (days >= 3) {
-          alerts.push(`المعاملة (${t.transaction_type}) للشركة (${t.companies?.name}) راكدة في (${t.current_location_step}) منذ ${days} أيام.`);
+          alerts.push(`المعاملة (${t.transaction_type}) للشركة (${t.companies?.name}) راكدة في المحطة منذ ${days} أيام.`);
         }
       });
 
@@ -920,7 +978,7 @@
     // حساب أسبوع العمل الرسمي (الأحد - الخميس)
     function getOfficialIraqiWorkWeek() {
       const now = new Date();
-      const day = now.getDay(); // 0: Sun, 1: Mon, ..., 5: Fri, 6: Sat
+      const day = now.getDay();
       let sunday = new Date(now);
       sunday.setDate(now.getDate() - (day === 6 ? 6 : day));
       sunday.setHours(0,0,0,0);
@@ -982,7 +1040,7 @@
 
     function printWeeklyReceiptVoucher() { window.print(); }
 
-    // الأرشيف والمكتبة والدوال المفقودة المضافة
+    // الأرشيف والمكتبة
     function openDocVault() {
       const comp = companies.find(c => c.id === selectedCompanyId);
       if (comp) {
@@ -1046,10 +1104,6 @@
       link.click();
       document.body.removeChild(link);
       showToast("تم تصدير ملف الـ CSV بنجاح 📊");
-    }
-
-    function printCustomStatement() {
-      window.print();
     }
 
     function renderArchiveLibrary(query = '') {
@@ -1120,11 +1174,12 @@
       if (!targetTxForWA) return;
       const comp = targetTxForWA.companies?.name || 'العميل';
       const txName = targetTxForWA.transaction_type;
-      const loc = targetTxForWA.current_location_step;
+      let hist = getStepHistory(targetTxForWA.id);
+      let latest = hist.length > 0 ? hist[hist.length - 1] : { dept: targetTxForWA.current_location_step || 'مسجل الشركات' };
       const office = localStorage.getItem('office_name') || 'إدارة المراجعات';
 
       let msg = "";
-      if (type === 'status') msg = `السادة *${comp}* المحترمون،\n\nنحيطكم علماً بأن معاملتكم (*${txName}*) متواجدة حالياً في: 📍 *${loc}*.\n\nتحياتنا،\n_${office}_`;
+      if (type === 'status') msg = `السادة *${comp}* المحترمون،\n\nنحيطكم علماً بأن معاملتكم (*${txName}*) متواجدة حالياً في: 📍 *${latest.dept}* (${latest.stage || ''}).\n\nتحياتنا،\n_${office}_`;
       else if (type === 'missing') msg = `السادة *${comp}* المحترمون،\n\nنرجو تزويدنا بالمستمسكات المطلوبة لمعاملة (*${txName}*).\n\nشكراً لتعاونكم،\n_${office}_`;
       else if (type === 'completed') msg = `السادة *${comp}* المحترمون،\n\nيسرنا إبلاغكم بإنجاز معاملتكم (*${txName}*) بشكل رسمي ✅.\n\nمبروك،\n_${office}_`;
 
