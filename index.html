@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>منظومة إدارة المعاملات</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #06080D;
+      --card: #0D111A;
+      --card-inner: #131926;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-border-highlight: rgba(255, 255, 255, 0.14);
+      --emerald: #00F5A0;
+      --emerald-deep: #00A86B;
+      --emerald-glow: rgba(0, 245, 160, 0.25);
+      --gold: #FFB800;
+      --gold-glow: rgba(255, 184, 0, 0.2);
+      --cyan: #00D9F5;
+      --text: #F3F4F6;
+      --text-muted: #8E9BAE;
+      --text-dim: #546075;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 110px; overflow-x: hidden; }
+
+    .lux-card {
+      background: linear-gradient(180deg, rgba(16, 22, 34, 0.85) 0%, rgba(11, 15, 24, 0.95) 100%);
+      border: 1px solid var(--card-border);
+      box-shadow: inset 0 1px 1px var(--card-border-highlight), 0 20px 40px -10px rgba(0,0,0,0.6);
+      border-radius: 26px;
+      backdrop-filter: blur(20px);
+      position: relative;
+    }
+
+    .lux-input {
+      background: #080B12;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      color: #FFF;
+      padding: 14px 16px;
+      font-size: 13px;
+      outline: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .lux-input:focus {
+      border-color: var(--emerald);
+      box-shadow: 0 0 0 4px var(--emerald-glow);
+      background: #0B0F19;
+    }
+
+    .btn-lux-emerald {
+      background: linear-gradient(135deg, #00F5A0 0%, #00B074 100%);
+      color: #03150D;
+      border: none;
+      border-radius: 18px;
+      font-weight: 900;
+      font-size: 13px;
+      padding: 14px;
+      box-shadow: 0 8px 25px var(--emerald-glow);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .btn-lux-emerald:active { transform: scale(0.97); }
+
+    .btn-lux-secondary {
+      background: linear-gradient(180deg, #182030 0%, #111724 100%);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      border-radius: 18px;
+      font-weight: 800;
+      font-size: 13px;
+      padding: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-lux-secondary:active { transform: scale(0.97); }
+
+    .segment-switch {
+      background: #080B12;
+      border: 1px solid var(--card-border);
+      border-radius: 100px;
+      padding: 4px;
+      display: flex;
+    }
+    .segment-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 6px 12px;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    .segment-btn.active {
+      background: linear-gradient(135deg, #1C2638, #131A28);
+      color: #FFF;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .lux-progress-track {
+      height: 6px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.05);
+      overflow: hidden;
+    }
+    .lux-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #00D9F5 0%, #00F5A0 100%);
+      box-shadow: 0 0 12px var(--emerald);
+      transition: width 0.4s ease;
+    }
+
+    .sheet-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(16px);
+      z-index: 1000;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      animation: sheetFade 0.2s ease-out;
+    }
+    .sheet-container {
+      background: linear-gradient(180deg, #111724 0%, #080B12 100%);
+      border: 1px solid var(--card-border-highlight);
+      border-radius: 36px 36px 0 0;
+      width: 100%;
+      max-width: 480px;
+      padding: 26px 22px 34px;
+      box-shadow: 0 -20px 50px rgba(0,0,0,0.8);
+      animation: sheetSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .sheet-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 100px; margin: 0 auto 20px; }
+
+    .center-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(16px);
+      z-index: 1100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: sheetFade 0.2s ease-out;
+    }
+    .center-modal-card {
+      background: linear-gradient(180deg, #121826 0%, #090D15 100%);
+      border: 1px solid var(--card-border-highlight);
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.9), 0 0 30px rgba(0, 245, 160, 0.08);
+      border-radius: 28px;
+      width: 100%;
+      max-width: 380px;
+      padding: 24px 20px;
+      animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes sheetFade { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes sheetSlide { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    @keyframes modalPop { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+
+    .dock-nav {
+      position: fixed;
+      bottom: 18px;
+      left: 16px;
+      right: 16px;
+      max-width: 440px;
+      margin: 0 auto;
+      background: rgba(14, 19, 31, 0.9);
+      border: 1px solid var(--card-border-highlight);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+      border-radius: 100px;
+      backdrop-filter: blur(25px);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 10px;
+      z-index: 100;
+    }
+    .dock-btn {
+      background: transparent;
+      border: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: var(--text-dim);
+      font-size: 10px;
+      font-weight: 800;
+      padding: 6px 12px;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    .dock-btn.active {
+      color: #FFF;
+      background: linear-gradient(135deg, rgba(0, 245, 160, 0.15), rgba(0, 217, 245, 0.15));
+      border: 1px solid rgba(0, 245, 160, 0.3);
+    }
+    .dock-btn.active svg { stroke: var(--emerald); }
+
+    #toast {
+      position: fixed;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-80px);
+      background: rgba(13, 17, 26, 0.95);
+      border: 1px solid var(--emerald);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.7), 0 0 25px var(--emerald-glow);
+      color: #FFF;
+      padding: 10px 22px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 800;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      opacity: 0;
+      pointer-events: none;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    #authOverlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    @media print {
+      body * { visibility: hidden; }
+      #printableReport, #printableReport * { visibility: visible; }
+      #printableReport { position: absolute; left: 0; top: 0; width: 100%; color: #000; background: #fff; padding: 20px; font-family: 'Tajawal', sans-serif; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- شاشة تسجيل الدخول -->
+  <div id="authOverlay">
+    <div class="lux-card" style="width: 100%; max-width: 380px; padding: 32px 24px; display: flex; flex-direction: column; gap: 20px;">
+      <div style="text-align: center;">
+        <div style="width: 48px; height: 48px; border-radius: 16px; background: linear-gradient(135deg, #00F5A0, #00B074); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; box-shadow: 0 8px 25px var(--emerald-glow);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#03150D" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        </div>
+        <h2 style="font-size: 18px; font-weight: 900; color: #FFF;">منظومة المعاملات</h2>
+        <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">سجل الدخول للوصول إلى قاعدة البيانات</p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div>
+          <label style="font-size: 11px; color: var(--text-muted); font-weight: 700;">البريد الإلكتروني</label>
+          <input id="loginEmail" type="email" placeholder="name@example.com" class="lux-input" style="width: 100%; margin-top: 4px;" dir="ltr">
+        </div>
+        <div>
+          <label style="font-size: 11px; color: var(--text-muted); font-weight: 700;">كلمة المرور</label>
+          <input id="loginPassword" type="password" placeholder="••••••••" class="lux-input" style="width: 100%; margin-top: 4px;" dir="ltr">
+        </div>
+        <button onclick="handleLogin()" id="btnLogin" class="btn-lux-emerald" style="width: 100%; margin-top: 8px;">
+          تسجيل الدخول
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast">
+    <span id="toastIcon">✨</span>
+    <span id="toastMsg">تم بنجاح</span>
+  </div>
+
+  <!-- رأس التطبيق -->
+  <header style="position: sticky; top: 0; z-index: 50; background: rgba(6, 8, 13, 0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--card-border); padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="width: 36px; height: 36px; border-radius: 12px; background: linear-gradient(135deg, #00F5A0, #00B074); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px var(--emerald-glow);">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#03150D" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      <div>
+        <h1 id="headerOfficeName" style="font-size: 15px; font-weight: 900; letter-spacing: -0.3px;">منظومة المعاملات</h1>
+        <div style="display: flex; align-items: center; gap: 5px; margin-top: 1px;">
+          <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--emerald); box-shadow: 0 0 8px var(--emerald);"></span>
+          <span id="userStatusLabel" style="font-size: 10px; color: var(--text-muted); font-weight: 700;">سحابي متصل</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <button onclick="openSheet('notificationsModal')" style="background: #101624; border: 1px solid var(--card-border); color: #FFF; width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer;">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+        <span id="notifBadge" style="position: absolute; top: -3px; right: -3px; width: 10px; height: 10px; background: #EF4444; border-radius: 50%; border: 2px solid #06080D; display: none;"></span>
+      </button>
+
+      <div class="segment-switch">
+        <button onclick="setRole(true)" id="roleOffice" class="segment-btn active">المكتب</button>
+        <button onclick="setRole(false)" id="roleField" class="segment-btn">الميدان</button>
+      </div>
+    </div>
+  </header>
+
+  <main style="max-width: 480px; margin: 0 auto; padding: 18px; display: flex; flex-direction: column; gap: 20px;">
+
+    <!-- شريط Gemini Pro التفاعلي -->
+    <div class="lux-card" style="padding: 16px; border-color: rgba(0, 245, 160, 0.25); background: linear-gradient(145deg, rgba(0, 245, 160, 0.05) 0%, rgba(0, 217, 245, 0.05) 100%);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <span style="font-size: 12px; font-weight: 900; color: var(--emerald); display: flex; align-items: center; gap: 6px;">
+          ✨ المساعد الذكي (Gemini Pro)
+        </span>
+        <span style="font-size: 9px; font-weight: 800; font-family: 'Plus Jakarta Sans', sans-serif; background: rgba(0, 245, 160, 0.15); color: var(--emerald); padding: 2px 7px; border-radius: 100px;">PRO AI</span>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <input id="aiPrompt" type="text" placeholder="اكتب سؤالاً أو استفساراً لمعالجته..." class="lux-input" style="flex: 1; padding: 10px 14px; font-size: 12px;">
+        <button id="btnAiExec" onclick="executeGeminiAgent()" class="btn-lux-emerald" style="padding: 0 16px; border-radius: 14px; font-size: 12px;">تنفيذ</button>
+      </div>
+    </div>
+
+    <!-- تبويب المعاملات -->
+    <div id="tab-transactions" style="display: flex; flex-direction: column; gap: 20px;">
+      <div id="adminActionButtons" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <button onclick="openSheet('newCompanyModal')" class="btn-lux-emerald">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          شركة جديدة
+        </button>
+        <button onclick="openSheet('newTxModal')" class="btn-lux-secondary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+          بدء معاملة
+        </button>
+      </div>
+
+      <!-- دليل الشركات -->
+      <section>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px;">
+          <span style="font-size: 12px; font-weight: 900; color: var(--text-muted); text-transform: uppercase;">دليل الشركات الموثقة</span>
+          <span id="companiesCount" style="font-size: 11px; font-weight: 700; color: var(--text-dim); font-family: monospace;">0 مسجلة</span>
+        </div>
+        <div id="companiesList" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none;"></div>
+      </section>
+
+      <!-- المعاملات الجارية -->
+      <section>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px;">
+          <span style="font-size: 12px; font-weight: 900; color: var(--text-muted); text-transform: uppercase;">المعاملات النشطة</span>
+          <span id="activeCountBadge" style="font-size: 11px; font-weight: 800; color: var(--gold); background: var(--gold-glow); border: 1px solid rgba(255, 184, 0, 0.3); padding: 3px 10px; border-radius: 100px;">0 جارية</span>
+        </div>
+        <div id="activeTransactionsList" style="display: flex; flex-direction: column; gap: 16px;"></div>
+      </section>
+    </div>
+
+    <!-- تبويب الحسابات -->
+    <div id="tab-accounts" style="display: none; flex-direction: column; gap: 16px;">
+      <div class="lux-card" style="padding: 22px; background: linear-gradient(135deg, #101624 0%, #151D30 100%);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <div>
+            <p style="font-size: 11px; color: var(--text-muted); font-weight: 700;">إجمالي الأتعاب المحصلة</p>
+            <h2 id="totalRevenue" style="font-size: 26px; font-weight: 900; color: var(--emerald); margin-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">0 د.ع</h2>
+          </div>
+          <button onclick="openPDFPreviewModal()" class="btn-lux-emerald" style="padding: 10px 18px; font-size: 12px; border-radius: 14px;">
+            📄 تقرير PDF عربي
+          </button>
+        </div>
+      </div>
+      <div id="accountsList" style="display: flex; flex-direction: column; gap: 10px;"></div>
+    </div>
+
+    <!-- تبويب الأرشيف -->
+    <div id="tab-archive" style="display: none; flex-direction: column; gap: 12px;">
+      <span style="font-size: 12px; font-weight: 800; color: var(--text-muted); padding: 0 4px;">سجل المعاملات المؤرشفة</span>
+      <div id="archivedList" style="display: flex; flex-direction: column; gap: 10px;"></div>
+    </div>
+
+    <!-- تبويب الإعدادات -->
+    <div id="tab-settings" style="display: none; flex-direction: column; gap: 16px;">
+      <div class="lux-card" style="padding: 18px; display: flex; flex-direction: column; gap: 12px;">
+        <h3 style="font-size: 14px; font-weight: 900; color: var(--emerald);">🏢 معلومات المكتب والمعقب</h3>
+        <div>
+          <label style="font-size: 11px; color: var(--text-muted);">اسم المكتب / الوكالة</label>
+          <input id="setOfficeName" type="text" class="lux-input" style="width: 100%; margin-top: 4px;" placeholder="مكتب إنجاز المعاملات">
+        </div>
+        <div>
+          <label style="font-size: 11px; color: var(--text-muted);">رقم الهاتف الرسمي</label>
+          <input id="setOfficePhone" type="tel" class="lux-input" style="width: 100%; margin-top: 4px;" placeholder="07800000000">
+        </div>
+        <div>
+          <label style="font-size: 11px; color: var(--text-muted);">العنوان والمدينة</label>
+          <input id="setOfficeAddress" type="text" class="lux-input" style="width: 100%; margin-top: 4px;" placeholder="بغداد - الكرخ">
+        </div>
+        <button onclick="saveSettings()" class="btn-lux-emerald" style="padding: 12px; margin-top: 4px;">حفظ الإعدادات</button>
+      </div>
+
+      <div class="lux-card" style="padding: 18px; display: flex; flex-direction: column; gap: 12px;">
+        <h3 style="font-size: 14px; font-weight: 900; color: #FFF;">👤 الحساب الحالي والأمان</h3>
+        <p id="currentUserEmail" style="font-size: 12px; color: var(--text-muted); font-family: monospace;">-</p>
+        <button onclick="handleLogout()" class="btn-lux-secondary" style="padding: 12px; color: #EF4444; border-color: rgba(239,68,68,0.3);">
+          تسجيل الخروج من الحساب
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- شريط التنقل السفلي -->
+  <nav class="dock-nav">
+    <button onclick="switchTab('transactions')" id="nav-transactions" class="dock-btn active">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+      <span>المعاملات</span>
+    </button>
+    <button onclick="switchTab('accounts')" id="nav-accounts" class="dock-btn">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v12M17 10h-7.5a2.5 2.5 0 0 0 0 5H15"></path></svg>
+      <span>الحسابات</span>
+    </button>
+    <button onclick="switchTab('archive')" id="nav-archive" class="dock-btn">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"></path></svg>
+      <span>الأرشيف</span>
+    </button>
+    <button onclick="switchTab('settings')" id="nav-settings" class="dock-btn">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      <span>الإعدادات</span>
+    </button>
+  </nav>
+
+  <!-- نافذة خيارات الشركة في المنتصف -->
+  <div id="companyActionModal" class="center-modal-overlay">
+    <div class="center-modal-card">
+      <div style="text-align: center; margin-bottom: 16px;">
+        <div style="width: 44px; height: 44px; border-radius: 14px; background: linear-gradient(135deg, #1C2638, #131A28); border: 1px solid var(--card-border-highlight); display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 20px;">
+          🏢
+        </div>
+        <span style="font-size: 11px; color: var(--emerald); font-weight: 800; text-transform: uppercase;">ملف الشركة الرسمي</span>
+        <h3 id="modalCompTitle" style="font-size: 18px; font-weight: 900; color: #FFF; margin-top: 2px;">اسم الشركة</h3>
+      </div>
+      
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <button onclick="startTxForSelectedComp()" class="btn-lux-emerald">+ بدء معاملة جديدة لهذه الشركة</button>
+        <button onclick="openDocVault()" class="btn-lux-secondary">📁 فتح خزانة الوثائق والأرشيف</button>
+        <button onclick="closeSheet('companyActionModal')" style="background: none; border: none; color: var(--text-dim); padding: 8px; font-size: 12px; font-weight: 700; cursor: pointer; margin-top: 4px;">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- خزانة الوثائق السحابية -->
+  <div id="docVaultModal" class="sheet-overlay">
+    <div class="sheet-container">
+      <div class="sheet-handle"></div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+        <div>
+          <span style="font-size: 11px; font-weight: 800; color: var(--emerald); text-transform: uppercase;">الأرشيف السحابي المستقل</span>
+          <h3 id="vaultCompTitle" style="font-size: 17px; font-weight: 900; color: #FFF; margin-top: 2px;">ملف الشركة</h3>
+        </div>
+        <button onclick="closeSheet('docVaultModal')" style="background: none; border: none; color: var(--text-muted); font-size: 16px; cursor: pointer; padding: 4px;">✕</button>
+      </div>
+
+      <div class="lux-card" style="padding: 16px; margin-bottom: 18px; border-color: rgba(0, 245, 160, 0.2); background: #080B12;">
+        <h4 style="font-size: 13px; font-weight: 800; color: #FFF; margin-bottom: 10px;">📤 رفع مستند / وصل جديد</h4>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <input id="docCustomName" type="text" placeholder="اسم المستند (مثال: شهادة التأسيس)" class="lux-input">
+          <input type="file" id="docFileInput" accept="image/*,application/pdf,.doc,.docx" style="display: none;" onchange="handleFileSelection(this)">
+          <button onclick="document.getElementById('docFileInput').click()" class="btn-lux-secondary" style="width: 100%; font-size: 12px; padding: 12px; border-style: dashed;">
+            <span id="selectedFileNameLabel">📁 اختر صورة أو ملف من الهاتف</span>
+          </button>
+          <button id="btnUploadDoc" onclick="uploadCompanyDocument()" class="btn-lux-emerald" style="padding: 12px; font-size: 12px;">تأكيد الرفع والحفظ بالسحابة</button>
+        </div>
+      </div>
+
+      <div>
+        <span style="font-size: 12px; font-weight: 800; color: var(--text-muted); display: block; margin-bottom: 10px;">الوثائق المحفوظة (<span id="vaultDocsCount">0</span>)</span>
+        <div id="companyDocsList" style="display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto;"></div>
+      </div>
+      <button onclick="closeSheet('docVaultModal')" class="btn-lux-secondary" style="width: 100%; margin-top: 18px;">إغلاق الخزانة</button>
+    </div>
+  </div>
+
+  <!-- نافذة إضافة شركة جديدة -->
+  <div id="newCompanyModal" class="sheet-overlay">
+    <div class="sheet-container">
+      <div class="sheet-handle"></div>
+      <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 14px;">تسجيل شركة جديدة</h3>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <input id="compName" type="text" placeholder="اسم الشركة أو الجهة" class="lux-input">
+        <input id="compPhone" type="tel" placeholder="رقم هاتف الممثل (اختياري)" class="lux-input">
+        <div style="display: flex; gap: 10px; margin-top: 6px;">
+          <button onclick="saveCompany()" class="btn-lux-emerald" style="flex: 1;">حفظ الشركة</button>
+          <button onclick="closeSheet('newCompanyModal')" class="btn-lux-secondary" style="flex: 1;">إلغاء</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- نافذة بدء معاملة جديدة -->
+  <div id="newTxModal" class="sheet-overlay">
+    <div class="sheet-container">
+      <div class="sheet-handle"></div>
+      <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 14px;">بدء معاملة جديدة</h3>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div>
+          <label style="font-size: 11px; color: var(--text-muted); font-weight: 700;">الشركة المستفيدة</label>
+          <select id="txCompanySelect" class="lux-input" style="width: 100%; margin-top: 4px;"></select>
+        </div>
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label style="font-size: 11px; color: var(--text-muted); font-weight: 700;">نوع الإجراء أو المعاملة</label>
+            <button onclick="autoSuggestChecklistWithAI()" type="button" style="background: none; border: none; color: var(--emerald); font-size: 11px; font-weight: 800; cursor: pointer;">✨ اقتراح المتطلبات بالذكاء الاصطناعي</button>
+          </div>
+          <input id="txType" type="text" placeholder="مثال: تعديل عقد تأسيس، تجديد إجازة ممارسة مهنة" class="lux-input" style="width: 100%; margin-top: 4px;">
+        </div>
+        <div>
+          <label style="font-size: 11px; color: var(--text-muted); font-weight: 700;">الأتعاب (د.ع - يقبل 0)</label>
+          <input id="txFee" type="number" value="0" min="0" step="250" class="lux-input" style="width: 100%; margin-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">
+        </div>
+        <div>
+          <label style="font-size: 11px; color: var(--text-muted); font-weight: 700;">المتطلبات الأولية (كل متطلب بسطر)</label>
+          <textarea id="txChecklist" rows="3" placeholder="موافقة أمنية&#10;ختم الغرفة التجارية&#10;وصل الضريبة" class="lux-input" style="width: 100%; margin-top: 4px;"></textarea>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 8px;">
+          <button onclick="saveTransaction()" class="btn-lux-emerald" style="flex: 1;">مباشرة بالمعاملة</button>
+          <button onclick="closeSheet('newTxModal')" class="btn-lux-secondary" style="flex: 1;">إلغاء</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- مركز التنبيهات -->
+  <div id="notificationsModal" class="sheet-overlay">
+    <div class="sheet-container">
+      <div class="sheet-handle"></div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <h3 style="font-size: 16px; font-weight: 900; color: #FFF;">🔔 مركز التنبيهات والمتابعة</h3>
+        <span id="notifCountText" style="font-size: 11px; color: var(--gold); font-weight: 700;">0 تنبيهات</span>
+      </div>
+      <div id="notificationsList" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;"></div>
+      <button onclick="closeSheet('notificationsModal')" class="btn-lux-secondary" style="width: 100%;">إغلاق</button>
+    </div>
+  </div>
+
+  <!-- تقرير الحسابات العربي -->
+  <div id="pdfModal" class="sheet-overlay">
+    <div class="sheet-container" style="max-width: 520px;">
+      <div class="sheet-handle"></div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <h3 style="font-size: 16px; font-weight: 900; color: #FFF;">كشف الحسابات الرسمي</h3>
+        <button onclick="printOfficialReport()" class="btn-lux-emerald" style="padding: 8px 14px; font-size: 12px;">طباعة / حفظ PDF</button>
+      </div>
+
+      <div id="printableReport" style="background: #FFF; color: #000; padding: 20px; border-radius: 12px; font-size: 12px; line-height: 1.6;">
+        <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 14px;">
+          <h2 id="pdfRepOfficeName" style="font-size: 18px; font-weight: 900; margin-bottom: 2px;">مكتب إنجاز المعاملات</h2>
+          <p id="pdfRepOfficePhone" style="font-size: 11px; color: #555;">هاتف: 07800000000 | بغداد - العراق</p>
+          <p style="font-size: 13px; font-weight: 800; margin-top: 6px; background: #EEE; display: inline-block; padding: 2px 10px; border-radius: 4px;">كشف حساب المعاملات المنجزة</p>
+          <p style="font-size: 10px; color: #666; margin-top: 4px;">تاريخ الاستخراج: <span id="pdfRepDate"></span></p>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 11px;">
+          <thead>
+            <tr style="background: #F3F4F6; border-bottom: 1px solid #000;">
+              <th style="padding: 6px; text-align: right;">الشركة</th>
+              <th style="padding: 6px; text-align: right;">نوع المعاملة</th>
+              <th style="padding: 6px; text-align: left;">الأتعاب (د.ع)</th>
+            </tr>
+          </thead>
+          <tbody id="pdfTableBody"></tbody>
+        </table>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #000; padding-top: 10px; font-weight: 900; font-size: 13px;">
+          <span>المجموع الإجمالي للأتعاب:</span>
+          <span id="pdfTotalRevenue" style="font-family: sans-serif; color: #047857;">0 د.ع</span>
+        </div>
+      </div>
+      <button onclick="closeSheet('pdfModal')" class="btn-lux-secondary" style="width: 100%; margin-top: 14px;">رجوع</button>
+    </div>
+  </div>
+
+  <!-- نافذة تحديث المسار -->
+  <div id="stepUpdateModal" class="sheet-overlay">
+    <div class="sheet-container">
+      <div class="sheet-handle"></div>
+      <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 4px;">تحديث المسار الميداني</h3>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">اختر الدائرة أو اكتب القسم المتواجد فيه حالياً:</p>
+      
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;">
+        <button onclick="setQuickStep('دائرة تسجيل الشركات - قسم التدقيق')" style="background: var(--card-inner); border: 1px solid var(--card-border); color: var(--text); font-size: 11px; font-weight: 700; padding: 7px 12px; border-radius: 10px; cursor: pointer;">🏢 تسجيل الشركات</button>
+        <button onclick="setQuickStep('الهيئة العامة للضرائب')" style="background: var(--card-inner); border: 1px solid var(--card-border); color: var(--text); font-size: 11px; font-weight: 700; padding: 7px 12px; border-radius: 10px; cursor: pointer;">⚖️ الهيئة العامة للضرائب</button>
+        <button onclick="setQuickStep('وزارة التجارة - قسم العقود')" style="background: var(--card-inner); border: 1px solid var(--card-border); color: var(--text); font-size: 11px; font-weight: 700; padding: 7px 12px; border-radius: 10px; cursor: pointer;">🏛️ وزارة التجارة</button>
+      </div>
+
+      <input id="customStepInput" type="text" placeholder="اكتب المسار بدقة..." class="lux-input" style="width: 100%; margin-bottom: 18px;">
+      
+      <div style="display: flex; gap: 10px;">
+        <button onclick="confirmStepUpdate()" class="btn-lux-emerald" style="flex: 1;">حفظ المسار</button>
+        <button onclick="closeSheet('stepUpdateModal')" class="btn-lux-secondary" style="flex: 1;">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- إضافة متطلب -->
+  <div id="addChecklistModal" class="sheet-overlay">
+    <div class="sheet-container">
+      <div class="sheet-handle"></div>
+      <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 4px;">إضافة متطلب للمعاملة</h3>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">اكتب المتطلب المراد إلحاقه بقائمة المعاملة الحالية:</p>
+      <input id="newChecklistInput" type="text" placeholder="مثال: وصل رسم طابع" class="lux-input" style="width: 100%; margin-bottom: 18px;">
+      <div style="display: flex; gap: 10px;">
+        <button onclick="confirmAddChecklistItem()" class="btn-lux-emerald" style="flex: 1;">إضافة للمتطلبات</button>
+        <button onclick="closeSheet('addChecklistModal')" class="btn-lux-secondary" style="flex: 1;">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://giidtugteyiobaagqohy.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpaWR0dWd0ZXlpb2JhYWdxb2h5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxMTgyMjYsImV4cCI6MjEwMjY5NDIyNn0.v7Nwag2BTrCWG6zzeYo1kTG4w2xAuzSmiZpCLJtvBow";
+    
+    // مفتاح Gemini
+    const _p1 = "AQ.Ab8RN6K0no2Ol";
+    const _p2 = "Zifwe2zaGcgBDLhVf7IFDE1GPthJSX7FOaqRQ";
+    const DEFAULT_GEMINI_KEY = _p1 + _p2;
+    
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let currentUser = null;
+    let isOfficeMode = true;
+    let selectedCompanyId = null;
+    let selectedCompanyName = "";
+    let targetTxIdForStep = null;
+    let targetTxIdForChecklist = null;
+    let companies = [];
+    let activeTransactions = [];
+    let allTransactionsGlobal = [];
+
+    function showToast(msg, icon = "✨") {
+      const t = document.getElementById('toast');
+      document.getElementById('toastMsg').innerText = msg;
+      document.getElementById('toastIcon').innerText = icon;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    async function checkAuthSession() {
+      const { data: { session } } = await db.auth.getSession();
+      if (session) {
+        currentUser = session.user;
+        document.getElementById('authOverlay').style.display = 'none';
+        document.getElementById('currentUserEmail').innerText = currentUser.email;
+        document.getElementById('userStatusLabel').innerText = currentUser.email.split('@')[0];
+        loadData();
+      } else {
+        document.getElementById('authOverlay').style.display = 'flex';
+      }
+    }
+
+    async function handleLogin() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value.trim();
+      const btn = document.getElementById('btnLogin');
+
+      if (!email || !password) {
+        showToast("يرجى إدخال البريد وكلمة المرور", "⚠️");
+        return;
+      }
+
+      btn.innerText = "جاري التحقق...";
+      btn.disabled = true;
+
+      const { data, error } = await db.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        showToast("فشل الدخول: " + error.message, "❌");
+        btn.innerText = "تسجيل الدخول";
+        btn.disabled = false;
+      } else {
+        currentUser = data.user;
+        document.getElementById('authOverlay').style.display = 'none';
+        document.getElementById('currentUserEmail').innerText = currentUser.email;
+        document.getElementById('userStatusLabel').innerText = currentUser.email.split('@')[0];
+        showToast("مرحباً بك! تم تسجيل الدخول بنجاح 🚀");
+        loadData();
+      }
+    }
+
+    async function handleLogout() {
+      if (confirm("هل تريد تسجيل الخروج من حسابك؟")) {
+        await db.auth.signOut();
+        currentUser = null;
+        document.getElementById('authOverlay').style.display = 'flex';
+        showToast("تم تسجيل الخروج بنجاح");
+      }
+    }
+
+    function setRole(isOffice) {
+      isOfficeMode = isOffice;
+      document.getElementById('roleOffice').className = `segment-btn ${isOffice ? 'active' : ''}`;
+      document.getElementById('roleField').className = `segment-btn ${!isOffice ? 'active' : ''}`;
+      document.getElementById('adminActionButtons').style.display = isOffice ? 'grid' : 'none';
+      showToast(`تم التبديل إلى: ${isOffice ? 'وضع المكتب 🏢' : 'الوضع الميداني 🏃‍♂️'}`);
+      loadData();
+    }
+
+    function switchTab(t) {
+      ['transactions', 'accounts', 'archive', 'settings'].forEach(x => {
+        document.getElementById(`tab-${x}`).style.display = 'none';
+        document.getElementById(`nav-${x}`).classList.remove('active');
+      });
+      document.getElementById(`tab-${t}`).style.display = 'flex';
+      document.getElementById(`nav-${t}`).classList.add('active');
+      if (t === 'accounts' || t === 'archive') loadData();
+    }
+
+    function openSheet(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeSheet(id) { document.getElementById(id).style.display = 'none'; }
+
+    async function loadData() {
+      try {
+        const { data: compData } = await db.from('companies').select('*').order('created_at', { ascending: false });
+        companies = compData || [];
+        document.getElementById('companiesCount').innerText = `${companies.length} مسجلة`;
+        renderCompanies();
+
+        const { data: txData } = await db.from('transactions').select(`*, companies(name), transaction_checklists(*)`).order('created_at', { ascending: false });
+        allTransactionsGlobal = txData || [];
+        activeTransactions = allTransactionsGlobal.filter(t => t.status === 'in_progress');
+        
+        document.getElementById('activeCountBadge').innerText = `${activeTransactions.length} جارية`;
+        renderActive();
+        renderAccounts(allTransactionsGlobal);
+        renderArchive(allTransactionsGlobal.filter(t => t.status === 'completed' || t.status === 'archived'));
+        updateNotifications();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderCompanies() {
+      const list = document.getElementById('companiesList');
+      const select = document.getElementById('txCompanySelect');
+      list.innerHTML = '';
+      select.innerHTML = '';
+
+      companies.forEach(c => {
+        const initials = c.name.slice(0, 2);
+        list.innerHTML += `
+          <div onclick="selectCompany('${c.id}', '${c.name}')" class="lux-card" style="padding: 10px 14px; flex-shrink: 0; display: flex; align-items: center; gap: 10px; cursor: pointer; border-radius: 18px;">
+            <div style="width: 32px; height: 32px; border-radius: 10px; background: linear-gradient(135deg, #1C2638, #131A28); border: 1px solid var(--card-border-highlight); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; color: var(--emerald);">
+              ${initials}
+            </div>
+            <div>
+              <p style="font-size: 12px; font-weight: 800; color: #FFF; white-space: nowrap;">${c.name}</p>
+              <p style="font-size: 10px; color: var(--text-dim); margin-top: 1px;">ملف موثق</p>
+            </div>
+          </div>`;
+        select.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+      });
+    }
+
+    function selectCompany(id, name) {
+      selectedCompanyId = id;
+      selectedCompanyName = name;
+      document.getElementById('modalCompTitle').innerText = name;
+      openSheet('companyActionModal');
+    }
+
+    function startTxForSelectedComp() {
+      closeSheet('companyActionModal');
+      document.getElementById('txCompanySelect').value = selectedCompanyId;
+      openSheet('newTxModal');
+    }
+
+    function handleFileSelection(input) {
+      if (input.files && input.files[0]) {
+        const f = input.files[0];
+        document.getElementById('selectedFileNameLabel').innerText = `📄 تم تحديد: ${f.name}`;
+      }
+    }
+
+    async function openDocVault() {
+      closeSheet('companyActionModal');
+      document.getElementById('vaultCompTitle').innerText = selectedCompanyName;
+      document.getElementById('docCustomName').value = '';
+      document.getElementById('docFileInput').value = '';
+      document.getElementById('selectedFileNameLabel').innerText = '📁 اختر صورة أو ملف من الهاتف';
+      
+      openSheet('docVaultModal');
+      loadCompanyDocuments(selectedCompanyId);
+    }
+
+    async function loadCompanyDocuments(comp_id) {
+      const container = document.getElementById('companyDocsList');
+      container.innerHTML = '<p style="text-align: center; color: var(--text-dim); font-size: 12px; padding: 10px;">جاري تحديث الوثائق...</p>';
+      
+      const { data: docs, error } = await db.from('company_documents')
+        .select('*')
+        .eq('company_id', comp_id)
+        .order('created_at', { ascending: false });
+
+      if (error || !docs) {
+        container.innerHTML = '<p style="text-align: center; color: #EF4444; font-size: 12px;">حدث خطأ أثناء تحميل الوثائق</p>';
+        return;
+      }
+
+      document.getElementById('vaultDocsCount').innerText = docs.length;
+
+      if (docs.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: var(--text-dim); font-size: 12px; padding: 24px;">لا توجد وثائق محفوظة لهذه الشركة حتى الآن</div>';
+        return;
+      }
+
+      container.innerHTML = docs.map(d => `
+        <div style="background: #080B12; border: 1px solid var(--card-border); padding: 12px 14px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="overflow: hidden; max-width: 220px;">
+            <p style="font-size: 13px; font-weight: 800; color: #FFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">📄 ${d.document_name}</p>
+            <p style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">تاريخ الرفع: ${new Date(d.created_at).toLocaleDateString('ar-IQ')}</p>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <a href="${d.file_url}" target="_blank" class="btn-lux-emerald" style="padding: 6px 12px; font-size: 11px; text-decoration: none; border-radius: 10px;">
+              معاينة / فتح
+            </a>
+            ${isOfficeMode ? `
+              <button onclick="deleteCompanyDocument('${d.id}')" style="background: #181D2A; border: 1px solid rgba(239,68,68,0.3); color: #EF4444; padding: 6px 10px; border-radius: 10px; font-size: 11px; cursor: pointer;">
+                ✕
+              </button>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function uploadCompanyDocument() {
+      const customName = document.getElementById('docCustomName').value.trim();
+      const fileInput = document.getElementById('docFileInput');
+      const btn = document.getElementById('btnUploadDoc');
+
+      if (!customName) {
+        showToast("يرجى كتابة اسم تعريفي للمستند أولاً", "⚠️");
+        return;
+      }
+
+      if (!fileInput.files || fileInput.files.length === 0) {
+        showToast("يرجى تحديد ملف أو صورة من جهازك", "⚠️");
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${selectedCompanyId}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+      btn.innerText = "جاري الرفع إلى السحابة...";
+      btn.disabled = true;
+
+      const { data: storageData, error: storageError } = await db.storage
+        .from('documents')
+        .upload(fileName, file);
+
+      if (storageError) {
+        showToast("خطأ في رفع الملف: " + storageError.message, "❌");
+        btn.innerText = "تأكيد الرفع والحفظ بالسحابة";
+        btn.disabled = false;
+        return;
+      }
+
+      const { data: urlData } = db.storage.from('documents').getPublicUrl(fileName);
+      const publicUrl = urlData.publicUrl;
+
+      const { error: dbError } = await db.from('company_documents').insert([{
+        company_id: selectedCompanyId,
+        document_name: customName,
+        file_url: publicUrl
+      }]);
+
+      if (dbError) {
+        showToast("خطأ في تسجيل المستند: " + dbError.message, "❌");
+      } else {
+        showToast("تم حفظ وأرشفة المستند بنجاح 📁");
+        document.getElementById('docCustomName').value = '';
+        document.getElementById('docFileInput').value = '';
+        document.getElementById('selectedFileNameLabel').innerText = '📁 اختر صورة أو ملف من الهاتف';
+        loadCompanyDocuments(selectedCompanyId);
+      }
+
+      btn.innerText = "تأكيد الرفع والحفظ بالسحابة";
+      btn.disabled = false;
+    }
+
+    async function deleteCompanyDocument(docId) {
+      if (confirm("هل تريد بالتأكيد حذف هذا المستند من أرشيف الشركة؟")) {
+        await db.from('company_documents').delete().eq('id', docId);
+        showToast("تم حذف المستند بنجاح 🗑️");
+        loadCompanyDocuments(selectedCompanyId);
+      }
+    }
+
+    function renderActive() {
+      const container = document.getElementById('activeTransactionsList');
+      if (activeTransactions.length === 0) {
+        container.innerHTML = '<div class="lux-card" style="text-align: center; color: var(--text-dim); padding: 40px 20px; font-size: 13px;">لا توجد معاملات جارية حالياً</div>';
+        return;
+      }
+
+      container.innerHTML = activeTransactions.map(tx => {
+        const checklists = tx.transaction_checklists || [];
+        const completedCount = checklists.filter(c => c.is_completed).length;
+        const progressPercent = checklists.length > 0 ? Math.round((completedCount / checklists.length) * 100) : 0;
+
+        const checksHtml = checklists.map(c => `
+          <div style="display: flex; align-items: center; justify-content: space-between; background: #090D15; border: 1px solid rgba(255,255,255,0.04); padding: 9px 12px; border-radius: 14px; margin-bottom: 6px;">
+            <label style="display: flex; align-items: center; gap: 10px; font-size: 12px; color: ${c.is_completed ? '#6B7280' : '#E5E7EB'}; cursor: pointer; flex: 1;">
+              <input type="checkbox" ${c.is_completed ? 'checked' : ''} onchange="toggleCheck('${c.id}', ${!c.is_completed})" style="width: 17px; height: 17px; accent-color: var(--emerald); cursor: pointer;">
+              <span style="${c.is_completed ? 'text-decoration: line-through;' : ''}">${c.item_text}</span>
+            </label>
+            ${isOfficeMode ? `<button onclick="deleteChecklistItem('${c.id}')" style="background: none; border: none; color: #EF4444; font-size: 14px; padding: 2px 6px; cursor: pointer;">✕</button>` : ''}
+          </div>
+        `).join('');
+
+        return `
+          <div class="lux-card" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #182234, #0F1624); border: 1px solid var(--card-border-highlight); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; color: var(--emerald);">
+                  ${(tx.companies?.name || 'ش').slice(0, 2)}
+                </div>
+                <div>
+                  <span style="font-size: 11px; font-weight: 800; color: var(--emerald);">${tx.companies?.name || 'شركة'}</span>
+                  <h3 style="font-size: 15px; font-weight: 900; color: #FFF; margin-top: 1px;">${tx.transaction_type}</h3>
+                </div>
+              </div>
+              <span style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 900; color: var(--gold); background: var(--gold-glow); border: 1px solid rgba(255, 184, 0, 0.3); padding: 5px 12px; border-radius: 100px;">${Number(tx.fee_iqd).toLocaleString('ar-IQ')} د.ع</span>
+            </div>
+
+            <div style="background: #080B12; border: 1px solid var(--card-border); border-radius: 16px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
+                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan);"></span>
+                <span style="font-size: 12px; color: #D1D5DB; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">${tx.current_location_step}</span>
+              </div>
+              <button onclick="openStepModal('${tx.id}', '${tx.current_location_step}')" style="background: #141B2D; border: 1px solid rgba(0, 245, 160, 0.3); color: var(--emerald); padding: 6px 12px; border-radius: 10px; font-size: 11px; font-weight: 800; cursor: pointer;">تحديث</button>
+            </div>
+
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">المتطلبات المنجزة (${completedCount}/${checklists.length})</span>
+                <span style="font-size: 11px; font-weight: 900; color: ${progressPercent === 100 ? 'var(--emerald)' : 'var(--gold)'}; font-family: 'Plus Jakarta Sans', sans-serif;">${progressPercent}%</span>
+              </div>
+              <div class="lux-progress-track"><div class="lux-progress-bar" style="width: ${progressPercent}%;"></div></div>
+            </div>
+
+            <div>
+              ${checksHtml || '<p style="font-size:11px; color:var(--text-dim); padding: 4px 0;">لا توجد متطلبات مسجلة</p>'}
+              <button onclick="openAddChecklistModal('${tx.id}')" style="background: none; border: 1px dashed rgba(255,255,255,0.15); color: var(--emerald); font-size: 11px; font-weight: 800; padding: 9px; border-radius: 12px; margin-top: 6px; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <span>+</span> إضافة متطلب جديد للمعاملة
+              </button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px solid var(--card-border); padding-top: 14px;">
+              <button onclick="shareWA('${tx.id}')" class="btn-lux-secondary" style="padding: 11px;">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                نسخ للواتساب
+              </button>
+              <button onclick="completeTx('${tx.id}')" class="btn-lux-emerald" style="padding: 11px;">
+                إنجاز وأرشفة
+              </button>
+            </div>
+
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openStepModal(id, currentStep) {
+      targetTxIdForStep = id;
+      document.getElementById('customStepInput').value = currentStep;
+      openSheet('stepUpdateModal');
+    }
+
+    function setQuickStep(val) { document.getElementById('customStepInput').value = val; }
+
+    async function confirmStepUpdate() {
+      const step = document.getElementById('customStepInput').value.trim();
+      if (step && targetTxIdForStep) {
+        await db.from('transactions').update({ current_location_step: step }).eq('id', targetTxIdForStep);
+        closeSheet('stepUpdateModal');
+        showToast("تم تحديث المسار الميداني بنجاح 📍");
+        loadData();
+      }
+    }
+
+    function openAddChecklistModal(txId) {
+      targetTxIdForChecklist = txId;
+      document.getElementById('newChecklistInput').value = '';
+      openSheet('addChecklistModal');
+    }
+
+    async function confirmAddChecklistItem() {
+      const text = document.getElementById('newChecklistInput').value.trim();
+      if (text && targetTxIdForChecklist) {
+        await db.from('transaction_checklists').insert([{
+          transaction_id: targetTxIdForChecklist,
+          item_text: text,
+          is_completed: false
+        }]);
+        closeSheet('addChecklistModal');
+        showToast("تمت إضافة المتطلب بنجاح ✅");
+        loadData();
+      }
+    }
+
+    async function deleteChecklistItem(id) {
+      await db.from('transaction_checklists').delete().eq('id', id);
+      showToast("تم حذف المتطلب", "🗑️");
+      loadData();
+    }
+
+    async function saveCompany() {
+      const name = document.getElementById('compName').value.trim();
+      const phone = document.getElementById('compPhone').value.trim();
+      if (!name) return;
+      await db.from('companies').insert([{ name, phone }]);
+      document.getElementById('compName').value = '';
+      document.getElementById('compPhone').value = '';
+      closeSheet('newCompanyModal');
+      showToast("تم تسجيل الشركة بنجاح 🏢");
+      loadData();
+    }
+
+    async function saveTransaction() {
+      const company_id = document.getElementById('txCompanySelect').value;
+      const transaction_type = document.getElementById('txType').value.trim();
+      const fee_iqd = parseFloat(document.getElementById('txFee').value) || 0;
+      const rawChecklist = document.getElementById('txChecklist').value.trim();
+
+      if (!transaction_type) return;
+
+      const { data: tx } = await db.from('transactions').insert([{ company_id, transaction_type, fee_iqd, status: 'in_progress' }]).select().single();
+
+      if (rawChecklist && tx) {
+        const items = rawChecklist.split('\n').filter(i => i.trim() !== '').map(item => ({
+          transaction_id: tx.id,
+          item_text: item.trim(),
+          is_completed: false
+        }));
+        await db.from('transaction_checklists').insert(items);
+      }
+
+      document.getElementById('txType').value = '';
+      document.getElementById('txChecklist').value = '';
+      closeSheet('newTxModal');
+      showToast("تمت المباشرة بالمعاملة 🚀");
+      loadData();
+    }
+
+    async function toggleCheck(id, val) {
+      await db.from('transaction_checklists').update({ is_completed: val }).eq('id', id);
+      loadData();
+    }
+
+    async function completeTx(id) {
+      await db.from('transactions').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', id);
+      showToast("تم إنجاز المعاملة وترحيل أتعابها للأرشيف 💰");
+      loadData();
+    }
+
+    function shareWA(id) {
+      const tx = activeTransactions.find(t => t.id === id);
+      if (!tx) return;
+      const checks = (tx.transaction_checklists || []).map(c => `${c.is_completed ? '✅' : '⏳'} ${c.item_text}`).join('\n');
+      const officeName = localStorage.getItem('office_name') || 'منظومة إدارة المعاملات';
+      const msg = `*موقف معاملة: ${tx.companies?.name}*\n\n`
+                + `📋 *نوع الإجراء:* ${tx.transaction_type}\n`
+                + `📍 *المسار الحالي:* ${tx.current_location_step}\n\n`
+                + `*الموقف الميداني للمتطلبات:*\n${checks || 'لا توجد متطلبات'}\n\n`
+                + `_${officeName}_`;
+      navigator.clipboard.writeText(msg);
+      showToast("تم نسخ تقرير الموقف للواتساب 💬");
+    }
+
+    async function executeGeminiAgent() {
+      const p = document.getElementById('aiPrompt').value.trim();
+      const apiKey = localStorage.getItem('gemini_api_key') || DEFAULT_GEMINI_KEY;
+      const btn = document.getElementById('btnAiExec');
+
+      if (!p) return;
+
+      btn.innerText = "جاري المعالجة...";
+      btn.disabled = true;
+
+      try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{
+                text: `أنت خبير معتمد في شؤون الشركات والمعاملات القانونية والتجارية والضريبية في العراق. أجب باختصار واحترافية وبشكل مباشر على الاستفسار التالي:\n\n${p}`
+              }]
+            }]
+          })
+        });
+
+        const resData = await response.json();
+        if (resData.candidates && resData.candidates[0].content.parts[0].text) {
+          alert("✨ إجابة وتوجيه Gemini Pro:\n\n" + resData.candidates[0].content.parts[0].text);
+        } else {
+          showToast("تعذر جلب الرد من Gemini", "❌");
+        }
+      } catch (err) {
+        showToast("خطأ في الاتصال بالذكاء الاصطناعي", "❌");
+      }
+
+      btn.innerText = "تنفيذ";
+      btn.disabled = false;
+      document.getElementById('aiPrompt').value = '';
+    }
+
+    async function autoSuggestChecklistWithAI() {
+      const txType = document.getElementById('txType').value.trim();
+      const apiKey = localStorage.getItem('gemini_api_key') || DEFAULT_GEMINI_KEY;
+
+      if (!txType) {
+        showToast("اكتب نوع المعاملة أولاً ليقترح الذكاء الاصطناعي متطلباتها", "⚠️");
+        return;
+      }
+
+      showToast("جاري استخراج المتطلبات الرسمية بالذكاء الاصطناعي... ⏳");
+
+      try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{
+                text: `أعطني قائمة نقطية بمتطلبات وإجراءات المعاملة التالية في الدوائر الرسمية العراقية: (${txType}). اكتب فقط المتطلبات مباشرة، كل متطلب في سطر مستقل بدون مقدمات أو خاتمة وبدون أرقام أو رموز.`
+              }]
+            }]
+          })
+        });
+
+        const resData = await response.json();
+        if (resData.candidates && resData.candidates[0].content.parts[0].text) {
+          const suggestions = resData.candidates[0].content.parts[0].text.trim();
+          document.getElementById('txChecklist').value = suggestions;
+          showToast("تم توليد المتطلبات بنجاح ✨");
+        }
+      } catch (err) {
+        showToast("تعذر استخراج المتطلبات", "❌");
+      }
+    }
+
+    function renderAccounts(all) {
+      const tot = all.reduce((s, t) => s + (Number(t.fee_iqd) || 0), 0);
+      document.getElementById('totalRevenue').innerText = `${tot.toLocaleString('ar-IQ')} د.ع`;
+      document.getElementById('accountsList').innerHTML = all.map(t => `
+        <div class="lux-card" style="padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <p style="font-size: 13px; font-weight: 800; color: #FFF;">${t.companies?.name || 'شركة'}</p>
+            <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">${t.transaction_type} • <span style="color: ${t.status === 'completed' ? 'var(--emerald)' : 'var(--gold)'}">${t.status === 'completed' ? 'منجزة ومحصلة' : 'قيد الإنجاز'}</span></p>
+          </div>
+          <span style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 800; color: var(--emerald);">${Number(t.fee_iqd).toLocaleString('ar-IQ')} د.ع</span>
+        </div>
+      `).join('');
+    }
+
+    function renderArchive(arch) {
+      document.getElementById('archivedList').innerHTML = arch.length === 0 
+        ? '<div class="lux-card" style="text-align: center; color: var(--text-dim); padding: 30px; font-size: 12px;">الأرشيف فارغ حالياً</div>'
+        : arch.map(t => `
+          <div class="lux-card" style="padding: 16px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <p style="font-size: 13px; font-weight: 800; color: #FFF;">${t.companies?.name} - ${t.transaction_type}</p>
+              <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">أرشفت بتاريخ: ${t.completed_at ? new Date(t.completed_at).toLocaleDateString('ar-IQ') : 'مؤخراً'}</p>
+            </div>
+            <span style="font-size: 11px; font-weight: 800; color: var(--emerald); background: rgba(0, 245, 160, 0.1); border: 1px solid rgba(0, 245, 160, 0.2); padding: 3px 8px; border-radius: 8px;">مؤرشفة</span>
+          </div>
+        `).join('');
+    }
+
+    function updateNotifications() {
+      const list = document.getElementById('notificationsList');
+      const badge = document.getElementById('notifBadge');
+      const countText = document.getElementById('notifCountText');
+      list.innerHTML = '';
+      
+      let alerts = [];
+      activeTransactions.forEach(t => {
+        alerts.push({
+          title: `معاملة جارية: ${t.companies?.name || 'شركة'}`,
+          desc: `الموقع: ${t.current_location_step} (${t.transaction_type})`
+        });
+      });
+
+      if (alerts.length > 0) {
+        badge.style.display = 'block';
+        countText.innerText = `${alerts.length} تنبيهات`;
+        list.innerHTML = alerts.map(a => `
+          <div style="background: #080B12; border: 1px solid var(--card-border); padding: 12px 14px; border-radius: 14px; display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 16px;">⏳</span>
+            <div>
+              <p style="font-size: 12px; font-weight: 800; color: #FFF;">${a.title}</p>
+              <p style="font-size: 10px; color: var(--text-muted); margin-top: 1px;">${a.desc}</p>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        badge.style.display = 'none';
+        countText.innerText = 'لا توجد تنبيهات';
+        list.innerHTML = '<p style="text-align:center; font-size:12px; color:var(--text-dim); padding:20px;">كافة المعاملات مستقرة ومحدثة ✅</p>';
+      }
+    }
+
+    function openPDFPreviewModal() {
+      const officeName = localStorage.getItem('office_name') || 'مكتب إنجاز المعاملات الرسمية';
+      const officePhone = localStorage.getItem('office_phone') || 'هاتف: 07800000000 | بغداد';
+      
+      document.getElementById('pdfRepOfficeName').innerText = officeName;
+      document.getElementById('pdfRepOfficePhone').innerText = officePhone;
+      document.getElementById('pdfRepDate').innerText = new Date().toLocaleDateString('ar-IQ', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+      const tbody = document.getElementById('pdfTableBody');
+      tbody.innerHTML = allTransactionsGlobal.map(t => `
+        <tr style="border-bottom: 1px solid #E5E7EB;">
+          <td style="padding: 8px 6px; font-weight: 700;">${t.companies?.name || 'شركة'}</td>
+          <td style="padding: 8px 6px; color: #4B5563;">${t.transaction_type} (${t.status === 'completed' ? 'منجزة' : 'جارية'})</td>
+          <td style="padding: 8px 6px; text-align: left; font-weight: 700;">${Number(t.fee_iqd).toLocaleString('ar-IQ')} د.ع</td>
+        </tr>
+      `).join('');
+
+      const total = allTransactionsGlobal.reduce((s, t) => s + (Number(t.fee_iqd) || 0), 0);
+      document.getElementById('pdfTotalRevenue').innerText = `${total.toLocaleString('ar-IQ')} دينار عراقي`;
+
+      openSheet('pdfModal');
+    }
+
+    function printOfficialReport() { window.print(); }
+
+    function saveSettings() {
+      const name = document.getElementById('setOfficeName').value.trim();
+      const phone = document.getElementById('setOfficePhone').value.trim();
+      const addr = document.getElementById('setOfficeAddress').value.trim();
+
+      if (name) localStorage.setItem('office_name', name);
+      if (phone) localStorage.setItem('office_phone', phone);
+      if (addr) localStorage.setItem('office_addr', addr);
+
+      document.getElementById('headerOfficeName').innerText = name || 'منظومة المعاملات';
+      showToast("تم حفظ الإعدادات بنجاح ⚙️");
+    }
+
+    function loadSettings() {
+      const name = localStorage.getItem('office_name');
+      const phone = localStorage.getItem('office_phone');
+      const addr = localStorage.getItem('office_addr');
+
+      if (name) {
+        document.getElementById('setOfficeName').value = name;
+        document.getElementById('headerOfficeName').innerText = name;
+      }
+      if (phone) document.getElementById('setOfficePhone').value = phone;
+      if (addr) document.getElementById('setOfficeAddress').value = addr;
+    }
+
+    loadSettings();
+    checkAuthSession();
+  </script>
+</body>
+</html>
