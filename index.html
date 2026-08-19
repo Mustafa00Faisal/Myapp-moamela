@@ -3,92 +3,226 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>منظومة إدارة المعاملات الملكية</title>
+  <title>منظومة الإدارة السيادية والمعاملات</title>
   
-  <!-- المكتبات السحابية والخطوط الرسمية الفاخرة -->
+  <!-- خطوط النخبة والمكتبات السحابية -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
   
   <style>
     :root {
-      --bg: #030407;
-      --bg-gradient: radial-gradient(circle at 50% 0%, #0D1322 0%, #030407 70%);
-      --card: rgba(13, 17, 26, 0.72);
-      --card-solid: #0A0E17;
-      --card-border: rgba(229, 195, 120, 0.14);
-      --card-border-highlight: rgba(255, 255, 255, 0.18);
-      --champagne: #E5C378;
-      --champagne-light: #F7E7BE;
-      --champagne-deep: #B38E3F;
-      --champagne-glow: rgba(229, 195, 120, 0.22);
-      --emerald: #00F5A0;
-      --emerald-glow: rgba(0, 245, 160, 0.25);
-      --cyan: #38BDF8;
-      --cyan-glow: rgba(56, 189, 248, 0.2);
-      --purple: #C084FC;
-      --purple-glow: rgba(192, 132, 252, 0.2);
-      --danger: #FB7185;
-      --text: #F8FAFC;
+      --bg-base: #030408;
+      --surface-glass: rgba(13, 17, 27, 0.65);
+      --surface-glass-heavy: rgba(8, 11, 19, 0.88);
+      --surface-elevated: rgba(22, 29, 46, 0.55);
+      
+      --border-subtle: rgba(255, 255, 255, 0.07);
+      --border-champagne: rgba(229, 195, 120, 0.22);
+      --border-champagne-glow: rgba(229, 195, 120, 0.45);
+      
+      --gold-primary: #F3E5AB;
+      --gold-core: #E5C378;
+      --gold-dark: #A88133;
+      --gold-glow: rgba(229, 195, 120, 0.25);
+      
+      --emerald-neon: #00F5A0;
+      --emerald-glow: rgba(0, 245, 160, 0.3);
+      --cyan-neon: #38BDF8;
+      --cyan-glow: rgba(56, 189, 248, 0.25);
+      --danger-neon: #FB7185;
+      
+      --text-main: #FFFFFF;
       --text-muted: #94A3B8;
-      --text-dim: #475569;
+      --text-dim: #4B5563;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background: var(--bg); background-image: var(--bg-gradient); color: var(--text); min-height: 100vh; padding-bottom: 110px; overflow-x: hidden; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Tajawal', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-    /* النمط الزجاجي الانكساري الفاخر (VisionOS Glass) */
-    .lux-card {
-      background: var(--card);
-      border: 1px solid var(--card-border);
-      box-shadow: inset 0 1px 0 var(--card-border-highlight), 0 20px 40px -15px rgba(0,0,0,0.85);
-      border-radius: 24px;
-      backdrop-filter: blur(28px);
-      -webkit-backdrop-filter: blur(28px);
+    body {
+      background-color: var(--bg-base);
+      background-image: 
+        radial-gradient(circle at 15% 0%, rgba(229, 195, 120, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 85% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 50% 100%, rgba(0, 245, 160, 0.06) 0%, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      min-height: 100vh;
+      padding-bottom: 120px;
+      overflow-x: hidden;
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    }
+
+    /* تأثيرات الزجاج الانكساري الفاخر */
+    .lux-glass-panel {
+      background: var(--surface-glass);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid var(--border-champagne);
+      border-radius: 28px;
+      box-shadow: 
+        0 30px 60px -15px rgba(0, 0, 0, 0.85),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.4);
       position: relative;
-      transition: border-color 0.3s ease;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .lux-glass-panel:hover {
+      border-color: var(--border-champagne-glow);
     }
 
     .lux-input {
-      background: rgba(5, 7, 12, 0.8);
-      border: 1px solid rgba(255, 255, 255, 0.09);
-      border-radius: 16px;
+      background: rgba(5, 7, 13, 0.75);
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px;
       color: #FFF;
-      padding: 13px 16px;
+      padding: 14px 18px;
       font-size: 13px;
       outline: none;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.6);
     }
     .lux-input:focus {
-      border-color: var(--champagne);
-      box-shadow: 0 0 0 3px var(--champagne-glow), inset 0 1px 2px rgba(0,0,0,0.5);
-      background: rgba(8, 12, 20, 0.95);
+      border-color: var(--gold-core);
+      box-shadow: 0 0 0 4px var(--gold-glow), inset 0 1px 2px rgba(0,0,0,0.8);
+      background: rgba(10, 14, 24, 0.95);
     }
 
+    /* أزرار السبيكة الذهبية والتيتانيوم */
+    .btn-gold {
+      background: linear-gradient(135deg, #F9F1D2 0%, #E5C378 45%, #9E792D 100%);
+      color: #04060A;
+      border: none;
+      border-radius: 18px;
+      font-weight: 900;
+      font-size: 13px;
+      padding: 14px 18px;
+      box-shadow: 0 10px 30px var(--gold-glow), inset 0 1px 1px rgba(255,255,255,0.8);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.25s ease;
+    }
+    .btn-gold:active { transform: scale(0.96); filter: brightness(0.95); }
+
+    .btn-secondary {
+      background: linear-gradient(180deg, rgba(26, 35, 54, 0.6) 0%, rgba(13, 19, 31, 0.7) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #FFF;
+      border-radius: 18px;
+      font-weight: 800;
+      font-size: 13px;
+      padding: 14px 18px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 8px 20px rgba(0,0,0,0.4);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.25s ease;
+    }
+    .btn-secondary:active { transform: scale(0.96); }
+
+    .btn-emerald {
+      background: linear-gradient(135deg, #00F5A0 0%, #009E67 100%);
+      color: #02180F;
+      border: none;
+      border-radius: 18px;
+      font-weight: 900;
+      font-size: 13px;
+      padding: 14px 18px;
+      box-shadow: 0 10px 25px var(--emerald-glow), inset 0 1px 1px rgba(255,255,255,0.6);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.25s ease;
+    }
+    .btn-emerald:active { transform: scale(0.96); }
+
+    .btn-cyan {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.2) 0%, rgba(14, 116, 144, 0.35) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #E0F2FE;
+      border-radius: 14px;
+      font-weight: 800;
+      font-size: 11px;
+      padding: 9px 14px;
+      box-shadow: 0 6px 20px var(--cyan-glow);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-cyan:active { transform: scale(0.96); }
+
+    .btn-purple {
+      background: linear-gradient(135deg, rgba(192, 132, 252, 0.2) 0%, rgba(126, 34, 206, 0.35) 100%);
+      border: 1px solid rgba(192, 132, 252, 0.4);
+      color: #F3E8FF;
+      border-radius: 14px;
+      font-weight: 800;
+      font-size: 11px;
+      padding: 9px 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-purple:active { transform: scale(0.96); }
+
+    .btn-danger {
+      background: linear-gradient(180deg, rgba(251, 113, 133, 0.15) 0%, rgba(159, 18, 57, 0.25) 100%);
+      border: 1px solid rgba(251, 113, 133, 0.35);
+      color: #FDA4AF;
+      border-radius: 18px;
+      font-weight: 800;
+      font-size: 13px;
+      padding: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    /* شريط البحث المطور */
     .search-box-wrapper {
       position: relative;
       display: flex;
       align-items: center;
     }
     .search-box-wrapper input {
-      padding-right: 44px;
-      padding-left: 36px;
+      padding-right: 48px;
+      padding-left: 40px;
       width: 100%;
-      background: rgba(10, 14, 24, 0.85);
-      border-color: rgba(229, 195, 120, 0.2);
-      font-weight: 500;
+      background: rgba(10, 14, 25, 0.7);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(229, 195, 120, 0.2);
+      font-weight: 600;
+      border-radius: 20px;
     }
     .search-box-wrapper .search-icon {
       position: absolute;
-      right: 14px;
-      color: var(--champagne);
+      right: 18px;
+      color: var(--gold-core);
       pointer-events: none;
     }
     .search-box-wrapper .clear-btn {
       position: absolute;
-      left: 12px;
+      left: 14px;
       background: transparent;
       border: none;
       color: var(--text-dim);
@@ -97,306 +231,57 @@
       display: none;
     }
 
-    /* أزرار التيتانيوم وذهب الشامبانيا */
-    .btn-lux-champagne {
-      background: linear-gradient(135deg, #F3E5AB 0%, #E5C378 50%, #B38E3F 100%);
-      color: #05070B;
-      border: none;
-      border-radius: 16px;
-      font-weight: 900;
-      font-size: 13px;
-      padding: 13px;
-      box-shadow: inset 0 1px 1px rgba(255,255,255,0.6), 0 8px 25px var(--champagne-glow);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.2s;
-    }
-    .btn-lux-champagne:active { transform: scale(0.97); }
-
-    .btn-lux-emerald {
-      background: linear-gradient(135deg, #00F5A0 0%, #00B074 100%);
-      color: #03150D;
-      border: none;
-      border-radius: 16px;
-      font-weight: 900;
-      font-size: 13px;
-      padding: 13px;
-      box-shadow: inset 0 1px 1px rgba(255,255,255,0.4), 0 8px 25px var(--emerald-glow);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.2s;
-    }
-    .btn-lux-emerald:active { transform: scale(0.97); }
-
-    .btn-lux-secondary {
-      background: linear-gradient(180deg, rgba(24, 32, 48, 0.7) 0%, rgba(13, 18, 28, 0.8) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: var(--text);
-      border-radius: 16px;
-      font-weight: 800;
-      font-size: 13px;
-      padding: 13px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .btn-lux-secondary:active { transform: scale(0.97); }
-
-    .btn-lux-danger {
-      background: linear-gradient(180deg, rgba(251, 113, 133, 0.12) 0%, rgba(159, 18, 57, 0.2) 100%);
-      border: 1px solid rgba(251, 113, 133, 0.35);
-      color: #FDA4AF;
-      border-radius: 16px;
-      font-weight: 800;
-      font-size: 13px;
-      padding: 13px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .btn-lux-danger:active { transform: scale(0.97); }
-
-    .btn-lux-cyan {
-      background: linear-gradient(135deg, rgba(56, 189, 248, 0.2) 0%, rgba(14, 116, 144, 0.3) 100%);
-      border: 1px solid rgba(56, 189, 248, 0.4);
-      color: #BAE6FD;
-      border-radius: 16px;
-      font-weight: 900;
-      font-size: 12px;
-      padding: 10px 12px;
-      box-shadow: 0 4px 20px var(--cyan-glow);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-    .btn-lux-cyan:active { transform: scale(0.97); }
-
-    .btn-lux-purple {
-      background: linear-gradient(135deg, rgba(192, 132, 252, 0.2) 0%, rgba(109, 40, 217, 0.3) 100%);
-      border: 1px solid rgba(192, 132, 252, 0.4);
-      color: #E9D5FF;
-      border-radius: 16px;
-      font-weight: 900;
-      font-size: 12px;
-      padding: 10px 12px;
-      box-shadow: 0 4px 20px var(--purple-glow);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-    .btn-lux-purple:active { transform: scale(0.97); }
-
-    .segment-switch {
-      background: #060911;
-      border: 1px solid rgba(229, 195, 120, 0.18);
-      border-radius: 100px;
-      padding: 4px;
-      display: flex;
-    }
-    .segment-btn {
-      flex: 1;
-      border: none;
-      background: transparent;
-      color: var(--text-muted);
-      font-size: 11px;
-      font-weight: 800;
-      padding: 6px 12px;
-      border-radius: 100px;
-      cursor: pointer;
-      transition: all 0.25s;
-    }
-    .segment-btn.active {
-      background: linear-gradient(135deg, #1F283D, #121826);
-      color: var(--champagne-light);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-      border: 1px solid rgba(229, 195, 120, 0.3);
-    }
-
-    .lux-progress-track {
-      height: 5px;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.06);
-      overflow: hidden;
-    }
-    .lux-progress-bar {
-      height: 100%;
-      background: linear-gradient(90deg, #E5C378 0%, #00F5A0 100%);
-      box-shadow: 0 0 10px var(--emerald);
-      transition: width 0.4s ease;
-    }
-
+    /* مؤشرات الركود المتوهجة */
     .stale-badge {
       display: inline-flex;
       align-items: center;
       gap: 5px;
       font-size: 10px;
       font-weight: 800;
-      padding: 3px 8px;
-      border-radius: 8px;
+      padding: 3px 9px;
+      border-radius: 100px;
     }
     .stale-badge.urgent {
-      background: rgba(251, 113, 133, 0.15);
+      background: rgba(251, 113, 133, 0.18);
       color: #FDA4AF;
-      border: 1px solid rgba(251, 113, 133, 0.3);
-      animation: pulseAlert 1.8s infinite;
+      border: 1px solid rgba(251, 113, 133, 0.4);
+      animation: alertPulse 1.6s infinite ease-in-out;
     }
     .stale-badge.warn {
-      background: rgba(229, 195, 120, 0.15);
-      color: var(--champagne);
-      border: 1px solid rgba(229, 195, 120, 0.3);
+      background: rgba(229, 195, 120, 0.16);
+      color: var(--gold-primary);
+      border: 1px solid rgba(229, 195, 120, 0.35);
     }
     .stale-badge.fresh {
-      background: rgba(0, 245, 160, 0.1);
-      color: var(--emerald);
-      border: 1px solid rgba(0, 245, 160, 0.2);
+      background: rgba(0, 245, 160, 0.12);
+      color: var(--emerald-neon);
+      border: 1px solid rgba(0, 245, 160, 0.25);
     }
 
-    @keyframes pulseAlert {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.6; }
+    @keyframes alertPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.65; transform: scale(0.97); }
     }
 
-    .timeline-container {
-      position: relative;
-      padding-right: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 10px;
-    }
-    .timeline-container::before {
-      content: '';
-      position: absolute;
-      right: 5px;
-      top: 6px;
-      bottom: 6px;
-      width: 2px;
-      background: rgba(255, 255, 255, 0.1);
-    }
-    .timeline-item {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .timeline-item::before {
-      content: '';
-      position: absolute;
-      right: -17px;
-      top: 5px;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--text-dim);
-      border: 2px solid var(--bg);
-    }
-    .timeline-item.active::before {
-      background: var(--champagne);
-      box-shadow: 0 0 10px var(--champagne);
-    }
-
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-    .kpi-card {
-      background: rgba(8, 12, 20, 0.85);
-      border: 1px solid rgba(229, 195, 120, 0.14);
-      border-radius: 18px;
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-    }
-
-    .sheet-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.88);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      z-index: 1000;
-      display: none;
-      align-items: flex-end;
-      justify-content: center;
-      animation: sheetFade 0.2s ease-out;
-    }
-    .sheet-container {
-      background: linear-gradient(180deg, #101625 0%, #05070D 100%);
-      border: 1px solid var(--card-border-highlight);
-      border-radius: 32px 32px 0 0;
-      width: 100%;
-      max-width: 480px;
-      padding: 24px 20px 32px;
-      box-shadow: 0 -20px 60px rgba(0,0,0,0.9);
-      animation: sheetSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-    .sheet-handle { width: 40px; height: 4px; background: rgba(229, 195, 120, 0.3); border-radius: 100px; margin: 0 auto 18px; }
-
-    .center-modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.88);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      z-index: 1100;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      animation: sheetFade 0.2s ease-out;
-    }
-    .center-modal-card {
-      background: linear-gradient(180deg, #111828 0%, #070A12 100%);
-      border: 1px solid rgba(229, 195, 120, 0.25);
-      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.95), 0 0 30px rgba(229, 195, 120, 0.08);
-      border-radius: 26px;
-      width: 100%;
-      max-width: 380px;
-      padding: 24px 20px;
-      animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    @keyframes sheetFade { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes sheetSlide { from { transform: translateY(100%); } to { transform: translateY(0); } }
-    @keyframes modalPop { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
-
-    /* شريط الملاحة المعلق الفاخر (Floating Obsidian Dock) */
+    /* شريط الملاحة المعلق الكبسولي */
     .dock-nav {
       position: fixed;
-      bottom: 18px;
-      left: 12px;
-      right: 12px;
-      max-width: 470px;
+      bottom: 20px;
+      left: 14px;
+      right: 14px;
+      max-width: 480px;
       margin: 0 auto;
-      background: rgba(8, 12, 20, 0.88);
-      border: 1px solid rgba(229, 195, 120, 0.2);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.15);
+      background: rgba(9, 13, 22, 0.82);
+      border: 1px solid var(--border-champagne);
+      box-shadow: 
+        0 25px 50px -10px rgba(0, 0, 0, 0.9),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18);
       border-radius: 100px;
-      backdrop-filter: blur(30px);
-      -webkit-backdrop-filter: blur(30px);
+      backdrop-filter: blur(32px) saturate(200%);
+      -webkit-backdrop-filter: blur(32px) saturate(200%);
       display: flex;
       justify-content: space-around;
-      padding: 8px 4px;
+      padding: 8px 6px;
       z-index: 100;
     }
     .dock-btn {
@@ -409,73 +294,147 @@
       color: var(--text-dim);
       font-size: 9px;
       font-weight: 800;
-      padding: 6px 8px;
+      padding: 7px 10px;
       border-radius: 100px;
       cursor: pointer;
-      transition: all 0.25s;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .dock-btn.active {
       color: #FFF;
-      background: linear-gradient(135deg, rgba(229, 195, 120, 0.18), rgba(56, 189, 248, 0.15));
-      border: 1px solid rgba(229, 195, 120, 0.35);
+      background: linear-gradient(135deg, rgba(229, 195, 120, 0.22), rgba(56, 189, 248, 0.18));
+      border: 1px solid rgba(229, 195, 120, 0.4);
+      box-shadow: 0 4px 15px rgba(229, 195, 120, 0.15);
     }
-    .dock-btn.active svg { stroke: var(--champagne); }
+    .dock-btn.active svg { stroke: var(--gold-core); }
+
+    /* Bento KPI Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .kpi-card {
+      background: rgba(11, 15, 25, 0.7);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-champagne);
+      border-radius: 22px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    /* شريط التقدم الفاخر */
+    .lux-progress-track {
+      height: 6px;
+      border-radius: 100px;
+      background: rgba(255, 255, 255, 0.06);
+      overflow: hidden;
+    }
+    .lux-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #E5C378 0%, #00F5A0 100%);
+      box-shadow: 0 0 12px var(--emerald-neon);
+      transition: width 0.5s ease;
+    }
+
+    /* المودال والبطاقات المنبثقة */
+    .sheet-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      z-index: 1000;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .sheet-container {
+      background: linear-gradient(180deg, #121828 0%, #06080F 100%);
+      border: 1px solid rgba(229, 195, 120, 0.25);
+      border-radius: 36px 36px 0 0;
+      width: 100%;
+      max-width: 480px;
+      padding: 24px 20px 36px;
+      box-shadow: 0 -25px 70px rgba(0,0,0,0.95);
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: sheetUp 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .sheet-handle { width: 44px; height: 5px; background: rgba(229, 195, 120, 0.35); border-radius: 100px; margin: 0 auto 20px; }
+
+    .center-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.88);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      z-index: 1100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .center-modal-card {
+      background: linear-gradient(180deg, #131A2B 0%, #080A12 100%);
+      border: 1px solid var(--border-champagne-glow);
+      box-shadow: 0 30px 60px -15px rgba(0,0,0,0.95), 0 0 40px rgba(229, 195, 120, 0.12);
+      border-radius: 30px;
+      width: 100%;
+      max-width: 390px;
+      padding: 26px 22px;
+      animation: modalPop 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    @keyframes modalPop { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
 
     #toast {
       position: fixed;
-      top: 18px;
+      top: 20px;
       left: 50%;
-      transform: translateX(-50%) translateY(-80px);
-      background: rgba(10, 14, 24, 0.95);
-      border: 1px solid var(--champagne);
-      box-shadow: 0 15px 35px rgba(0,0,0,0.8), 0 0 25px var(--champagne-glow);
+      transform: translateX(-50%) translateY(-90px);
+      background: rgba(12, 17, 28, 0.95);
+      border: 1px solid var(--gold-core);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.9), 0 0 30px var(--gold-glow);
       color: #FFF;
-      padding: 10px 22px;
+      padding: 12px 24px;
       border-radius: 100px;
       font-size: 12px;
       font-weight: 800;
       z-index: 9999;
       display: flex;
       align-items: center;
-      gap: 8px;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      gap: 10px;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
       opacity: 0;
       pointer-events: none;
     }
     #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-    #authOverlay {
-      position: fixed;
-      inset: 0;
-      background: var(--bg);
-      z-index: 2000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
     @media print {
       body * { visibility: hidden; }
       #printableReceiptArea, #printableReceiptArea *, #printableWeeklyArea, #printableWeeklyArea *, #printableCustomArea, #printableCustomArea * { visibility: visible; }
-      #printableReceiptArea, #printableWeeklyArea, #printableCustomArea { position: absolute; left: 0; top: 0; width: 100%; color: #000; background: #fff; padding: 20px; font-family: 'Tajawal', sans-serif; }
+      #printableReceiptArea, #printableWeeklyArea, #printableCustomArea { position: absolute; left: 0; top: 0; width: 100%; color: #000; background: #fff; padding: 20px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- شاشة الدخول -->
-  <div id="authOverlay">
-    <div class="lux-card" style="width: 100%; max-width: 380px; padding: 32px 24px; display: flex; flex-direction: column; gap: 20px; border-color: rgba(229,195,120,0.3);">
+  <!-- شاشة الدخول السيادية -->
+  <div id="authOverlay" style="position: fixed; inset: 0; background: var(--bg-base); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px;">
+    <div class="lux-glass-panel" style="width: 100%; max-width: 390px; padding: 36px 26px; display: flex; flex-direction: column; gap: 22px;">
       <div style="text-align: center;">
-        <div style="width: 48px; height: 48px; border-radius: 16px; background: linear-gradient(135deg, #F3E5AB, #B38E3F); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; box-shadow: 0 8px 25px var(--champagne-glow);">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#030508" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        <div style="width: 54px; height: 54px; border-radius: 20px; background: linear-gradient(135deg, #F9F1D2, #A88133); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; box-shadow: 0 10px 30px var(--gold-glow);">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#04060A" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
         </div>
-        <h2 style="font-size: 19px; font-weight: 900; color: #FFF; letter-spacing: -0.3px;">منظومة المعاملات</h2>
-        <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">تسجيل الدخول للنظام السحابي الشامل</p>
+        <h2 style="font-size: 20px; font-weight: 900; color: #FFF; letter-spacing: -0.3px;">منظومة المعاملات السيادية</h2>
+        <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">النظام السحابي الاحترافي لإدارة المعاملات الميدانية</p>
       </div>
 
-      <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="display: flex; flex-direction: column; gap: 14px;">
         <div>
           <label style="font-size: 11px; color: var(--text-muted); font-weight: 700;">البريد الإلكتروني</label>
           <input id="loginEmail" type="email" placeholder="name@example.com" class="lux-input" style="width: 100%; margin-top: 4px;" dir="ltr">
@@ -484,8 +443,8 @@
           <label style="font-size: 11px; color: var(--text-muted); font-weight: 700;">كلمة المرور</label>
           <input id="loginPassword" type="password" placeholder="••••••••" class="lux-input" style="width: 100%; margin-top: 4px;" dir="ltr">
         </div>
-        <button onclick="handleLogin()" id="btnLogin" class="btn-lux-champagne" style="width: 100%; margin-top: 8px;">
-          تسجيل الدخول
+        <button onclick="handleLogin()" id="btnLogin" class="btn-gold" style="width: 100%; margin-top: 8px;">
+          تسجيل الدخول للنظام
         </button>
       </div>
     </div>
@@ -493,54 +452,54 @@
 
   <div id="toast">
     <span id="toastIcon">✨</span>
-    <span id="toastMsg">تم بنجاح</span>
+    <span id="toastMsg">تم الإجراء بنجاح</span>
   </div>
 
-  <!-- رأس التطبيق الملكي -->
-  <header style="position: sticky; top: 0; z-index: 50; background: rgba(3, 5, 8, 0.88); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-bottom: 1px solid rgba(229,195,120,0.12); padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;">
-    <div style="display: flex; align-items: center; gap: 10px;">
-      <div style="width: 36px; height: 36px; border-radius: 12px; background: linear-gradient(135deg, #F3E5AB, #B38E3F); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px var(--champagne-glow);">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#030508" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+  <!-- رأس التطبيق الملكي العائم -->
+  <header style="position: sticky; top: 0; z-index: 50; background: rgba(3, 5, 10, 0.82); backdrop-filter: blur(25px); border-bottom: 1px solid var(--border-champagne); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <div style="width: 38px; height: 38px; border-radius: 14px; background: linear-gradient(135deg, #F9F1D2, #A88133); display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px var(--gold-glow);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#04060A" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
       </div>
       <div>
-        <h1 id="headerOfficeName" style="font-size: 15px; font-weight: 900; letter-spacing: -0.3px; color: #FFF;">منظومة المعاملات</h1>
-        <div style="display: flex; align-items: center; gap: 5px; margin-top: 1px;">
-          <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--emerald); box-shadow: 0 0 8px var(--emerald);"></span>
+        <h1 id="headerOfficeName" style="font-size: 15px; font-weight: 900; color: #FFF;">منظومة المعاملات</h1>
+        <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
+          <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--emerald-neon); box-shadow: 0 0 10px var(--emerald-neon);"></span>
           <span id="userStatusLabel" style="font-size: 10px; color: var(--text-muted); font-weight: 700;">سحابي متصل</span>
         </div>
       </div>
     </div>
 
-    <div style="display: flex; align-items: center; gap: 8px;">
-      <button onclick="openSheet('notificationsModal')" style="background: rgba(16, 22, 36, 0.8); border: 1px solid rgba(229,195,120,0.15); color: #FFF; width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer;">
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-        <span id="notifBadge" style="position: absolute; top: -3px; right: -3px; width: 10px; height: 10px; background: #EF4444; border-radius: 50%; border: 2px solid #030508; display: none;"></span>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <button onclick="openSheet('notificationsModal')" style="background: rgba(18, 25, 42, 0.8); border: 1px solid var(--border-champagne); color: #FFF; width: 38px; height: 38px; border-radius: 14px; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer;">
+        <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+        <span id="notifBadge" style="position: absolute; top: -2px; right: -2px; width: 10px; height: 10px; background: #EF4444; border-radius: 50%; border: 2px solid #030508; display: none;"></span>
       </button>
 
-      <div class="segment-switch">
-        <button onclick="setRole(true)" id="roleOffice" class="segment-btn active">المكتب</button>
-        <button onclick="setRole(false)" id="roleField" class="segment-btn">الميدان</button>
+      <div style="background: #070A12; border: 1px solid var(--border-champagne); border-radius: 100px; padding: 4px; display: flex;">
+        <button onclick="setRole(true)" id="roleOffice" style="border: none; background: linear-gradient(135deg, #1F283D, #121826); color: var(--gold-primary); font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 100px; cursor: pointer; border: 1px solid rgba(229,195,120,0.3);">المكتب</button>
+        <button onclick="setRole(false)" id="roleField" style="border: none; background: transparent; color: var(--text-muted); font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 100px; cursor: pointer;">الميدان</button>
       </div>
     </div>
   </header>
 
-  <main style="max-width: 480px; margin: 0 auto; padding: 18px; display: flex; flex-direction: column; gap: 18px;">
+  <main style="max-width: 480px; margin: 0 auto; padding: 20px 16px; display: flex; flex-direction: column; gap: 20px;">
 
-    <!-- شريط البحث الفوري الاحترافي -->
+    <!-- شريط البحث الفوري التفاعلي -->
     <div class="search-box-wrapper">
-      <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+      <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
       <input id="globalSearchInput" type="text" placeholder="ابحث عن شركة، معاملة، دائرة، أو رخصة..." class="lux-input" oninput="handleGlobalSearch(this.value)">
       <button id="clearSearchBtn" class="clear-btn" onclick="clearGlobalSearch()">✕</button>
     </div>
 
     <!-- تبويب 1: المعاملات الميدانية -->
-    <div id="tab-transactions" style="display: flex; flex-direction: column; gap: 18px;">
+    <div id="tab-transactions" style="display: flex; flex-direction: column; gap: 20px;">
       <div id="adminActionButtons" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-        <button onclick="openSheet('newCompanyModal')" class="btn-lux-champagne">
+        <button onclick="openSheet('newCompanyModal')" class="btn-gold">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
           شركة جديدة
         </button>
-        <button onclick="openSheet('newTxModal')" class="btn-lux-secondary">
+        <button onclick="openSheet('newTxModal')" class="btn-secondary">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
           بدء معاملة
         </button>
@@ -548,113 +507,112 @@
 
       <!-- دليل الشركات الموثقة -->
       <section id="companiesSection">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 4px;">
-          <span style="font-size: 12px; font-weight: 900; color: var(--champagne); text-transform: uppercase; letter-spacing: 0.5px;">دليل الشركات الموثقة</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px;">
+          <span style="font-size: 12px; font-weight: 900; color: var(--gold-core); letter-spacing: 0.5px;">دليل الشركات الموثقة</span>
           <span id="companiesCount" style="font-size: 11px; font-weight: 700; color: var(--text-dim); font-family: monospace;">0 مسجلة</span>
         </div>
-        <div id="companiesList" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none;"></div>
+        <div id="companiesList" style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none;"></div>
       </section>
 
       <!-- المعاملات النشطة -->
       <section>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px;">
-          <span style="font-size: 12px; font-weight: 900; color: var(--text-muted); text-transform: uppercase;">المعاملات النشطة</span>
-          <span id="activeCountBadge" style="font-size: 11px; font-weight: 800; color: var(--champagne); background: var(--champagne-glow); border: 1px solid rgba(229,195,120,0.3); padding: 3px 10px; border-radius: 100px;">0 جارية</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding: 0 4px;">
+          <span style="font-size: 12px; font-weight: 900; color: var(--text-muted);">المعاملات الجارية</span>
+          <span id="activeCountBadge" style="font-size: 11px; font-weight: 800; color: var(--gold-primary); background: var(--gold-glow); border: 1px solid rgba(229,195,120,0.3); padding: 3px 12px; border-radius: 100px;">0 جارية</span>
         </div>
         <div id="activeTransactionsList" style="display: flex; flex-direction: column; gap: 16px;"></div>
       </section>
     </div>
 
-    <!-- تبويب 2: الموجّه الميداني اليومي (Route Planner) -->
+    <!-- تبويب 2: الموجّه الميداني لفرز الدوائر -->
     <div id="tab-route" style="display: none; flex-direction: column; gap: 16px;">
-      <div class="lux-card" style="padding: 18px; border-color: rgba(56, 189, 248, 0.3);">
+      <div class="lux-glass-panel" style="padding: 20px; border-color: rgba(56, 189, 248, 0.35);">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <div>
-            <h3 style="font-size: 15px; font-weight: 900; color: var(--cyan);">🗺️ الموجه الميداني لفرز الدوائر</h3>
-            <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">تجميع المعاملات حسب كل دائرة لإنهاء المهام بجولة واحدة</p>
+            <h3 style="font-size: 15px; font-weight: 900; color: var(--cyan-neon);">🗺️ الموجه الميداني لفرز الدوائر</h3>
+            <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">تجميع المعاملات حسب كل دائرة لإنجاز المهام بجولة واحدة</p>
           </div>
-          <span id="routeTotalTasksBadge" style="font-size: 11px; font-weight: 800; color: var(--cyan); background: var(--cyan-glow); padding: 4px 10px; border-radius: 100px;">0 مهام</span>
+          <span id="routeTotalTasksBadge" style="font-size: 11px; font-weight: 800; color: var(--cyan-neon); background: var(--cyan-glow); padding: 4px 12px; border-radius: 100px;">0 مهام</span>
         </div>
       </div>
       <div id="routeGroupedList" style="display: flex; flex-direction: column; gap: 14px;"></div>
     </div>
 
-    <!-- تبويب 3: رادار نفاذية التراخيص وتواريخ التجديد -->
+    <!-- تبويب 3: رادار نفاذية التراخيص -->
     <div id="tab-licenses" style="display: none; flex-direction: column; gap: 16px;">
-      <div class="lux-card" style="padding: 18px; border-color: rgba(229, 195, 120, 0.3);">
+      <div class="lux-glass-panel" style="padding: 20px;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <div>
-            <h3 style="font-size: 15px; font-weight: 900; color: var(--champagne);">⏳ رادار التراخيص وتجديد الرخص</h3>
+            <h3 style="font-size: 15px; font-weight: 900; color: var(--gold-primary);">⏳ رادار التراخيص وتجديد الرخص</h3>
             <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">متابعة تواريخ انتهاء إجازات المهنة، الغرفة، وعقود الإيجار</p>
           </div>
-          <span id="licensesAlertCountBadge" style="font-size: 11px; font-weight: 800; color: var(--champagne); background: var(--champagne-glow); padding: 4px 10px; border-radius: 100px;">0 تنبيهات</span>
+          <span id="licensesAlertCountBadge" style="font-size: 11px; font-weight: 800; color: var(--gold-primary); background: var(--gold-glow); padding: 4px 12px; border-radius: 100px;">0 تنبيهات</span>
         </div>
       </div>
       <div id="licensesCardsList" style="display: flex; flex-direction: column; gap: 12px;"></div>
     </div>
 
-    <!-- تبويب 4: التحليلات ولوحة المعلومات (Dashboard) -->
+    <!-- تبويب 4: التحليلات Bento Grid -->
     <div id="tab-analytics" style="display: none; flex-direction: column; gap: 16px;">
       <div class="kpi-grid">
         <div class="kpi-card">
           <span style="font-size: 11px; color: var(--text-muted); font-weight: 700;">إجمالي الأتعاب المقدرة</span>
-          <h3 id="kpiTotalRevenue" style="font-size: 16px; font-weight: 900; color: var(--champagne); margin-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">0 د.ع</h3>
+          <h3 id="kpiTotalRevenue" style="font-size: 17px; font-weight: 900; color: var(--gold-primary); margin-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">0 د.ع</h3>
         </div>
         <div class="kpi-card">
           <span style="font-size: 11px; color: var(--text-muted); font-weight: 700;">المبالغ المقبوضة</span>
-          <h3 id="kpiPaidRevenue" style="font-size: 16px; font-weight: 900; color: var(--emerald); margin-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">0 د.ع</h3>
+          <h3 id="kpiPaidRevenue" style="font-size: 17px; font-weight: 900; color: var(--emerald-neon); margin-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">0 د.ع</h3>
         </div>
         <div class="kpi-card">
           <span style="font-size: 11px; color: var(--text-muted); font-weight: 700;">المتبقي بذمة الشركات</span>
-          <h3 id="kpiRemainingDebt" style="font-size: 16px; font-weight: 900; color: var(--danger); margin-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">0 د.ع</h3>
+          <h3 id="kpiRemainingDebt" style="font-size: 17px; font-weight: 900; color: var(--danger-neon); margin-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">0 د.ع</h3>
         </div>
         <div class="kpi-card">
           <span style="font-size: 11px; color: var(--text-muted); font-weight: 700;">نسبة الإنجاز الكلية</span>
-          <h3 id="kpiCompletionRate" style="font-size: 16px; font-weight: 900; color: var(--cyan); margin-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">0%</h3>
+          <h3 id="kpiCompletionRate" style="font-size: 17px; font-weight: 900; color: var(--cyan-neon); margin-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">0%</h3>
         </div>
       </div>
 
-      <div class="lux-card" style="padding: 18px;">
+      <div class="lux-glass-panel" style="padding: 20px;">
         <h4 style="font-size: 13px; font-weight: 800; color: #FFF; margin-bottom: 14px;">📊 توزيع حالات المعاملات</h4>
         <div style="max-height: 200px; position: relative;"><canvas id="txStatusChart"></canvas></div>
       </div>
 
-      <div class="lux-card" style="padding: 18px;">
-        <h4 style="font-size: 13px; font-weight: 800; color: #FFF; margin-bottom: 14px;">📈 الموقف المالي للمكتب</h4>
+      <div class="lux-glass-panel" style="padding: 20px;">
+        <h4 style="font-size: 13px; font-weight: 800; color: #FFF; margin-bottom: 14px;">📈 الموقف المالي العام</h4>
         <div style="max-height: 200px; position: relative;"><canvas id="financeChart"></canvas></div>
       </div>
     </div>
 
-    <!-- تبويب 5: الحسابات والمحاسبة الأسبوعية (الأحد - الخميس) -->
+    <!-- تبويب 5: الحسابات وسند التسوية الأسبوعي (الأحد - الخميس) -->
     <div id="tab-accounts" style="display: none; flex-direction: column; gap: 16px;">
-      
-      <div class="lux-card" style="padding: 20px; background: linear-gradient(135deg, rgba(16,24,38,0.9) 0%, rgba(8,12,20,0.95) 100%);">
+      <div class="lux-glass-panel" style="padding: 22px; background: linear-gradient(135deg, rgba(16,24,40,0.85) 0%, rgba(6,9,16,0.95) 100%);">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
           <div>
             <div style="display: flex; align-items: center; gap: 6px;">
-              <span style="font-size: 10px; font-weight: 800; color: var(--champagne); background: var(--champagne-glow); padding: 2px 8px; border-radius: 6px;">أسبوع العمل الرسمي (الأحد - الخميس)</span>
+              <span style="font-size: 10px; font-weight: 800; color: var(--gold-primary); background: var(--gold-glow); padding: 3px 10px; border-radius: 8px;">أسبوع العمل الرسمي (الأحد - الخميس)</span>
             </div>
-            <p id="weeklyPeriodSubtitle" style="font-size: 11px; color: var(--text-muted); font-weight: 700; margin-top: 4px;">أتعاب الأسبوع الجاري</p>
-            <h2 id="weeklyTotalSumBadge" style="font-size: 24px; font-weight: 900; color: var(--champagne); margin-top: 2px; font-family: 'Plus Jakarta Sans', sans-serif;">0 د.ع</h2>
+            <p id="weeklyPeriodSubtitle" style="font-size: 11px; color: var(--text-muted); font-weight: 700; margin-top: 6px;">أتعاب الأسبوع الجاري</p>
+            <h2 id="weeklyTotalSumBadge" style="font-size: 26px; font-weight: 900; color: var(--gold-primary); margin-top: 2px; font-family: 'Plus Jakarta Sans', sans-serif;">0 د.ع</h2>
           </div>
           <div style="display: flex; flex-direction: column; gap: 6px;">
-            <button onclick="exportAccountsToCSV()" class="btn-lux-secondary" style="padding: 7px 12px; font-size: 11px; border-radius: 10px;">📊 Excel</button>
-            <button onclick="openPDFPreviewModal()" class="btn-lux-champagne" style="padding: 7px 12px; font-size: 11px; border-radius: 10px;">📄 كشف عام</button>
+            <button onclick="exportAccountsToCSV()" class="btn-secondary" style="padding: 8px 14px; font-size: 11px; border-radius: 12px;">📊 Excel</button>
+            <button onclick="openPDFPreviewModal()" class="btn-gold" style="padding: 8px 14px; font-size: 11px; border-radius: 12px;">📄 كشف عام</button>
           </div>
         </div>
         
-        <div style="display: flex; justify-content: space-between; border-top: 1px solid rgba(229,195,120,0.15); padding-top: 10px; font-size: 11px;">
-          <span style="color: var(--emerald);">المقبوض الكلي: <b id="accPaidSummary">0 د.ع</b></span>
+        <div style="display: flex; justify-content: space-between; border-top: 1px solid var(--border-subtle); padding-top: 12px; font-size: 11px;">
+          <span style="color: var(--emerald-neon);">المقبوض الكلي: <b id="accPaidSummary">0 د.ع</b></span>
           <span style="color: #FDA4AF;">الديون الحالية: <b id="accDebtSummary">0 د.ع</b></span>
         </div>
       </div>
 
-      <div id="multiSelectActionCard" class="lux-card" style="padding: 14px 18px; border-color: rgba(56, 189, 248, 0.4); display: none; align-items: center; justify-content: space-between;">
+      <div id="multiSelectActionCard" class="lux-glass-panel" style="padding: 16px 20px; border-color: rgba(56, 189, 248, 0.45); display: none; align-items: center; justify-content: space-between;">
         <div>
-          <b style="font-size: 12px; color: var(--cyan);">تم تحديد (<span id="selectedCountBadge">0</span>) جهات</b>
-          <p style="font-size: 10px; color: var(--text-muted);">استخراج كشف حساب مجمع للجهات المحددة فقط</p>
+          <b style="font-size: 12px; color: var(--cyan-neon);">تم تحديد (<span id="selectedCountBadge">0</span>) جهات</b>
+          <p style="font-size: 10px; color: var(--text-muted);">استخراج كشف حساب مجمع للشركات المحددة فقط</p>
         </div>
-        <button onclick="generateCustomStatementForSelectedCompanies()" class="btn-lux-cyan" style="padding: 8px 14px; font-size: 11px;">
+        <button onclick="generateCustomStatementForSelectedCompanies()" class="btn-cyan" style="padding: 9px 16px; font-size: 11px;">
           📄 استخراج كشف للشركات المحددة
         </button>
       </div>
@@ -663,25 +621,25 @@
         <span style="font-size: 12px; font-weight: 800; color: var(--text-muted);">حدد الشركات لاستخراج كشف مجمع، أو اضغط على أزرار السند:</span>
       </div>
 
-      <div id="accountsList" style="display: flex; flex-direction: column; gap: 10px;"></div>
+      <div id="accountsList" style="display: flex; flex-direction: column; gap: 12px;"></div>
     </div>
 
-    <!-- تبويب 6: خزانة الوثائق السحابية العامة -->
-    <div id="tab-documents" style="display: none; flex-direction: column; gap: 14px;">
+    <!-- تبويب 6: خزانة الوثائق المركزية -->
+    <div id="tab-documents" style="display: none; flex-direction: column; gap: 16px;">
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 4px;">
         <div>
           <h3 style="font-size: 15px; font-weight: 900; color: #FFF;">📁 خزانة الوثائق المركزية</h3>
           <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">كل الوصولات والكتب الرسمية لكافة الشركات</p>
         </div>
-        <span id="allDocsTotalBadge" style="font-size: 11px; color: var(--champagne); font-weight: 800; background: var(--champagne-glow); border: 1px solid rgba(229,195,120,0.3); padding: 4px 10px; border-radius: 100px;">0 مستند</span>
+        <span id="allDocsTotalBadge" style="font-size: 11px; color: var(--gold-primary); font-weight: 800; background: var(--gold-glow); border: 1px solid rgba(229,195,120,0.3); padding: 4px 12px; border-radius: 100px;">0 مستند</span>
       </div>
-      <div id="allDocumentsList" style="display: flex; flex-direction: column; gap: 10px;"></div>
+      <div id="allDocumentsList" style="display: flex; flex-direction: column; gap: 12px;"></div>
     </div>
 
-    <!-- تبويب 7: الإعدادات، الرقابة، والنسخ الاحتياطي -->
+    <!-- تبويب 7: الإعدادات والنسخ الاحتياطي -->
     <div id="tab-settings" style="display: none; flex-direction: column; gap: 16px;">
-      <div class="lux-card" style="padding: 18px; display: flex; flex-direction: column; gap: 12px;">
-        <h3 style="font-size: 14px; font-weight: 900; color: var(--champagne);">🏢 معلومات المكتب والمعقب</h3>
+      <div class="lux-glass-panel" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+        <h3 style="font-size: 14px; font-weight: 900; color: var(--gold-primary);">🏢 معلومات المكتب والمعقب</h3>
         <div>
           <label style="font-size: 11px; color: var(--text-muted);">اسم المكتب / الوكالة</label>
           <input id="setOfficeName" type="text" class="lux-input" style="width: 100%; margin-top: 4px;" placeholder="مكتب إنجاز المعاملات">
@@ -692,32 +650,32 @@
         </div>
         <div>
           <label style="font-size: 11px; color: var(--text-muted);">العنوان والمدينة</label>
-          <input id="setOfficeAddress" type="text" class="lux-input" style="width: 100%; margin-top: 4px;" placeholder="بغداد - الكرخ">
+          <input id="setOfficeAddress" type="text" class="lux-input" style="width: 100%; margin-top: 4px;" placeholder="بغداد - العراق">
         </div>
-        <button onclick="saveSettings()" class="btn-lux-champagne" style="padding: 12px; margin-top: 4px;">حفظ الإعدادات</button>
+        <button onclick="saveSettings()" class="btn-gold" style="padding: 13px; margin-top: 4px;">حفظ التغييرات</button>
       </div>
 
-      <div class="lux-card" style="padding: 18px; display: flex; flex-direction: column; gap: 12px;">
-        <h3 style="font-size: 14px; font-weight: 900; color: var(--cyan);">💾 النسخ الاحتياطي وسجل العمليات</h3>
+      <div class="lux-glass-panel" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+        <h3 style="font-size: 14px; font-weight: 900; color: var(--cyan-neon);">💾 النسخ الاحتياطي وسجل العمليات</h3>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-          <button onclick="exportJSONBackup()" class="btn-lux-secondary" style="font-size: 11px; padding: 10px;">📥 تنزيل نسخة JSON</button>
-          <button onclick="document.getElementById('importBackupFile').click()" class="btn-lux-secondary" style="font-size: 11px; padding: 10px;">📤 استعادة نسخة</button>
+          <button onclick="exportJSONBackup()" class="btn-secondary" style="font-size: 11px; padding: 12px;">📥 تنزيل نسخة JSON</button>
+          <button onclick="document.getElementById('importBackupFile').click()" class="btn-secondary" style="font-size: 11px; padding: 12px;">📤 استعادة نسخة</button>
           <input type="file" id="importBackupFile" accept=".json" style="display: none;" onchange="handleJSONRestore(this)">
         </div>
-        <button onclick="openSheet('auditLogModal'); renderAuditLogs();" class="btn-lux-secondary" style="width: 100%; font-size: 11px; padding: 10px;">
+        <button onclick="openSheet('auditLogModal'); renderAuditLogs();" class="btn-secondary" style="width: 100%; font-size: 11px; padding: 12px;">
           📜 فتح سجل الرقابة وتتبع الحركات (Audit Log)
         </button>
       </div>
 
-      <div class="lux-card" style="padding: 18px; display: flex; flex-direction: column; gap: 12px;">
-        <h3 style="font-size: 14px; font-weight: 900; color: var(--champagne);">📦 سجل المعاملات المؤرشفة والمنجزة</h3>
+      <div class="lux-glass-panel" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+        <h3 style="font-size: 14px; font-weight: 900; color: var(--gold-primary);">📦 سجل المعاملات المؤرشفة والمنجزة</h3>
         <div id="archivedList" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto;"></div>
       </div>
 
-      <div class="lux-card" style="padding: 18px; display: flex; flex-direction: column; gap: 12px;">
-        <h3 style="font-size: 14px; font-weight: 900; color: #FFF;">👤 الحساب الحالي والأمان</h3>
+      <div class="lux-glass-panel" style="padding: 20px; display: flex; flex-direction: column; gap: 12px;">
+        <h3 style="font-size: 14px; font-weight: 900; color: #FFF;">👤 الحساب الحالي</h3>
         <p id="currentUserEmail" style="font-size: 12px; color: var(--text-muted); font-family: monospace;">-</p>
-        <button onclick="handleLogout()" class="btn-lux-secondary" style="padding: 12px; color: #FB7185; border-color: rgba(251,113,133,0.3);">
+        <button onclick="handleLogout()" class="btn-secondary" style="padding: 12px; color: #FB7185; border-color: rgba(251,113,133,0.3);">
           تسجيل الخروج من الحساب
         </button>
       </div>
@@ -725,143 +683,135 @@
 
   </main>
 
-  <!-- شريط التنقل السفلي المعلق الفاخر -->
+  <!-- شريط التنقل السفلي الكبسولي العائم -->
   <nav class="dock-nav">
     <button onclick="switchTab('transactions')" id="nav-transactions" class="dock-btn active">
-      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
       <span>المعاملات</span>
     </button>
     <button onclick="switchTab('route')" id="nav-route" class="dock-btn">
-      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
       <span>الموجه</span>
     </button>
     <button onclick="switchTab('licenses')" id="nav-licenses" class="dock-btn">
-      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
       <span>التراخيص</span>
     </button>
     <button onclick="switchTab('analytics')" id="nav-analytics" class="dock-btn">
-      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"></path></svg>
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"></path></svg>
       <span>التحليلات</span>
     </button>
     <button onclick="switchTab('accounts')" id="nav-accounts" class="dock-btn">
-      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v12M17 10h-7.5a2.5 2.5 0 0 0 0 5H15"></path></svg>
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v12M17 10h-7.5a2.5 2.5 0 0 0 0 5H15"></path></svg>
       <span>الحسابات</span>
     </button>
     <button onclick="switchTab('documents')" id="nav-documents" class="dock-btn">
-      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></svg>
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></svg>
       <span>الوثائق</span>
     </button>
     <button onclick="switchTab('settings')" id="nav-settings" class="dock-btn">
-      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
       <span>الإعدادات</span>
     </button>
   </nav>
 
+  <!-- نوافذ الإجراءات والمودالات المدمجة -->
+  
   <!-- نافذة خيارات الشركة -->
   <div id="companyActionModal" class="center-modal-overlay">
     <div class="center-modal-card">
-      <div style="text-align: center; margin-bottom: 16px;">
-        <div style="width: 44px; height: 44px; border-radius: 14px; background: linear-gradient(135deg, #1C2638, #131A28); border: 1px solid rgba(229,195,120,0.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 20px;">
+      <div style="text-align: center; margin-bottom: 18px;">
+        <div style="width: 48px; height: 48px; border-radius: 16px; background: linear-gradient(135deg, #1C2638, #131A28); border: 1px solid var(--border-champagne); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 22px;">
           🏢
         </div>
-        <span style="font-size: 11px; color: var(--champagne); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">ملف الشركة الرسمي</span>
-        <h3 id="modalCompTitle" style="font-size: 18px; font-weight: 900; color: #FFF; margin-top: 2px;">اسم الشركة</h3>
+        <span style="font-size: 11px; color: var(--gold-primary); font-weight: 800; letter-spacing: 0.5px;">ملف الشركة الرسمي</span>
+        <h3 id="modalCompTitle" style="font-size: 19px; font-weight: 900; color: #FFF; margin-top: 2px;">اسم الشركة</h3>
       </div>
       
       <div style="display: flex; flex-direction: column; gap: 10px;">
-        <button onclick="startTxForSelectedComp()" class="btn-lux-champagne">+ بدء معاملة جديدة لهذه الشركة</button>
-        <button onclick="openDocVault()" class="btn-lux-secondary">📁 فتح خزانة الوثائق والأرشيف</button>
-        <button onclick="openCompanyLicensesModal()" class="btn-lux-secondary">⏳ ضبط تواريخ نفاذية التراخيص</button>
-        <button onclick="openWeeklyReceiptForCompany(selectedCompanyId)" class="btn-lux-purple">📅 سند التسوية الأسبوعي الشامل</button>
-        <button onclick="openCompanyDedicatedStatement(selectedCompanyId)" class="btn-lux-cyan">📄 كشف حساب خاص بهذه الشركة</button>
-        <button onclick="deleteSelectedCompany()" class="btn-lux-danger">🗑️ حذف ملف الشركة بالكامل</button>
+        <button onclick="startTxForSelectedComp()" class="btn-gold">+ بدء معاملة جديدة لهذه الشركة</button>
+        <button onclick="openDocVault()" class="btn-secondary">📁 فتح خزانة الوثائق والأرشيف</button>
+        <button onclick="openCompanyLicensesModal()" class="btn-secondary">⏳ ضبط تواريخ نفاذية التراخيص</button>
+        <button onclick="openWeeklyReceiptForCompany(selectedCompanyId)" class="btn-purple">📅 سند التسوية الأسبوعي الشامل</button>
+        <button onclick="openCompanyDedicatedStatement(selectedCompanyId)" class="btn-cyan">📄 كشف حساب خاص بهذه الشركة</button>
+        <button onclick="deleteSelectedCompany()" class="btn-danger">🗑️ حذف ملف الشركة بالكامل</button>
         <button onclick="closeSheet('companyActionModal')" style="background: none; border: none; color: var(--text-dim); padding: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">إلغاء</button>
       </div>
     </div>
   </div>
 
-  <!-- صفحة تفاصيل المعاملة الكاملة (عند الضغط على المعاملة النشطة) -->
+  <!-- تفاصيل المعاملة النشطة -->
   <div id="transactionDetailsModal" class="sheet-overlay">
     <div class="sheet-container" style="max-width: 500px;">
       <div class="sheet-handle"></div>
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px;">
         <div>
-          <span id="dtCompNameBadge" style="font-size: 11px; font-weight: 800; color: var(--champagne); text-transform: uppercase;">اسم الشركة</span>
-          <h3 id="dtTxTitle" style="font-size: 18px; font-weight: 900; color: #FFF; margin-top: 2px;">نوع المعاملة</h3>
+          <span id="dtCompNameBadge" style="font-size: 11px; font-weight: 800; color: var(--gold-primary);">اسم الشركة</span>
+          <h3 id="dtTxTitle" style="font-size: 19px; font-weight: 900; color: #FFF; margin-top: 2px;">نوع المعاملة</h3>
         </div>
-        <button onclick="closeSheet('transactionDetailsModal')" style="background: none; border: none; color: var(--text-muted); font-size: 16px; cursor: pointer; padding: 4px;">✕</button>
+        <button onclick="closeSheet('transactionDetailsModal')" style="background: none; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer; padding: 4px;">✕</button>
       </div>
 
-      <!-- بطاقة الموقف المالي السريع داخل التفاصيل -->
-      <div class="lux-card" style="padding: 14px 18px; margin-bottom: 16px; background: rgba(5,7,12,0.85); display: flex; justify-content: space-between; align-items: center;">
+      <div class="lux-glass-panel" style="padding: 16px 20px; margin-bottom: 16px; background: rgba(5,7,12,0.85); display: flex; justify-content: space-between; align-items: center;">
         <div>
           <p style="font-size: 10px; color: var(--text-muted);">الأتعاب الكلية والمقبوض</p>
-          <h4 id="dtFinancialSummary" style="font-size: 14px; font-weight: 900; color: var(--champagne); margin-top: 2px;">0 د.ع</h4>
+          <h4 id="dtFinancialSummary" style="font-size: 14px; font-weight: 900; color: var(--gold-primary); margin-top: 2px;">0 د.ع</h4>
         </div>
-        <button onclick="openPaymentUpdateModalById(currentDetailTxId)" class="btn-lux-cyan" style="padding: 7px 12px; font-size: 11px;">تعديل المبالغ ✍️</button>
+        <button onclick="openPaymentUpdateModalById(currentDetailTxId)" class="btn-cyan">تعديل المبالغ ✍️</button>
       </div>
 
-      <!-- محطة المسار الحالي وسجل التنقلات التاريخي -->
-      <div class="lux-card" style="padding: 16px; margin-bottom: 16px; background: rgba(5,7,12,0.85);">
+      <div class="lux-glass-panel" style="padding: 18px; margin-bottom: 16px; background: rgba(5,7,12,0.85);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-          <span style="font-size: 12px; font-weight: 800; color: var(--cyan);">📍 الموقع الميداني الحالي</span>
-          <button onclick="openStepModal(currentDetailTxId, currentDetailCurrentLoc)" class="btn-lux-emerald" style="padding: 5px 12px; font-size: 10px; border-radius: 8px;">نقل المسار ➔</button>
+          <span style="font-size: 12px; font-weight: 800; color: var(--cyan-neon);">📍 الموقع الميداني الحالي</span>
+          <button onclick="openStepModal(currentDetailTxId, currentDetailCurrentLoc)" class="btn-emerald" style="padding: 6px 14px; font-size: 11px; border-radius: 10px;">نقل المسار ➔</button>
         </div>
-        <p id="dtCurrentLocText" style="font-size: 13px; font-weight: 900; color: #FFF; margin-bottom: 10px;">جاري التحميل...</p>
+        <p id="dtCurrentLocText" style="font-size: 14px; font-weight: 900; color: #FFF; margin-bottom: 12px;">جاري التحميل...</p>
         
-        <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); display: block; margin-bottom: 6px; border-top: 1px solid var(--card-border); padding-top: 10px;">📜 سجل محطات المسار التاريخية:</span>
-        <div id="dtTimelineList" class="timeline-container" style="max-height: 140px; overflow-y: auto;"></div>
+        <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); display: block; margin-bottom: 8px; border-top: 1px solid var(--border-subtle); padding-top: 10px;">📜 سجل محطات المسار التاريخية:</span>
+        <div id="dtTimelineList" style="display: flex; flex-direction: column; gap: 10px; max-height: 140px; overflow-y: auto;"></div>
       </div>
 
-      <!-- قائمة المتطلبات -->
-      <div class="lux-card" style="padding: 16px; margin-bottom: 18px; background: rgba(5,7,12,0.85);">
+      <div class="lux-glass-panel" style="padding: 18px; margin-bottom: 18px; background: rgba(5,7,12,0.85);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-          <span style="font-size: 12px; font-weight: 800; color: var(--emerald);">✅ المتطلبات والإجراءات</span>
-          <span id="dtChecklistProgressText" style="font-size: 11px; font-weight: 900; color: var(--champagne);">0%</span>
+          <span style="font-size: 12px; font-weight: 800; color: var(--emerald-neon);">✅ المتطلبات والإجراءات</span>
+          <span id="dtChecklistProgressText" style="font-size: 11px; font-weight: 900; color: var(--gold-primary);">0%</span>
         </div>
-        <div id="dtChecklistsContainer" style="display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow-y: auto; margin-bottom: 10px;"></div>
-        <button onclick="openAddChecklistModal(currentDetailTxId); closeSheet('transactionDetailsModal');" class="btn-lux-secondary" style="width: 100%; font-size: 11px; padding: 10px;">
+        <div id="dtChecklistsContainer" style="display: flex; flex-direction: column; gap: 8px; max-height: 180px; overflow-y: auto; margin-bottom: 12px;"></div>
+        <button onclick="openAddChecklistModal(currentDetailTxId); closeSheet('transactionDetailsModal');" class="btn-secondary" style="width: 100%; font-size: 11px; padding: 12px;">
           + إضافة متطلب جديد لهذا الإجراء
         </button>
       </div>
 
-      <!-- أزرار الإجراءات الاحترافية -->
       <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px;">
-        <button onclick="openWhatsAppQuickModal(currentDetailTxId); closeSheet('transactionDetailsModal');" class="btn-lux-secondary" style="padding: 11px 4px; font-size: 11px;">
-          💬 واتساب
-        </button>
-        <button onclick="openReceiptVoucherModalById(currentDetailTxId); closeSheet('transactionDetailsModal');" class="btn-lux-cyan" style="padding: 11px 4px; font-size: 11px;">
-          🧾 سند قبض
-        </button>
-        <button onclick="completeTx(currentDetailTxId); closeSheet('transactionDetailsModal');" class="btn-lux-emerald" style="padding: 11px 4px; font-size: 11px;">
-          إنجاز ✅
-        </button>
+        <button onclick="openWhatsAppQuickModal(currentDetailTxId); closeSheet('transactionDetailsModal');" class="btn-secondary" style="padding: 12px 6px; font-size: 11px;">💬 واتساب</button>
+        <button onclick="openReceiptVoucherModalById(currentDetailTxId); closeSheet('transactionDetailsModal');" class="btn-cyan" style="padding: 12px 6px; font-size: 11px;">🧾 سند قبض</button>
+        <button onclick="completeTx(currentDetailTxId); closeSheet('transactionDetailsModal');" class="btn-emerald" style="padding: 12px 6px; font-size: 11px;">إنجاز ✅</button>
       </div>
 
-      <button onclick="closeSheet('transactionDetailsModal')" class="btn-lux-secondary" style="width: 100%;">إغلاق التفاصيل</button>
+      <button onclick="closeSheet('transactionDetailsModal')" class="btn-secondary" style="width: 100%;">إغلاق التفاصيل</button>
     </div>
   </div>
 
-  <!-- نافذة كشف الحساب المخصص (المعزول) -->
+  <!-- كشف الحساب الخاص المعزول -->
   <div id="customStatementModal" class="sheet-overlay">
     <div class="sheet-container" style="max-width: 520px;">
       <div class="sheet-handle"></div>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
         <div>
-          <span style="font-size: 10px; font-weight: 800; color: var(--cyan); background: var(--cyan-glow); padding: 2px 8px; border-radius: 6px;">كشف حساب مستقل ومعزول</span>
-          <h3 id="customStatementTitle" style="font-size: 16px; font-weight: 900; color: #FFF; margin-top: 2px;">كشف الحساب</h3>
+          <span style="font-size: 10px; font-weight: 800; color: var(--cyan-neon); background: var(--cyan-glow); padding: 3px 10px; border-radius: 8px;">كشف حساب مستقل ومعزول</span>
+          <h3 id="customStatementTitle" style="font-size: 17px; font-weight: 900; color: #FFF; margin-top: 4px;">كشف الحساب</h3>
         </div>
-        <div style="display: flex; gap: 6px;">
-          <button onclick="shareCustomStatementViaWA()" class="btn-lux-secondary" style="padding: 8px 12px; font-size: 11px;">💬 واتساب</button>
-          <button onclick="printCustomStatement()" class="btn-lux-cyan" style="padding: 8px 14px; font-size: 11px;">🖨️ طباعة</button>
+        <div style="display: flex; gap: 8px;">
+          <button onclick="shareCustomStatementViaWA()" class="btn-secondary" style="padding: 9px 14px; font-size: 11px;">💬 واتساب</button>
+          <button onclick="printCustomStatement()" class="btn-cyan" style="padding: 9px 16px; font-size: 11px;">🖨️ طباعة</button>
         </div>
       </div>
 
-      <div id="printableCustomArea" style="background: #FFF; color: #000; padding: 20px; border-radius: 12px; font-size: 12px; line-height: 1.6; border: 2px solid #000;">
+      <div id="printableCustomArea" style="background: #FFF; color: #000; padding: 22px; border-radius: 14px; font-size: 12px; line-height: 1.6; border: 2px solid #000;">
         <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 14px;">
-          <h2 id="custRepOfficeName" style="font-size: 17px; font-weight: 900; margin-bottom: 2px;">مكتب إنجاز المعاملات</h2>
-          <p id="custRepOfficePhone" style="font-size: 10px; color: #555;">هاتف: 07800000000 | بغداد - العراق</p>
-          <p style="font-size: 12px; font-weight: 900; margin-top: 6px; background: #000; color: #FFF; display: inline-block; padding: 2px 10px; border-radius: 4px;">
+          <h2 id="custRepOfficeName" style="font-size: 18px; font-weight: 900; margin-bottom: 2px;">مكتب إنجاز المعاملات</h2>
+          <p id="custRepOfficePhone" style="font-size: 11px; color: #555;">هاتف: 07800000000 | بغداد - العراق</p>
+          <p style="font-size: 12px; font-weight: 900; margin-top: 6px; background: #000; color: #FFF; display: inline-block; padding: 3px 12px; border-radius: 4px;">
             كشف حساب مالي خاص: <span id="custRepClientName"></span>
           </p>
           <p style="font-size: 10px; color: #666; margin-top: 4px;">تاريخ الاستخراج: <span id="custRepDate"></span></p>
@@ -886,28 +836,28 @@
           <span style="color: #B91C1C;">المتبقي بذمتكم: <b id="custRepTotalDebt">0</b></span>
         </div>
       </div>
-      <button onclick="closeSheet('customStatementModal')" class="btn-lux-secondary" style="width: 100%; margin-top: 14px;">رجوع</button>
+      <button onclick="closeSheet('customStatementModal')" class="btn-secondary" style="width: 100%; margin-top: 16px;">رجوع</button>
     </div>
   </div>
 
-  <!-- نافذة سند القبض الأسبوعي الشامل (المحاسبة المجمعة) -->
+  <!-- سند التسوية الأسبوعي الشامل -->
   <div id="weeklyReceiptModal" class="sheet-overlay">
     <div class="sheet-container" style="max-width: 500px;">
       <div class="sheet-handle"></div>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
         <div>
-          <span style="font-size: 10px; font-weight: 800; color: var(--champagne); background: var(--champagne-glow); padding: 2px 8px; border-radius: 6px;">كشف وتسوية أسبوعية (الأحد - الخميس)</span>
-          <h3 style="font-size: 16px; font-weight: 900; color: #FFF; margin-top: 2px;">سند الحساب الأسبوعي</h3>
+          <span style="font-size: 10px; font-weight: 800; color: var(--gold-primary); background: var(--gold-glow); padding: 3px 10px; border-radius: 8px;">كشف وتسوية أسبوعية (الأحد - الخميس)</span>
+          <h3 style="font-size: 17px; font-weight: 900; color: #FFF; margin-top: 4px;">سند الحساب الأسبوعي</h3>
         </div>
-        <div style="display: flex; gap: 6px;">
-          <button onclick="shareWeeklyReceiptViaWA()" class="btn-lux-secondary" style="padding: 8px 12px; font-size: 11px;">💬 واتساب</button>
-          <button onclick="printWeeklyReceiptVoucher()" class="btn-lux-champagne" style="padding: 8px 14px; font-size: 11px;">🖨️ طباعة</button>
+        <div style="display: flex; gap: 8px;">
+          <button onclick="shareWeeklyReceiptViaWA()" class="btn-secondary" style="padding: 9px 14px; font-size: 11px;">💬 واتساب</button>
+          <button onclick="printWeeklyReceiptVoucher()" class="btn-gold" style="padding: 9px 16px; font-size: 11px;">🖨️ طباعة</button>
         </div>
       </div>
 
-      <div style="background: rgba(5,7,12,0.85); border: 1px solid var(--card-border); padding: 12px 14px; border-radius: 14px; margin-bottom: 14px; display: flex; flex-direction: column; gap: 6px;">
-        <label style="font-size: 11px; color: var(--champagne); font-weight: 800;">✍️ تعديل جهة الاستلام / اسم المسدد في السند الأسبوعي:</label>
-        <input id="weeklyRecEditCompanyName" type="text" class="lux-input" style="width: 100%; padding: 9px 12px; font-size: 12px;" oninput="updateWeeklyReceiptPayerName(this.value)">
+      <div style="background: rgba(5,7,12,0.85); border: 1px solid var(--border-champagne); padding: 14px; border-radius: 16px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px;">
+        <label style="font-size: 11px; color: var(--gold-primary); font-weight: 800;">✍️ تعديل جهة الاستلام / اسم المسدد في السند الأسبوعي:</label>
+        <input id="weeklyRecEditCompanyName" type="text" class="lux-input" style="width: 100%;" oninput="updateWeeklyReceiptPayerName(this.value)">
       </div>
 
       <div id="printableWeeklyArea" style="background: #FFF; color: #000; padding: 22px; border-radius: 14px; font-size: 12px; line-height: 1.6; border: 2px solid #000;">
@@ -939,21 +889,21 @@
         </div>
       </div>
 
-      <button id="btnSettleWeeklyDues" onclick="settleAllWeeklyDuesForCompany()" class="btn-lux-emerald" style="width: 100%; margin-top: 14px;">
+      <button id="btnSettleWeeklyDues" onclick="settleAllWeeklyDuesForCompany()" class="btn-emerald" style="width: 100%; margin-top: 16px;">
         ✅ تسوية وتصفير أتعاب هذا الأسبوع (جعلها واصل خالص)
       </button>
-      <button onclick="closeSheet('weeklyReceiptModal')" class="btn-lux-secondary" style="width: 100%; margin-top: 8px;">إغلاق</button>
+      <button onclick="closeSheet('weeklyReceiptModal')" class="btn-secondary" style="width: 100%; margin-top: 8px;">إغلاق</button>
     </div>
   </div>
 
-  <!-- نافذة ضبط تواريخ نفاذية تراخيص الشركة -->
+  <!-- ضبط تواريخ نفاذية التراخيص -->
   <div id="licensesEditModal" class="sheet-overlay">
     <div class="sheet-container">
       <div class="sheet-handle"></div>
       <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 4px;">ضبط تواريخ نفاذية التراخيص</h3>
-      <p id="licensesEditCompName" style="font-size: 12px; color: var(--champagne); margin-bottom: 14px;">شركة</p>
+      <p id="licensesEditCompName" style="font-size: 12px; color: var(--gold-primary); margin-bottom: 16px;">شركة</p>
       
-      <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div style="display: flex; flex-direction: column; gap: 12px;">
         <div>
           <label style="font-size: 11px; color: var(--text-muted);">إجازة ممارسة المهنة</label>
           <input id="licTradeExp" type="date" class="lux-input" style="width: 100%; margin-top: 4px;">
@@ -971,67 +921,67 @@
           <input id="licAnnualReportExp" type="date" class="lux-input" style="width: 100%; margin-top: 4px;">
         </div>
         <div style="display: flex; gap: 10px; margin-top: 10px;">
-          <button onclick="saveCompanyLicenses()" class="btn-lux-champagne" style="flex: 1;">حفظ وتفعيل الرادار</button>
-          <button onclick="closeSheet('licensesEditModal')" class="btn-lux-secondary" style="flex: 1;">إلغاء</button>
+          <button onclick="saveCompanyLicenses()" class="btn-gold" style="flex: 1;">حفظ وتفعيل الرادار</button>
+          <button onclick="closeSheet('licensesEditModal')" class="btn-secondary" style="flex: 1;">إلغاء</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- خزانة الوثائق الخاصة بشركة -->
+  <!-- خزانة وثائق الشركة -->
   <div id="docVaultModal" class="sheet-overlay">
     <div class="sheet-container">
       <div class="sheet-handle"></div>
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px;">
         <div>
-          <span style="font-size: 11px; font-weight: 800; color: var(--emerald); text-transform: uppercase;">الأرشيف السحابي المستقل</span>
-          <h3 id="vaultCompTitle" style="font-size: 17px; font-weight: 900; color: #FFF; margin-top: 2px;">ملف الشركة</h3>
+          <span style="font-size: 11px; font-weight: 800; color: var(--emerald-neon);">الأرشيف السحابي المستقل</span>
+          <h3 id="vaultCompTitle" style="font-size: 18px; font-weight: 900; color: #FFF; margin-top: 2px;">ملف الشركة</h3>
         </div>
-        <button onclick="closeSheet('docVaultModal')" style="background: none; border: none; color: var(--text-muted); font-size: 16px; cursor: pointer; padding: 4px;">✕</button>
+        <button onclick="closeSheet('docVaultModal')" style="background: none; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer; padding: 4px;">✕</button>
       </div>
 
-      <div class="lux-card" style="padding: 16px; margin-bottom: 18px; border-color: rgba(229,195,120,0.2); background: rgba(5,7,12,0.85);">
-        <h4 style="font-size: 13px; font-weight: 800; color: #FFF; margin-bottom: 10px;">📤 رفع مستند / وصل جديد</h4>
+      <div class="lux-glass-panel" style="padding: 18px; margin-bottom: 18px; background: rgba(5,7,12,0.85);">
+        <h4 style="font-size: 13px; font-weight: 800; color: #FFF; margin-bottom: 12px;">📤 رفع مستند / وصل جديد</h4>
         <div style="display: flex; flex-direction: column; gap: 10px;">
           <input id="docCustomName" type="text" placeholder="اسم المستند (مثال: شهادة التأسيس)" class="lux-input">
           <input type="file" id="docFileInput" accept="image/*,application/pdf,.doc,.docx" style="display: none;" onchange="handleFileSelection(this)">
-          <button onclick="document.getElementById('docFileInput').click()" class="btn-lux-secondary" style="width: 100%; font-size: 12px; padding: 12px; border-style: dashed;">
+          <button onclick="document.getElementById('docFileInput').click()" class="btn-secondary" style="width: 100%; font-size: 12px; padding: 14px; border-style: dashed;">
             <span id="selectedFileNameLabel">📁 اختر صورة أو ملف من الهاتف</span>
           </button>
-          <button id="btnUploadDoc" onclick="uploadCompanyDocument()" class="btn-lux-emerald" style="padding: 12px; font-size: 12px;">تأكيد الرفع والحفظ بالسحابة</button>
+          <button id="btnUploadDoc" onclick="uploadCompanyDocument()" class="btn-emerald" style="padding: 13px; font-size: 12px;">تأكيد الرفع والحفظ بالسحابة</button>
         </div>
       </div>
 
       <div>
-        <span style="font-size: 12px; font-weight: 800; color: var(--text-muted); display: block; margin-bottom: 10px;">الوثائق المحفوظة (<span id="vaultDocsCount">0</span>)</span>
+        <span style="font-size: 12px; font-weight: 800; color: var(--text-muted); display: block; margin-bottom: 12px;">الوثائق المحفوظة (<span id="vaultDocsCount">0</span>)</span>
         <div id="companyDocsList" style="display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto;"></div>
       </div>
-      <button onclick="closeSheet('docVaultModal')" class="btn-lux-secondary" style="width: 100%; margin-top: 18px;">إغلاق الخزانة</button>
+      <button onclick="closeSheet('docVaultModal')" class="btn-secondary" style="width: 100%; margin-top: 18px;">إغلاق الخزانة</button>
     </div>
   </div>
 
-  <!-- نافذة إضافة شركة جديدة -->
+  <!-- تسجيل شركة جديدة -->
   <div id="newCompanyModal" class="sheet-overlay">
     <div class="sheet-container">
       <div class="sheet-handle"></div>
-      <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 14px;">تسجيل شركة جديدة</h3>
-      <div style="display: flex; flex-direction: column; gap: 12px;">
+      <h3 style="font-size: 17px; font-weight: 900; margin-bottom: 16px;">تسجيل شركة جديدة</h3>
+      <div style="display: flex; flex-direction: column; gap: 14px;">
         <input id="compName" type="text" placeholder="اسم الشركة أو الجهة" class="lux-input">
         <input id="compPhone" type="tel" placeholder="رقم هاتف الممثل (اختياري)" class="lux-input">
-        <div style="display: flex; gap: 10px; margin-top: 6px;">
-          <button onclick="saveCompany()" class="btn-lux-champagne" style="flex: 1;">حفظ الشركة</button>
-          <button onclick="closeSheet('newCompanyModal')" class="btn-lux-secondary" style="flex: 1;">إلغاء</button>
+        <div style="display: flex; gap: 10px; margin-top: 8px;">
+          <button onclick="saveCompany()" class="btn-gold" style="flex: 1;">حفظ الشركة</button>
+          <button onclick="closeSheet('newCompanyModal')" class="btn-secondary" style="flex: 1;">إلغاء</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- نافذة بدء معاملة جديدة -->
+  <!-- بدء معاملة جديدة -->
   <div id="newTxModal" class="sheet-overlay">
     <div class="sheet-container">
       <div class="sheet-handle"></div>
-      <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 14px;">بدء معاملة جديدة</h3>
-      <div style="display: flex; flex-direction: column; gap: 12px;">
+      <h3 style="font-size: 17px; font-weight: 900; margin-bottom: 16px;">بدء معاملة جديدة</h3>
+      <div style="display: flex; flex-direction: column; gap: 14px;">
         <div>
           <label style="font-size: 11px; color: var(--text-muted); font-weight: 700;">الشركة المستفيدة</label>
           <select id="txCompanySelect" class="lux-input" style="width: 100%; margin-top: 4px;"></select>
@@ -1054,67 +1004,67 @@
           <label style="font-size: 11px; color: var(--text-muted); font-weight: 700;">المتطلبات الأولية (كل متطلب بسطر)</label>
           <textarea id="txChecklist" rows="3" placeholder="موافقة أمنية&#10;ختم الغرفة التجارية&#10;وصل الضريبة" class="lux-input" style="width: 100%; margin-top: 4px;"></textarea>
         </div>
-        <div style="display: flex; gap: 10px; margin-top: 8px;">
-          <button onclick="saveTransaction()" class="btn-lux-champagne" style="flex: 1;">مباشرة بالمعاملة</button>
-          <button onclick="closeSheet('newTxModal')" class="btn-lux-secondary" style="flex: 1;">إلغاء</button>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+          <button onclick="saveTransaction()" class="btn-gold" style="flex: 1;">مباشرة بالمعاملة</button>
+          <button onclick="closeSheet('newTxModal')" class="btn-secondary" style="flex: 1;">إلغاء</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- رادار التنبيهات المتقدم -->
+  <!-- رادار التنبيهات -->
   <div id="notificationsModal" class="sheet-overlay">
     <div class="sheet-container">
       <div class="sheet-handle"></div>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
         <div>
-          <h3 style="font-size: 16px; font-weight: 900; color: #FFF;">🔔 رادار المتابعة والتنبيهات</h3>
+          <h3 style="font-size: 17px; font-weight: 900; color: #FFF;">🔔 رادار المتابعة والتنبيهات</h3>
           <p style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">تنبيهات فورية للمعاملات والتراخيص</p>
         </div>
-        <span id="notifCountText" style="font-size: 11px; color: var(--champagne); font-weight: 800; background: var(--champagne-glow); padding: 3px 10px; border-radius: 100px;">0 تنبيهات</span>
+        <span id="notifCountText" style="font-size: 11px; color: var(--gold-primary); font-weight: 800; background: var(--gold-glow); padding: 4px 12px; border-radius: 100px;">0 تنبيهات</span>
       </div>
       <div id="notificationsList" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; max-height: 380px; overflow-y: auto;"></div>
-      <button onclick="closeSheet('notificationsModal')" class="btn-lux-secondary" style="width: 100%;">إغلاق</button>
+      <button onclick="closeSheet('notificationsModal')" class="btn-secondary" style="width: 100%;">إغلاق</button>
     </div>
   </div>
 
-  <!-- محرك رسائل الواتساب السريعة -->
+  <!-- محرك رسائل الواتساب -->
   <div id="whatsappQuickModal" class="sheet-overlay">
     <div class="sheet-container">
       <div class="sheet-handle"></div>
-      <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 4px;">💬 رسائل الواتساب المجهزة</h3>
-      <p id="waModalTxInfo" style="font-size: 12px; color: var(--emerald); margin-bottom: 14px;">توليد ومشاركة رسالة مهنية</p>
+      <h3 style="font-size: 17px; font-weight: 900; margin-bottom: 4px;">💬 رسائل الواتساب المجهزة</h3>
+      <p id="waModalTxInfo" style="font-size: 12px; color: var(--emerald-neon); margin-bottom: 16px;">توليد ومشاركة رسالة مهنية</p>
       
       <div style="display: flex; flex-direction: column; gap: 10px;">
-        <button onclick="generateWAMessage('status')" class="btn-lux-secondary" style="text-align: right; justify-content: flex-start;">📍 رسالة الموقف اليومي والموقع الحالي</button>
-        <button onclick="generateWAMessage('missing')" class="btn-lux-secondary" style="text-align: right; justify-content: flex-start;">⏳ رسالة نقص مستندات وأوراق مطلوبة</button>
-        <button onclick="generateWAMessage('payment')" class="btn-lux-secondary" style="text-align: right; justify-content: flex-start;">💰 رسالة مطالبة مالية مهذبة بالمتبقي</button>
-        <button onclick="generateWAMessage('completed')" class="btn-lux-secondary" style="text-align: right; justify-content: flex-start;">🎉 رسالة تهنئة بإنجاز المعاملة وجاهزيتها</button>
+        <button onclick="generateWAMessage('status')" class="btn-secondary" style="text-align: right; justify-content: flex-start;">📍 رسالة الموقف اليومي والموقع الحالي</button>
+        <button onclick="generateWAMessage('missing')" class="btn-secondary" style="text-align: right; justify-content: flex-start;">⏳ رسالة نقص مستندات وأوراق مطلوبة</button>
+        <button onclick="generateWAMessage('payment')" class="btn-secondary" style="text-align: right; justify-content: flex-start;">💰 رسالة مطالبة مالية مهذبة بالمتبقي</button>
+        <button onclick="generateWAMessage('completed')" class="btn-secondary" style="text-align: right; justify-content: flex-start;">🎉 رسالة تهنئة بإنجاز المعاملة وجاهزيتها</button>
       </div>
 
-      <div style="margin-top: 14px;">
+      <div style="margin-top: 16px;">
         <textarea id="waPreviewText" rows="4" class="lux-input" style="width: 100%; font-size: 11px;"></textarea>
-        <button onclick="copyAndSendWA()" class="btn-lux-emerald" style="width: 100%; margin-top: 10px;">نسخ وفتح الواتساب 🚀</button>
+        <button onclick="copyAndSendWA()" class="btn-emerald" style="width: 100%; margin-top: 10px;">نسخ وفتح الواتساب 🚀</button>
       </div>
-      <button onclick="closeSheet('whatsappQuickModal')" class="btn-lux-secondary" style="width: 100%; margin-top: 10px;">إغلاق</button>
+      <button onclick="closeSheet('whatsappQuickModal')" class="btn-secondary" style="width: 100%; margin-top: 10px;">إغلاق</button>
     </div>
   </div>
 
-  <!-- محرك توليد وطباعة سند القبض الفردي المباشر -->
+  <!-- سند القبض الفردي المباشر -->
   <div id="receiptVoucherModal" class="sheet-overlay">
     <div class="sheet-container" style="max-width: 500px;">
       <div class="sheet-handle"></div>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-        <h3 style="font-size: 16px; font-weight: 900; color: #FFF;">سند قبض مالي رسمي</h3>
-        <div style="display: flex; gap: 6px;">
-          <button onclick="shareReceiptViaWA()" class="btn-lux-secondary" style="padding: 8px 12px; font-size: 11px;">💬 واتساب</button>
-          <button onclick="printReceiptVoucher()" class="btn-lux-champagne" style="padding: 8px 14px; font-size: 11px;">🖨️ طباعة</button>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="font-size: 17px; font-weight: 900; color: #FFF;">سند قبض مالي رسمي</h3>
+        <div style="display: flex; gap: 8px;">
+          <button onclick="shareReceiptViaWA()" class="btn-secondary" style="padding: 9px 14px; font-size: 11px;">💬 واتساب</button>
+          <button onclick="printReceiptVoucher()" class="btn-gold" style="padding: 9px 16px; font-size: 11px;">🖨️ طباعة</button>
         </div>
       </div>
 
-      <div style="background: rgba(5,7,12,0.85); border: 1px solid var(--card-border); padding: 12px 14px; border-radius: 14px; margin-bottom: 14px; display: flex; flex-direction: column; gap: 6px;">
-        <label style="font-size: 11px; color: var(--champagne); font-weight: 800;">✍️ تعديل اسم المسلّم في السند:</label>
-        <input id="recEditCompanyName" type="text" class="lux-input" style="width: 100%; padding: 9px 12px; font-size: 12px;" oninput="updateReceiptPayerName(this.value)">
+      <div style="background: rgba(5,7,12,0.85); border: 1px solid var(--border-champagne); padding: 14px; border-radius: 16px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px;">
+        <label style="font-size: 11px; color: var(--gold-primary); font-weight: 800;">✍️ تعديل اسم المسلّم في السند:</label>
+        <input id="recEditCompanyName" type="text" class="lux-input" style="width: 100%;" oninput="updateReceiptPayerName(this.value)">
       </div>
 
       <div id="printableReceiptArea" style="background: #FFF; color: #000; padding: 22px; border-radius: 14px; font-size: 12px; line-height: 1.6; border: 2px solid #000;">
@@ -1149,68 +1099,68 @@
           </div>
         </div>
       </div>
-      <button onclick="closeSheet('receiptVoucherModal')" class="btn-lux-secondary" style="width: 100%; margin-top: 14px;">رجوع</button>
+      <button onclick="closeSheet('receiptVoucherModal')" class="btn-secondary" style="width: 100%; margin-top: 16px;">رجوع</button>
     </div>
   </div>
 
-  <!-- نافذة سجل الرقابة وتتبع الحركات (Audit Log) -->
+  <!-- سجل الرقابة وتتبع العمليات -->
   <div id="auditLogModal" class="sheet-overlay">
     <div class="sheet-container">
       <div class="sheet-handle"></div>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-        <h3 style="font-size: 16px; font-weight: 900; color: #FFF;">📜 سجل الرقابة وتدقيق الحركات</h3>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="font-size: 17px; font-weight: 900; color: #FFF;">📜 سجل الرقابة وتدقيق الحركات</h3>
         <button onclick="clearAuditLogs()" style="background: none; border: none; color: #FB7185; font-size: 11px; cursor: pointer;">مسح السجل</button>
       </div>
-      <div id="auditLogsContainer" style="display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto;"></div>
-      <button onclick="closeSheet('auditLogModal')" class="btn-lux-secondary" style="width: 100%; margin-top: 14px;">إغلاق</button>
+      <div id="auditLogsContainer" style="display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto;"></div>
+      <button onclick="closeSheet('auditLogModal')" class="btn-secondary" style="width: 100%; margin-top: 16px;">إغلاق</button>
     </div>
   </div>
 
-  <!-- نافذة نقل المسار الميداني -->
+  <!-- تحديث المسار الميداني -->
   <div id="stepUpdateModal" class="sheet-overlay">
     <div class="sheet-container">
       <div class="sheet-handle"></div>
-      <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 4px;">تحديث المسار الميداني</h3>
-      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">الموقع السابق سيُحفظ تلقائياً في السجل التاريخي:</p>
+      <h3 style="font-size: 17px; font-weight: 900; margin-bottom: 4px;">تحديث المسار الميداني</h3>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">الموقع السابق سيُحفظ تلقائياً في السجل التاريخي:</p>
       
-      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;">
-        <button onclick="setQuickStep('دائرة تسجيل الشركات - قسم التدقيق')" style="background: var(--card-inner); border: 1px solid var(--card-border); color: var(--text); font-size: 11px; font-weight: 700; padding: 7px 12px; border-radius: 10px; cursor: pointer;">🏢 تسجيل الشركات</button>
-        <button onclick="setQuickStep('الهيئة العامة للضرائب')" style="background: var(--card-inner); border: 1px solid var(--card-border); color: var(--text); font-size: 11px; font-weight: 700; padding: 7px 12px; border-radius: 10px; cursor: pointer;">⚖️ الهيئة العامة للضرائب</button>
-        <button onclick="setQuickStep('وزارة التجارة - قسم العقود')" style="background: var(--card-inner); border: 1px solid var(--card-border); color: var(--text); font-size: 11px; font-weight: 700; padding: 7px 12px; border-radius: 10px; cursor: pointer;">🏛️ وزارة التجارة</button>
-        <button onclick="setQuickStep('غرفة تجارة بغداد')" style="background: var(--card-inner); border: 1px solid var(--card-border); color: var(--text); font-size: 11px; font-weight: 700; padding: 7px 12px; border-radius: 10px; cursor: pointer;">🏛️ غرفة التجارة</button>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+        <button onclick="setQuickStep('دائرة تسجيل الشركات - قسم التدقيق')" class="btn-secondary" style="font-size: 11px; padding: 8px 14px; border-radius: 12px;">🏢 تسجيل الشركات</button>
+        <button onclick="setQuickStep('الهيئة العامة للضرائب')" class="btn-secondary" style="font-size: 11px; padding: 8px 14px; border-radius: 12px;">⚖️ الهيئة العامة للضرائب</button>
+        <button onclick="setQuickStep('وزارة التجارة - قسم العقود')" class="btn-secondary" style="font-size: 11px; padding: 8px 14px; border-radius: 12px;">🏛️ وزارة التجارة</button>
+        <button onclick="setQuickStep('غرفة تجارة بغداد')" class="btn-secondary" style="font-size: 11px; padding: 8px 14px; border-radius: 12px;">🏛️ غرفة التجارة</button>
       </div>
 
       <input id="customStepInput" type="text" placeholder="اكتب المسار أو القسم بدقة..." class="lux-input" style="width: 100%; margin-bottom: 18px;">
       
       <div style="display: flex; gap: 10px;">
-        <button onclick="confirmStepUpdate()" class="btn-lux-champagne" style="flex: 1;">حفظ ونقل المسار</button>
-        <button onclick="closeSheet('stepUpdateModal')" class="btn-lux-secondary" style="flex: 1;">إلغاء</button>
+        <button onclick="confirmStepUpdate()" class="btn-gold" style="flex: 1;">حفظ ونقل المسار</button>
+        <button onclick="closeSheet('stepUpdateModal')" class="btn-secondary" style="flex: 1;">إلغاء</button>
       </div>
     </div>
   </div>
 
-  <!-- إضافة متطلب -->
+  <!-- إضافة متطلب للمعاملة -->
   <div id="addChecklistModal" class="sheet-overlay">
     <div class="sheet-container">
       <div class="sheet-handle"></div>
-      <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 4px;">إضافة متطلب للمعاملة</h3>
-      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">اكتب المتطلب المراد إلحاقه بقائمة المعاملة الحالية:</p>
+      <h3 style="font-size: 17px; font-weight: 900; margin-bottom: 4px;">إضافة متطلب للمعاملة</h3>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">اكتب المتطلب المراد إلحاقه بقائمة المعاملة الحالية:</p>
       <input id="newChecklistInput" type="text" placeholder="مثال: وصل رسم طابع" class="lux-input" style="width: 100%; margin-bottom: 18px;">
       <div style="display: flex; gap: 10px;">
-        <button onclick="confirmAddChecklistItem()" class="btn-lux-emerald" style="flex: 1;">إضافة للمتطلبات</button>
-        <button onclick="closeSheet('addChecklistModal')" class="btn-lux-secondary" style="flex: 1;">إلغاء</button>
+        <button onclick="confirmAddChecklistItem()" class="btn-emerald" style="flex: 1;">إضافة للمتطلبات</button>
+        <button onclick="closeSheet('addChecklistModal')" class="btn-secondary" style="flex: 1;">إلغاء</button>
       </div>
     </div>
   </div>
 
-  <!-- نافذة تعديل وتسديد الدفعات المالية الفردية -->
+  <!-- إدارة أتعاب المعاملة الفردية -->
   <div id="updatePaymentModal" class="sheet-overlay">
     <div class="sheet-container">
       <div class="sheet-handle"></div>
-      <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 4px;">إدارة أتعاب المعاملة الفردية</h3>
-      <p id="updatePaymentTxInfo" style="font-size: 12px; color: var(--champagne); margin-bottom: 14px;">شركة</p>
+      <h3 style="font-size: 17px; font-weight: 900; margin-bottom: 4px;">إدارة أتعاب المعاملة الفردية</h3>
+      <p id="updatePaymentTxInfo" style="font-size: 12px; color: var(--gold-primary); margin-bottom: 16px;">شركة</p>
       
-      <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px;">
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
         <div>
           <label style="font-size: 11px; color: var(--text-muted);">الأتعاب الإجمالية (د.ع)</label>
           <input id="payModalTotalFee" type="number" class="lux-input" style="width: 100%; margin-top: 4px;" oninput="calculateDebtPreview()">
@@ -1219,19 +1169,19 @@
           <label style="font-size: 11px; color: var(--text-muted);">المبلغ المقبوض حالياً (د.ع)</label>
           <input id="payModalPaidFee" type="number" class="lux-input" style="width: 100%; margin-top: 4px;" oninput="calculateDebtPreview()">
         </div>
-        <div style="background: rgba(5,7,12,0.85); border: 1px solid var(--card-border); padding: 10px 14px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="background: rgba(5,7,12,0.85); border: 1px solid var(--border-champagne); padding: 12px 16px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center;">
           <span style="font-size: 12px; color: var(--text-muted);">المتبقي بذمة العميل:</span>
-          <b id="payModalDebtPreview" style="color: #FDA4AF; font-size: 13px;">0 د.ع</b>
+          <b id="payModalDebtPreview" style="color: #FDA4AF; font-size: 14px;">0 د.ع</b>
         </div>
         
-        <button onclick="quickPayFullAmount()" class="btn-lux-cyan" style="width: 100%; margin-top: 2px;">
+        <button onclick="quickPayFullAmount()" class="btn-cyan" style="width: 100%; margin-top: 4px; padding: 12px;">
           ✅ تسديد المبلغ بالكامل (جعلها واصل خالص)
         </button>
       </div>
 
       <div style="display: flex; gap: 10px;">
-        <button onclick="confirmPaymentUpdate()" class="btn-lux-emerald" style="flex: 1;">حفظ الحساب</button>
-        <button onclick="closeSheet('updatePaymentModal')" class="btn-lux-secondary" style="flex: 1;">إلغاء</button>
+        <button onclick="confirmPaymentUpdate()" class="btn-emerald" style="flex: 1;">حفظ الحساب</button>
+        <button onclick="closeSheet('updatePaymentModal')" class="btn-secondary" style="flex: 1;">إلغاء</button>
       </div>
     </div>
   </div>
@@ -1240,16 +1190,16 @@
   <div id="pdfModal" class="sheet-overlay">
     <div class="sheet-container" style="max-width: 520px;">
       <div class="sheet-handle"></div>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-        <h3 style="font-size: 16px; font-weight: 900; color: #FFF;">كشف الحسابات العام</h3>
-        <button onclick="window.print()" class="btn-lux-champagne" style="padding: 8px 14px; font-size: 12px;">طباعة / حفظ PDF</button>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="font-size: 17px; font-weight: 900; color: #FFF;">كشف الحسابات العام</h3>
+        <button onclick="window.print()" class="btn-gold" style="padding: 9px 16px; font-size: 12px;">طباعة / حفظ PDF</button>
       </div>
 
-      <div id="printableArea" style="background: #FFF; color: #000; padding: 20px; border-radius: 12px; font-size: 12px; line-height: 1.6;">
+      <div id="printableArea" style="background: #FFF; color: #000; padding: 22px; border-radius: 14px; font-size: 12px; line-height: 1.6;">
         <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 14px;">
           <h2 id="pdfRepOfficeName" style="font-size: 18px; font-weight: 900; margin-bottom: 2px;">مكتب إنجاز المعاملات</h2>
           <p id="pdfRepOfficePhone" style="font-size: 11px; color: #555;">هاتف: 07800000000 | بغداد - العراق</p>
-          <p style="font-size: 13px; font-weight: 800; margin-top: 6px; background: #EEE; display: inline-block; padding: 2px 10px; border-radius: 4px;">كشف الذمم والمواقف المالية العام</p>
+          <p style="font-size: 13px; font-weight: 800; margin-top: 6px; background: #EEE; display: inline-block; padding: 3px 12px; border-radius: 4px;">كشف الذمم والمواقف المالية العام</p>
           <p style="font-size: 10px; color: #666; margin-top: 4px;">تاريخ الاستخراج: <span id="pdfRepDate"></span></p>
         </div>
 
@@ -1272,7 +1222,7 @@
           <span style="color: #B91C1C;">المتبقي: <b id="pdfTotalDebt">0</b></span>
         </div>
       </div>
-      <button onclick="closeSheet('pdfModal')" class="btn-lux-secondary" style="width: 100%; margin-top: 14px;">رجوع</button>
+      <button onclick="closeSheet('pdfModal')" class="btn-secondary" style="width: 100%; margin-top: 16px;">رجوع</button>
     </div>
   </div>
 
@@ -1336,12 +1286,12 @@
         return;
       }
       container.innerHTML = logs.map(l => `
-        <div style="background:rgba(5,7,12,0.85); border:1px solid var(--card-border); padding:10px 12px; border-radius:12px;">
+        <div class="lux-glass-panel" style="padding:12px 14px; border-radius:16px;">
           <div style="display:flex; justify-content:space-between; font-size:11px;">
-            <b style="color:var(--champagne);">${l.action}</b>
+            <b style="color:var(--gold-primary);">${l.action}</b>
             <span style="color:var(--text-dim); font-family:monospace;">${new Date(l.time).toLocaleTimeString('ar-IQ')} - ${new Date(l.time).toLocaleDateString('ar-IQ')}</span>
           </div>
-          <p style="font-size:11px; color:#D1D5DB; margin-top:2px;">${l.details}</p>
+          <p style="font-size:11px; color:#D1D5DB; margin-top:4px;">${l.details}</p>
         </div>
       `).join('');
     }
@@ -1384,7 +1334,7 @@
 
       if (error) {
         showToast("فشل الدخول: " + error.message, "❌");
-        btn.innerText = "تسجيل الدخول";
+        btn.innerText = "تسجيل الدخول للنظام";
         btn.disabled = false;
       } else {
         currentUser = data.user;
@@ -1409,8 +1359,14 @@
 
     function setRole(isOffice) {
       isOfficeMode = isOffice;
-      document.getElementById('roleOffice').className = `segment-btn ${isOffice ? 'active' : ''}`;
-      document.getElementById('roleField').className = `segment-btn ${!isOffice ? 'active' : ''}`;
+      document.getElementById('roleOffice').style.background = isOffice ? 'linear-gradient(135deg, #1F283D, #121826)' : 'transparent';
+      document.getElementById('roleOffice').style.color = isOffice ? 'var(--gold-primary)' : 'var(--text-muted)';
+      document.getElementById('roleOffice').style.border = isOffice ? '1px solid rgba(229,195,120,0.3)' : 'none';
+
+      document.getElementById('roleField').style.background = !isOffice ? 'linear-gradient(135deg, #1F283D, #121826)' : 'transparent';
+      document.getElementById('roleField').style.color = !isOffice ? 'var(--gold-primary)' : 'var(--text-muted)';
+      document.getElementById('roleField').style.border = !isOffice ? '1px solid rgba(229,195,120,0.3)' : 'none';
+
       document.getElementById('adminActionButtons').style.display = isOffice ? 'grid' : 'none';
       showToast(`تم التبديل إلى: ${isOffice ? 'وضع المكتب 🏢' : 'الوضع الميداني 🏃‍♂️'}`);
       loadData();
@@ -1493,12 +1449,12 @@
       filtered.forEach(c => {
         const initials = c.name.slice(0, 2);
         list.innerHTML += `
-          <div onclick="selectCompany('${c.id}', '${c.name}')" class="lux-card" style="padding: 10px 14px; flex-shrink: 0; display: flex; align-items: center; gap: 10px; cursor: pointer; border-radius: 18px; border-color: rgba(229,195,120,0.18);">
-            <div style="width: 32px; height: 32px; border-radius: 10px; background: linear-gradient(135deg, #1C2638, #131A28); border: 1px solid rgba(229,195,120,0.3); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; color: var(--champagne);">
+          <div onclick="selectCompany('${c.id}', '${c.name}')" class="lux-glass-panel" style="padding: 12px 16px; flex-shrink: 0; display: flex; align-items: center; gap: 12px; cursor: pointer; border-radius: 20px;">
+            <div style="width: 36px; height: 36px; border-radius: 12px; background: linear-gradient(135deg, #1C2638, #131A28); border: 1px solid var(--border-champagne); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; color: var(--gold-primary);">
               ${initials}
             </div>
             <div>
-              <p style="font-size: 12px; font-weight: 800; color: #FFF; white-space: nowrap;">${c.name}</p>
+              <p style="font-size: 13px; font-weight: 800; color: #FFF; white-space: nowrap;">${c.name}</p>
               <p style="font-size: 10px; color: var(--text-dim); margin-top: 1px;">ملف موثق</p>
             </div>
           </div>`;
@@ -1607,13 +1563,13 @@
       }
 
       container.innerHTML = docs.map(d => `
-        <div style="background: rgba(5,7,12,0.85); border: 1px solid var(--card-border); padding: 12px 14px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center;">
+        <div class="lux-glass-panel" style="padding: 12px 16px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center;">
           <div style="overflow: hidden; max-width: 220px;">
             <p style="font-size: 13px; font-weight: 800; color: #FFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">📄 ${d.document_name}</p>
             <p style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">تاريخ الرفع: ${new Date(d.created_at).toLocaleDateString('ar-IQ')}</p>
           </div>
           <div style="display: flex; gap: 6px;">
-            <a href="${d.file_url}" target="_blank" class="btn-lux-champagne" style="padding: 6px 12px; font-size: 11px; text-decoration: none; border-radius: 10px;">
+            <a href="${d.file_url}" target="_blank" class="btn-gold" style="padding: 6px 12px; font-size: 11px; text-decoration: none; border-radius: 10px;">
               معاينة
             </a>
             ${isOfficeMode ? `
@@ -1689,18 +1645,18 @@
       });
 
       if (filtered.length === 0) {
-        list.innerHTML = '<div class="lux-card" style="text-align: center; color: var(--text-dim); padding: 40px 20px; font-size: 13px;">لا توجد وثائق محفوظة حالياً</div>';
+        list.innerHTML = '<div class="lux-glass-panel" style="text-align: center; color: var(--text-dim); padding: 40px 20px; font-size: 13px;">لا توجد وثائق محفوظة حالياً</div>';
         return;
       }
 
       list.innerHTML = filtered.map(d => `
-        <div class="lux-card" style="padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;">
+        <div class="lux-glass-panel" style="padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
           <div style="overflow: hidden; max-width: 230px;">
-            <span style="font-size: 10px; font-weight: 800; color: var(--champagne);">${d.companies?.name || 'شركة موثقة'}</span>
-            <p style="font-size: 13px; font-weight: 900; color: #FFF; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">📄 ${d.document_name}</p>
+            <span style="font-size: 10px; font-weight: 800; color: var(--gold-primary);">${d.companies?.name || 'شركة موثقة'}</span>
+            <p style="font-size: 13px; font-weight: 900; color: #FFF; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">📄 ${d.document_name}</p>
             <p style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">تاريخ الرفع: ${new Date(d.created_at).toLocaleDateString('ar-IQ')}</p>
           </div>
-          <a href="${d.file_url}" target="_blank" class="btn-lux-champagne" style="padding: 8px 14px; font-size: 11px; text-decoration: none; border-radius: 12px;">
+          <a href="${d.file_url}" target="_blank" class="btn-gold" style="padding: 8px 14px; font-size: 11px; text-decoration: none; border-radius: 12px;">
             معاينة
           </a>
         </div>
@@ -1721,24 +1677,24 @@
       document.getElementById('routeTotalTasksBadge').innerText = `${activeTransactions.length} معاملات موزعة`;
 
       if (keys.length === 0) {
-        container.innerHTML = '<div class="lux-card" style="text-align:center; padding:30px; color:var(--text-dim);">لا توجد معاملات جارية لتوجيهها</div>';
+        container.innerHTML = '<div class="lux-glass-panel" style="text-align:center; padding:30px; color:var(--text-dim);">لا توجد معاملات جارية لتوجيهها</div>';
         return;
       }
 
       container.innerHTML = keys.map(loc => `
-        <div class="lux-card" style="padding: 16px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border); padding-bottom: 8px; margin-bottom: 10px;">
-            <span style="font-size: 13px; font-weight: 900; color: var(--cyan);">📍 ${loc}</span>
-            <span style="font-size: 11px; font-weight: 800; color: #FFF; background:rgba(5,7,12,0.85); padding:2px 8px; border-radius:100px;">${groups[loc].length} معاملات</span>
+        <div class="lux-glass-panel" style="padding: 18px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; margin-bottom: 12px;">
+            <span style="font-size: 13px; font-weight: 900; color: var(--cyan-neon);">📍 ${loc}</span>
+            <span style="font-size: 11px; font-weight: 800; color: #FFF; background:rgba(5,7,12,0.85); padding:3px 10px; border-radius:100px;">${groups[loc].length} معاملات</span>
           </div>
           <div style="display: flex; flex-direction: column; gap: 8px;">
             ${groups[loc].map(t => `
-              <div style="background:rgba(5,7,12,0.85); border:1px solid var(--card-border); padding:10px 12px; border-radius:12px; display:flex; justify-content:space-between; align-items:center;">
+              <div style="background:rgba(5,7,12,0.85); border:1px solid var(--border-subtle); padding:10px 14px; border-radius:14px; display:flex; justify-content:space-between; align-items:center;">
                 <div>
                   <b style="font-size: 12px; color: #FFF;">${t.companies?.name}</b>
                   <p style="font-size: 10px; color: var(--text-muted);">${t.transaction_type}</p>
                 </div>
-                <button onclick="openStepModal('${t.id}', '${t.current_location_step}')" class="btn-lux-emerald" style="padding:5px 10px; font-size:10px; border-radius:8px;">نقل ➔</button>
+                <button onclick="openStepModal('${t.id}', '${t.current_location_step}')" class="btn-emerald" style="padding:6px 12px; font-size:10px; border-radius:10px;">نقل ➔</button>
               </div>
             `).join('')}
           </div>
@@ -1769,13 +1725,13 @@
               badge = `<span style="color:#FDA4AF; font-weight:900;">منتهية منذ ${Math.abs(daysLeft)} يوم 🚨</span>`;
             } else if (daysLeft <= 30) {
               totalAlerts++;
-              badge = `<span style="color:var(--champagne); font-weight:800;">تنفذ خلال ${daysLeft} يوم ⚠️</span>`;
+              badge = `<span style="color:var(--gold-primary); font-weight:800;">تنفذ خلال ${daysLeft} يوم ⚠️</span>`;
             } else {
-              badge = `<span style="color:var(--emerald); font-weight:700;">نافذة (${daysLeft} يوم) ✅</span>`;
+              badge = `<span style="color:var(--emerald-neon); font-weight:700;">نافذة (${daysLeft} يوم) ✅</span>`;
             }
 
             return `
-              <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(5,7,12,0.85); padding:8px 12px; border-radius:10px; font-size:11px; margin-bottom:4px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(5,7,12,0.85); padding:10px 14px; border-radius:12px; font-size:11px; margin-bottom:4px;">
                 <span>${it.name}: <b>${it.date}</b></span>
                 ${badge}
               </div>
@@ -1783,10 +1739,10 @@
           }).join('');
 
           html += `
-            <div class="lux-card" style="padding:16px;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div class="lux-glass-panel" style="padding:18px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                 <b style="font-size:13px; color:#FFF;">${c.name}</b>
-                <button onclick="selectCompany('${c.id}', '${c.name}'); openCompanyLicensesModal();" style="background:none; border:none; color:var(--champagne); font-size:11px; cursor:pointer;">تعديل المواعيد ⚙️</button>
+                <button onclick="selectCompany('${c.id}', '${c.name}'); openCompanyLicensesModal();" style="background:none; border:none; color:var(--gold-primary); font-size:11px; cursor:pointer;">تعديل المواعيد ⚙️</button>
               </div>
               ${itemsHtml}
             </div>
@@ -1795,7 +1751,7 @@
       });
 
       document.getElementById('licensesAlertCountBadge').innerText = `${totalAlerts} تراخيص مستحقة`;
-      container.innerHTML = html || '<div class="lux-card" style="text-align:center; padding:30px; color:var(--text-dim);">لم يتم إدخال تواريخ نفاذية التراخيص بعد</div>';
+      container.innerHTML = html || '<div class="lux-glass-panel" style="text-align:center; padding:30px; color:var(--text-dim);">لم يتم إدخال تواريخ نفاذية التراخيص بعد</div>';
     }
 
     function tafqeetIraqiDinar(number) {
@@ -1963,12 +1919,12 @@
 
       const checksContainer = document.getElementById('dtChecklistsContainer');
       checksContainer.innerHTML = checklists.length > 0 ? checklists.map(c => `
-        <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(8,12,20,0.9); border: 1px solid rgba(255,255,255,0.06); padding: 8px 10px; border-radius: 10px;">
-          <label style="display: flex; align-items: center; gap: 8px; font-size: 11px; color: ${c.is_completed ? '#6B7280' : '#E5E7EB'}; cursor: pointer; flex: 1;">
-            <input type="checkbox" ${c.is_completed ? 'checked' : ''} onchange="toggleCheck('${c.id}', ${!c.is_completed}); setTimeout(() => openTransactionFullDetails('${txId}'), 200);" style="width: 15px; height: 15px; accent-color: var(--champagne); cursor: pointer;">
+        <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(8,12,20,0.9); border: 1px solid rgba(255,255,255,0.06); padding: 10px 12px; border-radius: 12px;">
+          <label style="display: flex; align-items: center; gap: 10px; font-size: 11px; color: ${c.is_completed ? '#6B7280' : '#E5E7EB'}; cursor: pointer; flex: 1;">
+            <input type="checkbox" ${c.is_completed ? 'checked' : ''} onchange="toggleCheck('${c.id}', ${!c.is_completed}); setTimeout(() => openTransactionFullDetails('${txId}'), 200);" style="width: 16px; height: 16px; accent-color: var(--gold-core); cursor: pointer;">
             <span style="${c.is_completed ? 'text-decoration: line-through;' : ''}">${c.item_text}</span>
           </label>
-          <button onclick="deleteChecklistItem('${c.id}'); setTimeout(() => openTransactionFullDetails('${txId}'), 200);" style="background: none; border: none; color: #FB7185; font-size: 12px; cursor: pointer;">✕</button>
+          <button onclick="deleteChecklistItem('${c.id}'); setTimeout(() => openTransactionFullDetails('${txId}'), 200);" style="background: none; border: none; color: #FB7185; font-size: 13px; cursor: pointer;">✕</button>
         </div>
       `).join('') : '<p style="font-size:11px; color:var(--text-dim); text-align:center; padding:10px;">لا توجد متطلبات مسجلة</p>';
 
@@ -1983,8 +1939,8 @@
         const d = new Date(h.time);
         const timeStr = d.toLocaleDateString('ar-IQ', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
         return `
-          <div class="timeline-item ${isCurrent ? 'active' : ''}">
-            <span style="font-size: 12px; font-weight: ${isCurrent ? '900' : '700'}; color: ${isCurrent ? 'var(--champagne)' : '#FFF'};">
+          <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(10,14,24,0.8); border: 1px solid var(--border-subtle); padding: 8px 12px; border-radius: 12px;">
+            <span style="font-size: 12px; font-weight: ${isCurrent ? '900' : '700'}; color: ${isCurrent ? 'var(--gold-primary)' : '#FFF'};">
               ${isCurrent ? '📍 الحالي: ' : '🏢 محطة: '} ${h.step}
             </span>
             <span style="font-size: 9px; color: var(--text-dim); font-family: monospace;">${timeStr}</span>
@@ -2080,7 +2036,7 @@
 
       refreshWeeklyReceiptQRCode(recNumber, compName, totalWeeklyDue, currentWeeklyData.dateRange);
 
-      logActivity("إصدار سند أسبوعي", `سند تسوية أسبوعية (الأحد - الخميس) لشركة (${compName}) بمجموع ${totalWeeklyDue} د.ع`);
+      logActivity("إصدار سند أسبوعي", `سند تسوية أسبوعية لشركة (${compName}) بمجموع ${totalWeeklyDue} د.ع`);
       openSheet('weeklyReceiptModal');
     }
 
@@ -2374,7 +2330,7 @@
       });
 
       if (filtered.length === 0) {
-        container.innerHTML = `<div class="lux-card" style="text-align: center; color: var(--text-dim); padding: 40px 20px; font-size: 13px;">${searchQuery ? 'لا توجد نتائج مطابقة للبحث' : 'لا توجد معاملات جارية حالياً'}</div>`;
+        container.innerHTML = `<div class="lux-glass-panel" style="text-align: center; color: var(--text-dim); padding: 40px 20px; font-size: 13px;">${searchQuery ? 'لا توجد نتائج مطابقة للبحث' : 'لا توجد معاملات جارية حالياً'}</div>`;
         return;
       }
 
@@ -2388,57 +2344,51 @@
         const debt = Math.max(0, total - paid);
 
         return `
-          <div class="lux-card" style="padding: 20px; display: flex; flex-direction: column; gap: 14px; ${staleInfo.isUrgent ? 'border-color: rgba(251, 113, 133, 0.4);' : ''}">
+          <div class="lux-glass-panel" style="padding: 22px; display: flex; flex-direction: column; gap: 14px; ${staleInfo.isUrgent ? 'border-color: rgba(251, 113, 133, 0.45);' : ''}">
             
             <div onclick="openTransactionFullDetails('${tx.id}')" style="cursor: pointer;">
               <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                  <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #182234, #0F1624); border: 1px solid rgba(229,195,120,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; color: var(--champagne);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="width: 44px; height: 44px; border-radius: 14px; background: linear-gradient(135deg, #182234, #0F1624); border: 1px solid var(--border-champagne); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; color: var(--gold-primary);">
                     ${(tx.companies?.name || 'ش').slice(0, 2)}
                   </div>
                   <div>
                     <div style="display: flex; align-items: center; gap: 6px;">
-                      <span style="font-size: 11px; font-weight: 800; color: var(--champagne);">${tx.companies?.name || 'شركة'}</span>
+                      <span style="font-size: 11px; font-weight: 800; color: var(--gold-primary);">${tx.companies?.name || 'شركة'}</span>
                       ${staleInfo.badgeHtml}
                     </div>
-                    <h3 style="font-size: 15px; font-weight: 900; color: #FFF; margin-top: 1px;">${tx.transaction_type}</h3>
+                    <h3 style="font-size: 16px; font-weight: 900; color: #FFF; margin-top: 1px;">${tx.transaction_type}</h3>
                   </div>
                 </div>
                 <div style="text-align: left;">
-                  <span style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 900; color: var(--champagne); background: var(--champagne-glow); border: 1px solid rgba(229,195,120,0.3); padding: 4px 10px; border-radius: 100px; display: inline-block;">${total.toLocaleString('ar-IQ')} د.ع</span>
-                  <p style="font-size: 10px; color: ${debt === 0 ? 'var(--emerald)' : '#FDA4AF'}; margin-top: 4px; font-weight: 700;">
+                  <span style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 900; color: var(--gold-primary); background: var(--gold-glow); border: 1px solid rgba(229,195,120,0.3); padding: 4px 12px; border-radius: 100px; display: inline-block;">${total.toLocaleString('ar-IQ')} د.ع</span>
+                  <p style="font-size: 10px; color: ${debt === 0 ? 'var(--emerald-neon)' : '#FDA4AF'}; margin-top: 4px; font-weight: 700;">
                     ${debt === 0 ? 'واصل خالص ✅' : `متبقي: ${debt.toLocaleString('ar-IQ')} د.ع`}
                   </p>
                 </div>
               </div>
 
-              <div style="background: rgba(5,7,12,0.85); border: 1px solid var(--card-border); border-radius: 16px; padding: 10px 14px; margin-top: 12px; display: flex; justify-content: space-between; align-items: center;">
+              <div style="background: rgba(5,7,12,0.85); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 10px 14px; margin-top: 14px; display: flex; justify-content: space-between; align-items: center;">
                 <div style="display: flex; align-items: center; gap: 8px; overflow: hidden; flex: 1;">
-                  <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan);"></span>
+                  <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--cyan-neon); box-shadow: 0 0 10px var(--cyan-neon);"></span>
                   <span style="font-size: 12px; color: #D1D5DB; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${tx.current_location_step}</span>
                 </div>
-                <span style="font-size: 10px; color: var(--champagne); font-weight: 800;">عرض التفاصيل الكامله 🔍</span>
+                <span style="font-size: 10px; color: var(--gold-primary); font-weight: 800;">عرض التفاصيل 🔍</span>
               </div>
             </div>
 
             <div>
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">نسبة إنجاز المتطلبات (${completedCount}/${checklists.length})</span>
-                <span style="font-size: 11px; font-weight: 900; color: ${progressPercent === 100 ? 'var(--emerald)' : 'var(--champagne)'}; font-family: 'Plus Jakarta Sans', sans-serif;">${progressPercent}%</span>
+                <span style="font-size: 11px; font-weight: 800; color: var(--text-muted);">نسبة إنجاز المتطلبات (${completedCount}/${checklists.length})</span>
+                <span style="font-size: 11px; font-weight: 900; color: ${progressPercent === 100 ? 'var(--emerald-neon)' : 'var(--gold-primary)'}; font-family: 'Plus Jakarta Sans', sans-serif;">${progressPercent}%</span>
               </div>
               <div class="lux-progress-track"><div class="lux-progress-bar" style="width: ${progressPercent}%;"></div></div>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; border-top: 1px solid var(--card-border); padding-top: 12px;">
-              <button onclick="openWhatsAppQuickModal('${tx.id}')" class="btn-lux-secondary" style="padding: 10px 4px; font-size: 11px;">
-                💬 واتساب
-              </button>
-              <button onclick="openReceiptVoucherModalById('${tx.id}')" class="btn-lux-cyan" style="padding: 10px 4px; font-size: 11px;">
-                🧾 سند قبض
-              </button>
-              <button onclick="completeTx('${tx.id}')" class="btn-lux-emerald" style="padding: 10px 4px; font-size: 11px;">
-                إنجاز ✅
-              </button>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; border-top: 1px solid var(--border-subtle); padding-top: 12px;">
+              <button onclick="openWhatsAppQuickModal('${tx.id}')" class="btn-secondary" style="padding: 11px 4px; font-size: 11px;">💬 واتساب</button>
+              <button onclick="openReceiptVoucherModalById('${tx.id}')" class="btn-cyan" style="padding: 11px 4px; font-size: 11px;">🧾 سند قبض</button>
+              <button onclick="completeTx('${tx.id}')" class="btn-emerald" style="padding: 11px 4px; font-size: 11px;">إنجاز ✅</button>
             </div>
 
           </div>
@@ -2658,10 +2608,10 @@
         badge.style.display = 'block';
         countText.innerText = `${alerts.length} تنبيهات مهمة`;
         list.innerHTML = alerts.map(a => `
-          <div style="background:rgba(5,7,12,0.85); border:1px solid ${a.type === 'urgent' ? 'rgba(251, 113, 133, 0.4)' : 'rgba(229, 195, 120, 0.4)'}; padding:12px 14px; border-radius:16px; display:flex; align-items:flex-start; gap:10px;">
-            <span style="font-size: 18px;">${a.type === 'urgent' ? '🚨' : '⚠️'}</span>
+          <div class="lux-glass-panel" style="border-color: ${a.type === 'urgent' ? 'rgba(251, 113, 133, 0.45)' : 'rgba(229, 195, 120, 0.45)'}; padding:14px; border-radius:18px; display:flex; align-items:flex-start; gap:12px;">
+            <span style="font-size: 20px;">${a.type === 'urgent' ? '🚨' : '⚠️'}</span>
             <div style="flex: 1;">
-              <p style="font-size: 13px; font-weight: 900; color: ${a.type === 'urgent' ? '#FDA4AF' : 'var(--champagne)'};">${a.title}</p>
+              <p style="font-size: 13px; font-weight: 900; color: ${a.type === 'urgent' ? '#FDA4AF' : 'var(--gold-primary)'};">${a.title}</p>
               <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">${a.desc}</p>
             </div>
           </div>
@@ -2669,7 +2619,7 @@
       } else {
         badge.style.display = 'none';
         countText.innerText = '0 تنبيهات';
-        list.innerHTML = '<div style="text-align:center; padding: 30px 10px;"><p style="font-size: 14px; font-weight: 800; color: var(--emerald);">كل المعاملات والتراخيص نشطة ومحدثة 🚀</p></div>';
+        list.innerHTML = '<div style="text-align:center; padding: 30px 10px;"><p style="font-size: 14px; font-weight: 800; color: var(--emerald-neon);">كل المعاملات والتراخيص نشطة ومحدثة 🚀</p></div>';
       }
     }
 
@@ -2716,7 +2666,7 @@
             label: 'المبلغ (د.ع)',
             data: [totalPaid, totalDebt],
             backgroundColor: ['#38BDF8', '#FB7185'],
-            borderRadius: 8
+            borderRadius: 10
           }]
         },
         options: {
@@ -2743,7 +2693,6 @@
       });
       const weeklySum = weeklyTxs.reduce((s, t) => s + (Number(t.fee_iqd) || 0), 0);
 
-      document.getElementById('totalRevenue').innerText = `${tot.toLocaleString('ar-IQ')} د.ع`;
       document.getElementById('weeklyTotalSumBadge').innerText = `${weeklySum.toLocaleString('ar-IQ')} د.ع`;
       document.getElementById('weeklyPeriodSubtitle').innerText = `أتعاب الدوام (${workWeek.dateRangeText})`;
       document.getElementById('accPaidSummary').innerText = `${paidTot.toLocaleString('ar-IQ')} د.ع`;
@@ -2759,22 +2708,22 @@
         const isChecked = checkedCompanyIdsForStatement.has(c.id);
 
         return `
-          <div class="lux-card" style="padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+          <div class="lux-glass-panel" style="padding: 18px; display: flex; flex-direction: column; gap: 12px;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-              <div style="display:flex; align-items:flex-start; gap:10px; flex:1;">
-                <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleCompanyCheckboxForStatement('${c.id}', this.checked)" style="width:18px; height:18px; accent-color:var(--champagne); cursor:pointer; margin-top:2px;">
+              <div style="display:flex; align-items:flex-start; gap:12px; flex:1;">
+                <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleCompanyCheckboxForStatement('${c.id}', this.checked)" style="width:18px; height:18px; accent-color:var(--gold-core); cursor:pointer; margin-top:3px;">
                 <div>
-                  <p style="font-size: 13px; font-weight: 900; color: #FFF;">🏢 ${c.name}</p>
+                  <p style="font-size: 14px; font-weight: 900; color: #FFF;">🏢 ${c.name}</p>
                   <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
-                    الأتعاب: ${cTotalFee.toLocaleString('ar-IQ')} د.ع • <span style="color: ${cDebt === 0 ? 'var(--emerald)' : '#FDA4AF'}; font-weight:800;">${cDebt === 0 ? 'خالص بالكامل ✅' : `متبقي: ${cDebt.toLocaleString('ar-IQ')} د.ع`}</span>
+                    الأتعاب: ${cTotalFee.toLocaleString('ar-IQ')} د.ع • <span style="color: ${cDebt === 0 ? 'var(--emerald-neon)' : '#FDA4AF'}; font-weight:800;">${cDebt === 0 ? 'خالص بالكامل ✅' : `متبقي: ${cDebt.toLocaleString('ar-IQ')} د.ع`}</span>
                   </p>
                 </div>
               </div>
-              <div style="display: flex; gap: 6px;">
-                <button onclick="openWeeklyReceiptForCompany('${c.id}')" class="btn-lux-purple" style="padding: 6px 10px; font-size: 10px; border-radius: 8px;">
+              <div style="display: flex; gap: 8px;">
+                <button onclick="openWeeklyReceiptForCompany('${c.id}')" class="btn-purple">
                   📅 سند أسبوعي
                 </button>
-                <button onclick="openCompanyDedicatedStatement('${c.id}')" class="btn-lux-cyan" style="padding: 6px 10px; font-size: 10px; border-radius: 8px;">
+                <button onclick="openCompanyDedicatedStatement('${c.id}')" class="btn-cyan">
                   📄 كشف خاص
                 </button>
               </div>
@@ -2863,12 +2812,12 @@
       document.getElementById('archivedList').innerHTML = filtered.length === 0 
         ? '<p style="text-align: center; color: var(--text-dim); padding: 10px; font-size: 12px;">الأرشيف فارغ حالياً</p>'
         : filtered.map(t => `
-          <div style="background: rgba(5,7,12,0.85); border: 1px solid var(--card-border); padding: 10px 14px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+          <div class="lux-glass-panel" style="padding: 12px 16px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center;">
             <div>
               <p style="font-size: 12px; font-weight: 800; color: #FFF;">${t.companies?.name} - ${t.transaction_type}</p>
               <p style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">أنجزت: ${t.completed_at ? new Date(t.completed_at).toLocaleDateString('ar-IQ') : 'مؤخراً'}</p>
             </div>
-            <span style="font-size: 10px; font-weight: 800; color: var(--emerald); background: rgba(0, 245, 160, 0.1); padding: 2px 6px; border-radius: 6px;">مؤرشفة</span>
+            <span style="font-size: 10px; font-weight: 800; color: var(--emerald-neon); background: rgba(0, 245, 160, 0.12); padding: 3px 8px; border-radius: 8px;">مؤرشفة</span>
           </div>
         `).join('');
     }
