@@ -5,12 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>منظومة الإدارة السيادية</title>
   
-  <!-- المكتبات الأساسية -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   
-  <!-- خطوط فاخرة (Tajawal للنصوص، Plus Jakarta Sans للأرقام) -->
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800;900&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
   
   <style>
@@ -34,9 +32,10 @@
       --text-main: #FFFFFF;
       --text-muted: #8A8F98;
       
+      /* تم تعديل الحواف لتصبح هندسية أكثر وأقل دائرية */
       --radius-sm: 12px;
-      --radius-md: 20px;
-      --radius-lg: 28px;
+      --radius-md: 16px; /* كان 20px وجعل الأزرار كالكبسولة */
+      --radius-lg: 24px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -66,20 +65,22 @@
     }
     .editorial-input:focus { border-color: var(--gold); background: var(--card-elevated); }
 
-    .search-pill {
+    /* تم تحويل شريط البحث إلى كتلة صلبة بدلاً من الكبسولة */
+    .search-block {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
-      border-radius: 100px;
+      border-radius: var(--radius-sm);
       display: flex;
       align-items: center;
       padding: 4px 16px;
       position: relative;
+      margin-bottom: 24px;
     }
-    .search-pill input {
+    .search-block input {
       background: transparent; border: none; color: var(--text-main);
-      padding: 12px 12px 12px 32px; width: 100%; font-size: 14px; font-weight: 500; outline: none;
+      padding: 14px 12px 14px 32px; width: 100%; font-size: 14px; font-weight: 500; outline: none;
     }
-    .search-pill svg { position: absolute; right: 16px; color: var(--text-muted); }
+    .search-block svg { position: absolute; right: 16px; color: var(--text-muted); }
 
     .bento-card {
       background: var(--card-bg);
@@ -102,7 +103,7 @@
     .btn-gold:active { transform: scale(0.96); background: var(--gold-hover); }
 
     .btn-outline {
-      background: transparent; color: var(--text-main);
+      background: var(--card-bg); color: var(--text-main);
       border: 1px solid var(--border-color); border-radius: var(--radius-md);
       font-weight: 800; font-size: 14px; padding: 16px;
       display: flex; justify-content: center; align-items: center; gap: 8px;
@@ -112,7 +113,7 @@
 
     .btn-ghost {
       background: var(--card-elevated); color: var(--text-main);
-      border: none; border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color); border-radius: var(--radius-sm);
       font-weight: 700; font-size: 13px; padding: 12px 16px;
       cursor: pointer; transition: all 0.2s; text-align: center;
     }
@@ -186,7 +187,6 @@
 
     main { max-width: 520px; margin: 0 auto; padding: 24px; display: flex; flex-direction: column; gap: 24px; }
 
-    /* تنسيقات الطباعة */
     @media print {
       body * { visibility: hidden; }
       #printableReceiptArea, #printableReceiptArea *, #printableWeeklyArea, #printableWeeklyArea *, #printableCustomArea, #printableCustomArea * { visibility: visible; }
@@ -232,29 +232,35 @@
       </div>
     </div>
     <div style="display: flex; gap: 12px; align-items: center;">
-      <button onclick="openSheet('notificationsModal')" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-main); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; transition: 0.2s;">
+      <button onclick="openSheet('notificationsModal')" style="background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-main); width: 44px; height: 44px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; transition: 0.2s;">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
         <span id="notifBadge" style="position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; background: var(--danger); border-radius: 50%; display: none;"></span>
       </button>
-      <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 100px; padding: 4px; display: flex;">
-        <button onclick="setRole(true)" id="roleOffice" style="border: none; background: var(--card-elevated); color: var(--text-main); font-size: 12px; font-weight: 800; padding: 8px 16px; border-radius: 100px; cursor: pointer; transition: 0.3s;">المكتب</button>
-        <button onclick="setRole(false)" id="roleField" style="border: none; background: transparent; color: var(--text-muted); font-size: 12px; font-weight: 800; padding: 8px 16px; border-radius: 100px; cursor: pointer; transition: 0.3s;">الميدان</button>
+      <!-- تم تعديل مفتاح التبديل ليكون هندسياً أكثر -->
+      <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 4px; display: flex;">
+        <button onclick="setRole(true)" id="roleOffice" style="border: none; background: var(--card-elevated); border: 1px solid var(--border-color); color: var(--text-main); font-size: 12px; font-weight: 800; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: 0.3s;">المكتب</button>
+        <button onclick="setRole(false)" id="roleField" style="border: none; background: transparent; border: 1px solid transparent; color: var(--text-muted); font-size: 12px; font-weight: 800; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: 0.3s;">الميدان</button>
       </div>
     </div>
   </header>
 
   <main>
-    <div class="search-pill">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
-      <input id="globalSearchInput" type="text" placeholder="بحث شامل عن معاملة أو شركة..." oninput="handleGlobalSearch(this.value)">
-    </div>
-
     <!-- تبويب 1: الرئيسية -->
     <div id="tab-transactions" class="tab-section active">
-      <div id="adminActionButtons" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-        <button onclick="openSheet('newCompanyModal')" class="btn-outline">شركة جديدة</button>
-        <button onclick="openSheet('newTxModal')" class="btn-gold">بدء معاملة</button>
+      
+      <!-- شريط البحث (تم تحويله لكتلة صلبة) -->
+      <div class="search-block">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+        <input id="globalSearchInput" type="text" placeholder="بحث شامل عن معاملة أو شركة..." oninput="handleGlobalSearch(this.value)">
       </div>
+
+      <!-- الأزرار (أصبحت هندسية) -->
+      <div id="adminActionButtons" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 8px;">
+        <button onclick="openSheet('newTxModal')" class="btn-gold">بدء معاملة</button>
+        <button onclick="openSheet('newCompanyModal')" class="btn-outline">شركة جديدة</button>
+      </div>
+
+      <!-- الشركات الموثقة (تمرير أفقي كبطاقات بينتو مصغرة) -->
       <section>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
           <span style="font-size: 14px; font-weight: 900; color: var(--text-muted);">الشركات الموثقة</span>
@@ -262,10 +268,12 @@
         </div>
         <div id="companiesList" style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none;"></div>
       </section>
+
+      <!-- المعاملات النشطة -->
       <section>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; margin-top: 8px;">
           <span style="font-size: 14px; font-weight: 900; color: var(--text-muted);">المعاملات الجارية</span>
-          <span id="activeCountBadge" class="num-font" style="font-size: 12px; font-weight: 800; color: var(--gold); background: var(--gold-dim); padding: 4px 12px; border-radius: 100px;">0</span>
+          <span id="activeCountBadge" class="num-font" style="font-size: 12px; font-weight: 800; color: var(--gold); background: var(--gold-dim); padding: 4px 12px; border-radius: var(--radius-sm);">0</span>
         </div>
         <div id="activeTransactionsList" style="display: flex; flex-direction: column; gap: 24px;"></div>
       </section>
@@ -276,7 +284,7 @@
       <div class="bento-card">
         <h3 style="font-size: 20px; font-weight: 900; margin-bottom: 8px;">الموجه الميداني</h3>
         <p style="font-size: 13px; color: var(--text-muted);">تجميع المعاملات حسب كل دائرة لإنهاء المهام بجولة واحدة</p>
-        <span id="routeTotalTasksBadge" class="num-font" style="margin-top: 16px; display: inline-block; font-size: 12px; font-weight: 800; color: var(--blue); background: rgba(59, 130, 246, 0.1); padding: 6px 16px; border-radius: 100px; width: fit-content;">0</span>
+        <span id="routeTotalTasksBadge" class="num-font" style="margin-top: 16px; display: inline-block; font-size: 12px; font-weight: 800; color: var(--blue); background: rgba(59, 130, 246, 0.1); padding: 6px 16px; border-radius: var(--radius-sm); width: fit-content;">0</span>
       </div>
       <div id="routeGroupedList" style="display: flex; flex-direction: column; gap: 24px;"></div>
     </div>
@@ -286,7 +294,7 @@
       <div class="bento-card">
         <h3 style="font-size: 20px; font-weight: 900; margin-bottom: 8px; color: var(--gold);">رادار التراخيص</h3>
         <p style="font-size: 13px; color: var(--text-muted);">متابعة تواريخ انتهاء إجازات المهنة والغرف التجارية</p>
-        <span id="licensesAlertCountBadge" class="num-font" style="margin-top: 16px; display: inline-block; font-size: 12px; font-weight: 800; color: var(--gold); background: var(--gold-dim); padding: 6px 16px; border-radius: 100px; width: fit-content;">0</span>
+        <span id="licensesAlertCountBadge" class="num-font" style="margin-top: 16px; display: inline-block; font-size: 12px; font-weight: 800; color: var(--gold); background: var(--gold-dim); padding: 6px 16px; border-radius: var(--radius-sm); width: fit-content;">0</span>
       </div>
       <div id="licensesCardsList" style="display: flex; flex-direction: column; gap: 16px;"></div>
     </div>
@@ -319,7 +327,7 @@
     <div id="tab-accounts" class="tab-section">
       <div class="bento-card" style="border-color: var(--gold); position: relative; overflow: hidden;">
         <div style="position: absolute; top: -50%; right: -20%; width: 200px; height: 200px; background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 70%); border-radius: 50%;"></div>
-        <span style="font-size: 11px; font-weight: 800; color: var(--gold); background: var(--gold-dim); padding: 4px 12px; border-radius: 100px; width: fit-content; margin-bottom: 16px; position: relative;">دورة الأحد - الخميس</span>
+        <span style="font-size: 11px; font-weight: 800; color: var(--gold); background: var(--gold-dim); padding: 4px 12px; border-radius: var(--radius-sm); width: fit-content; margin-bottom: 16px; position: relative;">دورة الأحد - الخميس</span>
         <h3 style="font-size: 14px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; position: relative;">مجموع أتعاب الأسبوع الجاري</h3>
         <h2 id="weeklyTotalSumBadge" class="num-font" style="font-size: 36px; font-weight: 900; color: var(--gold); margin-bottom: 24px; position: relative; letter-spacing: -1px;">0 د.ع</h2>
         <div style="display: flex; gap: 12px; position: relative;">
@@ -405,7 +413,7 @@
         <span>الأرشيف</span>
       </button>
       <button onclick="switchTab('settings')" id="nav-settings" class="dock-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         <span>إعدادات</span>
       </button>
     </nav>
@@ -543,7 +551,7 @@
       <div class="sheet-drag"></div>
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
         <h3 style="font-size: 20px; font-weight: 900;">مركز التنبيهات</h3>
-        <span id="notifCountText" class="num-font" style="font-size: 13px; font-weight: 800; color: var(--gold); background: var(--gold-dim); padding: 4px 12px; border-radius: 100px;">0</span>
+        <span id="notifCountText" class="num-font" style="font-size: 13px; font-weight: 800; color: var(--gold); background: var(--gold-dim); padding: 4px 12px; border-radius: var(--radius-sm);">0</span>
       </div>
       <div id="notificationsList" style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; max-height: 400px; overflow-y: auto;"></div>
       <button onclick="closeSheet('notificationsModal')" class="btn-ghost" style="width: 100%;">إغلاق</button>
@@ -831,7 +839,7 @@
       <div class="sheet-drag"></div>
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
         <h3 style="font-size: 20px; font-weight: 900;">كشف المواقف العام</h3>
-        <button onclick="window.print()" class="btn-gold" style="padding: 10px 16px; font-size: 13px;">طباعة التقرير</button>
+        <button onclick="window.print()" class="btn-gold" style="padding: 10px 16px; font-size: 12px;">طباعة التقرير</button>
       </div>
 
       <div id="printableArea" style="background: #FFF; color: #000; padding: 32px; border-radius: 12px; font-size: 13px; line-height: 1.8; border: 1px solid #E5E7EB;">
@@ -865,7 +873,6 @@
     </div>
   </div>
 
-  <!-- السكربتات (تم تضمين جميع دوال الرندر لتعمل 100% مع التصميم الجديد) -->
   <script>
     const SUPABASE_URL = "https://giidtugteyiobaagqohy.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpaWR0dWd0ZXlpb2JhYWdxb2h5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxMTgyMjYsImV4cCI6MjEwMjY5NDIyNn0.v7Nwag2BTrCWG6zzeYo1kTG4w2xAuzSmiZpCLJtvBow";
@@ -898,7 +905,6 @@
     let statusChartInstance = null;
     let financeChartInstance = null;
 
-    // --- الوظائف الأساسية ---
     function showToast(msg, icon = "✨") {
       const t = document.getElementById('toast');
       document.getElementById('toastMsg').innerText = msg;
@@ -947,7 +953,6 @@
     function openSheet(id) { document.getElementById(id).style.display = 'flex'; }
     function closeSheet(id) { document.getElementById(id).style.display = 'none'; }
 
-    // --- المصادقة ---
     async function checkAuthSession() {
       const { data: { session } } = await db.auth.getSession();
       if (session) {
@@ -995,7 +1000,6 @@
       }
     }
 
-    // --- جلب البيانات ---
     async function loadData() {
       try {
         const { data: compData } = await db.from('companies').select('*').order('created_at', { ascending: false });
@@ -1023,8 +1027,10 @@
       renderArchive(allTransactionsGlobal.filter(t => t.status === 'completed' || t.status === 'archived'));
     }
 
-    // --- الرندر الشامل للواجهات (تم إكمالها بالكامل لتناسب تصميم البينتو الفاخر) ---
-    
+    /* 
+      تم تعديل دالة رندر الشركات الموثقة 
+      لتحويلها من شكل كبسولة أفقية إلى بطاقة بينتو مصغرة فاخرة ومربعة 
+    */
     function renderCompanies() {
       const list = document.getElementById('companiesList');
       const select = document.getElementById('txCompanySelect');
@@ -1034,11 +1040,14 @@
 
       filtered.forEach(c => {
         list.innerHTML += `
-          <div onclick="selectCompany('${c.id}', '${c.name}')" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px 20px; flex-shrink: 0; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: 0.2s;">
-            <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--card-elevated); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; color: var(--gold);">
+          <div onclick="selectCompany('${c.id}', '${c.name}')" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 16px; min-width: 140px; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; cursor: pointer; transition: 0.2s;">
+            <div style="width: 40px; height: 40px; border-radius: 12px; background: var(--card-elevated); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; color: var(--gold);">
               ${c.name.slice(0, 2)}
             </div>
-            <p style="font-size: 14px; font-weight: 900; white-space: nowrap;">${c.name}</p>
+            <div>
+              <p style="font-size: 14px; font-weight: 900; color: #FFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px;">${c.name}</p>
+              <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">ملف موثق</p>
+            </div>
           </div>`;
         select.innerHTML += `<option value="${c.id}">${c.name}</option>`;
       });
@@ -1072,7 +1081,7 @@
             <div onclick="openTransactionFullDetails('${tx.id}')" style="cursor: pointer;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <div style="display: flex; align-items: center; gap: 12px;">
-                  <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--card-elevated); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; color: var(--gold);">
+                  <div style="width: 40px; height: 40px; border-radius: 12px; background: var(--card-elevated); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; color: var(--gold);">
                     ${(tx.companies?.name || 'ش').slice(0, 2)}
                   </div>
                   <span style="font-size: 15px; font-weight: 900; color: #FFF;">${tx.companies?.name || 'شركة'}</span>
@@ -1405,8 +1414,6 @@
       });
     }
 
-    // --- الوظائف المساعدة والإجراءات التي تعتمد على تصميم البينتو ---
-    
     function getStalenessInfo(tx) {
       const hist = getStepHistory(tx.id);
       const lastTimeStr = hist.length > 0 ? hist[hist.length - 1].time : tx.created_at;
