@@ -32,9 +32,8 @@
       --text-main: #FFFFFF;
       --text-muted: #8A8F98;
       
-      /* تم تعديل الحواف لتصبح هندسية أكثر وأقل دائرية */
       --radius-sm: 12px;
-      --radius-md: 16px; /* كان 20px وجعل الأزرار كالكبسولة */
+      --radius-md: 16px;
       --radius-lg: 24px;
     }
 
@@ -65,7 +64,6 @@
     }
     .editorial-input:focus { border-color: var(--gold); background: var(--card-elevated); }
 
-    /* تم تحويل شريط البحث إلى كتلة صلبة بدلاً من الكبسولة */
     .search-block {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -219,12 +217,12 @@
     <span id="toastMsg">تم الإجراء بنجاح</span>
   </div>
 
-  <!-- الهيدر العلوي -->
+  <!-- الهيدر العلوي (تم إزالة زر الميدان والمكتب وإضافة التاريخ) -->
   <header>
-    <div style="display: flex; align-items: center; gap: 16px;">
+    <div style="display: flex; align-items: center; gap: 12px;">
       <div class="avatar-logo">M</div>
       <div>
-        <h1 id="headerOfficeName" style="font-size: 16px; font-weight: 900; letter-spacing: -0.3px;">منظومة المعاملات</h1>
+        <h1 id="headerOfficeName" style="font-size: 16px; font-weight: 900; letter-spacing: -0.3px;">مصطفى فيصل</h1>
         <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px;">
           <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--emerald);"></span>
           <span id="userStatusLabel" style="font-size: 11px; color: var(--text-muted); font-weight: 700;">متصل بالسحابة</span>
@@ -232,15 +230,15 @@
       </div>
     </div>
     <div style="display: flex; gap: 12px; align-items: center;">
+      <!-- شريحة التاريخ الفاخرة بدلاً من زر المكتب -->
+      <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 8px 16px; display: flex; align-items: center;">
+        <span id="headerDateDisplay" class="num-font" style="font-size: 12px; font-weight: 800; color: var(--gold);">التاريخ</span>
+      </div>
+      
       <button onclick="openSheet('notificationsModal')" style="background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-main); width: 44px; height: 44px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; transition: 0.2s;">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
         <span id="notifBadge" style="position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; background: var(--danger); border-radius: 50%; display: none;"></span>
       </button>
-      <!-- تم تعديل مفتاح التبديل ليكون هندسياً أكثر -->
-      <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 4px; display: flex;">
-        <button onclick="setRole(true)" id="roleOffice" style="border: none; background: var(--card-elevated); border: 1px solid var(--border-color); color: var(--text-main); font-size: 12px; font-weight: 800; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: 0.3s;">المكتب</button>
-        <button onclick="setRole(false)" id="roleField" style="border: none; background: transparent; border: 1px solid transparent; color: var(--text-muted); font-size: 12px; font-weight: 800; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: 0.3s;">الميدان</button>
-      </div>
     </div>
   </header>
 
@@ -248,19 +246,18 @@
     <!-- تبويب 1: الرئيسية -->
     <div id="tab-transactions" class="tab-section active">
       
-      <!-- شريط البحث (تم تحويله لكتلة صلبة) -->
+      <!-- شريط البحث ككتلة صلبة فاخرة -->
       <div class="search-block">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
         <input id="globalSearchInput" type="text" placeholder="بحث شامل عن معاملة أو شركة..." oninput="handleGlobalSearch(this.value)">
       </div>
 
-      <!-- الأزرار (أصبحت هندسية) -->
       <div id="adminActionButtons" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 8px;">
         <button onclick="openSheet('newTxModal')" class="btn-gold">بدء معاملة</button>
         <button onclick="openSheet('newCompanyModal')" class="btn-outline">شركة جديدة</button>
       </div>
 
-      <!-- الشركات الموثقة (تمرير أفقي كبطاقات بينتو مصغرة) -->
+      <!-- الشركات الموثقة (بطاقات أفقية راقية وبدون "شر") -->
       <section>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
           <span style="font-size: 14px; font-weight: 900; color: var(--text-muted);">الشركات الموثقة</span>
@@ -873,13 +870,14 @@
     </div>
   </div>
 
+  <!-- السكربتات -->
   <script>
     const SUPABASE_URL = "https://giidtugteyiobaagqohy.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpaWR0dWd0ZXlpb2JhYWdxb2h5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxMTgyMjYsImV4cCI6MjEwMjY5NDIyNn0.v7Nwag2BTrCWG6zzeYo1kTG4w2xAuzSmiZpCLJtvBow";
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let currentUser = null;
-    let isOfficeMode = true;
+    let isOfficeMode = true; // تم تثبيت الصلاحية كمدير أساسي لعدم الحاجة لزر التبديل
     let selectedCompanyId = null;
     let selectedCompanyName = "";
     
@@ -904,6 +902,12 @@
     let searchQuery = "";
     let statusChartInstance = null;
     let financeChartInstance = null;
+
+    // تم إنشاء أيقونة مؤسسية فاخرة بديلة للنص المشوه "شر"
+    const companyIconSVG = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 21h18M5 21V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14M9 9h6M9 13h6M9 17h6"/></svg>`;
+
+    // --- تحديث التاريخ في الهيدر ---
+    document.getElementById('headerDateDisplay').innerText = new Date().toLocaleDateString('ar-IQ', { day: 'numeric', month: 'short' });
 
     function showToast(msg, icon = "✨") {
       const t = document.getElementById('toast');
@@ -932,24 +936,6 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function setRole(isOffice) {
-      isOfficeMode = isOffice;
-      const rOffice = document.getElementById('roleOffice');
-      const rField = document.getElementById('roleField');
-      
-      if(isOffice) {
-        rOffice.style.background = 'var(--card-elevated)'; rOffice.style.color = 'var(--text-main)';
-        rField.style.background = 'transparent'; rField.style.color = 'var(--text-muted)';
-        document.getElementById('adminActionButtons').style.display = 'grid';
-      } else {
-        rField.style.background = 'var(--card-elevated)'; rField.style.color = 'var(--text-main)';
-        rOffice.style.background = 'transparent'; rOffice.style.color = 'var(--text-muted)';
-        document.getElementById('adminActionButtons').style.display = 'none';
-      }
-      showToast(isOffice ? 'الوضع المكتبي مفعل 🏢' : 'الوضع الميداني مفعل 🏃‍♂️');
-      loadData();
-    }
-
     function openSheet(id) { document.getElementById(id).style.display = 'flex'; }
     function closeSheet(id) { document.getElementById(id).style.display = 'none'; }
 
@@ -959,7 +945,6 @@
         currentUser = session.user;
         document.getElementById('authOverlay').style.display = 'none';
         document.getElementById('currentUserEmail').innerText = currentUser.email;
-        document.getElementById('userStatusLabel').innerText = currentUser.email.split('@')[0];
         loadData();
       } else {
         document.getElementById('authOverlay').style.display = 'flex';
@@ -983,7 +968,6 @@
         currentUser = data.user;
         document.getElementById('authOverlay').style.display = 'none';
         document.getElementById('currentUserEmail').innerText = currentUser.email;
-        document.getElementById('userStatusLabel').innerText = currentUser.email.split('@')[0];
         logActivity("دخول", `تسجيل دخول: ${currentUser.email}`);
         showToast("مرحباً بك!");
         loadData();
@@ -1028,8 +1012,7 @@
     }
 
     /* 
-      تم تعديل دالة رندر الشركات الموثقة 
-      لتحويلها من شكل كبسولة أفقية إلى بطاقة بينتو مصغرة فاخرة ومربعة 
+      تم استبدال دالة قص الحروف المزعجة (شر) بالأيقونة الهندسية الفاخرة للشركات
     */
     function renderCompanies() {
       const list = document.getElementById('companiesList');
@@ -1040,12 +1023,12 @@
 
       filtered.forEach(c => {
         list.innerHTML += `
-          <div onclick="selectCompany('${c.id}', '${c.name}')" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 16px; min-width: 140px; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; cursor: pointer; transition: 0.2s;">
-            <div style="width: 40px; height: 40px; border-radius: 12px; background: var(--card-elevated); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; color: var(--gold);">
-              ${c.name.slice(0, 2)}
+          <div onclick="selectCompany('${c.id}', '${c.name}')" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 14px 20px; min-width: 180px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: 0.2s;">
+            <div style="width: 38px; height: 38px; border-radius: 10px; background: var(--card-elevated); border: 1px solid var(--border-light); display: flex; align-items: center; justify-content: center; color: var(--gold);">
+              ${companyIconSVG}
             </div>
             <div>
-              <p style="font-size: 14px; font-weight: 900; color: #FFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px;">${c.name}</p>
+              <p style="font-size: 14px; font-weight: 900; color: #FFF; white-space: nowrap; max-width: 130px; overflow: hidden; text-overflow: ellipsis;">${c.name}</p>
               <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">ملف موثق</p>
             </div>
           </div>`;
@@ -1053,6 +1036,9 @@
       });
     }
 
+    /* 
+      تم استبدال دالة قص الحروف المزعجة (شر) بالأيقونة الهندسية في المعاملات النشطة أيضاً
+    */
     function renderActive() {
       const container = document.getElementById('activeTransactionsList');
       const filtered = activeTransactions.filter(tx => {
@@ -1081,8 +1067,8 @@
             <div onclick="openTransactionFullDetails('${tx.id}')" style="cursor: pointer;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <div style="display: flex; align-items: center; gap: 12px;">
-                  <div style="width: 40px; height: 40px; border-radius: 12px; background: var(--card-elevated); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; color: var(--gold);">
-                    ${(tx.companies?.name || 'ش').slice(0, 2)}
+                  <div style="width: 42px; height: 42px; border-radius: 12px; background: var(--card-elevated); border: 1px solid var(--border-light); display: flex; align-items: center; justify-content: center; color: var(--gold);">
+                    ${companyIconSVG}
                   </div>
                   <span style="font-size: 15px; font-weight: 900; color: #FFF;">${tx.companies?.name || 'شركة'}</span>
                 </div>
@@ -1871,7 +1857,7 @@
 
     function loadSettings() {
       const name = localStorage.getItem('office_name'); const phone = localStorage.getItem('office_phone'); const addr = localStorage.getItem('office_addr');
-      if (name) { document.getElementById('setOfficeName').value = name; document.getElementById('headerOfficeName').innerText = name; }
+      if (name) { document.getElementById('setOfficeName').value = name; }
       if (phone) document.getElementById('setOfficePhone').value = phone;
       if (addr) document.getElementById('setOfficeAddress').value = addr;
     }
@@ -1879,7 +1865,7 @@
     function saveSettings() {
       const name = document.getElementById('setOfficeName').value.trim(); const phone = document.getElementById('setOfficePhone').value.trim(); const addr = document.getElementById('setOfficeAddress').value.trim();
       if (name) localStorage.setItem('office_name', name); if (phone) localStorage.setItem('office_phone', phone); if (addr) localStorage.setItem('office_addr', addr);
-      document.getElementById('headerOfficeName').innerText = name || 'منظومة المعاملات'; showToast("تم حفظ الإعدادات");
+      showToast("تم حفظ الإعدادات");
     }
 
     loadSettings();
