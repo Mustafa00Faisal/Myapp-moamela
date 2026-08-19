@@ -27,6 +27,7 @@
       --danger-glow: rgba(255, 77, 77, 0.25);
       --cyan: #00D9F5;
       --cyan-glow: rgba(0, 217, 245, 0.2);
+      --purple: #A78BFA;
       --text: #F3F4F6;
       --text-muted: #8E9BAE;
       --text-dim: #546075;
@@ -147,7 +148,7 @@
       border-radius: 16px;
       font-weight: 900;
       font-size: 12px;
-      padding: 11px;
+      padding: 10px 12px;
       box-shadow: 0 8px 25px var(--cyan-glow);
       cursor: pointer;
       display: flex;
@@ -156,6 +157,23 @@
       gap: 6px;
     }
     .btn-lux-cyan:active { transform: scale(0.97); }
+
+    .btn-lux-purple {
+      background: linear-gradient(135deg, #A78BFA 0%, #7C3AED 100%);
+      color: #FFF;
+      border: none;
+      border-radius: 16px;
+      font-weight: 900;
+      font-size: 12px;
+      padding: 10px 12px;
+      box-shadow: 0 8px 25px rgba(167, 139, 250, 0.3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-lux-purple:active { transform: scale(0.97); }
 
     .segment-switch {
       background: #080B12;
@@ -408,8 +426,8 @@
 
     @media print {
       body * { visibility: hidden; }
-      #printableReceiptArea, #printableReceiptArea * { visibility: visible; }
-      #printableReceiptArea { position: absolute; left: 0; top: 0; width: 100%; color: #000; background: #fff; padding: 20px; font-family: 'Tajawal', sans-serif; }
+      #printableReceiptArea, #printableReceiptArea *, #printableWeeklyArea, #printableWeeklyArea *, #printableCustomArea, #printableCustomArea * { visibility: visible; }
+      #printableReceiptArea, #printableWeeklyArea, #printableCustomArea { position: absolute; left: 0; top: 0; width: 100%; color: #000; background: #fff; padding: 20px; font-family: 'Tajawal', sans-serif; }
     }
   </style>
 </head>
@@ -576,24 +594,46 @@
       </div>
     </div>
 
-    <!-- تبويب 5: الحسابات، السندات، وتصدير Excel -->
+    <!-- تبويب 5: الحسابات، الكشوفات المخصصة، والمحاسبة الأسبوعية -->
     <div id="tab-accounts" style="display: none; flex-direction: column; gap: 16px;">
+      
+      <!-- بطاقة المحاسبة الأسبوعية والتحصيل -->
       <div class="lux-card" style="padding: 20px; background: linear-gradient(135deg, #101624 0%, #151D30 100%);">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
           <div>
-            <p style="font-size: 11px; color: var(--text-muted); font-weight: 700;">إجمالي الأتعاب الكلية</p>
-            <h2 id="totalRevenue" style="font-size: 24px; font-weight: 900; color: var(--emerald); margin-top: 2px; font-family: 'Plus Jakarta Sans', sans-serif;">0 د.ع</h2>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="font-size: 10px; font-weight: 800; color: var(--purple); background: rgba(167, 139, 250, 0.15); padding: 2px 8px; border-radius: 6px;">نظام الحساب والتحصيل</span>
+            </div>
+            <p style="font-size: 11px; color: var(--text-muted); font-weight: 700; margin-top: 4px;">أتعاب الأسبوع الجاري (آخر 7 أيام)</p>
+            <h2 id="weeklyTotalSumBadge" style="font-size: 24px; font-weight: 900; color: var(--emerald); margin-top: 2px; font-family: 'Plus Jakarta Sans', sans-serif;">0 د.ع</h2>
           </div>
-          <div style="display: flex; gap: 8px;">
-            <button onclick="exportAccountsToCSV()" class="btn-lux-secondary" style="padding: 8px 12px; font-size: 11px; border-radius: 12px;">📊 Excel</button>
-            <button onclick="openPDFPreviewModal()" class="btn-lux-emerald" style="padding: 8px 14px; font-size: 11px; border-radius: 12px;">📄 تقرير PDF</button>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <button onclick="exportAccountsToCSV()" class="btn-lux-secondary" style="padding: 7px 12px; font-size: 11px; border-radius: 10px;">📊 Excel</button>
+            <button onclick="openPDFPreviewModal()" class="btn-lux-emerald" style="padding: 7px 12px; font-size: 11px; border-radius: 10px;">📄 كشف عام</button>
           </div>
         </div>
+        
         <div style="display: flex; justify-content: space-between; border-top: 1px solid var(--card-border); padding-top: 10px; font-size: 11px;">
-          <span style="color: var(--cyan);">المقبوض: <b id="accPaidSummary">0 د.ع</b></span>
-          <span style="color: #FF7B7B;">المتبقي: <b id="accDebtSummary">0 د.ع</b></span>
+          <span style="color: var(--cyan);">المقبوض الكلي: <b id="accPaidSummary">0 د.ع</b></span>
+          <span style="color: #FF7B7B;">الديون الحالية: <b id="accDebtSummary">0 د.ع</b></span>
         </div>
       </div>
+
+      <!-- أداة استخراج كشف مخصص لمعاملات محددة بالـ Checkbox -->
+      <div id="multiSelectActionCard" class="lux-card" style="padding: 14px 18px; border-color: rgba(0, 217, 245, 0.3); display: none; align-items: center; justify-content: space-between;">
+        <div>
+          <b style="font-size: 12px; color: var(--cyan);">تم تحديد (<span id="selectedCountBadge">0</span>) معاملات</b>
+          <p style="font-size: 10px; color: var(--text-muted);">إنشاء كشف حساب معزول للمحدد فقط</p>
+        </div>
+        <button onclick="generateCustomStatementForSelected()" class="btn-lux-cyan" style="padding: 8px 14px; font-size: 11px;">
+          📄 استخراج كشف للمحدد
+        </button>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 4px;">
+        <span style="font-size: 12px; font-weight: 800; color: var(--text-muted);">حسابات الشركات (كشف وسند مستقل لكل عميل):</span>
+      </div>
+
       <div id="accountsList" style="display: flex; flex-direction: column; gap: 10px;"></div>
     </div>
 
@@ -703,9 +743,117 @@
         <button onclick="startTxForSelectedComp()" class="btn-lux-emerald">+ بدء معاملة جديدة لهذه الشركة</button>
         <button onclick="openDocVault()" class="btn-lux-secondary">📁 فتح خزانة الوثائق والأرشيف</button>
         <button onclick="openCompanyLicensesModal()" class="btn-lux-secondary">⏳ ضبط تواريخ نفاذية التراخيص</button>
+        <button onclick="openWeeklyReceiptForCompany(selectedCompanyId)" class="btn-lux-purple">📅 سند التسوية الأسبوعي الشامل</button>
+        <button onclick="openCompanyDedicatedStatement(selectedCompanyId)" class="btn-lux-cyan">📄 كشف حساب خاص بهذه الشركة</button>
         <button onclick="deleteSelectedCompany()" class="btn-lux-danger">🗑️ حذف ملف الشركة بالكامل</button>
         <button onclick="closeSheet('companyActionModal')" style="background: none; border: none; color: var(--text-dim); padding: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">إلغاء</button>
       </div>
+    </div>
+  </div>
+
+  <!-- نافذة كشف الحساب المخصص (المعزول لعميل أو لمعاملات مختارة) -->
+  <div id="customStatementModal" class="sheet-overlay">
+    <div class="sheet-container" style="max-width: 520px;">
+      <div class="sheet-handle"></div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <div>
+          <span style="font-size: 10px; font-weight: 800; color: var(--cyan); background: var(--cyan-glow); padding: 2px 8px; border-radius: 6px;">كشف حساب مستقل ومعزول</span>
+          <h3 id="customStatementTitle" style="font-size: 16px; font-weight: 900; color: #FFF; margin-top: 2px;">كشف الحساب</h3>
+        </div>
+        <div style="display: flex; gap: 6px;">
+          <button onclick="shareCustomStatementViaWA()" class="btn-lux-secondary" style="padding: 8px 12px; font-size: 11px;">💬 واتساب</button>
+          <button onclick="printCustomStatement()" class="btn-lux-cyan" style="padding: 8px 14px; font-size: 11px;">🖨️ طباعة</button>
+        </div>
+      </div>
+
+      <div id="printableCustomArea" style="background: #FFF; color: #000; padding: 20px; border-radius: 12px; font-size: 12px; line-height: 1.6; border: 2px solid #000;">
+        <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 14px;">
+          <h2 id="custRepOfficeName" style="font-size: 17px; font-weight: 900; margin-bottom: 2px;">مكتب إنجاز المعاملات</h2>
+          <p id="custRepOfficePhone" style="font-size: 10px; color: #555;">هاتف: 07800000000 | بغداد - العراق</p>
+          <p style="font-size: 12px; font-weight: 900; margin-top: 6px; background: #000; color: #FFF; display: inline-block; padding: 2px 10px; border-radius: 4px;">
+            كشف حساب مالي خاص: <span id="custRepClientName"></span>
+          </p>
+          <p style="font-size: 10px; color: #666; margin-top: 4px;">تاريخ الاستخراج: <span id="custRepDate"></span></p>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 11px;">
+          <thead>
+            <tr style="background: #F3F4F6; border-bottom: 1.5px solid #000;">
+              <th style="padding: 6px; text-align: right;">نوع المعاملة</th>
+              <th style="padding: 6px; text-align: center;">الحالة</th>
+              <th style="padding: 6px; text-align: center;">الأتعاب</th>
+              <th style="padding: 6px; text-align: center;">المقبوض</th>
+              <th style="padding: 6px; text-align: left;">المتبقي</th>
+            </tr>
+          </thead>
+          <tbody id="custRepTableBody"></tbody>
+        </table>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #000; padding-top: 8px; font-weight: 900; font-size: 11px;">
+          <span>المجموع: <b id="custRepTotalFee">0</b></span>
+          <span style="color: #047857;">المقبوض: <b id="custRepTotalPaid">0</b></span>
+          <span style="color: #B91C1C;">المتبقي بذمتكم: <b id="custRepTotalDebt">0</b></span>
+        </div>
+      </div>
+      <button onclick="closeSheet('customStatementModal')" class="btn-lux-secondary" style="width: 100%; margin-top: 14px;">رجوع</button>
+    </div>
+  </div>
+
+  <!-- نافذة سند القبض الأسبوعي الشامل (المحاسبة المجمعة) -->
+  <div id="weeklyReceiptModal" class="sheet-overlay">
+    <div class="sheet-container" style="max-width: 500px;">
+      <div class="sheet-handle"></div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <div>
+          <span style="font-size: 10px; font-weight: 800; color: var(--purple); background: rgba(167, 139, 250, 0.15); padding: 2px 8px; border-radius: 6px;">كشف وتسوية أسبوعية</span>
+          <h3 style="font-size: 16px; font-weight: 900; color: #FFF; margin-top: 2px;">سند الحساب الأسبوعي</h3>
+        </div>
+        <div style="display: flex; gap: 6px;">
+          <button onclick="shareWeeklyReceiptViaWA()" class="btn-lux-secondary" style="padding: 8px 12px; font-size: 11px;">💬 واتساب</button>
+          <button onclick="printWeeklyReceiptVoucher()" class="btn-lux-purple" style="padding: 8px 14px; font-size: 11px;">🖨️ طباعة</button>
+        </div>
+      </div>
+
+      <!-- خانة التعديل الفوري لاسم المسدد في السند الأسبوعي -->
+      <div style="background: #080B12; border: 1px solid var(--card-border); padding: 12px 14px; border-radius: 14px; margin-bottom: 14px; display: flex; flex-direction: column; gap: 6px;">
+        <label style="font-size: 11px; color: var(--purple); font-weight: 800;">✍️ تعديل جهة الاستلام / اسم المسدد في السند الأسبوعي:</label>
+        <input id="weeklyRecEditCompanyName" type="text" class="lux-input" style="width: 100%; padding: 9px 12px; font-size: 12px;" oninput="updateWeeklyReceiptPayerName(this.value)">
+      </div>
+
+      <div id="printableWeeklyArea" style="background: #FFF; color: #000; padding: 22px; border-radius: 14px; font-size: 12px; line-height: 1.6; border: 2px solid #000;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 12px;">
+          <div>
+            <h2 id="weeklyRecOfficeName" style="font-size: 17px; font-weight: 900;">مكتب إنجاز المعاملات</h2>
+            <p id="weeklyRecOfficePhone" style="font-size: 10px; color: #555;">هاتف: 07800000000 | بغداد</p>
+          </div>
+          <div style="text-align: left;">
+            <span style="font-size: 13px; font-weight: 900; background: #000; color: #FFF; padding: 2px 8px; border-radius: 4px;">سند تسوية أسبوعي</span>
+            <p style="font-size: 10px; color: #333; margin-top: 2px;">رقم السند: <b id="weeklyRecNumber" style="font-family: monospace;"></b></p>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 14px; display: flex; flex-direction: column; gap: 6px;">
+          <p>استلمنا من السادة / السيد: <b id="weeklyRecCompanyName" style="font-size: 13px; text-decoration: underline; color: #000;"></b></p>
+          <p>مجموع أتعاب الأسبوع الجاري: <b id="weeklyRecAmountNum" style="font-family: monospace; font-size: 16px; color: #000;"></b> د.ع</p>
+          <p>فقط وقدره: <b id="weeklyRecAmountText" style="color: #047857; font-size: 13px;"></b></p>
+          <p>عن تسوية معاملات الفترة: <b id="weeklyRecDateRange" style="color: #555;"></b></p>
+          <p>عدد المعاملات المشمولة في الحساب: <b id="weeklyRecTxCount" style="color: #000;"></b> معاملة</p>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 2px solid #000; padding-top: 12px;">
+          <div id="weeklyReceiptQRCode" style="width: 60px; height: 60px;"></div>
+          <div style="text-align: center;">
+            <p style="font-size: 11px; font-weight: 800;">توقيع وختم استلام الأسبوع</p>
+            <p style="font-size: 10px; color: #777; margin-top: 20px;">................................</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- زر تسوية أتعاب الأسبوع بنقرة واحدة -->
+      <button id="btnSettleWeeklyDues" onclick="settleAllWeeklyDuesForCompany()" class="btn-lux-emerald" style="width: 100%; margin-top: 14px;">
+        ✅ تسوية وتصفير أتعاب هذا الأسبوع (جعلها واصل خالص)
+      </button>
+      <button onclick="closeSheet('weeklyReceiptModal')" class="btn-lux-secondary" style="width: 100%; margin-top: 8px;">إغلاق</button>
     </div>
   </div>
 
@@ -863,7 +1011,7 @@
     </div>
   </div>
 
-  <!-- محرك توليد وطباعة سند القبض الرسمي المباشر -->
+  <!-- محرك توليد وطباعة سند القبض الفردي المباشر -->
   <div id="receiptVoucherModal" class="sheet-overlay">
     <div class="sheet-container" style="max-width: 500px;">
       <div class="sheet-handle"></div>
@@ -873,6 +1021,11 @@
           <button onclick="shareReceiptViaWA()" class="btn-lux-secondary" style="padding: 8px 12px; font-size: 11px;">💬 واتساب</button>
           <button onclick="printReceiptVoucher()" class="btn-lux-emerald" style="padding: 8px 14px; font-size: 11px;">🖨️ طباعة</button>
         </div>
+      </div>
+
+      <div style="background: #080B12; border: 1px solid var(--card-border); padding: 12px 14px; border-radius: 14px; margin-bottom: 14px; display: flex; flex-direction: column; gap: 6px;">
+        <label style="font-size: 11px; color: var(--emerald); font-weight: 800;">✍️ تعديل اسم المسلّم في السند:</label>
+        <input id="recEditCompanyName" type="text" class="lux-input" style="width: 100%; padding: 9px 12px; font-size: 12px;" oninput="updateReceiptPayerName(this.value)">
       </div>
 
       <div id="printableReceiptArea" style="background: #FFF; color: #000; padding: 22px; border-radius: 14px; font-size: 12px; line-height: 1.6; border: 2px solid #000;">
@@ -888,7 +1041,7 @@
         </div>
 
         <div style="margin-bottom: 14px; display: flex; flex-direction: column; gap: 6px;">
-          <p>استلمنا من السادة: <b id="recRepCompanyName" style="font-size: 13px; text-decoration: underline;"></b></p>
+          <p>استلمنا من السادة / السيد: <b id="recRepCompanyName" style="font-size: 13px; text-decoration: underline; color: #000;"></b></p>
           <p>مبلغاً وقدره: <b id="recRepAmountNum" style="font-family: monospace; font-size: 14px;"></b> د.ع</p>
           <p>فقط وقدره: <b id="recRepAmountText" style="color: #047857;"></b></p>
           <p>وذلك عن أجور: <span id="recRepTxType"></span></p>
@@ -977,11 +1130,11 @@
     </div>
   </div>
 
-  <!-- نافذة تعديل وتسديد الدفعات المالية -->
+  <!-- نافذة تعديل وتسديد الدفعات المالية الفردية -->
   <div id="updatePaymentModal" class="sheet-overlay">
     <div class="sheet-container">
       <div class="sheet-handle"></div>
-      <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 4px;">إدارة وتسديد أتعاب المعاملة</h3>
+      <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 4px;">إدارة أتعاب المعاملة الفردية</h3>
       <p id="updatePaymentTxInfo" style="font-size: 12px; color: var(--gold); margin-bottom: 14px;">شركة</p>
       
       <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px;">
@@ -998,7 +1151,6 @@
           <b id="payModalDebtPreview" style="color:#FF7B7B; font-size:13px;">0 د.ع</b>
         </div>
         
-        <!-- زر التسديد الكامل بنقرة واحدة -->
         <button onclick="quickPayFullAmount()" class="btn-lux-cyan" style="width:100%; margin-top:2px;">
           ✅ تسديد المبلغ بالكامل (جعلها واصل خالص)
         </button>
@@ -1016,7 +1168,7 @@
     <div class="sheet-container" style="max-width: 520px;">
       <div class="sheet-handle"></div>
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-        <h3 style="font-size: 16px; font-weight: 900; color: #FFF;">كشف الحسابات الرسمي</h3>
+        <h3 style="font-size: 16px; font-weight: 900; color: #FFF;">كشف الحسابات العام</h3>
         <button onclick="window.print()" class="btn-lux-emerald" style="padding: 8px 14px; font-size: 12px;">طباعة / حفظ PDF</button>
       </div>
 
@@ -1024,7 +1176,7 @@
         <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 14px;">
           <h2 id="pdfRepOfficeName" style="font-size: 18px; font-weight: 900; margin-bottom: 2px;">مكتب إنجاز المعاملات</h2>
           <p id="pdfRepOfficePhone" style="font-size: 11px; color: #555;">هاتف: 07800000000 | بغداد - العراق</p>
-          <p style="font-size: 13px; font-weight: 800; margin-top: 6px; background: #EEE; display: inline-block; padding: 2px 10px; border-radius: 4px;">كشف الذمم والمواقف المالية</p>
+          <p style="font-size: 13px; font-weight: 800; margin-top: 6px; background: #EEE; display: inline-block; padding: 2px 10px; border-radius: 4px;">كشف الذمم والمواقف المالية العام</p>
           <p style="font-size: 10px; color: #666; margin-top: 4px;">تاريخ الاستخراج: <span id="pdfRepDate"></span></p>
         </div>
 
@@ -1067,6 +1219,11 @@
     let targetTxForPayment = null;
     let targetTxForWA = null;
     let currentReceiptTx = null;
+    let currentWeeklyCompanyId = null;
+    let currentWeeklyData = null;
+    let currentCustomStatementData = null;
+    let checkedTxIdsForStatement = new Set();
+
     let companies = [];
     let activeTransactions = [];
     let allTransactionsGlobal = [];
@@ -1618,7 +1775,7 @@
       return "فقط " + numStr.trim() + " دينار عراقي لا غير";
     }
 
-    /* استدعاء وتوليد سند القبض الفوري */
+    /* محرك سندات القبض الفردية المباشرة */
     function openReceiptVoucherModalById(txId) {
       const tx = allTransactionsGlobal.find(t => t.id === txId);
       if (!tx) return;
@@ -1637,19 +1794,41 @@
       document.getElementById('recRepOfficeName').innerText = officeName;
       document.getElementById('recRepOfficePhone').innerText = officePhone;
       document.getElementById('recRepNumber').innerText = recNumber;
+      
+      document.getElementById('recEditCompanyName').value = compName;
       document.getElementById('recRepCompanyName').innerText = compName;
+
       document.getElementById('recRepAmountNum').innerText = paid.toLocaleString('ar-IQ');
       document.getElementById('recRepAmountText').innerText = tafqeetIraqiDinar(paid);
       document.getElementById('recRepTxType').innerText = txType;
       document.getElementById('recRepTotalFee').innerText = fee.toLocaleString('ar-IQ');
       document.getElementById('recRepRemaining').innerText = debt.toLocaleString('ar-IQ');
 
+      refreshReceiptQRCode(recNumber, compName, paid, debt);
+
+      logActivity("إصدار سند قبض", `سند رقم (${recNumber}) لشركة (${compName})`);
+      openSheet('receiptVoucherModal');
+    }
+
+    function updateReceiptPayerName(val) {
+      const name = val.trim() || (currentReceiptTx ? currentReceiptTx.companies?.name : 'العميل');
+      document.getElementById('recRepCompanyName').innerText = name;
+      
+      const recNumber = document.getElementById('recRepNumber').innerText;
+      const paid = Number(localStorage.getItem(`tx_paid_${currentReceiptTx?.id}`)) || 0;
+      const fee = Number(currentReceiptTx?.fee_iqd) || 0;
+      const debt = Math.max(0, fee - paid);
+
+      refreshReceiptQRCode(recNumber, name, paid, debt);
+    }
+
+    function refreshReceiptQRCode(recNumber, payerName, paid, debt) {
       try {
         const qrContainer = document.getElementById('receiptQRCode');
         qrContainer.innerHTML = '';
         if (typeof QRCode !== 'undefined') {
           new QRCode(qrContainer, {
-            text: `سند قبض: ${recNumber} | الشركة: ${compName} | الواصل: ${paid} د.ع | المتبقي: ${debt} د.ع`,
+            text: `سند قبض: ${recNumber} | المسلم: ${payerName} | الواصل: ${paid} د.ع | المتبقي: ${debt} د.ع`,
             width: 60,
             height: 60,
             colorDark : "#000000",
@@ -1657,14 +1836,11 @@
           });
         }
       } catch(e) { console.log(e); }
-
-      logActivity("إصدار سند قبض", `سند رقم (${recNumber}) لشركة (${compName})`);
-      openSheet('receiptVoucherModal');
     }
 
     function shareReceiptViaWA() {
       if (!currentReceiptTx) return;
-      const comp = currentReceiptTx.companies?.name || 'العميل المحترم';
+      const comp = document.getElementById('recRepCompanyName').innerText || currentReceiptTx.companies?.name || 'العميل المحترم';
       const txName = currentReceiptTx.transaction_type;
       const fee = Number(currentReceiptTx.fee_iqd) || 0;
       const paid = Number(localStorage.getItem(`tx_paid_${currentReceiptTx.id}`)) || 0;
@@ -1672,14 +1848,14 @@
       const office = localStorage.getItem('office_name') || 'مكتب إنجاز المعاملات';
       const recNumber = document.getElementById('recRepNumber').innerText;
 
-      const msg = `🧾 *سند قبض رسمي - ${office}*\n\n`
+      const msg = `🧾 *سند قبض مالي - ${office}*\n\n`
                 + `▫️ *رقم السند:* ${recNumber}\n`
-                + `▫️ *السادة:* ${comp}\n`
+                + `▫️ *استلمنا من:* ${comp}\n`
                 + `▫️ *نوع المعاملة:* ${txName}\n`
                 + `▫️ *المبلغ المقبوض:* ${paid.toLocaleString('ar-IQ')} دينار عراقي\n`
-                + `▫️ *كتابة:* ${tafqeetIraqiDinar(paid)}\n`
+                + `▫️ *فقط وقدره:* ${tafqeetIraqiDinar(paid)}\n`
                 + `▫️ *المتبقي بذمتكم:* ${debt.toLocaleString('ar-IQ')} د.ع\n\n`
-                + `_تم استلام المبلغ وتوثيق الحساب رسمياً._\n`
+                + `_تم التوثيق والقبض رسمياً._\n`
                 + `_${office}_`;
 
       navigator.clipboard.writeText(msg);
@@ -1688,6 +1864,270 @@
     }
 
     function printReceiptVoucher() { window.print(); }
+
+    /* =========================================================================
+       محرك المحاسبة الأسبوعية وسندات التسوية الشاملة (Weekly Settlement Engine)
+       ========================================================================= */
+
+    function getWeeklyDateRange() {
+      const now = new Date();
+      const pastWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      return {
+        startStr: pastWeek.toLocaleDateString('ar-IQ', { month: 'numeric', day: 'numeric' }),
+        endStr: now.toLocaleDateString('ar-IQ', { month: 'numeric', day: 'numeric', year: 'numeric' }),
+        cutoffDate: pastWeek
+      };
+    }
+
+    function openWeeklyReceiptForCompany(compId) {
+      closeSheet('companyActionModal');
+      currentWeeklyCompanyId = compId;
+      const comp = companies.find(c => c.id === compId);
+      const compName = comp ? comp.name : 'الشركة الموثقة';
+
+      const range = getWeeklyDateRange();
+      const companyWeeklyTxs = allTransactionsGlobal.filter(t => t.company_id === compId);
+      
+      let totalWeeklyFee = 0;
+      let totalWeeklyPaid = 0;
+
+      companyWeeklyTxs.forEach(t => {
+        const fee = Number(t.fee_iqd) || 0;
+        const paid = Number(localStorage.getItem(`tx_paid_${t.id}`)) || 0;
+        totalWeeklyFee += fee;
+        totalWeeklyPaid += paid;
+      });
+
+      const totalWeeklyDue = totalWeeklyFee;
+
+      currentWeeklyData = {
+        compId: compId,
+        compName: compName,
+        totalWeeklyFee: totalWeeklyFee,
+        totalWeeklyPaid: totalWeeklyPaid,
+        totalWeeklyDue: totalWeeklyDue,
+        txList: companyWeeklyTxs,
+        dateRange: `من ${range.startStr} إلى ${range.endStr}`
+      };
+
+      const officeName = localStorage.getItem('office_name') || 'مكتب إنجاز المعاملات الرسمية';
+      const officePhone = localStorage.getItem('office_phone') || 'هاتف: 07800000000 | بغداد';
+      const recNumber = `WEEK-${Date.now().toString().slice(-6)}`;
+
+      document.getElementById('weeklyRecOfficeName').innerText = officeName;
+      document.getElementById('weeklyRecOfficePhone').innerText = officePhone;
+      document.getElementById('weeklyRecNumber').innerText = recNumber;
+      
+      document.getElementById('weeklyRecEditCompanyName').value = compName;
+      document.getElementById('weeklyRecCompanyName').innerText = compName;
+
+      document.getElementById('weeklyRecAmountNum').innerText = totalWeeklyDue.toLocaleString('ar-IQ');
+      document.getElementById('weeklyRecAmountText').innerText = tafqeetIraqiDinar(totalWeeklyDue);
+      document.getElementById('weeklyRecDateRange').innerText = currentWeeklyData.dateRange;
+      document.getElementById('weeklyRecTxCount').innerText = companyWeeklyTxs.length;
+
+      refreshWeeklyReceiptQRCode(recNumber, compName, totalWeeklyDue, currentWeeklyData.dateRange);
+
+      logActivity("إصدار سند أسبوعي", `سند تسوية أسبوعية شامل لشركة (${compName}) بمجموع ${totalWeeklyDue} د.ع`);
+      openSheet('weeklyReceiptModal');
+    }
+
+    function updateWeeklyReceiptPayerName(val) {
+      const name = val.trim() || (currentWeeklyData ? currentWeeklyData.compName : 'العميل');
+      document.getElementById('weeklyRecCompanyName').innerText = name;
+      
+      const recNumber = document.getElementById('weeklyRecNumber').innerText;
+      const amount = currentWeeklyData ? currentWeeklyData.totalWeeklyDue : 0;
+      const range = currentWeeklyData ? currentWeeklyData.dateRange : '';
+
+      refreshWeeklyReceiptQRCode(recNumber, name, amount, range);
+    }
+
+    function refreshWeeklyReceiptQRCode(recNumber, payerName, amount, range) {
+      try {
+        const qrContainer = document.getElementById('weeklyReceiptQRCode');
+        qrContainer.innerHTML = '';
+        if (typeof QRCode !== 'undefined') {
+          new QRCode(qrContainer, {
+            text: `سند تسوية أسبوعي: ${recNumber} | المستلم منه: ${payerName} | مجموع الأتعاب: ${amount} د.ع | الفترة: ${range}`,
+            width: 60,
+            height: 60,
+            colorDark : "#000000",
+            colorLight : "#ffffff"
+          });
+        }
+      } catch(e) { console.log(e); }
+    }
+
+    function shareWeeklyReceiptViaWA() {
+      if (!currentWeeklyData) return;
+      const comp = document.getElementById('weeklyRecCompanyName').innerText || currentWeeklyData.compName;
+      const office = localStorage.getItem('office_name') || 'مكتب إنجاز المعاملات';
+      const recNumber = document.getElementById('weeklyRecNumber').innerText;
+      const total = currentWeeklyData.totalWeeklyDue;
+      const count = currentWeeklyData.txList.length;
+      const range = currentWeeklyData.dateRange;
+
+      const msg = `📅 *سند تسوية الحساب الأسبوعي - ${office}*\n\n`
+                + `▫️ *رقم السند:* ${recNumber}\n`
+                + `▫️ *السادة:* ${comp}\n`
+                + `▫️ *فترة المحاسبة الأسبوعية:* ${range}\n`
+                + `▫️ *عدد المعاملات المشمولة:* ${count} معاملات\n\n`
+                + `💰 *مجموع أتعاب الأسبوع الكلية:* *${total.toLocaleString('ar-IQ')} دينار عراقي*\n`
+                + `▫️ *فقط وقدره:* ${tafqeetIraqiDinar(total)}\n\n`
+                + `_يرجى التفضل بمطابقة وتصفية حساب الأسبوع._\n`
+                + `_${office}_`;
+
+      navigator.clipboard.writeText(msg);
+      showToast("تم نسخ المطالبة الأسبوعية للواتساب 💬");
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    function printWeeklyReceiptVoucher() { window.print(); }
+
+    async function settleAllWeeklyDuesForCompany() {
+      if (!currentWeeklyData || !currentWeeklyData.txList) return;
+      const count = currentWeeklyData.txList.length;
+      if (count === 0) {
+        showToast("لا توجد معاملات لتسويتها", "⚠️");
+        return;
+      }
+
+      if (!confirm(`هل تريد تسوية وتصفير أتعاب (${count}) معاملات لهذا الأسبوع وجعلها واصلة بالكامل؟`)) return;
+
+      currentWeeklyData.txList.forEach(t => {
+        const fee = Number(t.fee_iqd) || 0;
+        localStorage.setItem(`tx_paid_${t.id}`, fee);
+      });
+
+      logActivity("تسوية أسبوعية", `تم تسديد وتصفير حسابات الأسبوع بالكامل لشركة: ${currentWeeklyData.compName}`);
+      showToast("تمت تسوية أتعاب الأسبوع وجعلها واصلة بالكامل ✅");
+      closeSheet('weeklyReceiptModal');
+      loadData();
+    }
+
+    /* =========================================================================
+       محرك كشوفات الحسابات المخصصة والمعزولة (Dedicated Statement Engine)
+       ========================================================================= */
+
+    function toggleTxCheckboxForStatement(txId, isChecked) {
+      if (isChecked) {
+        checkedTxIdsForStatement.add(txId);
+      } else {
+        checkedTxIdsForStatement.delete(txId);
+      }
+
+      const card = document.getElementById('multiSelectActionCard');
+      const badge = document.getElementById('selectedCountBadge');
+      
+      if (checkedTxIdsForStatement.size > 0) {
+        card.style.display = 'flex';
+        badge.innerText = checkedTxIdsForStatement.size;
+      } else {
+        card.style.display = 'none';
+      }
+    }
+
+    function generateCustomStatementForSelected() {
+      const selectedTxs = allTransactionsGlobal.filter(t => checkedTxIdsForStatement.has(t.id));
+      if (selectedTxs.length === 0) return;
+
+      const firstComp = selectedTxs[0].companies?.name || 'عميل محترم';
+      const clientName = selectedTxs.every(t => t.companies?.name === firstComp) ? firstComp : 'كشف معاملات مختارة ومجمعة';
+
+      renderCustomStatementUI(clientName, selectedTxs);
+    }
+
+    function openCompanyDedicatedStatement(compId) {
+      closeSheet('companyActionModal');
+      const comp = companies.find(c => c.id === compId);
+      const clientName = comp ? comp.name : 'شركة موثقة';
+      const compTxs = allTransactionsGlobal.filter(t => t.company_id === compId);
+
+      if (compTxs.length === 0) {
+        showToast("لا توجد معاملات مسجلة لهذه الشركة بعد", "⚠️");
+        return;
+      }
+
+      renderCustomStatementUI(clientName, compTxs);
+    }
+
+    function renderCustomStatementUI(clientTitle, txArray) {
+      const officeName = localStorage.getItem('office_name') || 'مكتب إنجاز المعاملات الرسمية';
+      const officePhone = localStorage.getItem('office_phone') || 'هاتف: 07800000000 | بغداد';
+
+      document.getElementById('custRepOfficeName').innerText = officeName;
+      document.getElementById('custRepOfficePhone').innerText = officePhone;
+      document.getElementById('custRepClientName').innerText = clientTitle;
+      document.getElementById('custRepDate').innerText = new Date().toLocaleDateString('ar-IQ', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+      let tot = 0, paidTot = 0, debtTot = 0;
+
+      const tbody = document.getElementById('custRepTableBody');
+      tbody.innerHTML = txArray.map(t => {
+        const fee = Number(t.fee_iqd) || 0;
+        const paid = Number(localStorage.getItem(`tx_paid_${t.id}`)) || 0;
+        const debt = Math.max(0, fee - paid);
+        tot += fee; paidTot += paid; debtTot += debt;
+
+        return `
+          <tr style="border-bottom: 1px solid #E5E7EB;">
+            <td style="padding: 6px; font-weight: 700;">${t.transaction_type}</td>
+            <td style="padding: 6px; text-align: center; color: ${t.status === 'completed' ? '#047857' : '#D97706'}; font-weight:700;">${t.status === 'completed' ? 'منجزة' : 'جارية'}</td>
+            <td style="padding: 6px; text-align: center; font-weight: 700;">${fee.toLocaleString('ar-IQ')}</td>
+            <td style="padding: 6px; text-align: center; color: #047857;">${paid.toLocaleString('ar-IQ')}</td>
+            <td style="padding: 6px; text-align: left; font-weight: 700; color: #B91C1C;">${debt.toLocaleString('ar-IQ')}</td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('custRepTotalFee').innerText = `${tot.toLocaleString('ar-IQ')} د.ع`;
+      document.getElementById('custRepTotalPaid').innerText = `${paidTot.toLocaleString('ar-IQ')} د.ع`;
+      document.getElementById('custRepTotalDebt').innerText = `${debtTot.toLocaleString('ar-IQ')} د.ع`;
+
+      currentCustomStatementData = {
+        clientName: clientTitle,
+        txList: txArray,
+        totalFee: tot,
+        totalPaid: paidTot,
+        totalDebt: debtTot
+      };
+
+      logActivity("كشف حساب مخصص", `تم استخراج كشف مالي معزول لـ: ${clientTitle}`);
+      openSheet('customStatementModal');
+    }
+
+    function shareCustomStatementViaWA() {
+      if (!currentCustomStatementData) return;
+      const client = currentCustomStatementData.clientName;
+      const office = localStorage.getItem('office_name') || 'مكتب إنجاز المعاملات';
+      const tot = currentCustomStatementData.totalFee;
+      const paid = currentCustomStatementData.totalPaid;
+      const debt = currentCustomStatementData.totalDebt;
+
+      const txLines = currentCustomStatementData.txList.map(t => {
+        const fee = Number(t.fee_iqd) || 0;
+        const p = Number(localStorage.getItem(`tx_paid_${t.id}`)) || 0;
+        const d = Math.max(0, fee - p);
+        return `▫️ *${t.transaction_type}*: أتعاب ${fee.toLocaleString('ar-IQ')} | واصل ${p.toLocaleString('ar-IQ')} | متبقي ${d.toLocaleString('ar-IQ')} د.ع`;
+      }).join('\n');
+
+      const msg = `📑 *كشف حساب مالي خاص - ${office}*\n\n`
+                + `السادة *${client}* المحترمون،\n\n`
+                + `مرفق طياً كشف الحساب المالي للمعاملات:\n`
+                + `${txLines}\n\n`
+                + `📊 *الموقف المالي الإجمالي:*\n`
+                + `▪️ مجموع الأتعاب: *${tot.toLocaleString('ar-IQ')} د.ع*\n`
+                + `▪️ المبلغ المسدد: *${paid.toLocaleString('ar-IQ')} د.ع*\n`
+                + `▪️ *المتبقي بذمتكم:* *${debt.toLocaleString('ar-IQ')} د.ع*\n\n`
+                + `_${office}_`;
+
+      navigator.clipboard.writeText(msg);
+      showToast("تم نسخ كشف الحساب وجاري فتح الواتساب 💬");
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    function printCustomStatement() { window.print(); }
 
     function openWhatsAppQuickModal(txId) {
       targetTxForWA = activeTransactions.find(t => t.id === txId);
@@ -1727,398 +2167,6 @@
       navigator.clipboard.writeText(text);
       showToast("تم نسخ الرسالة وجاري فتح الواتساب 💬");
       window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
-    }
-
-    function getStepHistory(txId) {
-      const stored = localStorage.getItem(`step_history_${txId}`);
-      return stored ? JSON.parse(stored) : [];
-    }
-
-    function pushStepHistory(txId, oldLocation, newLocation) {
-      let hist = getStepHistory(txId);
-      if (hist.length === 0 && oldLocation) {
-        hist.push({ step: oldLocation, time: new Date(Date.now() - 3600000).toISOString() });
-      }
-      hist.push({ step: newLocation, time: new Date().toISOString() });
-      localStorage.setItem(`step_history_${txId}`, JSON.stringify(hist));
-    }
-
-    function viewTimeline(txId, compName, txType, currentLoc) {
-      document.getElementById('timelineTxTitle').innerText = `${compName} - ${txType}`;
-      const list = document.getElementById('timelineStepsList');
-      let hist = getStepHistory(txId);
-
-      if (hist.length === 0) {
-        hist = [{ step: currentLoc || 'تم استلام المعاملة وبدء الإجراءات', time: new Date().toISOString() }];
-      }
-
-      list.innerHTML = hist.map((h, i) => {
-        const isCurrent = i === hist.length - 1;
-        const d = new Date(h.time);
-        const timeStr = d.toLocaleDateString('ar-IQ', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-
-        return `
-          <div class="timeline-item ${isCurrent ? 'active' : ''}">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="font-size: 13px; font-weight: ${isCurrent ? '900' : '700'}; color: ${isCurrent ? 'var(--emerald)' : '#FFF'};">
-                ${isCurrent ? '📍 الموقع الحالي: ' : '🏢 محطة سابقة: '} ${h.step}
-              </span>
-            </div>
-            <span style="font-size: 10px; color: var(--text-dim); font-family: 'Plus Jakarta Sans', sans-serif;">${timeStr}</span>
-          </div>
-        `;
-      }).join('');
-
-      openSheet('timelineModal');
-    }
-
-    function getStalenessInfo(tx) {
-      const hist = getStepHistory(tx.id);
-      const lastTimeStr = hist.length > 0 ? hist[hist.length - 1].time : tx.created_at;
-      const hoursPassed = Math.floor((new Date() - new Date(lastTimeStr)) / (1000 * 60 * 60));
-
-      if (hoursPassed >= 48) {
-        const days = Math.floor(hoursPassed / 24);
-        return {
-          type: 'urgent',
-          badgeHtml: `<span class="stale-badge urgent">⚠️ راكدة منذ ${days} يوم</span>`,
-          alertText: `لم يتم تحريكها منذ ${days} يوم!`,
-          isUrgent: true
-        };
-      } else if (hoursPassed >= 24) {
-        return {
-          type: 'warn',
-          badgeHtml: `<span class="stale-badge warn">⏳ متوقفة منذ ${hoursPassed} ساعة</span>`,
-          alertText: `متوقفة منذ أكثر من 24 ساعة.`,
-          isUrgent: false
-        };
-      } else {
-        return {
-          type: 'fresh',
-          badgeHtml: `<span class="stale-badge fresh">✨ نشطة ومحدثة</span>`,
-          alertText: null,
-          isUrgent: false
-        };
-      }
-    }
-
-    function renderActive() {
-      const container = document.getElementById('activeTransactionsList');
-      
-      const filtered = activeTransactions.filter(tx => {
-        if (!searchQuery) return true;
-        const cName = (tx.companies?.name || '').toLowerCase();
-        const tType = (tx.transaction_type || '').toLowerCase();
-        const cLoc = (tx.current_location_step || '').toLowerCase();
-        return cName.includes(searchQuery) || tType.includes(searchQuery) || cLoc.includes(searchQuery);
-      });
-
-      if (filtered.length === 0) {
-        container.innerHTML = `<div class="lux-card" style="text-align: center; color: var(--text-dim); padding: 40px 20px; font-size: 13px;">${searchQuery ? 'لا توجد نتائج مطابقة للبحث' : 'لا توجد معاملات جارية حالياً'}</div>`;
-        return;
-      }
-
-      container.innerHTML = filtered.map(tx => {
-        const checklists = tx.transaction_checklists || [];
-        const completedCount = checklists.filter(c => c.is_completed).length;
-        const progressPercent = checklists.length > 0 ? Math.round((completedCount / checklists.length) * 100) : 0;
-        const staleInfo = getStalenessInfo(tx);
-        const historyCount = getStepHistory(tx.id).length;
-        const paid = Number(localStorage.getItem(`tx_paid_${tx.id}`) || 0);
-        const total = Number(tx.fee_iqd) || 0;
-        const debt = Math.max(0, total - paid);
-
-        const checksHtml = checklists.map(c => `
-          <div style="display: flex; align-items: center; justify-content: space-between; background: #090D15; border: 1px solid rgba(255,255,255,0.04); padding: 9px 12px; border-radius: 14px; margin-bottom: 6px;">
-            <label style="display: flex; align-items: center; gap: 10px; font-size: 12px; color: ${c.is_completed ? '#6B7280' : '#E5E7EB'}; cursor: pointer; flex: 1;">
-              <input type="checkbox" ${c.is_completed ? 'checked' : ''} onchange="toggleCheck('${c.id}', ${!c.is_completed})" style="width: 17px; height: 17px; accent-color: var(--emerald); cursor: pointer;">
-              <span style="${c.is_completed ? 'text-decoration: line-through;' : ''}">${c.item_text}</span>
-            </label>
-            ${isOfficeMode ? `<button onclick="deleteChecklistItem('${c.id}')" style="background: none; border: none; color: #EF4444; font-size: 14px; padding: 2px 6px; cursor: pointer;">✕</button>` : ''}
-          </div>
-        `).join('');
-
-        return `
-          <div class="lux-card" style="padding: 20px; display: flex; flex-direction: column; gap: 14px; ${staleInfo.isUrgent ? 'border-color: rgba(255, 77, 77, 0.4);' : ''}">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-              <div style="display: flex; align-items: center; gap: 10px;">
-                <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #182234, #0F1624); border: 1px solid var(--card-border-highlight); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; color: var(--emerald);">
-                  ${(tx.companies?.name || 'ش').slice(0, 2)}
-                </div>
-                <div>
-                  <div style="display: flex; align-items: center; gap: 6px;">
-                    <span style="font-size: 11px; font-weight: 800; color: var(--emerald);">${tx.companies?.name || 'شركة'}</span>
-                    ${staleInfo.badgeHtml}
-                  </div>
-                  <h3 style="font-size: 15px; font-weight: 900; color: #FFF; margin-top: 1px;">${tx.transaction_type}</h3>
-                </div>
-              </div>
-              <div style="text-align: left; cursor: pointer;" onclick="openPaymentUpdateModalById('${tx.id}')">
-                <span style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 900; color: var(--gold); background: var(--gold-glow); border: 1px solid rgba(255, 184, 0, 0.3); padding: 4px 10px; border-radius: 100px; display: inline-block;">${total.toLocaleString('ar-IQ')} د.ع</span>
-                <p style="font-size: 10px; color: ${debt === 0 ? 'var(--emerald)' : '#FF7B7B'}; margin-top: 4px; font-weight: 700;">
-                  ${debt === 0 ? 'واصل خالص ✅' : `متبقي: ${debt.toLocaleString('ar-IQ')} د.ع ✍️`}
-                </p>
-              </div>
-            </div>
-
-            <div style="background: #080B12; border: 1px solid var(--card-border); border-radius: 16px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
-              <div style="display: flex; align-items: center; gap: 8px; overflow: hidden; flex: 1;">
-                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan);"></span>
-                <span style="font-size: 12px; color: #D1D5DB; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${tx.current_location_step}</span>
-              </div>
-              <div style="display: flex; gap: 6px;">
-                <button onclick="viewTimeline('${tx.id}', '${tx.companies?.name}', '${tx.transaction_type}', '${tx.current_location_step}')" style="background: #101624; border: 1px solid var(--card-border); color: var(--cyan); padding: 6px 10px; border-radius: 10px; font-size: 11px; font-weight: 800; cursor: pointer;">
-                  📜 المسار ${historyCount > 1 ? `(${historyCount})` : ''}
-                </button>
-                <button onclick="openStepModal('${tx.id}', '${tx.current_location_step}')" style="background: #141B2D; border: 1px solid rgba(0, 245, 160, 0.3); color: var(--emerald); padding: 6px 12px; border-radius: 10px; font-size: 11px; font-weight: 800; cursor: pointer;">نقل</button>
-              </div>
-            </div>
-
-            <div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">المتطلبات المنجزة (${completedCount}/${checklists.length})</span>
-                <span style="font-size: 11px; font-weight: 900; color: ${progressPercent === 100 ? 'var(--emerald)' : 'var(--gold)'}; font-family: 'Plus Jakarta Sans', sans-serif;">${progressPercent}%</span>
-              </div>
-              <div class="lux-progress-track"><div class="lux-progress-bar" style="width: ${progressPercent}%;"></div></div>
-            </div>
-
-            <div>
-              ${checksHtml || '<p style="font-size:11px; color:var(--text-dim); padding: 4px 0;">لا توجد متطلبات مسجلة</p>'}
-              <button onclick="openAddChecklistModal('${tx.id}')" style="background: none; border: 1px dashed rgba(255,255,255,0.15); color: var(--emerald); font-size: 11px; font-weight: 800; padding: 9px; border-radius: 12px; margin-top: 6px; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                <span>+</span> إضافة متطلب جديد للمعاملة
-              </button>
-            </div>
-
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; border-top: 1px solid var(--card-border); padding-top: 14px;">
-              <button onclick="openWhatsAppQuickModal('${tx.id}')" class="btn-lux-secondary" style="padding: 10px 4px; font-size: 11px;">
-                💬 واتساب
-              </button>
-              <button onclick="openReceiptVoucherModalById('${tx.id}')" class="btn-lux-cyan" style="padding: 10px 4px; font-size: 11px;">
-                🧾 سند قبض
-              </button>
-              <button onclick="completeTx('${tx.id}')" class="btn-lux-emerald" style="padding: 10px 4px; font-size: 11px;">
-                إنجاز ✅
-              </button>
-            </div>
-
-          </div>
-        `;
-      }).join('');
-    }
-
-    function openStepModal(id, currentStep) {
-      targetTxIdForStep = id;
-      currentOldStepForTx = currentStep;
-      document.getElementById('customStepInput').value = '';
-      openSheet('stepUpdateModal');
-    }
-
-    function setQuickStep(val) { document.getElementById('customStepInput').value = val; }
-
-    async function confirmStepUpdate() {
-      const step = document.getElementById('customStepInput').value.trim();
-      if (step && targetTxIdForStep) {
-        pushStepHistory(targetTxIdForStep, currentOldStepForTx, step);
-        await db.from('transactions').update({ current_location_step: step }).eq('id', targetTxIdForStep);
-        logActivity("تحديث مسار", `تم نقل المعاملة إلى: ${step}`);
-        closeSheet('stepUpdateModal');
-        showToast("تم نقل المسار وحفظ المحطة السابقة بنجاح 📍");
-        loadData();
-      }
-    }
-
-    function openPaymentUpdateModalById(txId) {
-      const tx = allTransactionsGlobal.find(t => t.id === txId);
-      if (!tx) return;
-
-      targetTxForPayment = txId;
-      const compName = tx.companies?.name || 'شركة موثقة';
-      const total = Number(tx.fee_iqd) || 0;
-      const paid = Number(localStorage.getItem(`tx_paid_${tx.id}`)) || 0;
-
-      document.getElementById('updatePaymentTxInfo').innerText = `شركة: ${compName} - ${tx.transaction_type}`;
-      document.getElementById('payModalTotalFee').value = total;
-      document.getElementById('payModalPaidFee').value = paid;
-      calculateDebtPreview();
-      openSheet('updatePaymentModal');
-    }
-
-    function calculateDebtPreview() {
-      const total = parseFloat(document.getElementById('payModalTotalFee').value) || 0;
-      const paid = parseFloat(document.getElementById('payModalPaidFee').value) || 0;
-      const debt = Math.max(0, total - paid);
-      document.getElementById('payModalDebtPreview').innerText = `${debt.toLocaleString('ar-IQ')} د.ع`;
-    }
-
-    function quickPayFullAmount() {
-      const total = parseFloat(document.getElementById('payModalTotalFee').value) || 0;
-      document.getElementById('payModalPaidFee').value = total;
-      calculateDebtPreview();
-      showToast("تم تحديد المبلغ بالكامل كواصل ✅");
-    }
-
-    async function confirmPaymentUpdate() {
-      if (!targetTxForPayment) return;
-      const newTotal = parseFloat(document.getElementById('payModalTotalFee').value) || 0;
-      const newPaid = parseFloat(document.getElementById('payModalPaidFee').value) || 0;
-
-      await db.from('transactions').update({ fee_iqd: newTotal }).eq('id', targetTxForPayment);
-      localStorage.setItem(`tx_paid_${targetTxForPayment}`, newPaid);
-
-      logActivity("تعديل مالي", `تعديل أتعاب معاملة: إجمالي ${newTotal} د.ع - مقبوض ${newPaid} د.ع`);
-      closeSheet('updatePaymentModal');
-      showToast("تم تحديث الموقف المالي للمعاملة 💰");
-      loadData();
-    }
-
-    function openAddChecklistModal(txId) {
-      targetTxIdForChecklist = txId;
-      document.getElementById('newChecklistInput').value = '';
-      openSheet('addChecklistModal');
-    }
-
-    async function confirmAddChecklistItem() {
-      const text = document.getElementById('newChecklistInput').value.trim();
-      if (text && targetTxIdForChecklist) {
-        await db.from('transaction_checklists').insert([{
-          transaction_id: targetTxIdForChecklist,
-          item_text: text,
-          is_completed: false
-        }]);
-        logActivity("إضافة متطلب", `إضافة متطلب: (${text})`);
-        closeSheet('addChecklistModal');
-        showToast("تمت إضافة المتطلب بنجاح ✅");
-        loadData();
-      }
-    }
-
-    async function deleteChecklistItem(id) {
-      await db.from('transaction_checklists').delete().eq('id', id);
-      showToast("تم حذف المتطلب", "🗑️");
-      loadData();
-    }
-
-    async function saveCompany() {
-      const name = document.getElementById('compName').value.trim();
-      const phone = document.getElementById('compPhone').value.trim();
-      if (!name) return;
-      await db.from('companies').insert([{ name, phone }]);
-      logActivity("إضافة شركة", `تسجيل شركة جديدة: ${name}`);
-      document.getElementById('compName').value = '';
-      document.getElementById('compPhone').value = '';
-      closeSheet('newCompanyModal');
-      showToast("تم تسجيل الشركة بنجاح 🏢");
-      loadData();
-    }
-
-    async function saveTransaction() {
-      const company_id = document.getElementById('txCompanySelect').value;
-      const transaction_type = document.getElementById('txType').value.trim();
-      const fee_iqd = parseFloat(document.getElementById('txFee').value) || 0;
-      const paid_iqd = parseFloat(document.getElementById('txPaid').value) || 0;
-      const rawChecklist = document.getElementById('txChecklist').value.trim();
-
-      if (!transaction_type) return;
-
-      const { data: tx } = await db.from('transactions').insert([{ 
-        company_id, 
-        transaction_type, 
-        fee_iqd, 
-        status: 'in_progress',
-        current_location_step: 'تم استلام المعاملة وبدء الإجراءات'
-      }]).select().single();
-
-      if (tx) {
-        pushStepHistory(tx.id, null, 'تم استلام المعاملة وبدء الإجراءات');
-        if (paid_iqd > 0) {
-          localStorage.setItem(`tx_paid_${tx.id}`, paid_iqd);
-        }
-      }
-
-      if (rawChecklist && tx) {
-        const items = rawChecklist.split('\n').filter(i => i.trim() !== '').map(item => ({
-          transaction_id: tx.id,
-          item_text: item.trim(),
-          is_completed: false
-        }));
-        await db.from('transaction_checklists').insert(items);
-      }
-
-      logActivity("بدء معاملة", `بدء معاملة (${transaction_type}) بقيمة ${fee_iqd} د.ع`);
-      document.getElementById('txType').value = '';
-      document.getElementById('txChecklist').value = '';
-      document.getElementById('txPaid').value = '0';
-      closeSheet('newTxModal');
-      showToast("تمت المباشرة بالمعاملة 🚀");
-      loadData();
-    }
-
-    async function toggleCheck(id, val) {
-      await db.from('transaction_checklists').update({ is_completed: val }).eq('id', id);
-      loadData();
-    }
-
-    async function completeTx(id) {
-      await db.from('transactions').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', id);
-      logActivity("إنجاز معاملة", `تم إنجاز وأرشفة المعاملة رقم ${id}`);
-      showToast("تم إنجاز المعاملة وترحيل أتعابها للأرشيف 💰");
-      loadData();
-    }
-
-    function updateSmartRadarAlerts() {
-      const list = document.getElementById('notificationsList');
-      const badge = document.getElementById('notifBadge');
-      const countText = document.getElementById('notifCountText');
-      list.innerHTML = '';
-      
-      let alerts = [];
-
-      activeTransactions.forEach(t => {
-        const stale = getStalenessInfo(t);
-        if (stale.alertText) {
-          alerts.push({
-            type: stale.type,
-            title: `تنبيه ركود: ${t.companies?.name || 'شركة'}`,
-            desc: `${stale.alertText} - نوع المعاملة: (${t.transaction_type})`,
-            loc: t.current_location_step
-          });
-        }
-      });
-
-      companies.forEach(c => {
-        const lics = JSON.parse(localStorage.getItem(`lic_${c.id}`) || '{}');
-        Object.keys(lics).forEach(k => {
-          if (lics[k]) {
-            const daysLeft = Math.ceil((new Date(lics[k]) - new Date()) / (1000 * 60 * 60 * 24));
-            if (daysLeft <= 30) {
-              alerts.push({
-                type: daysLeft < 0 ? 'urgent' : 'warn',
-                title: `تنبيه ترخيص: ${c.name}`,
-                desc: `الترخيص (${k}) ${daysLeft < 0 ? `منتهي منذ ${Math.abs(daysLeft)} يوم!` : `ينتهي خلال ${daysLeft} يوم!`}`,
-                loc: 'دائرة التراخيص'
-              });
-            }
-          }
-        });
-      });
-
-      if (alerts.length > 0) {
-        badge.style.display = 'block';
-        countText.innerText = `${alerts.length} تنبيهات مهمة`;
-        list.innerHTML = alerts.map(a => `
-          <div style="background: #080B12; border: 1px solid ${a.type === 'urgent' ? 'rgba(255, 77, 77, 0.4)' : 'rgba(255, 184, 0, 0.4)'}; padding: 12px 14px; border-radius: 16px; display: flex; align-items: flex-start; gap: 10px;">
-            <span style="font-size: 18px;">${a.type === 'urgent' ? '🚨' : '⚠️'}</span>
-            <div style="flex: 1;">
-              <p style="font-size: 13px; font-weight: 900; color: ${a.type === 'urgent' ? '#FF6B6B' : 'var(--gold)'};">${a.title}</p>
-              <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">${a.desc}</p>
-            </div>
-          </div>
-        `).join('');
-      } else {
-        badge.style.display = 'none';
-        countText.innerText = '0 تنبيهات';
-        list.innerHTML = '<div style="text-align:center; padding: 30px 10px;"><p style="font-size: 14px; font-weight: 800; color: var(--emerald);">كل المعاملات والتراخيص نشطة ومحدثة 🚀</p></div>';
-      }
     }
 
     function renderAnalyticsCharts() {
@@ -2184,37 +2232,68 @@
       const paidTot = all.reduce((s, t) => s + (Number(localStorage.getItem(`tx_paid_${t.id}`)) || 0), 0);
       const debtTot = Math.max(0, tot - paidTot);
 
+      const range = getWeeklyDateRange();
+      const weeklyTxs = all.filter(t => new Date(t.created_at) >= range.cutoffDate);
+      const weeklySum = weeklyTxs.reduce((s, t) => s + (Number(t.fee_iqd) || 0), 0);
+
       document.getElementById('totalRevenue').innerText = `${tot.toLocaleString('ar-IQ')} د.ع`;
+      document.getElementById('weeklyTotalSumBadge').innerText = `${weeklySum.toLocaleString('ar-IQ')} د.ع`;
       document.getElementById('accPaidSummary').innerText = `${paidTot.toLocaleString('ar-IQ')} د.ع`;
       document.getElementById('accDebtSummary').innerText = `${debtTot.toLocaleString('ar-IQ')} د.ع`;
       
-      const filtered = all.filter(t => {
-        if (!searchQuery) return true;
-        const cName = (t.companies?.name || '').toLowerCase();
-        const tType = (t.transaction_type || '').toLowerCase();
-        return cName.includes(searchQuery) || tType.includes(searchQuery);
-      });
+      const filteredCompanies = companies.filter(c => !searchQuery || c.name.toLowerCase().includes(searchQuery));
 
-      document.getElementById('accountsList').innerHTML = filtered.map(t => {
-        const fee = Number(t.fee_iqd) || 0;
-        const paid = Number(localStorage.getItem(`tx_paid_${t.id}`)) || 0;
-        const remaining = Math.max(0, fee - paid);
+      document.getElementById('accountsList').innerHTML = filteredCompanies.map(c => {
+        const cTxs = all.filter(t => t.company_id === c.id);
+        const cTotalFee = cTxs.reduce((s, t) => s + (Number(t.fee_iqd) || 0), 0);
+        const cPaid = cTxs.reduce((s, t) => s + (Number(localStorage.getItem(`tx_paid_${t.id}`)) || 0), 0);
+        const cDebt = Math.max(0, cTotalFee - cPaid);
+
+        const txItemsHtml = cTxs.map(t => {
+          const fee = Number(t.fee_iqd) || 0;
+          const paid = Number(localStorage.getItem(`tx_paid_${t.id}`)) || 0;
+          const remaining = Math.max(0, fee - paid);
+          const isChecked = checkedTxIdsForStatement.has(t.id);
+
+          return `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#080B12; border:1px solid rgba(255,255,255,0.04); padding:8px 10px; border-radius:10px; margin-top:6px; font-size:11px;">
+              <label style="display:flex; align-items:center; gap:8px; cursor:pointer; flex:1;">
+                <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleTxCheckboxForStatement('${t.id}', this.checked)" style="width:16px; height:16px; accent-color:var(--cyan); cursor:pointer;">
+                <span style="color:#FFF; font-weight:700;">${t.transaction_type}</span>
+              </label>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span style="font-family:sans-serif; color:${remaining === 0 ? 'var(--emerald)' : '#FF7B7B'}; font-weight:800;">
+                  ${remaining === 0 ? 'واصل' : `${remaining.toLocaleString('ar-IQ')} د.ع`}
+                </span>
+                <button onclick="openReceiptVoucherModalById('${t.id}')" class="btn-lux-cyan" style="padding:4px 8px; font-size:10px; border-radius:6px;">سند</button>
+              </div>
+            </div>
+          `;
+        }).join('');
 
         return `
-          <div class="lux-card" style="padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;">
-            <div>
-              <p style="font-size: 13px; font-weight: 800; color: #FFF;">${t.companies?.name || 'شركة'}</p>
-              <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">${t.transaction_type} • <span style="color: ${t.status === 'completed' ? 'var(--emerald)' : 'var(--gold)'}">${t.status === 'completed' ? 'منجزة' : 'جارية'}</span></p>
-              <p style="font-size: 10px; color: var(--cyan); margin-top: 2px;">المقبوض: ${paid.toLocaleString('ar-IQ')} د.ع</p>
-            </div>
-            <div style="display:flex; align-items:center; gap:8px;">
-              <div style="text-align: left; cursor: pointer;" onclick="openPaymentUpdateModalById('${t.id}')">
-                <span style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 800; color: var(--emerald);">${fee.toLocaleString('ar-IQ')} د.ع</span>
-                <p style="font-size: 10px; color: ${remaining === 0 ? 'var(--emerald)' : '#FF7B7B'}; margin-top: 2px; font-weight: 800;">
-                  ${remaining === 0 ? 'واصل خالص ✅' : `متبقي: ${remaining.toLocaleString('ar-IQ')} د.ع`}
+          <div class="lux-card" style="padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div>
+                <p style="font-size: 13px; font-weight: 900; color: #FFF;">🏢 ${c.name}</p>
+                <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+                  أتعاب كلية: ${cTotalFee.toLocaleString('ar-IQ')} د.ع • <span style="color: ${cDebt === 0 ? 'var(--emerald)' : '#FF7B7B'}; font-weight:800;">${cDebt === 0 ? 'خالص بالكامل ✅' : `متبقي: ${cDebt.toLocaleString('ar-IQ')} د.ع`}</span>
                 </p>
               </div>
-              <button onclick="openReceiptVoucherModalById('${t.id}')" class="btn-lux-cyan" style="padding:6px 10px; font-size:11px; border-radius:10px;">🧾 سند</button>
+              <div style="display: flex; gap: 6px;">
+                <button onclick="openWeeklyReceiptForCompany('${c.id}')" class="btn-lux-purple" style="padding: 6px 10px; font-size: 10px; border-radius: 8px;">
+                  📅 سند أسبوعي
+                </button>
+                <button onclick="openCompanyDedicatedStatement('${c.id}')" class="btn-lux-cyan" style="padding: 6px 10px; font-size: 10px; border-radius: 8px;">
+                  📄 كشف خاص
+                </button>
+              </div>
+            </div>
+            
+            <!-- قائمة معاملات الشركة مع مربعات الاختيار -->
+            <div style="border-top: 1px solid var(--card-border); padding-top: 6px;">
+              <span style="font-size:10px; color:var(--text-dim);">حدد المعاملات المراد تضمينها في كشف مخصص:</span>
+              ${txItemsHtml || '<p style="font-size:10px; color:var(--text-dim); padding:4px 0;">لا توجد معاملات مسجلة</p>'}
             </div>
           </div>
         `;
@@ -2342,7 +2421,7 @@
       document.getElementById('pdfTotalPaid').innerText = `${paidTot.toLocaleString('ar-IQ')} د.ع`;
       document.getElementById('pdfTotalDebt').innerText = `${debtTot.toLocaleString('ar-IQ')} د.ع`;
 
-      logActivity("استخراج تقرير PDF", "تم استخراج كشف الحسابات المالي الرسمي");
+      logActivity("استخراج تقرير PDF", "تم استخراج كشف الحسابات المالي العام");
       openSheet('pdfModal');
     }
 
