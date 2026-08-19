@@ -186,8 +186,8 @@
       body * { visibility: hidden; }
       body { background-color: #FFF !important; }
       .sheet-content { background: #FFF !important; box-shadow: none !important; padding: 0 !important; }
-      #printableWeeklyArea, #printableWeeklyArea *, #printableCustomArea, #printableCustomArea * { visibility: visible; color: #000 !important; }
-      #printableWeeklyArea, #printableCustomArea { position: absolute; left: 0; top: 0; width: 100%; background: #fff; padding: 20px; font-family: 'Tajawal', sans-serif; border: none !important; }
+      #printableWeeklyArea, #printableWeeklyArea *, #printableCustomArea, #printableCustomArea *, #printableArea, #printableArea * { visibility: visible; color: #000 !important; }
+      #printableWeeklyArea, #printableCustomArea, #printableArea { position: absolute; left: 0; top: 0; width: 100%; background: #fff; padding: 20px; font-family: 'Tajawal', sans-serif; border: none !important; }
     }
   </style>
 </head>
@@ -559,7 +559,7 @@
     </div>
   </div>
 
-  <!-- السكربتات البرمجية المتكاملة -->
+  <!-- السكربتات البرمجية المتكاملة والمحدثة -->
   <script>
     const SUPABASE_URL = "https://giidtugteyiobaagqohy.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpaWR0dWd0ZXlpb2JhYWdxb2h5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxMTgyMjYsImV4cCI6MjEwMjY5NDIyNn0.v7Nwag2BTrCWG6zzeYo1kTG4w2xAuzSmiZpCLJtvBow";
@@ -575,7 +575,7 @@
     let currentWeeklyCompanyId = null;
     let currentWeeklyData = null;
     let currentCustomStatementData = null;
-    let checkedCompanyIdsForStatement = new Set();
+    let searchQuery = "";
     
     let currentDetailTxId = null;
     let currentDetailCurrentLoc = "";
@@ -917,6 +917,25 @@
       }
     }
 
+    // حساب أسبوع العمل الرسمي (الأحد - الخميس)
+    function getOfficialIraqiWorkWeek() {
+      const now = new Date();
+      const day = now.getDay(); // 0: Sun, 1: Mon, ..., 5: Fri, 6: Sat
+      let sunday = new Date(now);
+      sunday.setDate(now.getDate() - (day === 6 ? 6 : day));
+      sunday.setHours(0,0,0,0);
+      
+      let thursday = new Date(sunday);
+      thursday.setDate(sunday.getDate() + 4);
+      thursday.setHours(23,59,59,999);
+      
+      return {
+        startDate: sunday,
+        endDate: thursday,
+        dateRangeText: `${sunday.toLocaleDateString('ar-IQ')} - ${thursday.toLocaleDateString('ar-IQ')}`
+      };
+    }
+
     // المالية الأسبوعية
     function renderAccounts(all) {
       const workWeek = getOfficialIraqiWorkWeek();
@@ -963,7 +982,76 @@
 
     function printWeeklyReceiptVoucher() { window.print(); }
 
-    // الأرشيف والمكتبة
+    // الأرشيف والمكتبة والدوال المفقودة المضافة
+    function openDocVault() {
+      const comp = companies.find(c => c.id === selectedCompanyId);
+      if (comp) {
+        document.getElementById('vaultCompTitle').innerText = `أرشيف شركة: ${comp.name}`;
+        loadCompanyDocuments(selectedCompanyId);
+        openSheet('docVaultModal');
+      }
+    }
+
+    function openPDFPreviewModal() {
+      const tbody = document.getElementById('pdfTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      let totalDebtAll = 0;
+
+      companies.forEach(c => {
+        const cTxs = allTransactionsGlobal.filter(t => t.company_id === c.id);
+        cTxs.forEach(t => {
+          const paid = Number(localStorage.getItem(`tx_paid_${t.id}`)) || 0;
+          const fee = Number(t.fee_iqd) || 0;
+          const debt = fee - paid;
+          if (debt > 0) {
+            totalDebtAll += debt;
+            tbody.innerHTML += `
+              <tr style="border-bottom: 1px solid #ddd;">
+                <td style="padding: 8px;">${c.name}</td>
+                <td style="padding: 8px;">${t.transaction_type}</td>
+                <td style="text-align:center; padding: 8px;">${fee.toLocaleString('ar-IQ')}</td>
+                <td style="text-align:left; padding: 8px; color: red;">${debt.toLocaleString('ar-IQ')} د.ع</td>
+              </tr>
+            `;
+          }
+        });
+      });
+
+      const totalEl = document.getElementById('pdfTotalDebt');
+      if (totalEl) totalEl.innerText = `${totalDebtAll.toLocaleString('ar-IQ')} د.ع`;
+      openSheet('pdfModal');
+    }
+
+    function exportAccountsToCSV() {
+      let csvContent = "\uFEFFاسم الشركة,نوع المعاملة,الأتعاب,الدين المعلق\n";
+      
+      companies.forEach(c => {
+        const cTxs = allTransactionsGlobal.filter(t => t.company_id === c.id);
+        cTxs.forEach(t => {
+          const paid = Number(localStorage.getItem(`tx_paid_${t.id}`)) || 0;
+          const fee = Number(t.fee_iqd) || 0;
+          const debt = fee - paid;
+          if (debt > 0) {
+            csvContent += `"${c.name}","${t.transaction_type}",${fee},${debt}\n`;
+          }
+        });
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.setAttribute('download', `Financial_Accounts_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast("تم تصدير ملف الـ CSV بنجاح 📊");
+    }
+
+    function printCustomStatement() {
+      window.print();
+    }
+
     function renderArchiveLibrary(query = '') {
       const container = document.getElementById('libraryCompaniesList');
       const q = query.toLowerCase();
