@@ -594,17 +594,17 @@
       </div>
     </div>
 
-    <!-- تبويب 5: الحسابات، الكشوفات المخصصة، والمحاسبة الأسبوعية -->
+    <!-- تبويب 5: الحسابات والمحاسبة الأسبوعية (الأحد - الخميس) -->
     <div id="tab-accounts" style="display: none; flex-direction: column; gap: 16px;">
       
-      <!-- بطاقة المحاسبة الأسبوعية والتحصيل -->
+      <!-- بطاقة المحاسبة الأسبوعية الرسمية (الأحد إلى الخميس) -->
       <div class="lux-card" style="padding: 20px; background: linear-gradient(135deg, #101624 0%, #151D30 100%);">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
           <div>
             <div style="display: flex; align-items: center; gap: 6px;">
-              <span style="font-size: 10px; font-weight: 800; color: var(--purple); background: rgba(167, 139, 250, 0.15); padding: 2px 8px; border-radius: 6px;">نظام الحساب والتحصيل</span>
+              <span style="font-size: 10px; font-weight: 800; color: var(--purple); background: rgba(167, 139, 250, 0.15); padding: 2px 8px; border-radius: 6px;">أسبوع العمل الرسمي (الأحد - الخميس)</span>
             </div>
-            <p style="font-size: 11px; color: var(--text-muted); font-weight: 700; margin-top: 4px;">أتعاب الأسبوع الجاري (آخر 7 أيام)</p>
+            <p id="weeklyPeriodSubtitle" style="font-size: 11px; color: var(--text-muted); font-weight: 700; margin-top: 4px;">أتعاب الأسبوع الجاري</p>
             <h2 id="weeklyTotalSumBadge" style="font-size: 24px; font-weight: 900; color: var(--emerald); margin-top: 2px; font-family: 'Plus Jakarta Sans', sans-serif;">0 د.ع</h2>
           </div>
           <div style="display: flex; flex-direction: column; gap: 6px;">
@@ -619,19 +619,19 @@
         </div>
       </div>
 
-      <!-- أداة استخراج كشف مخصص لمعاملات محددة بالـ Checkbox -->
+      <!-- أداة استخراج كشف الحساب المجمع لعدة شركات أو معاملات محددة -->
       <div id="multiSelectActionCard" class="lux-card" style="padding: 14px 18px; border-color: rgba(0, 217, 245, 0.3); display: none; align-items: center; justify-content: space-between;">
         <div>
-          <b style="font-size: 12px; color: var(--cyan);">تم تحديد (<span id="selectedCountBadge">0</span>) معاملات</b>
-          <p style="font-size: 10px; color: var(--text-muted);">إنشاء كشف حساب معزول للمحدد فقط</p>
+          <b style="font-size: 12px; color: var(--cyan);">تم تحديد (<span id="selectedCountBadge">0</span>) جهات</b>
+          <p style="font-size: 10px; color: var(--text-muted);">استخراج كشف حساب مجمع للجهات المحددة فقط</p>
         </div>
-        <button onclick="generateCustomStatementForSelected()" class="btn-lux-cyan" style="padding: 8px 14px; font-size: 11px;">
-          📄 استخراج كشف للمحدد
+        <button onclick="generateCustomStatementForSelectedCompanies()" class="btn-lux-cyan" style="padding: 8px 14px; font-size: 11px;">
+          📄 استخراج كشف للشركات المحددة
         </button>
       </div>
 
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 4px;">
-        <span style="font-size: 12px; font-weight: 800; color: var(--text-muted);">حسابات الشركات (كشف وسند مستقل لكل عميل):</span>
+        <span style="font-size: 12px; font-weight: 800; color: var(--text-muted);">حدد الشركات لاستخراج كشف مجمع، أو اضغط على أزرار السند:</span>
       </div>
 
       <div id="accountsList" style="display: flex; flex-direction: column; gap: 10px;"></div>
@@ -751,7 +751,7 @@
     </div>
   </div>
 
-  <!-- نافذة كشف الحساب المخصص (المعزول لعميل أو لمعاملات مختارة) -->
+  <!-- نافذة كشف الحساب المخصص (المعزول لعميل أو لمجموعة شركات مختارة) -->
   <div id="customStatementModal" class="sheet-overlay">
     <div class="sheet-container" style="max-width: 520px;">
       <div class="sheet-handle"></div>
@@ -779,8 +779,8 @@
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 11px;">
           <thead>
             <tr style="background: #F3F4F6; border-bottom: 1.5px solid #000;">
+              <th style="padding: 6px; text-align: right;">الجهة / الشركة</th>
               <th style="padding: 6px; text-align: right;">نوع المعاملة</th>
-              <th style="padding: 6px; text-align: center;">الحالة</th>
               <th style="padding: 6px; text-align: center;">الأتعاب</th>
               <th style="padding: 6px; text-align: center;">المقبوض</th>
               <th style="padding: 6px; text-align: left;">المتبقي</th>
@@ -805,7 +805,7 @@
       <div class="sheet-handle"></div>
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
         <div>
-          <span style="font-size: 10px; font-weight: 800; color: var(--purple); background: rgba(167, 139, 250, 0.15); padding: 2px 8px; border-radius: 6px;">كشف وتسوية أسبوعية</span>
+          <span style="font-size: 10px; font-weight: 800; color: var(--purple); background: rgba(167, 139, 250, 0.15); padding: 2px 8px; border-radius: 6px;">كشف وتسوية أسبوعية (الأحد - الخميس)</span>
           <h3 style="font-size: 16px; font-weight: 900; color: #FFF; margin-top: 2px;">سند الحساب الأسبوعي</h3>
         </div>
         <div style="display: flex; gap: 6px;">
@@ -836,8 +836,8 @@
           <p>استلمنا من السادة / السيد: <b id="weeklyRecCompanyName" style="font-size: 13px; text-decoration: underline; color: #000;"></b></p>
           <p>مجموع أتعاب الأسبوع الجاري: <b id="weeklyRecAmountNum" style="font-family: monospace; font-size: 16px; color: #000;"></b> د.ع</p>
           <p>فقط وقدره: <b id="weeklyRecAmountText" style="color: #047857; font-size: 13px;"></b></p>
-          <p>عن تسوية معاملات الفترة: <b id="weeklyRecDateRange" style="color: #555;"></b></p>
-          <p>عدد المعاملات المشمولة في الحساب: <b id="weeklyRecTxCount" style="color: #000;"></b> معاملة</p>
+          <p>عن تسوية أسبوع العمل: <b id="weeklyRecDateRange" style="color: #555;"></b></p>
+          <p>عدد المعاملات المشمولة: <b id="weeklyRecTxCount" style="color: #000;"></b> معاملة</p>
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 2px solid #000; padding-top: 12px;">
@@ -849,7 +849,6 @@
         </div>
       </div>
 
-      <!-- زر تسوية أتعاب الأسبوع بنقرة واحدة -->
       <button id="btnSettleWeeklyDues" onclick="settleAllWeeklyDuesForCompany()" class="btn-lux-emerald" style="width: 100%; margin-top: 14px;">
         ✅ تسوية وتصفير أتعاب هذا الأسبوع (جعلها واصل خالص)
       </button>
@@ -1222,7 +1221,7 @@
     let currentWeeklyCompanyId = null;
     let currentWeeklyData = null;
     let currentCustomStatementData = null;
-    let checkedTxIdsForStatement = new Set();
+    let checkedCompanyIdsForStatement = new Set();
 
     let companies = [];
     let activeTransactions = [];
@@ -1866,16 +1865,37 @@
     function printReceiptVoucher() { window.print(); }
 
     /* =========================================================================
-       محرك المحاسبة الأسبوعية وسندات التسوية الشاملة (Weekly Settlement Engine)
+       محرك أسبوع العمل الرسمي العراقي (الأحد ➔ الخميس) مع استبعاد الجمعة والسبت
        ========================================================================= */
 
-    function getWeeklyDateRange() {
+    function getOfficialIraqiWorkWeek() {
       const now = new Date();
-      const pastWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const currentDay = now.getDay(); // 0: الأحد, 1: الاثنين, ..., 4: الخميس, 5: الجمعة, 6: السبت
+      
+      let diffToSunday = 0;
+      if (currentDay === 5) { // الجمعة
+        diffToSunday = 5;
+      } else if (currentDay === 6) { // السبت
+        diffToSunday = 6;
+      } else {
+        diffToSunday = currentDay; // الأحد إلى الخميس
+      }
+
+      const sundayStart = new Date(now);
+      sundayStart.setDate(now.getDate() - diffToSunday);
+      sundayStart.setHours(0, 0, 0, 0);
+
+      const thursdayEnd = new Date(sundayStart);
+      thursdayEnd.setDate(sundayStart.getDate() + 4);
+      thursdayEnd.setHours(23, 59, 59, 999);
+
+      const startStr = sundayStart.toLocaleDateString('ar-IQ', { month: 'numeric', day: 'numeric' });
+      const endStr = thursdayEnd.toLocaleDateString('ar-IQ', { month: 'numeric', day: 'numeric', year: 'numeric' });
+
       return {
-        startStr: pastWeek.toLocaleDateString('ar-IQ', { month: 'numeric', day: 'numeric' }),
-        endStr: now.toLocaleDateString('ar-IQ', { month: 'numeric', day: 'numeric', year: 'numeric' }),
-        cutoffDate: pastWeek
+        startDate: sundayStart,
+        endDate: thursdayEnd,
+        dateRangeText: `من الأحد (${startStr}) إلى الخميس (${endStr})`
       };
     }
 
@@ -1885,13 +1905,21 @@
       const comp = companies.find(c => c.id === compId);
       const compName = comp ? comp.name : 'الشركة الموثقة';
 
-      const range = getWeeklyDateRange();
-      const companyWeeklyTxs = allTransactionsGlobal.filter(t => t.company_id === compId);
+      const workWeek = getOfficialIraqiWorkWeek();
+      
+      // جلب معاملات الأسبوع الرسمي (من الأحد إلى الخميس)
+      const companyWeeklyTxs = allTransactionsGlobal.filter(t => {
+        const txDate = new Date(t.created_at);
+        return t.company_id === compId && txDate >= workWeek.startDate && txDate <= workWeek.endDate;
+      });
+
+      // إذا لم تكن هناك معاملات خلال هذا الأسبوع بالتحديد، نجلب كل المعاملات المعلقة للشركة
+      const txsToCount = companyWeeklyTxs.length > 0 ? companyWeeklyTxs : allTransactionsGlobal.filter(t => t.company_id === compId);
       
       let totalWeeklyFee = 0;
       let totalWeeklyPaid = 0;
 
-      companyWeeklyTxs.forEach(t => {
+      txsToCount.forEach(t => {
         const fee = Number(t.fee_iqd) || 0;
         const paid = Number(localStorage.getItem(`tx_paid_${t.id}`)) || 0;
         totalWeeklyFee += fee;
@@ -1906,8 +1934,8 @@
         totalWeeklyFee: totalWeeklyFee,
         totalWeeklyPaid: totalWeeklyPaid,
         totalWeeklyDue: totalWeeklyDue,
-        txList: companyWeeklyTxs,
-        dateRange: `من ${range.startStr} إلى ${range.endStr}`
+        txList: txsToCount,
+        dateRange: workWeek.dateRangeText
       };
 
       const officeName = localStorage.getItem('office_name') || 'مكتب إنجاز المعاملات الرسمية';
@@ -1924,11 +1952,11 @@
       document.getElementById('weeklyRecAmountNum').innerText = totalWeeklyDue.toLocaleString('ar-IQ');
       document.getElementById('weeklyRecAmountText').innerText = tafqeetIraqiDinar(totalWeeklyDue);
       document.getElementById('weeklyRecDateRange').innerText = currentWeeklyData.dateRange;
-      document.getElementById('weeklyRecTxCount').innerText = companyWeeklyTxs.length;
+      document.getElementById('weeklyRecTxCount').innerText = txsToCount.length;
 
       refreshWeeklyReceiptQRCode(recNumber, compName, totalWeeklyDue, currentWeeklyData.dateRange);
 
-      logActivity("إصدار سند أسبوعي", `سند تسوية أسبوعية شامل لشركة (${compName}) بمجموع ${totalWeeklyDue} د.ع`);
+      logActivity("إصدار سند أسبوعي", `سند تسوية أسبوعية (الأحد - الخميس) لشركة (${compName}) بمجموع ${totalWeeklyDue} د.ع`);
       openSheet('weeklyReceiptModal');
     }
 
@@ -1949,7 +1977,7 @@
         qrContainer.innerHTML = '';
         if (typeof QRCode !== 'undefined') {
           new QRCode(qrContainer, {
-            text: `سند تسوية أسبوعي: ${recNumber} | المستلم منه: ${payerName} | مجموع الأتعاب: ${amount} د.ع | الفترة: ${range}`,
+            text: `سند تسوية أسبوعي: ${recNumber} | المستلم منه: ${payerName} | مجموع الأتعاب: ${amount} د.ع | أسبوع العمل: ${range}`,
             width: 60,
             height: 60,
             colorDark : "#000000",
@@ -1968,14 +1996,14 @@
       const count = currentWeeklyData.txList.length;
       const range = currentWeeklyData.dateRange;
 
-      const msg = `📅 *سند تسوية الحساب الأسبوعي - ${office}*\n\n`
+      const msg = `📅 *سند تسوية الحساب الأسبوعي الرسمي - ${office}*\n\n`
                 + `▫️ *رقم السند:* ${recNumber}\n`
                 + `▫️ *السادة:* ${comp}\n`
-                + `▫️ *فترة المحاسبة الأسبوعية:* ${range}\n`
+                + `▫️ *فترة المحاسبة (الدوام الرسمي):* ${range}\n`
                 + `▫️ *عدد المعاملات المشمولة:* ${count} معاملات\n\n`
                 + `💰 *مجموع أتعاب الأسبوع الكلية:* *${total.toLocaleString('ar-IQ')} دينار عراقي*\n`
                 + `▫️ *فقط وقدره:* ${tafqeetIraqiDinar(total)}\n\n`
-                + `_يرجى التفضل بمطابقة وتصفية حساب الأسبوع._\n`
+                + `_يرجى التفضل بمطابقة وتصفية حساب نهاية دوام الخميس._\n`
                 + `_${office}_`;
 
       navigator.clipboard.writeText(msg);
@@ -2007,35 +2035,36 @@
     }
 
     /* =========================================================================
-       محرك كشوفات الحسابات المخصصة والمعزولة (Dedicated Statement Engine)
+       محرك كشوفات الحسابات المخصصة والمعزولة للشركات المحددة (Multi-Company Statement)
        ========================================================================= */
 
-    function toggleTxCheckboxForStatement(txId, isChecked) {
+    function toggleCompanyCheckboxForStatement(compId, isChecked) {
       if (isChecked) {
-        checkedTxIdsForStatement.add(txId);
+        checkedCompanyIdsForStatement.add(compId);
       } else {
-        checkedTxIdsForStatement.delete(txId);
+        checkedCompanyIdsForStatement.delete(compId);
       }
 
       const card = document.getElementById('multiSelectActionCard');
       const badge = document.getElementById('selectedCountBadge');
       
-      if (checkedTxIdsForStatement.size > 0) {
+      if (checkedCompanyIdsForStatement.size > 0) {
         card.style.display = 'flex';
-        badge.innerText = checkedTxIdsForStatement.size;
+        badge.innerText = checkedCompanyIdsForStatement.size;
       } else {
         card.style.display = 'none';
       }
     }
 
-    function generateCustomStatementForSelected() {
-      const selectedTxs = allTransactionsGlobal.filter(t => checkedTxIdsForStatement.has(t.id));
-      if (selectedTxs.length === 0) return;
+    function generateCustomStatementForSelectedCompanies() {
+      const selectedTxs = allTransactionsGlobal.filter(t => checkedCompanyIdsForStatement.has(t.company_id));
+      if (selectedTxs.length === 0) {
+        showToast("الشركات المحددة لا تحتوي على معاملات بعد", "⚠️");
+        return;
+      }
 
-      const firstComp = selectedTxs[0].companies?.name || 'عميل محترم';
-      const clientName = selectedTxs.every(t => t.companies?.name === firstComp) ? firstComp : 'كشف معاملات مختارة ومجمعة';
-
-      renderCustomStatementUI(clientName, selectedTxs);
+      const selectedNames = companies.filter(c => checkedCompanyIdsForStatement.has(c.id)).map(c => c.name).join(' + ');
+      renderCustomStatementUI(selectedNames, selectedTxs);
     }
 
     function openCompanyDedicatedStatement(compId) {
@@ -2072,8 +2101,8 @@
 
         return `
           <tr style="border-bottom: 1px solid #E5E7EB;">
-            <td style="padding: 6px; font-weight: 700;">${t.transaction_type}</td>
-            <td style="padding: 6px; text-align: center; color: ${t.status === 'completed' ? '#047857' : '#D97706'}; font-weight:700;">${t.status === 'completed' ? 'منجزة' : 'جارية'}</td>
+            <td style="padding: 6px; font-weight: 700; color: #111;">${t.companies?.name || 'شركة'}</td>
+            <td style="padding: 6px; color: #4B5563;">${t.transaction_type}</td>
             <td style="padding: 6px; text-align: center; font-weight: 700;">${fee.toLocaleString('ar-IQ')}</td>
             <td style="padding: 6px; text-align: center; color: #047857;">${paid.toLocaleString('ar-IQ')}</td>
             <td style="padding: 6px; text-align: left; font-weight: 700; color: #B91C1C;">${debt.toLocaleString('ar-IQ')}</td>
@@ -2093,7 +2122,7 @@
         totalDebt: debtTot
       };
 
-      logActivity("كشف حساب مخصص", `تم استخراج كشف مالي معزول لـ: ${clientTitle}`);
+      logActivity("كشف حساب مخصص", `تم استخراج كشف مالي معزول للشركات: ${clientTitle}`);
       openSheet('customStatementModal');
     }
 
@@ -2109,12 +2138,12 @@
         const fee = Number(t.fee_iqd) || 0;
         const p = Number(localStorage.getItem(`tx_paid_${t.id}`)) || 0;
         const d = Math.max(0, fee - p);
-        return `▫️ *${t.transaction_type}*: أتعاب ${fee.toLocaleString('ar-IQ')} | واصل ${p.toLocaleString('ar-IQ')} | متبقي ${d.toLocaleString('ar-IQ')} د.ع`;
+        return `▫️ *${t.companies?.name || ''} - ${t.transaction_type}*: أتعاب ${fee.toLocaleString('ar-IQ')} | واصل ${p.toLocaleString('ar-IQ')} | متبقي ${d.toLocaleString('ar-IQ')} د.ع`;
       }).join('\n');
 
       const msg = `📑 *كشف حساب مالي خاص - ${office}*\n\n`
                 + `السادة *${client}* المحترمون،\n\n`
-                + `مرفق طياً كشف الحساب المالي للمعاملات:\n`
+                + `مرفق طياً كشف الحساب المالي للمعاملات المحددة:\n`
                 + `${txLines}\n\n`
                 + `📊 *الموقف المالي الإجمالي:*\n`
                 + `▪️ مجموع الأتعاب: *${tot.toLocaleString('ar-IQ')} د.ع*\n`
@@ -2232,12 +2261,17 @@
       const paidTot = all.reduce((s, t) => s + (Number(localStorage.getItem(`tx_paid_${t.id}`)) || 0), 0);
       const debtTot = Math.max(0, tot - paidTot);
 
-      const range = getWeeklyDateRange();
-      const weeklyTxs = all.filter(t => new Date(t.created_at) >= range.cutoffDate);
+      // حساب أتعاب أسبوع العمل الرسمي (الأحد ➔ الخميس)
+      const workWeek = getOfficialIraqiWorkWeek();
+      const weeklyTxs = all.filter(t => {
+        const d = new Date(t.created_at);
+        return d >= workWeek.startDate && d <= workWeek.endDate;
+      });
       const weeklySum = weeklyTxs.reduce((s, t) => s + (Number(t.fee_iqd) || 0), 0);
 
       document.getElementById('totalRevenue').innerText = `${tot.toLocaleString('ar-IQ')} د.ع`;
       document.getElementById('weeklyTotalSumBadge').innerText = `${weeklySum.toLocaleString('ar-IQ')} د.ع`;
+      document.getElementById('weeklyPeriodSubtitle').innerText = `أتعاب الدوام (${workWeek.dateRangeText})`;
       document.getElementById('accPaidSummary').innerText = `${paidTot.toLocaleString('ar-IQ')} د.ع`;
       document.getElementById('accDebtSummary').innerText = `${debtTot.toLocaleString('ar-IQ')} د.ع`;
       
@@ -2248,37 +2282,19 @@
         const cTotalFee = cTxs.reduce((s, t) => s + (Number(t.fee_iqd) || 0), 0);
         const cPaid = cTxs.reduce((s, t) => s + (Number(localStorage.getItem(`tx_paid_${t.id}`)) || 0), 0);
         const cDebt = Math.max(0, cTotalFee - cPaid);
-
-        const txItemsHtml = cTxs.map(t => {
-          const fee = Number(t.fee_iqd) || 0;
-          const paid = Number(localStorage.getItem(`tx_paid_${t.id}`)) || 0;
-          const remaining = Math.max(0, fee - paid);
-          const isChecked = checkedTxIdsForStatement.has(t.id);
-
-          return `
-            <div style="display:flex; justify-content:space-between; align-items:center; background:#080B12; border:1px solid rgba(255,255,255,0.04); padding:8px 10px; border-radius:10px; margin-top:6px; font-size:11px;">
-              <label style="display:flex; align-items:center; gap:8px; cursor:pointer; flex:1;">
-                <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleTxCheckboxForStatement('${t.id}', this.checked)" style="width:16px; height:16px; accent-color:var(--cyan); cursor:pointer;">
-                <span style="color:#FFF; font-weight:700;">${t.transaction_type}</span>
-              </label>
-              <div style="display:flex; align-items:center; gap:6px;">
-                <span style="font-family:sans-serif; color:${remaining === 0 ? 'var(--emerald)' : '#FF7B7B'}; font-weight:800;">
-                  ${remaining === 0 ? 'واصل' : `${remaining.toLocaleString('ar-IQ')} د.ع`}
-                </span>
-                <button onclick="openReceiptVoucherModalById('${t.id}')" class="btn-lux-cyan" style="padding:4px 8px; font-size:10px; border-radius:6px;">سند</button>
-              </div>
-            </div>
-          `;
-        }).join('');
+        const isChecked = checkedCompanyIdsForStatement.has(c.id);
 
         return `
           <div class="lux-card" style="padding: 16px; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-              <div>
-                <p style="font-size: 13px; font-weight: 900; color: #FFF;">🏢 ${c.name}</p>
-                <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
-                  أتعاب كلية: ${cTotalFee.toLocaleString('ar-IQ')} د.ع • <span style="color: ${cDebt === 0 ? 'var(--emerald)' : '#FF7B7B'}; font-weight:800;">${cDebt === 0 ? 'خالص بالكامل ✅' : `متبقي: ${cDebt.toLocaleString('ar-IQ')} د.ع`}</span>
-                </p>
+              <div style="display:flex; align-items:flex-start; gap:10px; flex:1;">
+                <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleCompanyCheckboxForStatement('${c.id}', this.checked)" style="width:18px; height:18px; accent-color:var(--cyan); cursor:pointer; margin-top:2px;">
+                <div>
+                  <p style="font-size: 13px; font-weight: 900; color: #FFF;">🏢 ${c.name}</p>
+                  <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+                    الأتعاب: ${cTotalFee.toLocaleString('ar-IQ')} د.ع • <span style="color: ${cDebt === 0 ? 'var(--emerald)' : '#FF7B7B'}; font-weight:800;">${cDebt === 0 ? 'خالص بالكامل ✅' : `متبقي: ${cDebt.toLocaleString('ar-IQ')} د.ع`}</span>
+                  </p>
+                </div>
               </div>
               <div style="display: flex; gap: 6px;">
                 <button onclick="openWeeklyReceiptForCompany('${c.id}')" class="btn-lux-purple" style="padding: 6px 10px; font-size: 10px; border-radius: 8px;">
@@ -2288,12 +2304,6 @@
                   📄 كشف خاص
                 </button>
               </div>
-            </div>
-            
-            <!-- قائمة معاملات الشركة مع مربعات الاختيار -->
-            <div style="border-top: 1px solid var(--card-border); padding-top: 6px;">
-              <span style="font-size:10px; color:var(--text-dim);">حدد المعاملات المراد تضمينها في كشف مخصص:</span>
-              ${txItemsHtml || '<p style="font-size:10px; color:var(--text-dim); padding:4px 0;">لا توجد معاملات مسجلة</p>'}
             </div>
           </div>
         `;
