@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>منظومة إدارة المعاملات المتقدمة</title>
   
-  <!-- المكتبات السحابية والخطوط الرسمية -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -426,8 +425,8 @@
 
     @media print {
       body * { visibility: hidden; }
-      #printableReceiptArea, #printableReceiptArea *, #printableWeeklyArea, #printableWeeklyArea *, #printableCustomArea, #printableCustomArea * { visibility: visible; }
-      #printableReceiptArea, #printableWeeklyArea, #printableCustomArea { position: absolute; left: 0; top: 0; width: 100%; color: #000; background: #fff; padding: 20px; font-family: 'Tajawal', sans-serif; }
+      #printableReceiptArea, #printableReceiptArea *, #printableWeeklyArea, #printableWeeklyArea *, #printableCustomArea, #printableCustomArea *, #txFullDetailsPrintArea, #txFullDetailsPrintArea * { visibility: visible; }
+      #printableReceiptArea, #printableWeeklyArea, #printableCustomArea, #txFullDetailsPrintArea { position: absolute; left: 0; top: 0; width: 100%; color: #000; background: #fff; padding: 20px; font-family: 'Tajawal', sans-serif; }
     }
   </style>
 </head>
@@ -597,7 +596,6 @@
     <!-- تبويب 5: الحسابات والمحاسبة الأسبوعية (الأحد - الخميس) -->
     <div id="tab-accounts" style="display: none; flex-direction: column; gap: 16px;">
       
-      <!-- بطاقة المحاسبة الأسبوعية الرسمية (الأحد إلى الخميس) -->
       <div class="lux-card" style="padding: 20px; background: linear-gradient(135deg, #101624 0%, #151D30 100%);">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
           <div>
@@ -619,7 +617,6 @@
         </div>
       </div>
 
-      <!-- أداة استخراج كشف الحساب المجمع لعدة شركات أو معاملات محددة -->
       <div id="multiSelectActionCard" class="lux-card" style="padding: 14px 18px; border-color: rgba(0, 217, 245, 0.3); display: none; align-items: center; justify-content: space-between;">
         <div>
           <b style="font-size: 12px; color: var(--cyan);">تم تحديد (<span id="selectedCountBadge">0</span>) جهات</b>
@@ -723,7 +720,7 @@
       <span>الوثائق</span>
     </button>
     <button onclick="switchTab('settings')" id="nav-settings" class="dock-btn">
-      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l-.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
       <span>الإعدادات</span>
     </button>
   </nav>
@@ -751,7 +748,69 @@
     </div>
   </div>
 
-  <!-- نافذة كشف الحساب المخصص (المعزول لعميل أو لمجموعة شركات مختارة) -->
+  <!-- صفحة تفاصيل المعاملة الكاملة (عند الضغط على المعاملة النشطة) -->
+  <div id="transactionDetailsModal" class="sheet-overlay">
+    <div class="sheet-container" style="max-width: 500px;">
+      <div class="sheet-handle"></div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+        <div>
+          <span id="dtCompNameBadge" style="font-size: 11px; font-weight: 800; color: var(--emerald); text-transform: uppercase;">اسم الشركة</span>
+          <h3 id="dtTxTitle" style="font-size: 18px; font-weight: 900; color: #FFF; margin-top: 2px;">نوع المعاملة</h3>
+        </div>
+        <button onclick="closeSheet('transactionDetailsModal')" style="background: none; border: none; color: var(--text-muted); font-size: 16px; cursor: pointer; padding: 4px;">✕</button>
+      </div>
+
+      <!-- بطاقة الموقف المالي السريع داخل التفاصيل -->
+      <div class="lux-card" style="padding: 14px 18px; margin-bottom: 16px; background: #080B12; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <p style="font-size: 10px; color: var(--text-muted);">الأتعاب الكلية والمقبوض</p>
+          <h4 id="dtFinancialSummary" style="font-size: 14px; font-weight: 900; color: var(--gold); margin-top: 2px;">0 د.ع</h4>
+        </div>
+        <button onclick="openPaymentUpdateModalById(currentDetailTxId)" class="btn-lux-cyan" style="padding: 7px 12px; font-size: 11px;">تعديل المبالغ ✍️</button>
+      </div>
+
+      <!-- محطة المسار الحالي وسجل التنقلات التاريخي -->
+      <div class="lux-card" style="padding: 16px; margin-bottom: 16px; background: #080B12;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span style="font-size: 12px; font-weight: 800; color: var(--cyan);">📍 الموقع الميداني الحالي</span>
+          <button onclick="openStepModal(currentDetailTxId, currentDetailCurrentLoc)" class="btn-lux-emerald" style="padding: 5px 12px; font-size: 10px; border-radius: 8px;">نقل المسار ➔</button>
+        </div>
+        <p id="dtCurrentLocText" style="font-size: 13px; font-weight: 900; color: #FFF; margin-bottom: 10px;">جاري التحميل...</p>
+        
+        <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); display: block; margin-bottom: 6px; border-top: 1px solid var(--card-border); padding-top: 10px;">📜 سجل محطات المسار التاريخية:</span>
+        <div id="dtTimelineList" class="timeline-container" style="max-height: 140px; overflow-y: auto;"></div>
+      </div>
+
+      <!-- قائمة المتطلبات -->
+      <div class="lux-card" style="padding: 16px; margin-bottom: 18px; background: #080B12;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span style="font-size: 12px; font-weight: 800; color: var(--emerald);">✅ المتطلبات والإجراءات</span>
+          <span id="dtChecklistProgressText" style="font-size: 11px; font-weight: 900; color: var(--gold);">0%</span>
+        </div>
+        <div id="dtChecklistsContainer" style="display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow-y: auto; margin-bottom: 10px;"></div>
+        <button onclick="openAddChecklistModal(currentDetailTxId); closeSheet('transactionDetailsModal');" class="btn-lux-secondary" style="width: 100%; font-size: 11px; padding: 10px;">
+          + إضافة متطلب جديد لهذا الإجراء
+        </button>
+      </div>
+
+      <!-- أزرار الإجراءات الاحترافية (واتساب، سند قبض، إنجاز) -->
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px;">
+        <button onclick="openWhatsAppQuickModal(currentDetailTxId); closeSheet('transactionDetailsModal');" class="btn-lux-secondary" style="padding: 11px 4px; font-size: 11px;">
+          💬 واتساب
+        </button>
+        <button onclick="openReceiptVoucherModalById(currentDetailTxId); closeSheet('transactionDetailsModal');" class="btn-lux-cyan" style="padding: 11px 4px; font-size: 11px;">
+          🧾 سند قبض
+        </button>
+        <button onclick="completeTx(currentDetailTxId); closeSheet('transactionDetailsModal');" class="btn-lux-emerald" style="padding: 11px 4px; font-size: 11px;">
+          إنجاز ✅
+        </button>
+      </div>
+
+      <button onclick="closeSheet('transactionDetailsModal')" class="btn-lux-secondary" style="width: 100%;">إغلاق التفاصيل</button>
+    </div>
+  </div>
+
+  <!-- نافذة كشف الحساب المخصص (المعزول لمجموعة شركات أو معاملات محددة) -->
   <div id="customStatementModal" class="sheet-overlay">
     <div class="sheet-container" style="max-width: 520px;">
       <div class="sheet-handle"></div>
@@ -814,7 +873,6 @@
         </div>
       </div>
 
-      <!-- خانة التعديل الفوري لاسم المسدد في السند الأسبوعي -->
       <div style="background: #080B12; border: 1px solid var(--card-border); padding: 12px 14px; border-radius: 14px; margin-bottom: 14px; display: flex; flex-direction: column; gap: 6px;">
         <label style="font-size: 11px; color: var(--purple); font-weight: 800;">✍️ تعديل جهة الاستلام / اسم المسدد في السند الأسبوعي:</label>
         <input id="weeklyRecEditCompanyName" type="text" class="lux-input" style="width: 100%; padding: 9px 12px; font-size: 12px;" oninput="updateWeeklyReceiptPayerName(this.value)">
@@ -1222,6 +1280,9 @@
     let currentWeeklyData = null;
     let currentCustomStatementData = null;
     let checkedCompanyIdsForStatement = new Set();
+    
+    let currentDetailTxId = null;
+    let currentDetailCurrentLoc = "";
 
     let companies = [];
     let activeTransactions = [];
@@ -1865,20 +1926,81 @@
     function printReceiptVoucher() { window.print(); }
 
     /* =========================================================================
+       فتح صفحة تفاصيل المعاملة الكاملة عند الضغط على البطاقة النشطة
+       ========================================================================= */
+
+    function openTransactionFullDetails(txId) {
+      const tx = allTransactionsGlobal.find(t => t.id === txId);
+      if (!tx) return;
+
+      currentDetailTxId = txId;
+      currentDetailCurrentLoc = tx.current_location_step || 'بداية المعاملة';
+
+      document.getElementById('dtCompNameBadge').innerText = tx.companies?.name || 'شركة موثقة';
+      document.getElementById('dtTxTitle').innerText = tx.transaction_type;
+      document.getElementById('dtCurrentLocText').innerText = currentDetailCurrentLoc;
+
+      const fee = Number(tx.fee_iqd) || 0;
+      const paid = Number(localStorage.getItem(`tx_paid_${tx.id}`)) || 0;
+      const debt = Math.max(0, fee - paid);
+      document.getElementById('dtFinancialSummary').innerText = `أتعاب: ${fee.toLocaleString('ar-IQ')} | مقبوض: ${paid.toLocaleString('ar-IQ')} | متبقي: ${debt.toLocaleString('ar-IQ')} د.ع`;
+
+      // متطلبات المعاملة
+      const checklists = tx.transaction_checklists || [];
+      const completedCount = checklists.filter(c => c.is_completed).length;
+      const progressPercent = checklists.length > 0 ? Math.round((completedCount / checklists.length) * 100) : 0;
+      document.getElementById('dtChecklistProgressText').innerText = `${progressPercent}% (${completedCount}/${checklists.length})`;
+
+      const checksContainer = document.getElementById('dtChecklistsContainer');
+      checksContainer.innerHTML = checklists.length > 0 ? checklists.map(c => `
+        <div style="display: flex; align-items: center; justify-content: space-between; background: #06080D; border: 1px solid rgba(255,255,255,0.04); padding: 8px 10px; border-radius: 10px;">
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 11px; color: ${c.is_completed ? '#6B7280' : '#E5E7EB'}; cursor: pointer; flex: 1;">
+            <input type="checkbox" ${c.is_completed ? 'checked' : ''} onchange="toggleCheck('${c.id}', ${!c.is_completed}); setTimeout(() => openTransactionFullDetails('${txId}'), 200);" style="width: 15px; height: 15px; accent-color: var(--emerald); cursor: pointer;">
+            <span style="${c.is_completed ? 'text-decoration: line-through;' : ''}">${c.item_text}</span>
+          </label>
+          <button onclick="deleteChecklistItem('${c.id}'); setTimeout(() => openTransactionFullDetails('${txId}'), 200);" style="background: none; border: none; color: #EF4444; font-size: 12px; cursor: pointer;">✕</button>
+        </div>
+      `).join('') : '<p style="font-size:11px; color:var(--text-dim); text-align:center; padding:10px;">لا توجد متطلبات مسجلة</p>';
+
+      // السجل التاريخي
+      const timelineContainer = document.getElementById('dtTimelineList');
+      let hist = getStepHistory(txId);
+      if (hist.length === 0) {
+        hist = [{ step: currentDetailCurrentLoc, time: new Date().toISOString() }];
+      }
+
+      timelineContainer.innerHTML = hist.map((h, i) => {
+        const isCurrent = i === hist.length - 1;
+        const d = new Date(h.time);
+        const timeStr = d.toLocaleDateString('ar-IQ', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        return `
+          <div class="timeline-item ${isCurrent ? 'active' : ''}">
+            <span style="font-size: 12px; font-weight: ${isCurrent ? '900' : '700'}; color: ${isCurrent ? 'var(--emerald)' : '#FFF'};">
+              ${isCurrent ? '📍 الحالي: ' : '🏢 محطة: '} ${h.step}
+            </span>
+            <span style="font-size: 9px; color: var(--text-dim); font-family: monospace;">${timeStr}</span>
+          </div>
+        `;
+      }).join('');
+
+      openSheet('transactionDetailsModal');
+    }
+
+    /* =========================================================================
        محرك أسبوع العمل الرسمي العراقي (الأحد ➔ الخميس) مع استبعاد الجمعة والسبت
        ========================================================================= */
 
     function getOfficialIraqiWorkWeek() {
       const now = new Date();
-      const currentDay = now.getDay(); // 0: الأحد, 1: الاثنين, ..., 4: الخميس, 5: الجمعة, 6: السبت
+      const currentDay = now.getDay();
       
       let diffToSunday = 0;
-      if (currentDay === 5) { // الجمعة
+      if (currentDay === 5) {
         diffToSunday = 5;
-      } else if (currentDay === 6) { // السبت
+      } else if (currentDay === 6) {
         diffToSunday = 6;
       } else {
-        diffToSunday = currentDay; // الأحد إلى الخميس
+        diffToSunday = currentDay;
       }
 
       const sundayStart = new Date(now);
@@ -1906,20 +2028,12 @@
       const compName = comp ? comp.name : 'الشركة الموثقة';
 
       const workWeek = getOfficialIraqiWorkWeek();
-      
-      // جلب معاملات الأسبوع الرسمي (من الأحد إلى الخميس)
-      const companyWeeklyTxs = allTransactionsGlobal.filter(t => {
-        const txDate = new Date(t.created_at);
-        return t.company_id === compId && txDate >= workWeek.startDate && txDate <= workWeek.endDate;
-      });
-
-      // إذا لم تكن هناك معاملات خلال هذا الأسبوع بالتحديد، نجلب كل المعاملات المعلقة للشركة
-      const txsToCount = companyWeeklyTxs.length > 0 ? companyWeeklyTxs : allTransactionsGlobal.filter(t => t.company_id === compId);
+      const companyWeeklyTxs = allTransactionsGlobal.filter(t => t.company_id === compId);
       
       let totalWeeklyFee = 0;
       let totalWeeklyPaid = 0;
 
-      txsToCount.forEach(t => {
+      companyWeeklyTxs.forEach(t => {
         const fee = Number(t.fee_iqd) || 0;
         const paid = Number(localStorage.getItem(`tx_paid_${t.id}`)) || 0;
         totalWeeklyFee += fee;
@@ -1934,7 +2048,7 @@
         totalWeeklyFee: totalWeeklyFee,
         totalWeeklyPaid: totalWeeklyPaid,
         totalWeeklyDue: totalWeeklyDue,
-        txList: txsToCount,
+        txList: companyWeeklyTxs,
         dateRange: workWeek.dateRangeText
       };
 
@@ -1952,7 +2066,7 @@
       document.getElementById('weeklyRecAmountNum').innerText = totalWeeklyDue.toLocaleString('ar-IQ');
       document.getElementById('weeklyRecAmountText').innerText = tafqeetIraqiDinar(totalWeeklyDue);
       document.getElementById('weeklyRecDateRange').innerText = currentWeeklyData.dateRange;
-      document.getElementById('weeklyRecTxCount').innerText = txsToCount.length;
+      document.getElementById('weeklyRecTxCount').innerText = companyWeeklyTxs.length;
 
       refreshWeeklyReceiptQRCode(recNumber, compName, totalWeeklyDue, currentWeeklyData.dateRange);
 
@@ -2035,7 +2149,7 @@
     }
 
     /* =========================================================================
-       محرك كشوفات الحسابات المخصصة والمعزولة للشركات المحددة (Multi-Company Statement)
+       محرك كشوفات الحسابات المعزولة للشركات المحددة (Multi-Company Statement)
        ========================================================================= */
 
     function toggleCompanyCheckboxForStatement(compId, isChecked) {
@@ -2198,6 +2312,391 @@
       window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
     }
 
+    function getStepHistory(txId) {
+      const stored = localStorage.getItem(`step_history_${txId}`);
+      return stored ? JSON.parse(stored) : [];
+    }
+
+    function pushStepHistory(txId, oldLocation, newLocation) {
+      let hist = getStepHistory(txId);
+      if (hist.length === 0 && oldLocation) {
+        hist.push({ step: oldLocation, time: new Date(Date.now() - 3600000).toISOString() });
+      }
+      hist.push({ step: newLocation, time: new Date().toISOString() });
+      localStorage.setItem(`step_history_${txId}`, JSON.stringify(hist));
+    }
+
+    function viewTimeline(txId, compName, txType, currentLoc) {
+      document.getElementById('timelineTxTitle').innerText = `${compName} - ${txType}`;
+      const list = document.getElementById('timelineStepsList');
+      let hist = getStepHistory(txId);
+
+      if (hist.length === 0) {
+        hist = [{ step: currentLoc || 'تم استلام المعاملة وبدء الإجراءات', time: new Date().toISOString() }];
+      }
+
+      list.innerHTML = hist.map((h, i) => {
+        const isCurrent = i === hist.length - 1;
+        const d = new Date(h.time);
+        const timeStr = d.toLocaleDateString('ar-IQ', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+        return `
+          <div class="timeline-item ${isCurrent ? 'active' : ''}">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 13px; font-weight: ${isCurrent ? '900' : '700'}; color: ${isCurrent ? 'var(--emerald)' : '#FFF'};">
+                ${isCurrent ? '📍 الموقع الحالي: ' : '🏢 محطة سابقة: '} ${h.step}
+              </span>
+            </div>
+            <span style="font-size: 10px; color: var(--text-dim); font-family: 'Plus Jakarta Sans', sans-serif;">${timeStr}</span>
+          </div>
+        `;
+      }).join('');
+
+      openSheet('timelineModal');
+    }
+
+    function getStalenessInfo(tx) {
+      const hist = getStepHistory(tx.id);
+      const lastTimeStr = hist.length > 0 ? hist[hist.length - 1].time : tx.created_at;
+      const hoursPassed = Math.floor((new Date() - new Date(lastTimeStr)) / (1000 * 60 * 60));
+
+      if (hoursPassed >= 48) {
+        const days = Math.floor(hoursPassed / 24);
+        return {
+          type: 'urgent',
+          badgeHtml: `<span class="stale-badge urgent">⚠️ راكدة منذ ${days} يوم</span>`,
+          alertText: `لم يتم تحريكها منذ ${days} يوم!`,
+          isUrgent: true
+        };
+      } else if (hoursPassed >= 24) {
+        return {
+          type: 'warn',
+          badgeHtml: `<span class="stale-badge warn">⏳ متوقفة منذ ${hoursPassed} ساعة</span>`,
+          alertText: `متوقفة منذ أكثر من 24 ساعة.`,
+          isUrgent: false
+        };
+      } else {
+        return {
+          type: 'fresh',
+          badgeHtml: `<span class="stale-badge fresh">✨ نشطة ومحدثة</span>`,
+          alertText: null,
+          isUrgent: false
+        };
+      }
+    }
+
+    function renderActive() {
+      const container = document.getElementById('activeTransactionsList');
+      
+      const filtered = activeTransactions.filter(tx => {
+        if (!searchQuery) return true;
+        const cName = (tx.companies?.name || '').toLowerCase();
+        const tType = (tx.transaction_type || '').toLowerCase();
+        const cLoc = (tx.current_location_step || '').toLowerCase();
+        return cName.includes(searchQuery) || tType.includes(searchQuery) || cLoc.includes(searchQuery);
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="lux-card" style="text-align: center; color: var(--text-dim); padding: 40px 20px; font-size: 13px;">${searchQuery ? 'لا توجد نتائج مطابقة للبحث' : 'لا توجد معاملات جارية حالياً'}</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(tx => {
+        const checklists = tx.transaction_checklists || [];
+        const completedCount = checklists.filter(c => c.is_completed).length;
+        const progressPercent = checklists.length > 0 ? Math.round((completedCount / checklists.length) * 100) : 0;
+        const staleInfo = getStalenessInfo(tx);
+        const historyCount = getStepHistory(tx.id).length;
+        const paid = Number(localStorage.getItem(`tx_paid_${tx.id}`) || 0);
+        const total = Number(tx.fee_iqd) || 0;
+        const debt = Math.max(0, total - paid);
+
+        return `
+          <div class="lux-card" style="padding: 20px; display: flex; flex-direction: column; gap: 14px; ${staleInfo.isUrgent ? 'border-color: rgba(255, 77, 77, 0.4);' : ''}">
+            
+            <!-- الضغط على البطاقة يفتح صفحة التفاصيل الكاملة -->
+            <div onclick="openTransactionFullDetails('${tx.id}')" style="cursor: pointer;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #182234, #0F1624); border: 1px solid var(--card-border-highlight); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; color: var(--emerald);">
+                    ${(tx.companies?.name || 'ش').slice(0, 2)}
+                  </div>
+                  <div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                      <span style="font-size: 11px; font-weight: 800; color: var(--emerald);">${tx.companies?.name || 'شركة'}</span>
+                      ${staleInfo.badgeHtml}
+                    </div>
+                    <h3 style="font-size: 15px; font-weight: 900; color: #FFF; margin-top: 1px;">${tx.transaction_type}</h3>
+                  </div>
+                </div>
+                <div style="text-align: left;">
+                  <span style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 900; color: var(--gold); background: var(--gold-glow); border: 1px solid rgba(255, 184, 0, 0.3); padding: 4px 10px; border-radius: 100px; display: inline-block;">${total.toLocaleString('ar-IQ')} د.ع</span>
+                  <p style="font-size: 10px; color: ${debt === 0 ? 'var(--emerald)' : '#FF7B7B'}; margin-top: 4px; font-weight: 700;">
+                    ${debt === 0 ? 'واصل خالص ✅' : `متبقي: ${debt.toLocaleString('ar-IQ')} د.ع`}
+                  </p>
+                </div>
+              </div>
+
+              <div style="background: #080B12; border: 1px solid var(--card-border); border-radius: 16px; padding: 10px 14px; margin-top: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 8px; overflow: hidden; flex: 1;">
+                  <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan);"></span>
+                  <span style="font-size: 12px; color: #D1D5DB; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${tx.current_location_step}</span>
+                </div>
+                <span style="font-size: 10px; color: var(--emerald); font-weight: 800;">عرض التفاصيل الكامله 🔍</span>
+              </div>
+            </div>
+
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">نسبة إنجاز المتطلبات (${completedCount}/${checklists.length})</span>
+                <span style="font-size: 11px; font-weight: 900; color: ${progressPercent === 100 ? 'var(--emerald)' : 'var(--gold)'}; font-family: 'Plus Jakarta Sans', sans-serif;">${progressPercent}%</span>
+              </div>
+              <div class="lux-progress-track"><div class="lux-progress-bar" style="width: ${progressPercent}%;"></div></div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; border-top: 1px solid var(--card-border); padding-top: 12px;">
+              <button onclick="openWhatsAppQuickModal('${tx.id}')" class="btn-lux-secondary" style="padding: 10px 4px; font-size: 11px;">
+                💬 واتساب
+              </button>
+              <button onclick="openReceiptVoucherModalById('${tx.id}')" class="btn-lux-cyan" style="padding: 10px 4px; font-size: 11px;">
+                🧾 سند قبض
+              </button>
+              <button onclick="completeTx('${tx.id}')" class="btn-lux-emerald" style="padding: 10px 4px; font-size: 11px;">
+                إنجاز ✅
+              </button>
+            </div>
+
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openStepModal(id, currentStep) {
+      targetTxIdForStep = id;
+      currentOldStepForTx = currentStep;
+      document.getElementById('customStepInput').value = '';
+      openSheet('stepUpdateModal');
+    }
+
+    function setQuickStep(val) { document.getElementById('customStepInput').value = val; }
+
+    async function confirmStepUpdate() {
+      const step = document.getElementById('customStepInput').value.trim();
+      if (step && targetTxIdForStep) {
+        pushStepHistory(targetTxIdForStep, currentOldStepForTx, step);
+        await db.from('transactions').update({ current_location_step: step }).eq('id', targetTxIdForStep);
+        logActivity("تحديث مسار", `تم نقل المعاملة إلى: ${step}`);
+        closeSheet('stepUpdateModal');
+        showToast("تم نقل المسار وحفظ المحطة السابقة بنجاح 📍");
+        loadData();
+      }
+    }
+
+    function openPaymentUpdateModalById(txId) {
+      const tx = allTransactionsGlobal.find(t => t.id === txId);
+      if (!tx) return;
+
+      targetTxForPayment = txId;
+      const compName = tx.companies?.name || 'شركة موثقة';
+      const total = Number(tx.fee_iqd) || 0;
+      const paid = Number(localStorage.getItem(`tx_paid_${tx.id}`)) || 0;
+
+      document.getElementById('updatePaymentTxInfo').innerText = `شركة: ${compName} - ${tx.transaction_type}`;
+      document.getElementById('payModalTotalFee').value = total;
+      document.getElementById('payModalPaidFee').value = paid;
+      calculateDebtPreview();
+      openSheet('updatePaymentModal');
+    }
+
+    function calculateDebtPreview() {
+      const total = parseFloat(document.getElementById('payModalTotalFee').value) || 0;
+      const paid = parseFloat(document.getElementById('payModalPaidFee').value) || 0;
+      const debt = Math.max(0, total - paid);
+      document.getElementById('payModalDebtPreview').innerText = `${debt.toLocaleString('ar-IQ')} د.ع`;
+    }
+
+    function quickPayFullAmount() {
+      const total = parseFloat(document.getElementById('payModalTotalFee').value) || 0;
+      document.getElementById('payModalPaidFee').value = total;
+      calculateDebtPreview();
+      showToast("تم تحديد المبلغ بالكامل كواصل ✅");
+    }
+
+    async function confirmPaymentUpdate() {
+      if (!targetTxForPayment) return;
+      const newTotal = parseFloat(document.getElementById('payModalTotalFee').value) || 0;
+      const newPaid = parseFloat(document.getElementById('payModalPaidFee').value) || 0;
+
+      await db.from('transactions').update({ fee_iqd: newTotal }).eq('id', targetTxForPayment);
+      localStorage.setItem(`tx_paid_${targetTxForPayment}`, newPaid);
+
+      logActivity("تعديل مالي", `تعديل أتعاب معاملة: إجمالي ${newTotal} د.ع - مقبوض ${newPaid} د.ع`);
+      closeSheet('updatePaymentModal');
+      showToast("تم تحديث الموقف المالي للمعاملة 💰");
+      loadData();
+      if (currentDetailTxId) openTransactionFullDetails(currentDetailTxId);
+    }
+
+    function openAddChecklistModal(txId) {
+      targetTxIdForChecklist = txId;
+      document.getElementById('newChecklistInput').value = '';
+      openSheet('addChecklistModal');
+    }
+
+    async function confirmAddChecklistItem() {
+      const text = document.getElementById('newChecklistInput').value.trim();
+      if (text && targetTxIdForChecklist) {
+        await db.from('transaction_checklists').insert([{
+          transaction_id: targetTxIdForChecklist,
+          item_text: text,
+          is_completed: false
+        }]);
+        logActivity("إضافة متطلب", `إضافة متطلب: (${text})`);
+        closeSheet('addChecklistModal');
+        showToast("تمت إضافة المتطلب بنجاح ✅");
+        loadData();
+        if (currentDetailTxId) openTransactionFullDetails(currentDetailTxId);
+      }
+    }
+
+    async function deleteChecklistItem(id) {
+      await db.from('transaction_checklists').delete().eq('id', id);
+      showToast("تم حذف المتطلب", "🗑️");
+      loadData();
+      if (currentDetailTxId) openTransactionFullDetails(currentDetailTxId);
+    }
+
+    async function saveCompany() {
+      const name = document.getElementById('compName').value.trim();
+      const phone = document.getElementById('compPhone').value.trim();
+      if (!name) return;
+      await db.from('companies').insert([{ name, phone }]);
+      logActivity("إضافة شركة", `تسجيل شركة جديدة: ${name}`);
+      document.getElementById('compName').value = '';
+      document.getElementById('compPhone').value = '';
+      closeSheet('newCompanyModal');
+      showToast("تم تسجيل الشركة بنجاح 🏢");
+      loadData();
+    }
+
+    async function saveTransaction() {
+      const company_id = document.getElementById('txCompanySelect').value;
+      const transaction_type = document.getElementById('txType').value.trim();
+      const fee_iqd = parseFloat(document.getElementById('txFee').value) || 0;
+      const paid_iqd = parseFloat(document.getElementById('txPaid').value) || 0;
+      const rawChecklist = document.getElementById('txChecklist').value.trim();
+
+      if (!transaction_type) {
+        showToast("يرجى كتابة نوع المعاملة", "⚠️");
+        return;
+      }
+
+      const { data: tx, error } = await db.from('transactions').insert([{ 
+        company_id, 
+        transaction_type, 
+        fee_iqd, 
+        status: 'in_progress',
+        current_location_step: 'تم استلام المعاملة وبدء الإجراءات'
+      }]).select().single();
+
+      if (error) {
+        showToast("خطأ في حفظ المعاملة: " + error.message, "❌");
+        return;
+      }
+
+      if (tx) {
+        pushStepHistory(tx.id, null, 'تم استلام المعاملة وبدء الإجراءات');
+        if (paid_iqd > 0) {
+          localStorage.setItem(`tx_paid_${tx.id}`, paid_iqd);
+        }
+      }
+
+      if (rawChecklist && tx) {
+        const items = rawChecklist.split('\n').filter(i => i.trim() !== '').map(item => ({
+          transaction_id: tx.id,
+          item_text: item.trim(),
+          is_completed: false
+        }));
+        await db.from('transaction_checklists').insert(items);
+      }
+
+      logActivity("بدء معاملة", `بدء معاملة (${transaction_type}) بقيمة ${fee_iqd} د.ع`);
+      document.getElementById('txType').value = '';
+      document.getElementById('txChecklist').value = '';
+      document.getElementById('txPaid').value = '0';
+      closeSheet('newTxModal');
+      showToast("تمت المباشرة بالمعاملة 🚀");
+      loadData();
+    }
+
+    async function toggleCheck(id, val) {
+      await db.from('transaction_checklists').update({ is_completed: val }).eq('id', id);
+      loadData();
+    }
+
+    async function completeTx(id) {
+      await db.from('transactions').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', id);
+      logActivity("إنجاز معاملة", `تم إنجاز وأرشفة المعاملة رقم ${id}`);
+      showToast("تم إنجاز المعاملة وترحيل أتعابها للأرشيف 💰");
+      loadData();
+    }
+
+    function updateSmartRadarAlerts() {
+      const list = document.getElementById('notificationsList');
+      const badge = document.getElementById('notifBadge');
+      const countText = document.getElementById('notifCountText');
+      list.innerHTML = '';
+      
+      let alerts = [];
+
+      activeTransactions.forEach(t => {
+        const stale = getStalenessInfo(t);
+        if (stale.alertText) {
+          alerts.push({
+            type: stale.type,
+            title: `تنبيه ركود: ${t.companies?.name || 'شركة'}`,
+            desc: `${stale.alertText} - نوع المعاملة: (${t.transaction_type})`,
+            loc: t.current_location_step
+          });
+        }
+      });
+
+      companies.forEach(c => {
+        const lics = JSON.parse(localStorage.getItem(`lic_${c.id}`) || '{}');
+        Object.keys(lics).forEach(k => {
+          if (lics[k]) {
+            const daysLeft = Math.ceil((new Date(lics[k]) - new Date()) / (1000 * 60 * 60 * 24));
+            if (daysLeft <= 30) {
+              alerts.push({
+                type: daysLeft < 0 ? 'urgent' : 'warn',
+                title: `تنبيه ترخيص: ${c.name}`,
+                desc: `الترخيص (${k}) ${daysLeft < 0 ? `منتهي منذ ${Math.abs(daysLeft)} يوم!` : `ينتهي خلال ${daysLeft} يوم!`}`,
+                loc: 'دائرة التراخيص'
+              });
+            }
+          }
+        });
+      });
+
+      if (alerts.length > 0) {
+        badge.style.display = 'block';
+        countText.innerText = `${alerts.length} تنبيهات مهمة`;
+        list.innerHTML = alerts.map(a => `
+          <div style="background: #080B12; border: 1px solid ${a.type === 'urgent' ? 'rgba(255, 77, 77, 0.4)' : 'rgba(255, 184, 0, 0.4)'}; padding: 12px 14px; border-radius: 16px; display: flex; align-items: flex-start; gap: 10px;">
+            <span style="font-size: 18px;">${a.type === 'urgent' ? '🚨' : '⚠️'}</span>
+            <div style="flex: 1;">
+              <p style="font-size: 13px; font-weight: 900; color: ${a.type === 'urgent' ? '#FF6B6B' : 'var(--gold)'};">${a.title}</p>
+              <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">${a.desc}</p>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        badge.style.display = 'none';
+        countText.innerText = '0 تنبيهات';
+        list.innerHTML = '<div style="text-align:center; padding: 30px 10px;"><p style="font-size: 14px; font-weight: 800; color: var(--emerald);">كل المعاملات والتراخيص نشطة ومحدثة 🚀</p></div>';
+      }
+    }
+
     function renderAnalyticsCharts() {
       const activeCount = activeTransactions.length;
       const completedCount = allTransactionsGlobal.filter(t => t.status === 'completed' || t.status === 'archived').length;
@@ -2261,7 +2760,6 @@
       const paidTot = all.reduce((s, t) => s + (Number(localStorage.getItem(`tx_paid_${t.id}`)) || 0), 0);
       const debtTot = Math.max(0, tot - paidTot);
 
-      // حساب أتعاب أسبوع العمل الرسمي (الأحد ➔ الخميس)
       const workWeek = getOfficialIraqiWorkWeek();
       const weeklyTxs = all.filter(t => {
         const d = new Date(t.created_at);
