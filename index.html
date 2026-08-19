@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>منظومة إدارة المعاملات المتقدمة</title>
   
-  <!-- المكتبات السحابية المعتمدة -->
+  <!-- المكتبات السحابية والخطوط الرسمية -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
   
   <style>
@@ -26,6 +27,7 @@
       --danger-glow: rgba(255, 77, 77, 0.25);
       --cyan: #00D9F5;
       --cyan-glow: rgba(0, 217, 245, 0.2);
+      --purple: #A78BFA;
       --text: #F3F4F6;
       --text-muted: #8E9BAE;
       --text-dim: #546075;
@@ -139,6 +141,23 @@
     }
     .btn-lux-danger:active { transform: scale(0.97); }
 
+    .btn-lux-cyan {
+      background: linear-gradient(135deg, #00D9F5 0%, #0099CC 100%);
+      color: #03151F;
+      border: none;
+      border-radius: 16px;
+      font-weight: 900;
+      font-size: 13px;
+      padding: 13px;
+      box-shadow: 0 8px 25px var(--cyan-glow);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-lux-cyan:active { transform: scale(0.97); }
+
     .segment-switch {
       background: #080B12;
       border: 1px solid var(--card-border);
@@ -178,7 +197,6 @@
       transition: width 0.4s ease;
     }
 
-    /* شارات التنبيه الزمني */
     .stale-badge {
       display: inline-flex;
       align-items: center;
@@ -210,7 +228,6 @@
       50% { opacity: 0.6; }
     }
 
-    /* خط زمني للمسار التاريخي */
     .timeline-container {
       position: relative;
       padding-right: 18px;
@@ -320,18 +337,18 @@
     .dock-nav {
       position: fixed;
       bottom: 18px;
-      left: 14px;
-      right: 14px;
-      max-width: 450px;
+      left: 12px;
+      right: 12px;
+      max-width: 470px;
       margin: 0 auto;
-      background: rgba(14, 19, 31, 0.92);
+      background: rgba(14, 19, 31, 0.94);
       border: 1px solid var(--card-border-highlight);
       box-shadow: 0 15px 35px rgba(0,0,0,0.6);
       border-radius: 100px;
       backdrop-filter: blur(25px);
       display: flex;
       justify-content: space-around;
-      padding: 8px 6px;
+      padding: 8px 4px;
       z-index: 100;
     }
     .dock-btn {
@@ -342,9 +359,9 @@
       align-items: center;
       gap: 3px;
       color: var(--text-dim);
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 800;
-      padding: 6px 10px;
+      padding: 6px 8px;
       border-radius: 100px;
       cursor: pointer;
       transition: all 0.25s;
@@ -390,16 +407,17 @@
       padding: 20px;
     }
 
+    /* أنماط الطباعة */
     @media print {
       body * { visibility: hidden; }
-      #printableReport, #printableReport * { visibility: visible; }
-      #printableReport { position: absolute; left: 0; top: 0; width: 100%; color: #000; background: #fff; padding: 20px; font-family: 'Tajawal', sans-serif; }
+      #printableArea, #printableArea * { visibility: visible; }
+      #printableArea { position: absolute; left: 0; top: 0; width: 100%; color: #000; background: #fff; padding: 20px; font-family: 'Tajawal', sans-serif; }
     }
   </style>
 </head>
 <body>
 
-  <!-- شاشة تسجيل الدخول -->
+  <!-- شاشة الدخول -->
   <div id="authOverlay">
     <div class="lux-card" style="width: 100%; max-width: 380px; padding: 32px 24px; display: flex; flex-direction: column; gap: 20px;">
       <div style="text-align: center;">
@@ -407,7 +425,7 @@
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#03150D" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
         </div>
         <h2 style="font-size: 18px; font-weight: 900; color: #FFF;">منظومة المعاملات</h2>
-        <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">سجل الدخول للوصول إلى قاعدة البيانات السحابية</p>
+        <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">تسجيل الدخول للنظام السحابي الشامل</p>
       </div>
 
       <div style="display: flex; flex-direction: column; gap: 12px;">
@@ -432,7 +450,7 @@
   </div>
 
   <!-- رأس التطبيق -->
-  <header style="position: sticky; top: 0; z-index: 50; background: rgba(6, 8, 13, 0.88); backdrop-filter: blur(20px); border-bottom: 1px solid var(--card-border); padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;">
+  <header style="position: sticky; top: 0; z-index: 50; background: rgba(6, 8, 13, 0.9); backdrop-filter: blur(20px); border-bottom: 1px solid var(--card-border); padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;">
     <div style="display: flex; align-items: center; gap: 10px;">
       <div style="width: 36px; height: 36px; border-radius: 12px; background: linear-gradient(135deg, #00F5A0, #00B074); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px var(--emerald-glow);">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#03150D" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
@@ -464,7 +482,7 @@
     <!-- شريط البحث الفوري الاحترافي -->
     <div class="search-box-wrapper">
       <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
-      <input id="globalSearchInput" type="text" placeholder="ابحث عن شركة، نوع معاملة، مسار، أو مستند..." class="lux-input" oninput="handleGlobalSearch(this.value)">
+      <input id="globalSearchInput" type="text" placeholder="ابحث عن شركة، معاملة، دائرة، أو رخصة..." class="lux-input" oninput="handleGlobalSearch(this.value)">
       <button id="clearSearchBtn" class="clear-btn" onclick="clearGlobalSearch()">✕</button>
     </div>
 
@@ -500,45 +518,67 @@
       </section>
     </div>
 
-    <!-- تبويب 2: لوحة التحليلات والداشبورد (Dashboard) -->
+    <!-- تبويب 2: الموجّه الميداني اليومي (Route Planner) -->
+    <div id="tab-route" style="display: none; flex-direction: column; gap: 16px;">
+      <div class="lux-card" style="padding: 18px; border-color: rgba(0, 217, 245, 0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <h3 style="font-size: 15px; font-weight: 900; color: var(--cyan);">🗺️ الموجه الميداني لفرز الدوائر</h3>
+            <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">تجميع المعاملات حسب كل دائرة لإنهاء المهام بجولة واحدة</p>
+          </div>
+          <span id="routeTotalTasksBadge" style="font-size: 11px; font-weight: 800; color: var(--cyan); background: var(--cyan-glow); padding: 4px 10px; border-radius: 100px;">0 مهام</span>
+        </div>
+      </div>
+      <div id="routeGroupedList" style="display: flex; flex-direction: column; gap: 14px;"></div>
+    </div>
+
+    <!-- تبويب 3: رادار نفاذية التراخيص وتواريخ التجديد -->
+    <div id="tab-licenses" style="display: none; flex-direction: column; gap: 16px;">
+      <div class="lux-card" style="padding: 18px; border-color: rgba(255, 184, 0, 0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <h3 style="font-size: 15px; font-weight: 900; color: var(--gold);">⏳ رادار التراخيص وتجديد الرخص</h3>
+            <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">متابعة تواريخ انتهاء إجازات المهنة، الغرفة، وعقود الإيجار</p>
+          </div>
+          <span id="licensesAlertCountBadge" style="font-size: 11px; font-weight: 800; color: var(--gold); background: var(--gold-glow); padding: 4px 10px; border-radius: 100px;">0 تنبيهات</span>
+        </div>
+      </div>
+      <div id="licensesCardsList" style="display: flex; flex-direction: column; gap: 12px;"></div>
+    </div>
+
+    <!-- تبويب 4: التحليلات ولوحة المعلومات (Dashboard) -->
     <div id="tab-analytics" style="display: none; flex-direction: column; gap: 16px;">
-      
       <div class="kpi-grid">
         <div class="kpi-card">
           <span style="font-size: 11px; color: var(--text-muted); font-weight: 700;">إجمالي الأتعاب المقدرة</span>
-          <h3 id="kpiTotalRevenue" style="font-size: 17px; font-weight: 900; color: var(--emerald); margin-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">0 د.ع</h3>
+          <h3 id="kpiTotalRevenue" style="font-size: 16px; font-weight: 900; color: var(--emerald); margin-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">0 د.ع</h3>
         </div>
         <div class="kpi-card">
           <span style="font-size: 11px; color: var(--text-muted); font-weight: 700;">المبالغ المقبوضة</span>
-          <h3 id="kpiPaidRevenue" style="font-size: 17px; font-weight: 900; color: var(--cyan); margin-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">0 د.ع</h3>
+          <h3 id="kpiPaidRevenue" style="font-size: 16px; font-weight: 900; color: var(--cyan); margin-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">0 د.ع</h3>
         </div>
         <div class="kpi-card">
           <span style="font-size: 11px; color: var(--text-muted); font-weight: 700;">المتبقي بذمة الشركات</span>
-          <h3 id="kpiRemainingDebt" style="font-size: 17px; font-weight: 900; color: var(--danger); margin-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">0 د.ع</h3>
+          <h3 id="kpiRemainingDebt" style="font-size: 16px; font-weight: 900; color: var(--danger); margin-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">0 د.ع</h3>
         </div>
         <div class="kpi-card">
-          <span style="font-size: 11px; color: var(--text-muted); font-weight: 700;">نسبة إنجاز المعاملات</span>
-          <h3 id="kpiCompletionRate" style="font-size: 17px; font-weight: 900; color: var(--gold); margin-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">0%</h3>
+          <span style="font-size: 11px; color: var(--text-muted); font-weight: 700;">نسبة الإنجاز الكلية</span>
+          <h3 id="kpiCompletionRate" style="font-size: 16px; font-weight: 900; color: var(--gold); margin-top: 4px; font-family: 'Plus Jakarta Sans', sans-serif;">0%</h3>
         </div>
       </div>
 
       <div class="lux-card" style="padding: 18px;">
         <h4 style="font-size: 13px; font-weight: 800; color: #FFF; margin-bottom: 14px;">📊 توزيع حالات المعاملات</h4>
-        <div style="max-height: 220px; position: relative;">
-          <canvas id="txStatusChart"></canvas>
-        </div>
+        <div style="max-height: 200px; position: relative;"><canvas id="txStatusChart"></canvas></div>
       </div>
 
       <div class="lux-card" style="padding: 18px;">
         <h4 style="font-size: 13px; font-weight: 800; color: #FFF; margin-bottom: 14px;">📈 الموقف المالي للمكتب</h4>
-        <div style="max-height: 220px; position: relative;">
-          <canvas id="financeChart"></canvas>
-        </div>
+        <div style="max-height: 200px; position: relative;"><canvas id="financeChart"></canvas></div>
       </div>
-
     </div>
 
-    <!-- تبويب 3: الحسابات والذمم المالية -->
+    <!-- تبويب 5: الحسابات، السندات، وتصدير Excel -->
     <div id="tab-accounts" style="display: none; flex-direction: column; gap: 16px;">
       <div class="lux-card" style="padding: 20px; background: linear-gradient(135deg, #101624 0%, #151D30 100%);">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
@@ -547,12 +587,8 @@
             <h2 id="totalRevenue" style="font-size: 24px; font-weight: 900; color: var(--emerald); margin-top: 2px; font-family: 'Plus Jakarta Sans', sans-serif;">0 د.ع</h2>
           </div>
           <div style="display: flex; gap: 8px;">
-            <button onclick="exportAccountsToCSV()" class="btn-lux-secondary" style="padding: 9px 12px; font-size: 11px; border-radius: 12px;">
-              📊 تصدير Excel
-            </button>
-            <button onclick="openPDFPreviewModal()" class="btn-lux-emerald" style="padding: 9px 14px; font-size: 11px; border-radius: 12px;">
-              📄 تقرير PDF
-            </button>
+            <button onclick="exportAccountsToCSV()" class="btn-lux-secondary" style="padding: 8px 12px; font-size: 11px; border-radius: 12px;">📊 Excel</button>
+            <button onclick="openPDFPreviewModal()" class="btn-lux-emerald" style="padding: 8px 14px; font-size: 11px; border-radius: 12px;">📄 تقرير PDF</button>
           </div>
         </div>
         <div style="display: flex; justify-content: space-between; border-top: 1px solid var(--card-border); padding-top: 10px; font-size: 11px;">
@@ -563,19 +599,19 @@
       <div id="accountsList" style="display: flex; flex-direction: column; gap: 10px;"></div>
     </div>
 
-    <!-- تبويب 4: الأرشيف السحابي الموحد للوثائق -->
+    <!-- تبويب 6: خزانة الوثائق السحابية العامة -->
     <div id="tab-documents" style="display: none; flex-direction: column; gap: 14px;">
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 4px;">
         <div>
-          <h3 style="font-size: 15px; font-weight: 900; color: #FFF;">📁 خزانة الوثائق السحابية العامة</h3>
-          <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">جميع الوصولات والمستندات المحفوظة لكافة الشركات</p>
+          <h3 style="font-size: 15px; font-weight: 900; color: #FFF;">📁 خزانة الوثائق المركزية</h3>
+          <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">كل الوصولات والكتب الرسمية لكافة الشركات</p>
         </div>
         <span id="allDocsTotalBadge" style="font-size: 11px; color: var(--emerald); font-weight: 800; background: rgba(0, 245, 160, 0.1); border: 1px solid rgba(0, 245, 160, 0.2); padding: 4px 10px; border-radius: 100px;">0 مستند</span>
       </div>
       <div id="allDocumentsList" style="display: flex; flex-direction: column; gap: 10px;"></div>
     </div>
 
-    <!-- تبويب 5: الإعدادات والأرشيف -->
+    <!-- تبويب 7: الإعدادات، الرقابة، والنسخ الاحتياطي -->
     <div id="tab-settings" style="display: none; flex-direction: column; gap: 16px;">
       <div class="lux-card" style="padding: 18px; display: flex; flex-direction: column; gap: 12px;">
         <h3 style="font-size: 14px; font-weight: 900; color: var(--emerald);">🏢 معلومات المكتب والمعقب</h3>
@@ -594,10 +630,23 @@
         <button onclick="saveSettings()" class="btn-lux-emerald" style="padding: 12px; margin-top: 4px;">حفظ الإعدادات</button>
       </div>
 
+      <!-- أدوات النسخ الاحتياطي وسجل الرقابة -->
+      <div class="lux-card" style="padding: 18px; display: flex; flex-direction: column; gap: 12px;">
+        <h3 style="font-size: 14px; font-weight: 900; color: var(--cyan);">💾 النسخ الاحتياطي وسجل العمليات</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <button onclick="exportJSONBackup()" class="btn-lux-secondary" style="font-size: 11px; padding: 10px;">📥 تنزيل نسخة JSON</button>
+          <button onclick="document.getElementById('importBackupFile').click()" class="btn-lux-secondary" style="font-size: 11px; padding: 10px;">📤 استعادة نسخة</button>
+          <input type="file" id="importBackupFile" accept=".json" style="display: none;" onchange="handleJSONRestore(this)">
+        </div>
+        <button onclick="openSheet('auditLogModal'); renderAuditLogs();" class="btn-lux-secondary" style="width: 100%; font-size: 11px; padding: 10px;">
+          📜 فتح سجل الرقابة وتتبع الحركات (Audit Log)
+        </button>
+      </div>
+
       <!-- قسم الأرشيف المنجز -->
       <div class="lux-card" style="padding: 18px; display: flex; flex-direction: column; gap: 12px;">
         <h3 style="font-size: 14px; font-weight: 900; color: var(--gold);">📦 سجل المعاملات المؤرشفة والمنجزة</h3>
-        <div id="archivedList" style="display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto;"></div>
+        <div id="archivedList" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto;"></div>
       </div>
 
       <div class="lux-card" style="padding: 18px; display: flex; flex-direction: column; gap: 12px;">
@@ -611,31 +660,39 @@
 
   </main>
 
-  <!-- شريط التنقل السفلي -->
+  <!-- شريط التنقل السفلي الاحترافي -->
   <nav class="dock-nav">
     <button onclick="switchTab('transactions')" id="nav-transactions" class="dock-btn active">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
       <span>المعاملات</span>
     </button>
+    <button onclick="switchTab('route')" id="nav-route" class="dock-btn">
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
+      <span>الموجه</span>
+    </button>
+    <button onclick="switchTab('licenses')" id="nav-licenses" class="dock-btn">
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+      <span>التراخيص</span>
+    </button>
     <button onclick="switchTab('analytics')" id="nav-analytics" class="dock-btn">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"></path></svg>
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"></path></svg>
       <span>التحليلات</span>
     </button>
     <button onclick="switchTab('accounts')" id="nav-accounts" class="dock-btn">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v12M17 10h-7.5a2.5 2.5 0 0 0 0 5H15"></path></svg>
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v12M17 10h-7.5a2.5 2.5 0 0 0 0 5H15"></path></svg>
       <span>الحسابات</span>
     </button>
     <button onclick="switchTab('documents')" id="nav-documents" class="dock-btn">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></svg>
       <span>الوثائق</span>
     </button>
     <button onclick="switchTab('settings')" id="nav-settings" class="dock-btn">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
       <span>الإعدادات</span>
     </button>
   </nav>
 
-  <!-- نافذة خيارات الشركة المحدثة (مع زر الحذف) -->
+  <!-- نافذة خيارات الشركة -->
   <div id="companyActionModal" class="center-modal-overlay">
     <div class="center-modal-card">
       <div style="text-align: center; margin-bottom: 16px;">
@@ -649,8 +706,41 @@
       <div style="display: flex; flex-direction: column; gap: 10px;">
         <button onclick="startTxForSelectedComp()" class="btn-lux-emerald">+ بدء معاملة جديدة لهذه الشركة</button>
         <button onclick="openDocVault()" class="btn-lux-secondary">📁 فتح خزانة الوثائق والأرشيف</button>
+        <button onclick="openCompanyLicensesModal()" class="btn-lux-secondary">⏳ ضبط تواريخ نفاذية التراخيص</button>
         <button onclick="deleteSelectedCompany()" class="btn-lux-danger">🗑️ حذف ملف الشركة بالكامل</button>
-        <button onclick="closeSheet('companyActionModal')" style="background: none; border: none; color: var(--text-dim); padding: 8px; font-size: 12px; font-weight: 700; cursor: pointer; margin-top: 2px;">إلغاء</button>
+        <button onclick="closeSheet('companyActionModal')" style="background: none; border: none; color: var(--text-dim); padding: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- نافذة ضبط تواريخ نفاذية تراخيص الشركة -->
+  <div id="licensesEditModal" class="sheet-overlay">
+    <div class="sheet-container">
+      <div class="sheet-handle"></div>
+      <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 4px;">ضبط تواريخ نفاذية التراخيص</h3>
+      <p id="licensesEditCompName" style="font-size: 12px; color: var(--gold); margin-bottom: 14px;">شركة</p>
+      
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div>
+          <label style="font-size: 11px; color: var(--text-muted);">إجازة ممارسة المهنة</label>
+          <input id="licTradeExp" type="date" class="lux-input" style="width: 100%; margin-top: 4px;">
+        </div>
+        <div>
+          <label style="font-size: 11px; color: var(--text-muted);">هوية غرفة التجارة</label>
+          <input id="licChamberExp" type="date" class="lux-input" style="width: 100%; margin-top: 4px;">
+        </div>
+        <div>
+          <label style="font-size: 11px; color: var(--text-muted);">عقد إيجار مقر الشركة</label>
+          <input id="licLeaseExp" type="date" class="lux-input" style="width: 100%; margin-top: 4px;">
+        </div>
+        <div>
+          <label style="font-size: 11px; color: var(--text-muted);">موعد الحسابات الختامية السنوية</label>
+          <input id="licAnnualReportExp" type="date" class="lux-input" style="width: 100%; margin-top: 4px;">
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+          <button onclick="saveCompanyLicenses()" class="btn-lux-emerald" style="flex: 1;">حفظ وتفعيل الرادار</button>
+          <button onclick="closeSheet('licensesEditModal')" class="btn-lux-secondary" style="flex: 1;">إلغاء</button>
+        </div>
       </div>
     </div>
   </div>
@@ -739,14 +829,14 @@
     </div>
   </div>
 
-  <!-- رادار التنبيهات المتقدم (مانع النسيان) -->
+  <!-- رادار التنبيهات المتقدم -->
   <div id="notificationsModal" class="sheet-overlay">
     <div class="sheet-container">
       <div class="sheet-handle"></div>
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
         <div>
           <h3 style="font-size: 16px; font-weight: 900; color: #FFF;">🔔 رادار المتابعة والتنبيهات</h3>
-          <p style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">تنبيهات فورية للمعاملات المتوقفة والمستحقة</p>
+          <p style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">تنبيهات فورية للمعاملات والتراخيص</p>
         </div>
         <span id="notifCountText" style="font-size: 11px; color: var(--gold); font-weight: 800; background: var(--gold-glow); padding: 3px 10px; border-radius: 100px;">0 تنبيهات</span>
       </div>
@@ -755,7 +845,87 @@
     </div>
   </div>
 
-  <!-- نافذة سجل المسار الميداني التاريخي -->
+  <!-- محرك رسائل الواتساب السريعة -->
+  <div id="whatsappQuickModal" class="sheet-overlay">
+    <div class="sheet-container">
+      <div class="sheet-handle"></div>
+      <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 4px;">💬 رسائل الواتساب المجهزة</h3>
+      <p id="waModalTxInfo" style="font-size: 12px; color: var(--emerald); margin-bottom: 14px;">توليد ومشاركة رسالة مهنية</p>
+      
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <button onclick="generateWAMessage('status')" class="btn-lux-secondary" style="text-align: right; justify-content: flex-start;">📍 رسالة الموقف اليومي والموقع الحالي</button>
+        <button onclick="generateWAMessage('missing')" class="btn-lux-secondary" style="text-align: right; justify-content: flex-start;">⏳ رسالة نقص مستندات وأوراق مطلوبة</button>
+        <button onclick="generateWAMessage('payment')" class="btn-lux-secondary" style="text-align: right; justify-content: flex-start;">💰 رسالة مطالبة مالية مهذبة بالمتبقي</button>
+        <button onclick="generateWAMessage('completed')" class="btn-lux-secondary" style="text-align: right; justify-content: flex-start;">🎉 رسالة تهنئة بإنجاز المعاملة وجاهزيتها</button>
+      </div>
+
+      <div style="margin-top: 14px;">
+        <textarea id="waPreviewText" rows="4" class="lux-input" style="width: 100%; font-size: 11px;"></textarea>
+        <button onclick="copyAndSendWA()" class="btn-lux-emerald" style="width: 100%; margin-top: 10px;">نسخ وفتح الواتساب 🚀</button>
+      </div>
+      <button onclick="closeSheet('whatsappQuickModal')" class="btn-lux-secondary" style="width: 100%; margin-top: 10px;">إغلاق</button>
+    </div>
+  </div>
+
+  <!-- محرك توليد وطباعة سند القبض الرسمي -->
+  <div id="receiptVoucherModal" class="sheet-overlay">
+    <div class="sheet-container" style="max-width: 500px;">
+      <div class="sheet-handle"></div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <h3 style="font-size: 16px; font-weight: 900; color: #FFF;">سند قبض مالي رسمي</h3>
+        <button onclick="printReceiptVoucher()" class="btn-lux-emerald" style="padding: 8px 14px; font-size: 12px;">طباعة السند</button>
+      </div>
+
+      <div id="printableArea" style="background: #FFF; color: #000; padding: 22px; border-radius: 14px; font-size: 12px; line-height: 1.6; border: 2px solid #000;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 12px;">
+          <div>
+            <h2 id="recRepOfficeName" style="font-size: 17px; font-weight: 900;">مكتب إنجاز المعاملات</h2>
+            <p id="recRepOfficePhone" style="font-size: 10px; color: #555;">هاتف: 07800000000 | بغداد</p>
+          </div>
+          <div style="text-align: left;">
+            <span style="font-size: 14px; font-weight: 900; background: #000; color: #FFF; padding: 2px 8px; border-radius: 4px;">سند قبض</span>
+            <p style="font-size: 10px; color: #333; margin-top: 2px;">رقم السند: <b id="recRepNumber" style="font-family: monospace;"></b></p>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 14px; display: flex; flex-direction: column; gap: 6px;">
+          <p>استلمنا من السادة: <b id="recRepCompanyName" style="font-size: 13px; text-decoration: underline;"></b></p>
+          <p>مبلغاً وقدره: <b id="recRepAmountNum" style="font-family: monospace; font-size: 14px;"></b> د.ع</p>
+          <p>فقط وقدره: <b id="recRepAmountText" style="color: #047857;"></b></p>
+          <p>وذلك عن أجور: <span id="recRepTxType"></span></p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; border-top: 1px dashed #666; border-bottom: 1px dashed #666; padding: 8px 0; margin-bottom: 14px; font-size: 11px;">
+          <div>الأتعاب الكلية: <b id="recRepTotalFee"></b> د.ع</div>
+          <div>المتبقي بذمة العميل: <b id="recRepRemaining" style="color: #B91C1C;"></b> د.ع</div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+          <div id="receiptQRCode" style="width: 60px; height: 60px;"></div>
+          <div style="text-align: center;">
+            <p style="font-size: 11px; font-weight: 800;">توقيع واستلام المكتب</p>
+            <p style="font-size: 10px; color: #777; margin-top: 20px;">................................</p>
+          </div>
+        </div>
+      </div>
+      <button onclick="closeSheet('receiptVoucherModal')" class="btn-lux-secondary" style="width: 100%; margin-top: 14px;">رجوع</button>
+    </div>
+  </div>
+
+  <!-- نافذة سجل الرقابة وتتبع الحركات (Audit Log) -->
+  <div id="auditLogModal" class="sheet-overlay">
+    <div class="sheet-container">
+      <div class="sheet-handle"></div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <h3 style="font-size: 16px; font-weight: 900; color: #FFF;">📜 سجل الرقابة وتدقيق الحركات</h3>
+        <button onclick="clearAuditLogs()" style="background: none; border: none; color: #FF7B7B; font-size: 11px; cursor: pointer;">مسح السجل</button>
+      </div>
+      <div id="auditLogsContainer" style="display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto;"></div>
+      <button onclick="closeSheet('auditLogModal')" class="btn-lux-secondary" style="width: 100%; margin-top: 14px;">إغلاق</button>
+    </div>
+  </div>
+
+  <!-- باقي النوافذ المساعدة (المسار، الدفعات، إضافة متطلب) -->
   <div id="timelineModal" class="sheet-overlay">
     <div class="sheet-container">
       <div class="sheet-handle"></div>
@@ -766,53 +936,11 @@
         </div>
         <button onclick="closeSheet('timelineModal')" style="background: none; border: none; color: var(--text-muted); font-size: 16px; cursor: pointer;">✕</button>
       </div>
-
       <div id="timelineStepsList" class="timeline-container"></div>
       <button onclick="closeSheet('timelineModal')" class="btn-lux-secondary" style="width: 100%; margin-top: 18px;">رجوع</button>
     </div>
   </div>
 
-  <!-- تقرير الحسابات الرسمي العربي -->
-  <div id="pdfModal" class="sheet-overlay">
-    <div class="sheet-container" style="max-width: 520px;">
-      <div class="sheet-handle"></div>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-        <h3 style="font-size: 16px; font-weight: 900; color: #FFF;">كشف الحسابات الرسمي</h3>
-        <button onclick="printOfficialReport()" class="btn-lux-emerald" style="padding: 8px 14px; font-size: 12px;">طباعة / حفظ PDF</button>
-      </div>
-
-      <div id="printableReport" style="background: #FFF; color: #000; padding: 20px; border-radius: 12px; font-size: 12px; line-height: 1.6;">
-        <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 14px;">
-          <h2 id="pdfRepOfficeName" style="font-size: 18px; font-weight: 900; margin-bottom: 2px;">مكتب إنجاز المعاملات</h2>
-          <p id="pdfRepOfficePhone" style="font-size: 11px; color: #555;">هاتف: 07800000000 | بغداد - العراق</p>
-          <p style="font-size: 13px; font-weight: 800; margin-top: 6px; background: #EEE; display: inline-block; padding: 2px 10px; border-radius: 4px;">كشف الذمم والمواقف المالية</p>
-          <p style="font-size: 10px; color: #666; margin-top: 4px;">تاريخ الاستخراج: <span id="pdfRepDate"></span></p>
-        </div>
-
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 11px;">
-          <thead>
-            <tr style="background: #F3F4F6; border-bottom: 1px solid #000;">
-              <th style="padding: 6px; text-align: right;">الشركة</th>
-              <th style="padding: 6px; text-align: right;">نوع المعاملة</th>
-              <th style="padding: 6px; text-align: center;">الأتعاب</th>
-              <th style="padding: 6px; text-align: center;">المقبوض</th>
-              <th style="padding: 6px; text-align: left;">المتبقي</th>
-            </tr>
-          </thead>
-          <tbody id="pdfTableBody"></tbody>
-        </table>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #000; padding-top: 10px; font-weight: 900; font-size: 12px;">
-          <span>المجموع الكلي: <b id="pdfTotalRevenue">0</b></span>
-          <span style="color: #047857;">المقبوض: <b id="pdfTotalPaid">0</b></span>
-          <span style="color: #B91C1C;">الديون المتبقية: <b id="pdfTotalDebt">0</b></span>
-        </div>
-      </div>
-      <button onclick="closeSheet('pdfModal')" class="btn-lux-secondary" style="width: 100%; margin-top: 14px;">رجوع</button>
-    </div>
-  </div>
-
-  <!-- نافذة تحديث المسار الميداني -->
   <div id="stepUpdateModal" class="sheet-overlay">
     <div class="sheet-container">
       <div class="sheet-handle"></div>
@@ -835,7 +963,6 @@
     </div>
   </div>
 
-  <!-- إضافة متطلب -->
   <div id="addChecklistModal" class="sheet-overlay">
     <div class="sheet-container">
       <div class="sheet-handle"></div>
@@ -849,7 +976,6 @@
     </div>
   </div>
 
-  <!-- تحديث الدفعة المالية للمعاملة -->
   <div id="updatePaymentModal" class="sheet-overlay">
     <div class="sheet-container">
       <div class="sheet-handle"></div>
@@ -874,6 +1000,46 @@
     </div>
   </div>
 
+  <!-- كشف الحسابات PDF -->
+  <div id="pdfModal" class="sheet-overlay">
+    <div class="sheet-container" style="max-width: 520px;">
+      <div class="sheet-handle"></div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <h3 style="font-size: 16px; font-weight: 900; color: #FFF;">كشف الحسابات الرسمي</h3>
+        <button onclick="printReceiptVoucher()" class="btn-lux-emerald" style="padding: 8px 14px; font-size: 12px;">طباعة / حفظ PDF</button>
+      </div>
+
+      <div id="pdfReportContent" style="background: #FFF; color: #000; padding: 20px; border-radius: 12px; font-size: 12px; line-height: 1.6;">
+        <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 14px;">
+          <h2 id="pdfRepOfficeName" style="font-size: 18px; font-weight: 900; margin-bottom: 2px;">مكتب إنجاز المعاملات</h2>
+          <p id="pdfRepOfficePhone" style="font-size: 11px; color: #555;">هاتف: 07800000000 | بغداد - العراق</p>
+          <p style="font-size: 13px; font-weight: 800; margin-top: 6px; background: #EEE; display: inline-block; padding: 2px 10px; border-radius: 4px;">كشف الذمم والمواقف المالية</p>
+          <p style="font-size: 10px; color: #666; margin-top: 4px;">تاريخ الاستخراج: <span id="pdfRepDate"></span></p>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 11px;">
+          <thead>
+            <tr style="background: #F3F4F6; border-bottom: 1px solid #000;">
+              <th style="padding: 6px; text-align: right;">الشركة</th>
+              <th style="padding: 6px; text-align: right;">نوع المعاملة</th>
+              <th style="padding: 6px; text-align: center;">الأتعاب</th>
+              <th style="padding: 6px; text-align: center;">المقبوض</th>
+              <th style="padding: 6px; text-align: left;">المتبقي</th>
+            </tr>
+          </thead>
+          <tbody id="pdfTableBody"></tbody>
+        </table>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #000; padding-top: 10px; font-weight: 900; font-size: 12px;">
+          <span>المجموع: <b id="pdfTotalRevenue">0</b></span>
+          <span style="color: #047857;">المقبوض: <b id="pdfTotalPaid">0</b></span>
+          <span style="color: #B91C1C;">المتبقي: <b id="pdfTotalDebt">0</b></span>
+        </div>
+      </div>
+      <button onclick="closeSheet('pdfModal')" class="btn-lux-secondary" style="width: 100%; margin-top: 14px;">رجوع</button>
+    </div>
+  </div>
+
   <script>
     const SUPABASE_URL = "https://giidtugteyiobaagqohy.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpaWR0dWd0ZXlpb2JhYWdxb2h5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxMTgyMjYsImV4cCI6MjEwMjY5NDIyNn0.v7Nwag2BTrCWG6zzeYo1kTG4w2xAuzSmiZpCLJtvBow";
@@ -888,6 +1054,7 @@
     let currentOldStepForTx = "";
     let targetTxIdForChecklist = null;
     let targetTxForPayment = null;
+    let targetTxForWA = null;
     let companies = [];
     let activeTransactions = [];
     let allTransactionsGlobal = [];
@@ -902,6 +1069,45 @@
       document.getElementById('toastIcon').innerText = icon;
       t.classList.add('show');
       setTimeout(() => t.classList.remove('show'), 3200);
+    }
+
+    /* نظام الرقابة وسجل العمليات */
+    function logActivity(action, details) {
+      let logs = JSON.parse(localStorage.getItem('sys_audit_logs') || '[]');
+      logs.unshift({
+        time: new Date().toISOString(),
+        action: action,
+        details: details,
+        user: currentUser ? currentUser.email : 'مسؤول'
+      });
+      if (logs.length > 200) logs.pop();
+      localStorage.setItem('sys_audit_logs', JSON.stringify(logs));
+    }
+
+    function renderAuditLogs() {
+      const container = document.getElementById('auditLogsContainer');
+      const logs = JSON.parse(localStorage.getItem('sys_audit_logs') || '[]');
+      if (logs.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:var(--text-dim); padding:20px; font-size:12px;">لا توجد حركات مسجلة حالياً</p>';
+        return;
+      }
+      container.innerHTML = logs.map(l => `
+        <div style="background:#080B12; border:1px solid var(--card-border); padding:10px 12px; border-radius:12px;">
+          <div style="display:flex; justify-content:space-between; font-size:11px;">
+            <b style="color:var(--emerald);">${l.action}</b>
+            <span style="color:var(--text-dim); font-family:monospace;">${new Date(l.time).toLocaleTimeString('ar-IQ')} - ${new Date(l.time).toLocaleDateString('ar-IQ')}</span>
+          </div>
+          <p style="font-size:11px; color:#D1D5DB; margin-top:2px;">${l.details}</p>
+        </div>
+      `).join('');
+    }
+
+    function clearAuditLogs() {
+      if (confirm("هل تريد مسح سجل الرقابة بالكامل؟")) {
+        localStorage.removeItem('sys_audit_logs');
+        renderAuditLogs();
+        showToast("تم مسح السجل", "🗑️");
+      }
     }
 
     async function checkAuthSession() {
@@ -941,6 +1147,7 @@
         document.getElementById('authOverlay').style.display = 'none';
         document.getElementById('currentUserEmail').innerText = currentUser.email;
         document.getElementById('userStatusLabel').innerText = currentUser.email.split('@')[0];
+        logActivity("تسجيل دخول", `دخول المستخدم: ${currentUser.email}`);
         showToast("مرحباً بك! تم تسجيل الدخول بنجاح 🚀");
         loadData();
       }
@@ -948,6 +1155,7 @@
 
     async function handleLogout() {
       if (confirm("هل تريد تسجيل الخروج من حسابك؟")) {
+        logActivity("تسجيل خروج", `خروج المستخدم: ${currentUser?.email}`);
         await db.auth.signOut();
         currentUser = null;
         document.getElementById('authOverlay').style.display = 'flex';
@@ -965,14 +1173,20 @@
     }
 
     function switchTab(t) {
-      ['transactions', 'analytics', 'accounts', 'documents', 'settings'].forEach(x => {
-        document.getElementById(`tab-${x}`).style.display = 'none';
-        document.getElementById(`nav-${x}`).classList.remove('active');
+      ['transactions', 'route', 'licenses', 'analytics', 'accounts', 'documents', 'settings'].forEach(x => {
+        const el = document.getElementById(`tab-${x}`);
+        const nav = document.getElementById(`nav-${x}`);
+        if (el) el.style.display = 'none';
+        if (nav) nav.classList.remove('active');
       });
       document.getElementById(`tab-${t}`).style.display = 'flex';
       document.getElementById(`nav-${t}`).classList.add('active');
+
+      if (t === 'route') renderRoutePlanner();
+      if (t === 'licenses') renderLicensesTracker();
       if (t === 'analytics') renderAnalyticsCharts();
       if (t === 'documents') renderAllDocuments();
+      if (t === 'accounts') renderAccounts(allTransactionsGlobal);
     }
 
     function openSheet(id) { document.getElementById(id).style.display = 'flex'; }
@@ -1000,7 +1214,6 @@
       }
     }
 
-    /* جلب كل الوثائق لتبويب الخزانة العامة */
     async function fetchAllDocuments() {
       const { data: docs } = await db.from('company_documents').select('*, companies(name)').order('created_at', { ascending: false });
       allDocumentsGlobal = docs || [];
@@ -1008,7 +1221,6 @@
       renderAllDocuments();
     }
 
-    /* نظام البحث الفوري الشامل */
     function handleGlobalSearch(val) {
       searchQuery = val.trim().toLowerCase();
       document.getElementById('clearSearchBtn').style.display = searchQuery ? 'block' : 'none';
@@ -1016,6 +1228,8 @@
       renderActive();
       renderAccounts(allTransactionsGlobal);
       renderAllDocuments();
+      renderRoutePlanner();
+      renderLicensesTracker();
       renderArchive(allTransactionsGlobal.filter(t => t.status === 'completed' || t.status === 'archived'));
     }
 
@@ -1058,11 +1272,9 @@
       openSheet('companyActionModal');
     }
 
-    /* حذف الشركة بالكامل مع كافة متعلقاتها */
     async function deleteSelectedCompany() {
       if (!selectedCompanyId) return;
-
-      const confirmDel = confirm(`تحذير نهائي:\nهل تريد بالتأكيد حذف ملف (${selectedCompanyName}) بالكامل؟\nسيتم حذف كافة معاملاتها ووثائقها المرتبطة بها.`);
+      const confirmDel = confirm(`تحذير نهائي:\nهل تريد بالتأكيد حذف ملف (${selectedCompanyName}) بالكامل؟\nسيتم حذف كافة معاملاتها ووثائقها وتراخيصها المرتبطة.`);
       if (!confirmDel) return;
 
       try {
@@ -1070,6 +1282,7 @@
         await db.from('transactions').delete().eq('company_id', selectedCompanyId);
         await db.from('companies').delete().eq('id', selectedCompanyId);
         
+        logActivity("حذف شركة", `تم حذف ملف الشركة: ${selectedCompanyName}`);
         closeSheet('companyActionModal');
         showToast("تم حذف ملف الشركة وسجلاتها بنجاح 🗑️");
         loadData();
@@ -1082,6 +1295,33 @@
       closeSheet('companyActionModal');
       document.getElementById('txCompanySelect').value = selectedCompanyId;
       openSheet('newTxModal');
+    }
+
+    function openCompanyLicensesModal() {
+      closeSheet('companyActionModal');
+      document.getElementById('licensesEditCompName').innerText = selectedCompanyName;
+      const lics = JSON.parse(localStorage.getItem(`lic_${selectedCompanyId}`) || '{}');
+      document.getElementById('licTradeExp').value = lics.trade || '';
+      document.getElementById('licChamberExp').value = lics.chamber || '';
+      document.getElementById('licLeaseExp').value = lics.lease || '';
+      document.getElementById('licAnnualReportExp').value = lics.annual || '';
+      openSheet('licensesEditModal');
+    }
+
+    function saveCompanyLicenses() {
+      if (!selectedCompanyId) return;
+      const lics = {
+        trade: document.getElementById('licTradeExp').value,
+        chamber: document.getElementById('licChamberExp').value,
+        lease: document.getElementById('licLeaseExp').value,
+        annual: document.getElementById('licAnnualReportExp').value
+      };
+      localStorage.setItem(`lic_${selectedCompanyId}`, JSON.stringify(lics));
+      logActivity("تحديث تراخيص", `تم ضبط مواعيد رخص الشركة: ${selectedCompanyName}`);
+      closeSheet('licensesEditModal');
+      showToast("تم حفظ مواعيد التراخيص وتفعيل الرادار ⏳");
+      renderLicensesTracker();
+      updateSmartRadarAlerts();
     }
 
     function handleFileSelection(input) {
@@ -1097,7 +1337,6 @@
       document.getElementById('docCustomName').value = '';
       document.getElementById('docFileInput').value = '';
       document.getElementById('selectedFileNameLabel').innerText = '📁 اختر صورة أو ملف من الهاتف';
-      
       openSheet('docVaultModal');
       loadCompanyDocuments(selectedCompanyId);
     }
@@ -1131,7 +1370,7 @@
           </div>
           <div style="display: flex; gap: 6px;">
             <a href="${d.file_url}" target="_blank" class="btn-lux-emerald" style="padding: 6px 12px; font-size: 11px; text-decoration: none; border-radius: 10px;">
-              معاينة / فتح
+              معاينة
             </a>
             ${isOfficeMode ? `
               <button onclick="deleteCompanyDocument('${d.id}')" style="background: #181D2A; border: 1px solid rgba(239,68,68,0.3); color: #EF4444; padding: 6px 10px; border-radius: 10px; font-size: 11px; cursor: pointer;">
@@ -1147,13 +1386,8 @@
       const fileInput = document.getElementById('docFileInput');
       const btn = document.getElementById('btnUploadDoc');
 
-      if (!customName) {
-        showToast("يرجى كتابة اسم تعريفي للمستند أولاً", "⚠️");
-        return;
-      }
-
-      if (!fileInput.files || fileInput.files.length === 0) {
-        showToast("يرجى تحديد ملف أو صورة من جهازك", "⚠️");
+      if (!customName || !fileInput.files || fileInput.files.length === 0) {
+        showToast("يرجى كتابة اسم وتحديد ملف أولاً", "⚠️");
         return;
       }
 
@@ -1164,9 +1398,7 @@
       btn.innerText = "جاري الرفع إلى السحابة...";
       btn.disabled = true;
 
-      const { data: storageData, error: storageError } = await db.storage
-        .from('documents')
-        .upload(fileName, file);
+      const { error: storageError } = await db.storage.from('documents').upload(fileName, file);
 
       if (storageError) {
         showToast("خطأ في رفع الملف: " + storageError.message, "❌");
@@ -1176,31 +1408,26 @@
       }
 
       const { data: urlData } = db.storage.from('documents').getPublicUrl(fileName);
-      const publicUrl = urlData.publicUrl;
-
-      const { error: dbError } = await db.from('company_documents').insert([{
+      await db.from('company_documents').insert([{
         company_id: selectedCompanyId,
         document_name: customName,
-        file_url: publicUrl
+        file_url: urlData.publicUrl
       }]);
 
-      if (dbError) {
-        showToast("خطأ في تسجيل المستند: " + dbError.message, "❌");
-      } else {
-        showToast("تم حفظ وأرشفة المستند بنجاح 📁");
-        document.getElementById('docCustomName').value = '';
-        document.getElementById('docFileInput').value = '';
-        document.getElementById('selectedFileNameLabel').innerText = '📁 اختر صورة أو ملف من الهاتف';
-        loadCompanyDocuments(selectedCompanyId);
-        fetchAllDocuments();
-      }
+      logActivity("رفع مستند", `تم حفظ وثيقة (${customName}) لشركة (${selectedCompanyName})`);
+      showToast("تم حفظ وأرشفة المستند بنجاح 📁");
+      document.getElementById('docCustomName').value = '';
+      document.getElementById('docFileInput').value = '';
+      document.getElementById('selectedFileNameLabel').innerText = '📁 اختر صورة أو ملف من الهاتف';
+      loadCompanyDocuments(selectedCompanyId);
+      fetchAllDocuments();
 
       btn.innerText = "تأكيد الرفع والحفظ بالسحابة";
       btn.disabled = false;
     }
 
     async function deleteCompanyDocument(docId) {
-      if (confirm("هل تريد بالتأكيد حذف هذا المستند من أرشيف الشركة؟")) {
+      if (confirm("هل تريد بالتأكيد حذف هذا المستند؟")) {
         await db.from('company_documents').delete().eq('id', docId);
         showToast("تم حذف المستند بنجاح 🗑️");
         loadCompanyDocuments(selectedCompanyId);
@@ -1208,7 +1435,6 @@
       }
     }
 
-    /* عرض كل الوثائق في تبويب الوثائق الموحد */
     function renderAllDocuments() {
       const list = document.getElementById('allDocumentsList');
       const filtered = allDocumentsGlobal.filter(d => {
@@ -1235,6 +1461,227 @@
           </a>
         </div>
       `).join('');
+    }
+
+    /* الموجه الميداني لفرز الدوائر */
+    function renderRoutePlanner() {
+      const container = document.getElementById('routeGroupedList');
+      const groups = {};
+
+      activeTransactions.forEach(tx => {
+        const loc = tx.current_location_step || 'غير محدد';
+        if (!groups[loc]) groups[loc] = [];
+        groups[loc].push(tx);
+      });
+
+      const keys = Object.keys(groups);
+      document.getElementById('routeTotalTasksBadge').innerText = `${activeTransactions.length} معاملات موزعة`;
+
+      if (keys.length === 0) {
+        container.innerHTML = '<div class="lux-card" style="text-align:center; padding:30px; color:var(--text-dim);">لا توجد معاملات جارية لتوجيهها</div>';
+        return;
+      }
+
+      container.innerHTML = keys.map(loc => `
+        <div class="lux-card" style="padding: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border); padding-bottom: 8px; margin-bottom: 10px;">
+            <span style="font-size: 13px; font-weight: 900; color: var(--cyan);">📍 ${loc}</span>
+            <span style="font-size: 11px; font-weight: 800; color: #FFF; background:#080B12; padding:2px 8px; border-radius:100px;">${groups[loc].length} معاملات</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            ${groups[loc].map(t => `
+              <div style="background:#080B12; border:1px solid var(--card-border); padding:10px 12px; border-radius:12px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <b style="font-size: 12px; color: #FFF;">${t.companies?.name}</b>
+                  <p style="font-size: 10px; color: var(--text-muted);">${t.transaction_type}</p>
+                </div>
+                <button onclick="openStepModal('${t.id}', '${t.current_location_step}')" class="btn-lux-emerald" style="padding:5px 10px; font-size:10px; border-radius:8px;">نقل ➔</button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    /* رادار نفاذية التراخيص */
+    function renderLicensesTracker() {
+      const container = document.getElementById('licensesCardsList');
+      let totalAlerts = 0;
+      let html = '';
+
+      companies.forEach(c => {
+        const lics = JSON.parse(localStorage.getItem(`lic_${c.id}`) || '{}');
+        const items = [
+          { name: 'إجازة ممارسة المهنة', date: lics.trade },
+          { name: 'هوية غرفة التجارة', date: lics.chamber },
+          { name: 'عقد إيجار المقر', date: lics.lease },
+          { name: 'الحسابات الختامية', date: lics.annual }
+        ].filter(i => i.date);
+
+        if (items.length > 0) {
+          const itemsHtml = items.map(it => {
+            const daysLeft = Math.ceil((new Date(it.date) - new Date()) / (1000 * 60 * 60 * 24));
+            let badge = '';
+            if (daysLeft < 0) {
+              totalAlerts++;
+              badge = `<span style="color:#FF4D4D; font-weight:900;">منتهية منذ ${Math.abs(daysLeft)} يوم 🚨</span>`;
+            } else if (daysLeft <= 30) {
+              totalAlerts++;
+              badge = `<span style="color:var(--gold); font-weight:800;">تنفذ خلال ${daysLeft} يوم ⚠️</span>`;
+            } else {
+              badge = `<span style="color:var(--emerald); font-weight:700;">نافذة (${daysLeft} يوم) ✅</span>`;
+            }
+
+            return `
+              <div style="display:flex; justify-content:space-between; align-items:center; background:#080B12; padding:8px 12px; border-radius:10px; font-size:11px; margin-bottom:4px;">
+                <span>${it.name}: <b>${it.date}</b></span>
+                ${badge}
+              </div>
+            `;
+          }).join('');
+
+          html += `
+            <div class="lux-card" style="padding:16px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <b style="font-size:13px; color:#FFF;">${c.name}</b>
+                <button onclick="selectCompany('${c.id}', '${c.name}'); openCompanyLicensesModal();" style="background:none; border:none; color:var(--emerald); font-size:11px; cursor:pointer;">تعديل المواعيد ⚙️</button>
+              </div>
+              ${itemsHtml}
+            </div>
+          `;
+        }
+      });
+
+      document.getElementById('licensesAlertCountBadge').innerText = `${totalAlerts} تراخيص مستحقة`;
+      container.innerHTML = html || '<div class="lux-card" style="text-align:center; padding:30px; color:var(--text-dim);">لم يتم إدخال تواريخ نفاذية التراخيص بعد</div>';
+    }
+
+    /* محرك التفقيط بالدينار العراقي */
+    function tafqeetIraqiDinar(number) {
+      if (!number || isNaN(number) || number === 0) return "صفر دينار عراقي";
+      const ones = ["", "واحد", "اثنان", "ثلاثة", "أربعة", "خمسة", "ستة", "سبعة", "ثمانية", "تسعة", "عشرة", "أحد عشر", "اثنا عشر", "ثلاثة عشر", "أربعة عشر", "خمسة عشر", "ستة عشر", "سبعة عشر", "ثمانية عشر", "تسعة عشر"];
+      const tens = ["", "", "عشرون", "ثلاثون", "أربعون", "خمسون", "ستون", "سبعون", "ثمانون", "تسعون"];
+      const hundreds = ["", "مائة", "مائتان", "ثلاثمائة", "أربعمائة", "خمسمائة", "ستمائة", "سبعمائة", "ثمانمائة", "تسعمائة"];
+
+      function convertGroup(n) {
+        let text = "";
+        const h = Math.floor(n / 100);
+        const rem = n % 100;
+        if (h > 0) text += hundreds[h];
+        if (rem > 0) {
+          if (text !== "") text += " و";
+          if (rem < 20) text += ones[rem];
+          else {
+            const o = rem % 10;
+            const t = Math.floor(rem / 10);
+            if (o > 0) text += ones[o] + " و";
+            text += tens[t];
+          }
+        }
+        return text;
+      }
+
+      let numStr = "";
+      const billions = Math.floor(number / 1000000000);
+      number %= 1000000000;
+      const millions = Math.floor(number / 1000000);
+      number %= 1000000;
+      const thousands = Math.floor(number / 1000);
+      const remaining = Math.floor(number % 1000);
+
+      if (billions > 0) numStr += convertGroup(billions) + " مليار ";
+      if (millions > 0) {
+        if (numStr !== "") numStr += "و";
+        numStr += convertGroup(millions) + " مليون ";
+      }
+      if (thousands > 0) {
+        if (numStr !== "") numStr += "و";
+        if (thousands === 1) numStr += "ألف ";
+        else if (thousands === 2) numStr += "ألفان ";
+        else if (thousands >= 3 && thousands <= 10) numStr += convertGroup(thousands) + " آلاف ";
+        else numStr += convertGroup(thousands) + " ألف ";
+      }
+      if (remaining > 0) {
+        if (numStr !== "") numStr += "و";
+        numStr += convertGroup(remaining) + " ";
+      }
+
+      return "فقط " + numStr.trim() + " دينار عراقي لا غير";
+    }
+
+    /* محرك سندات القبض */
+    function generateReceiptVoucher(txId, compName, txType, fee, paid) {
+      const recNumber = `REC-${Date.now().toString().slice(-6)}`;
+      const debt = Math.max(0, fee - paid);
+      const officeName = localStorage.getItem('office_name') || 'مكتب إنجاز المعاملات الرسمية';
+      const officePhone = localStorage.getItem('office_phone') || 'هاتف: 07800000000 | بغداد';
+
+      document.getElementById('recRepOfficeName').innerText = officeName;
+      document.getElementById('recRepOfficePhone').innerText = officePhone;
+      document.getElementById('recRepNumber').innerText = recNumber;
+      document.getElementById('recRepCompanyName').innerText = compName;
+      document.getElementById('recRepAmountNum').innerText = Number(paid).toLocaleString('ar-IQ');
+      document.getElementById('recRepAmountText').innerText = tafqeetIraqiDinar(paid);
+      document.getElementById('recRepTxType').innerText = txType;
+      document.getElementById('recRepTotalFee').innerText = Number(fee).toLocaleString('ar-IQ');
+      document.getElementById('recRepRemaining').innerText = Number(debt).toLocaleString('ar-IQ');
+
+      // توليد الباركود
+      const qrContainer = document.getElementById('receiptQRCode');
+      qrContainer.innerHTML = '';
+      new QRCode(qrContainer, {
+        text: `سند قبض: ${recNumber} | الشركة: ${compName} | المبلغ: ${paid} د.ع | التاريخ: ${new Date().toLocaleDateString('ar-IQ')}`,
+        width: 60,
+        height: 60,
+        colorDark : "#000000",
+        colorLight : "#ffffff"
+      });
+
+      logActivity("إصدار سند قبض", `سند رقم (${recNumber}) للشركة: ${compName} بمبلغ ${paid} د.ع`);
+      openSheet('receiptVoucherModal');
+    }
+
+    function printReceiptVoucher() { window.print(); }
+
+    /* محرك رسائل الواتساب */
+    function openWhatsAppQuickModal(txId) {
+      targetTxForWA = activeTransactions.find(t => t.id === txId);
+      if (!targetTxForWA) return;
+      document.getElementById('waModalTxInfo').innerText = `معاملة: ${targetTxForWA.companies?.name} - ${targetTxForWA.transaction_type}`;
+      generateWAMessage('status');
+      openSheet('whatsappQuickModal');
+    }
+
+    function generateWAMessage(type) {
+      if (!targetTxForWA) return;
+      const comp = targetTxForWA.companies?.name || 'حضرة العميل';
+      const txName = targetTxForWA.transaction_type;
+      const loc = targetTxForWA.current_location_step;
+      const office = localStorage.getItem('office_name') || 'مكتب إنجاز المعاملات';
+      const paid = Number(localStorage.getItem(`tx_paid_${targetTxForWA.id}`) || 0);
+      const total = Number(targetTxForWA.fee_iqd) || 0;
+      const debt = Math.max(0, total - paid);
+
+      let msg = "";
+      if (type === 'status') {
+        msg = `السادة *${comp}* المحترمون،\n\nنود إحاطتكم بأن معاملتكم (*${txName}*) متواجدة حالياً في: 📍 *${loc}* وجاري إكمال الإجراءات بسلاسة.\n\nتحياتنا،\n_${office}_`;
+      } else if (type === 'missing') {
+        const checklists = (targetTxForWA.transaction_checklists || []).filter(c => !c.is_completed).map(c => `▫️ ${c.item_text}`).join('\n');
+        msg = `السادة *${comp}* المحترمون،\n\nيرجى تزويدنا بالمستندات والمتطلبات التالية لإتمام معاملة (*${txName}*):\n\n${checklists || 'يرجى مراجعتنا لتسليم الوثائق الأصلية.'}\n\nشاكرين تعاونكم،\n_${office}_`;
+      } else if (type === 'payment') {
+        msg = `السادة *${comp}* المحترمون،\n\nمرفق طياً الموقف المالي لمعاملة (*${txName}*):\n▫️ الأتعاب الكلية: *${total.toLocaleString('ar-IQ')} د.ع*\n▫️ المبلغ الواصل: *${paid.toLocaleString('ar-IQ')} د.ع*\n▫️ المتبقي بذمتكم: *${debt.toLocaleString('ar-IQ')} د.ع*\n\nيرجى التفضل بتسديد الدفعة المستحقة.\n_${office}_`;
+      } else if (type === 'completed') {
+        msg = `السادة *${comp}* الكرام،\n\nيسرنا إعلامكم بإنجاز معاملتكم (*${txName}*) بالكامل وبشكل رسمي ✅.\nيمكنكم الآن استلام الأوليات والمستندات المنجزة.\n\nمبروك لكم،\n_${office}_`;
+      }
+
+      document.getElementById('waPreviewText').value = msg;
+    }
+
+    function copyAndSendWA() {
+      const text = document.getElementById('waPreviewText').value;
+      navigator.clipboard.writeText(text);
+      showToast("تم نسخ الرسالة وجاري فتح الواتساب 💬");
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
     }
 
     /* إدارة السجل التاريخي للمسار */
@@ -1281,7 +1728,6 @@
       openSheet('timelineModal');
     }
 
-    /* حساب شارة ركود المعاملة */
     function getStalenessInfo(tx) {
       const hist = getStepHistory(tx.id);
       const lastTimeStr = hist.length > 0 ? hist[hist.length - 1].time : tx.created_at;
@@ -1399,13 +1845,15 @@
               </button>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px solid var(--card-border); padding-top: 14px;">
-              <button onclick="shareWA('${tx.id}')" class="btn-lux-secondary" style="padding: 11px;">
-                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-                نسخ للواتساب
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; border-top: 1px solid var(--card-border); padding-top: 14px;">
+              <button onclick="openWhatsAppQuickModal('${tx.id}')" class="btn-lux-secondary" style="padding: 10px 6px; font-size: 11px;">
+                💬 واتساب
               </button>
-              <button onclick="completeTx('${tx.id}')" class="btn-lux-emerald" style="padding: 11px;">
-                إنجاز وأرشفة
+              <button onclick="generateReceiptVoucher('${tx.id}', '${tx.companies?.name}', '${tx.transaction_type}', ${total}, ${paid})" class="btn-lux-cyan" style="padding: 10px 6px; font-size: 11px;">
+                🧾 سند قبض
+              </button>
+              <button onclick="completeTx('${tx.id}')" class="btn-lux-emerald" style="padding: 10px 6px; font-size: 11px;">
+                إنجاز ✅
               </button>
             </div>
 
@@ -1428,6 +1876,7 @@
       if (step && targetTxIdForStep) {
         pushStepHistory(targetTxIdForStep, currentOldStepForTx, step);
         await db.from('transactions').update({ current_location_step: step }).eq('id', targetTxIdForStep);
+        logActivity("تحديث مسار", `تم نقل المعاملة إلى: ${step}`);
         closeSheet('stepUpdateModal');
         showToast("تم نقل المسار وحفظ المحطة السابقة بنجاح 📍");
         loadData();
@@ -1450,6 +1899,7 @@
       await db.from('transactions').update({ fee_iqd: newTotal }).eq('id', targetTxForPayment);
       localStorage.setItem(`tx_paid_${targetTxForPayment}`, newPaid);
 
+      logActivity("تعديل مالي", `تعديل أتعاب معاملة: إجمالي ${newTotal} د.ع - مقبوض ${newPaid} د.ع`);
       closeSheet('updatePaymentModal');
       showToast("تم تحديث الموقف المالي للمعاملة 💰");
       loadData();
@@ -1469,6 +1919,7 @@
           item_text: text,
           is_completed: false
         }]);
+        logActivity("إضافة متطلب", `إضافة متطلب: (${text})`);
         closeSheet('addChecklistModal');
         showToast("تمت إضافة المتطلب بنجاح ✅");
         loadData();
@@ -1486,6 +1937,7 @@
       const phone = document.getElementById('compPhone').value.trim();
       if (!name) return;
       await db.from('companies').insert([{ name, phone }]);
+      logActivity("إضافة شركة", `تسجيل شركة جديدة: ${name}`);
       document.getElementById('compName').value = '';
       document.getElementById('compPhone').value = '';
       closeSheet('newCompanyModal');
@@ -1526,6 +1978,7 @@
         await db.from('transaction_checklists').insert(items);
       }
 
+      logActivity("بدء معاملة", `بدء معاملة (${transaction_type}) بقيمة ${fee_iqd} د.ع`);
       document.getElementById('txType').value = '';
       document.getElementById('txChecklist').value = '';
       document.getElementById('txPaid').value = '0';
@@ -1541,29 +1994,11 @@
 
     async function completeTx(id) {
       await db.from('transactions').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', id);
+      logActivity("إنجاز معاملة", `تم إنجاز وأرشفة المعاملة رقم ${id}`);
       showToast("تم إنجاز المعاملة وترحيل أتعابها للأرشيف 💰");
       loadData();
     }
 
-    function shareWA(id) {
-      const tx = activeTransactions.find(t => t.id === id);
-      if (!tx) return;
-      const checks = (tx.transaction_checklists || []).map(c => `${c.is_completed ? '✅' : '⏳'} ${c.item_text}`).join('\n');
-      const hist = getStepHistory(tx.id);
-      const histText = hist.length > 1 ? `\n\n*المسار السابق:* ${hist.slice(0, -1).map(h => h.step).join(' ➔ ')}` : '';
-      
-      const officeName = localStorage.getItem('office_name') || 'منظومة إدارة المعاملات';
-      const msg = `*موقف معاملة: ${tx.companies?.name}*\n\n`
-                + `📋 *نوع الإجراء:* ${tx.transaction_type}\n`
-                + `📍 *الموقع الحالي:* ${tx.current_location_step}`
-                + histText
-                + `\n\n*الموقف الميداني للمتطلبات:*\n${checks || 'لا توجد متطلبات'}\n\n`
-                + `_${officeName}_`;
-      navigator.clipboard.writeText(msg);
-      showToast("تم نسخ تقرير الموقف للواتساب 💬");
-    }
-
-    /* رادار التنبيهات المتقدم الذكي */
     function updateSmartRadarAlerts() {
       const list = document.getElementById('notificationsList');
       const badge = document.getElementById('notifBadge');
@@ -1584,6 +2019,24 @@
         }
       });
 
+      // تنبيهات التراخيص
+      companies.forEach(c => {
+        const lics = JSON.parse(localStorage.getItem(`lic_${c.id}`) || '{}');
+        Object.keys(lics).forEach(k => {
+          if (lics[k]) {
+            const daysLeft = Math.ceil((new Date(lics[k]) - new Date()) / (1000 * 60 * 60 * 24));
+            if (daysLeft <= 30) {
+              alerts.push({
+                type: daysLeft < 0 ? 'urgent' : 'warn',
+                title: `تنبيه ترخيص: ${c.name}`,
+                desc: `الترخيص (${k}) ${daysLeft < 0 ? `منتهي منذ ${Math.abs(daysLeft)} يوم!` : `ينتهي خلال ${daysLeft} يوم!`}`,
+                loc: 'دائرة التراخيص'
+              });
+            }
+          }
+        });
+      });
+
       if (alerts.length > 0) {
         badge.style.display = 'block';
         countText.innerText = `${alerts.length} تنبيهات مهمة`;
@@ -1593,18 +2046,16 @@
             <div style="flex: 1;">
               <p style="font-size: 13px; font-weight: 900; color: ${a.type === 'urgent' ? '#FF6B6B' : 'var(--gold)'};">${a.title}</p>
               <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">${a.desc}</p>
-              <p style="font-size: 10px; color: var(--cyan); margin-top: 3px;">📍 الموقع الحالي: ${a.loc}</p>
             </div>
           </div>
         `).join('');
       } else {
         badge.style.display = 'none';
         countText.innerText = '0 تنبيهات';
-        list.innerHTML = '<div style="text-align:center; padding: 30px 10px;"><p style="font-size: 14px; font-weight: 800; color: var(--emerald);">ممتاز! كل المعاملات نشطة ومتابعة 🚀</p><p style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">الرادار ينبهك تلقائياً إذا توقفت أي شركة لأكثر من 24 ساعة.</p></div>';
+        list.innerHTML = '<div style="text-align:center; padding: 30px 10px;"><p style="font-size: 14px; font-weight: 800; color: var(--emerald);">كل المعاملات والتراخيص نشطة ومحدثة 🚀</p></div>';
       }
     }
 
-    /* لوحة الرسوم البيانية التفاعلية (Chart.js) */
     function renderAnalyticsCharts() {
       const activeCount = activeTransactions.length;
       const completedCount = allTransactionsGlobal.filter(t => t.status === 'completed' || t.status === 'archived').length;
@@ -1619,7 +2070,6 @@
       document.getElementById('kpiRemainingDebt').innerText = `${totalDebt.toLocaleString('ar-IQ')} د.ع`;
       document.getElementById('kpiCompletionRate').innerText = `${completionRate}%`;
 
-      // رسم الحالات الدائري
       const ctxStatus = document.getElementById('txStatusChart').getContext('2d');
       if (statusChartInstance) statusChartInstance.destroy();
       statusChartInstance = new Chart(ctxStatus, {
@@ -1639,7 +2089,6 @@
         }
       });
 
-      // رسم الموقف المالي الشريطي
       const ctxFinance = document.getElementById('financeChart').getContext('2d');
       if (financeChartInstance) financeChartInstance.destroy();
       financeChartInstance = new Chart(ctxFinance, {
@@ -1711,14 +2160,12 @@
       }
 
       let csv = "\uFEFFالشركة,نوع المعاملة,الحالة,الأتعاب الكلية (د.ع),المبلغ المقبوض (د.ع),المتبقي (د.ع),تاريخ التسجيل\n";
-      
       allTransactionsGlobal.forEach(t => {
         const fee = Number(t.fee_iqd) || 0;
         const paid = Number(localStorage.getItem(`tx_paid_${t.id}`)) || 0;
         const debt = Math.max(0, fee - paid);
         const status = t.status === 'completed' ? 'منجزة' : 'قيد الإنجاز';
         const date = new Date(t.created_at).toLocaleDateString('ar-IQ');
-
         csv += `"${t.companies?.name || 'شركة'}","${t.transaction_type}","${status}",${fee},${paid},${debt},"${date}"\n`;
       });
 
@@ -1729,7 +2176,50 @@
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      logActivity("تصدير Excel", "تم تصدير كشف الحسابات بصيغة CSV");
       showToast("تم تصدير ملف Excel بنجاح 📊");
+    }
+
+    /* نظام النسخ الاحتياطي والاستعادة JSON */
+    function exportJSONBackup() {
+      const backupData = {
+        timestamp: new Date().toISOString(),
+        localStorageData: { ...localStorage },
+        companies: companies,
+        transactions: allTransactionsGlobal
+      };
+
+      const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.setAttribute('download', `نسخة_احتياطية_المنظومة_${Date.now()}.json`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      logActivity("نسخ احتياطي", "تم تنزيل نسخة احتياطية JSON محلياً");
+      showToast("تم تنزيل النسخة الاحتياطية بنجاح 💾");
+    }
+
+    function handleJSONRestore(input) {
+      if (!input.files || input.files.length === 0) return;
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.localStorageData) {
+            Object.keys(data.localStorageData).forEach(k => {
+              localStorage.setItem(k, data.localStorageData[k]);
+            });
+            logActivity("استعادة نسخة", "تمت استعادة البيانات من ملف JSON");
+            showToast("تمت استعادة النسخة الاحتياطية بنجاح 🚀");
+            loadData();
+          }
+        } catch (err) {
+          showToast("الملف غير صالح للاستعادة", "❌");
+        }
+      };
+      reader.readAsText(file);
     }
 
     function renderArchive(arch) {
@@ -1785,10 +2275,9 @@
       document.getElementById('pdfTotalPaid').innerText = `${paidTot.toLocaleString('ar-IQ')} د.ع`;
       document.getElementById('pdfTotalDebt').innerText = `${debtTot.toLocaleString('ar-IQ')} د.ع`;
 
+      logActivity("استخراج تقرير PDF", "تم استخراج كشف الحسابات المالي الرسمي");
       openSheet('pdfModal');
     }
-
-    function printOfficialReport() { window.print(); }
 
     function saveSettings() {
       const name = document.getElementById('setOfficeName').value.trim();
@@ -1800,6 +2289,7 @@
       if (addr) localStorage.setItem('office_addr', addr);
 
       document.getElementById('headerOfficeName').innerText = name || 'منظومة المعاملات';
+      logActivity("تحديث إعدادات", "تم تحديث بيانات المكتب الرسمية");
       showToast("تم حفظ معلومات المكتب بنجاح ⚙️");
     }
 
@@ -1821,4 +2311,3 @@
   </script>
 </body>
 </html>
-ظ
