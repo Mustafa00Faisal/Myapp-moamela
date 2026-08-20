@@ -6,7 +6,7 @@
   <title>نظام إدارة المعاملات المؤسسية</title>
   
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0B0F19">
+  <meta name="theme-color" content="#090D16">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="المعقب">
@@ -19,28 +19,25 @@
   
   <style>
     :root {
-      --bg-color: #0B0F19; /* أزرق داكن تنفيذي مريح للعين */
-      --card-bg: #111827; /* خلفية بطاقات ناعمة */
-      --card-elevated: #1F2937; /* بطاقات بارزة */
-      --border-color: #374151; /* حدود أنيقة غير حادة */
-      --border-light: #4B5563;
+      --bg-color: #090D16;
+      --surface-color: #111827;
+      --surface-elevated: #1F2937;
+      --border-subtle: #2D3748;
+      --border-focus: #F59E0B;
       
-      --gold: #F59E0B; /* ذهبي دافئ ونابض بالحياة */
-      --gold-dim: rgba(245, 158, 11, 0.12);
-      --gold-hover: #FBBF24;
-      
+      --gold: #F59E0B;
+      --gold-gradient: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
       --emerald: #10B981;
-      --danger: #F43F5E;
+      --danger: #EF4444;
       --blue: #3B82F6;
       --purple: #8B5CF6;
-      --amber: #F59E0B;
       
-      --text-main: #F9FAFB;
+      --text-main: #F3F4F6;
       --text-muted: #9CA3AF;
       
-      --radius-sm: 14px;
-      --radius-md: 18px;
-      --radius-lg: 24px;
+      --radius-card: 20px;
+      --radius-btn: 14px;
+      --radius-sm: 10px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -50,161 +47,198 @@
       color: var(--text-main);
       font-family: 'Tajawal', sans-serif;
       min-height: 100vh;
-      padding-bottom: 130px;
+      padding-bottom: 120px;
       overflow-x: hidden;
     }
 
     .num-font { font-family: 'Plus Jakarta Sans', sans-serif; }
 
-    .editorial-input {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-sm);
+    /* إعادة تصميم المدخلات لتكون أكثر عصرية ونظافة */
+    .modern-input {
+      background: var(--surface-color);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-btn);
       color: var(--text-main);
-      padding: 16px;
+      padding: 16px 18px;
       font-size: 15px;
       font-weight: 500;
       width: 100%;
       outline: none;
-      transition: all 0.3s ease;
+      transition: all 0.25s ease;
     }
-    .editorial-input:focus { border-color: var(--gold); background: var(--card-elevated); box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15); }
+    .modern-input:focus {
+      border-color: var(--border-focus);
+      background: var(--surface-elevated);
+      box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.12);
+    }
 
-    .search-block {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-sm);
+    /* شريط البحث المطور */
+    .search-wrapper {
+      background: var(--surface-color);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-btn);
       display: flex;
       align-items: center;
       padding: 4px 16px;
       position: relative;
-      margin-bottom: 24px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
     }
-    .search-block input {
+    .search-wrapper input {
       background: transparent; border: none; color: var(--text-main);
-      padding: 14px 12px 14px 32px; width: 100%; font-size: 14px; font-weight: 500; outline: none;
+      padding: 14px 12px 14px 36px; width: 100%; font-size: 14px; font-weight: 500; outline: none;
     }
-    .search-block svg { position: absolute; right: 16px; color: var(--text-muted); }
+    .search-wrapper svg { position: absolute; right: 16px; color: var(--text-muted); width: 18px; height: 18px; }
 
-    .bento-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      padding: 24px;
+    /* بطاقات النظام بأسلوب عائم ونظيف */
+    .exec-card {
+      background: var(--surface-color);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-card);
+      padding: 22px;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-      transition: transform 0.2s ease, border-color 0.3s;
+      gap: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      transition: all 0.2s ease;
     }
-    .bento-card:active { transform: scale(0.99); border-color: var(--border-light); }
+    .exec-card:active { transform: scale(0.99); }
 
-    .btn-gold {
-      background: linear-gradient(135deg, #F59E0B, #D97706); color: #000;
-      border: none; border-radius: var(--radius-md);
-      font-weight: 900; font-size: 14px; padding: 16px;
-      display: flex; justify-content: center; align-items: center; gap: 8px;
-      cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+    /* أزرار العمليات التنفيذية */
+    .btn-action-gold {
+      background: var(--gold-gradient);
+      color: #000;
+      border: none;
+      border-radius: var(--radius-btn);
+      font-weight: 900;
+      font-size: 14px;
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.2);
+      transition: all 0.2s ease;
     }
-    .btn-gold:active { transform: scale(0.96); filter: brightness(1.1); }
+    .btn-action-gold:active { transform: scale(0.96); filter: brightness(1.1); }
 
-    .btn-outline {
-      background: var(--card-bg); color: var(--text-main);
-      border: 1px solid var(--border-color); border-radius: var(--radius-md);
-      font-weight: 800; font-size: 14px; padding: 16px;
-      display: flex; justify-content: center; align-items: center; gap: 8px;
-      cursor: pointer; transition: all 0.2s;
+    .btn-action-outline {
+      background: var(--surface-color);
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-btn);
+      font-weight: 800;
+      font-size: 14px;
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
-    .btn-outline:active { background: var(--card-elevated); transform: scale(0.96); border-color: var(--border-light); }
+    .btn-action-outline:active { background: var(--surface-elevated); transform: scale(0.96); }
 
-    .btn-ghost {
-      background: var(--card-elevated); color: var(--text-main);
-      border: 1px solid var(--border-color); border-radius: var(--radius-sm);
-      font-weight: 700; font-size: 13px; padding: 12px 16px;
-      cursor: pointer; transition: all 0.2s; text-align: center;
+    .btn-subtle {
+      background: var(--surface-elevated);
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 13px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
     }
-    .btn-ghost:active { filter: brightness(1.2); transform: scale(0.96); }
+    .btn-subtle:active { filter: brightness(1.2); }
 
-    .dock-wrapper {
-      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-      width: 94%; max-width: 500px; z-index: 100;
+    /* شريط التنقل السفلي المطور (Floating Island Dock) */
+    .dock-bar-wrapper {
+      position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+      width: 92%; max-width: 480px; z-index: 100;
     }
-    .dock-container {
-      background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-      border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 100px;
-      display: flex; align-items: center; justify-content: space-between; padding: 8px 16px;
-      box-shadow: 0 16px 32px rgba(0,0,0,0.4);
+    .dock-bar {
+      background: rgba(17, 24, 39, 0.9);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 40px;
+      display: flex; align-items: center; justify-content: space-around;
+      padding: 8px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
     }
-    
-    .dock-item {
+    .dock-tab {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 4px; padding: 8px 12px;
-      border-radius: 100px; border: none; background: transparent;
-      color: var(--text-muted); cursor: pointer; transition: all 0.3s ease;
+      gap: 3px; padding: 10px 14px;
+      border-radius: 30px; border: none; background: transparent;
+      color: var(--text-muted); cursor: pointer; transition: all 0.25s ease;
     }
-    .dock-item svg { width: 20px; height: 20px; stroke-width: 2; transition: all 0.3s; }
-    .dock-item span { font-size: 10px; font-weight: 700; white-space: nowrap; }
-    
-    .dock-item.active { background: var(--card-elevated); color: var(--text-main); }
-    .dock-item.active svg { color: var(--gold); stroke-width: 2.5; }
+    .dock-tab svg { width: 20px; height: 20px; stroke-width: 2; transition: all 0.25s; }
+    .dock-tab span { font-size: 10px; font-weight: 700; }
+    .dock-tab.active { background: var(--surface-elevated); color: var(--text-main); }
+    .dock-tab.active svg { color: var(--gold); stroke-width: 2.5; }
 
+    /* رأس الصفحة التنفيذي */
     header {
       position: sticky; top: 0; z-index: 50;
-      background: rgba(11, 15, 25, 0.85); backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border-color);
-      padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;
+      background: rgba(9, 13, 22, 0.85); backdrop-filter: blur(15px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 16px 20px;
+      display: flex; justify-content: space-between; align-items: center;
     }
-    .avatar-logo {
-      width: 44px; height: 44px; border-radius: 50%;
-      background: var(--card-elevated); border: 1px solid var(--border-color);
+    .user-avatar {
+      width: 42px; height: 42px; border-radius: 14px;
+      background: var(--surface-elevated); border: 1px solid var(--border-subtle);
       display: flex; align-items: center; justify-content: center;
       font-weight: 900; font-size: 16px; color: var(--gold);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     }
 
+    /* النوافذ المنبثقة (Bottom Sheets) */
     .sheet-overlay {
       position: fixed; inset: 0;
-      background: rgba(0,0,0,0.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
       z-index: 1000; display: none; align-items: flex-end; justify-content: center;
     }
-    .sheet-content {
+    .sheet-panel {
       background: var(--bg-color);
-      border-top: 1px solid var(--border-color);
-      border-radius: 36px 36px 0 0;
+      border-top: 1px solid var(--border-subtle);
+      border-radius: 32px 32px 0 0;
       width: 100%; max-width: 500px;
-      padding: 24px 24px 40px; max-height: 90vh; overflow-y: auto;
-      animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: 0 -20px 40px rgba(0,0,0,0.5);
+      padding: 24px 22px 40px; max-height: 90vh; overflow-y: auto;
+      animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 -20px 40px rgba(0,0,0,0.6);
     }
-    .sheet-drag { width: 48px; height: 5px; background: var(--border-color); border-radius: 100px; margin: 0 auto 32px; }
+    .sheet-handle { width: 40px; height: 4px; background: var(--border-subtle); border-radius: 100px; margin: 0 auto 24px; }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-    .tab-section { display: none; flex-direction: column; gap: 24px; animation: fadeIn 0.3s ease; }
+    .tab-section { display: none; flex-direction: column; gap: 20px; animation: fadeIn 0.25s ease; }
     .tab-section.active { display: flex; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
+    /* التنبيه العائم (Toast) */
     #toast {
-      position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-100px);
-      background: var(--card-elevated); border: 1px solid var(--border-color);
-      padding: 16px 32px; border-radius: 100px; color: var(--text-main); font-weight: 800; font-size: 13px;
-      z-index: 9999; display: flex; align-items: center; gap: 12px;
-      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
+      background: var(--surface-elevated); border: 1px solid var(--border-subtle);
+      padding: 14px 24px; border-radius: 30px; color: var(--text-main); font-weight: 800; font-size: 13px;
+      z-index: 9999; display: flex; align-items: center; gap: 10px;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0; box-shadow: 0 15px 35px rgba(0,0,0,0.4);
     }
     #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-    main { max-width: 520px; margin: 0 auto; padding: 24px; display: flex; flex-direction: column; gap: 24px; }
+    main { max-width: 500px; margin: 0 auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
 
     @media print {
       body * { visibility: hidden; }
       body { background-color: #FFF !important; }
-      .sheet-content { background: #FFF !important; box-shadow: none !important; padding: 0 !important; }
+      .sheet-panel { background: #FFF !important; box-shadow: none !important; padding: 0 !important; }
       #printableWeeklyArea, #printableWeeklyArea *, #printableCustomArea, #printableCustomArea *, #printableArea, #printableArea * { visibility: visible; color: #000 !important; }
       #printableWeeklyArea, #printableCustomArea, #printableArea { position: absolute; left: 0; top: 0; width: 100%; background: #fff; padding: 20px; font-family: 'Tajawal', sans-serif; border: none !important; }
     }
     
-    .chart-container {
+    .chart-box {
       position: relative;
-      height: 180px;
+      height: 160px;
       width: 100%;
       display: flex;
       justify-content: center;
@@ -214,20 +248,20 @@
 </head>
 <body>
 
-  <!-- شاشة الدخول -->
+  <!-- شاشة الدخول السحابي -->
   <div id="authOverlay" style="position: fixed; inset: 0; background: var(--bg-color); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 24px;">
-    <div style="width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 32px;">
+    <div style="width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 28px;">
       <div style="text-align: center;">
-        <div style="width: 64px; height: 64px; border-radius: 20px; background: var(--card-bg); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.3);">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        <div style="width: 60px; height: 60px; border-radius: 18px; background: var(--surface-color); border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.3);">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
         </div>
-        <h2 style="font-size: 24px; font-weight: 900; color: #FFF;">نظام إدارة المعاملات</h2>
-        <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">بوابة المعقب المؤسسية</p>
+        <h2 style="font-size: 22px; font-weight: 900; color: #FFF;">نظام إدارة العمليات</h2>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 6px;">بوابة المعقب المؤسسية الآمنة</p>
       </div>
-      <div style="display: flex; flex-direction: column; gap: 16px;">
-        <input id="loginEmail" type="email" placeholder="البريد الإلكتروني" class="editorial-input" dir="ltr">
-        <input id="loginPassword" type="password" placeholder="كلمة المرور" class="editorial-input" dir="ltr">
-        <button onclick="handleLogin()" id="btnLogin" class="btn-gold" style="margin-top: 8px;">دخول للنظام</button>
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <input id="loginEmail" type="email" placeholder="البريد الإلكتروني" class="modern-input" dir="ltr">
+        <input id="loginPassword" type="password" placeholder="كلمة المرور" class="modern-input" dir="ltr">
+        <button onclick="handleLogin()" id="btnLogin" class="btn-action-gold" style="margin-top: 6px;">دخول للنظام</button>
       </div>
     </div>
   </div>
@@ -237,356 +271,368 @@
     <span id="toastMsg">تم الإجراء</span>
   </div>
 
-  <!-- الهيدر -->
+  <!-- رأس الصفحة التنفيذي المطور -->
   <header>
     <div style="display: flex; align-items: center; gap: 12px;">
-      <div class="avatar-logo">M</div>
+      <div class="user-avatar">م</div>
       <div>
-        <h1 style="font-size: 16px; font-weight: 900;">إدارة العمليات</h1>
-        <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px;">
+        <h1 style="font-size: 15px; font-weight: 900;">إدارة العمليات</h1>
+        <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
           <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--emerald);"></span>
-          <span style="font-size: 11px; color: var(--text-muted); font-weight: 700;">النظام السحابي متصل</span>
+          <span style="font-size: 10px; color: var(--text-muted); font-weight: 700;">متصل بالسحابة</span>
         </div>
       </div>
     </div>
-    <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 8px 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-      <span id="headerDateDisplay" class="num-font" style="font-size: 12px; font-weight: 800; color: var(--gold);">التاريخ</span>
+    <div style="background: var(--surface-color); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 6px 14px;">
+      <span id="headerDateDisplay" class="num-font" style="font-size: 11px; font-weight: 800; color: var(--gold);">التاريخ</span>
     </div>
   </header>
 
   <main>
-    <!-- نظام 1: التتبع المعاملاتي المتقدم -->
+    <!-- قسم التتبع والعمليات -->
     <div id="tab-tracking" class="tab-section active">
       
-      <!-- لوحة القيادة البصرية -->
-      <div class="bento-card" style="padding: 16px; margin-bottom: -8px;">
-        <h3 style="font-size: 14px; font-weight: 900; color: var(--text-muted); margin-bottom: 12px; text-align: center;">إحصائيات المعاملات الجارية</h3>
-        <div class="chart-container">
+      <!-- بطاقة إحصائيات بصرية عصرية -->
+      <div class="exec-card" style="padding: 16px 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="font-size: 13px; font-weight: 800; color: var(--text-muted);">حالة المعاملات الحالية</span>
+          <span id="activeCountBadge" class="num-font" style="font-size: 11px; font-weight: 900; color: var(--gold); background: rgba(245, 158, 11, 0.1); padding: 3px 10px; border-radius: 20px;">0 نشطة</span>
+        </div>
+        <div class="chart-box">
           <canvas id="statusChart"></canvas>
         </div>
       </div>
 
-      <div class="search-block">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
-        <input id="globalSearchInput" type="text" placeholder="بحث باسم الشركة أو المعاملة..." oninput="handleGlobalSearch(this.value)">
+      <div class="search-wrapper">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+        <input id="globalSearchInput" type="text" placeholder="بحث سريع باسم الشركة أو المعاملة..." oninput="handleGlobalSearch(this.value)">
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 8px;">
-        <button onclick="openSheet('newTxModal')" class="btn-gold">استلام معاملة</button>
-        <button onclick="openSheet('newCompanyModal')" class="btn-outline">تسجيل شركة</button>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <button onclick="openSheet('newTxModal')" class="btn-action-gold">+ استلام معاملة</button>
+        <button onclick="openSheet('newCompanyModal')" class="btn-action-outline">+ تسجيل شركة</button>
       </div>
 
-      <section>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-          <span style="font-size: 14px; font-weight: 900; color: var(--text-muted);">الشركات والجهات</span>
-          <span id="companiesCount" class="num-font" style="font-size: 13px; font-weight: 800; color: var(--text-muted);">0</span>
+      <section style="margin-top: 4px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <span style="font-size: 13px; font-weight: 800; color: var(--text-muted);">الشركات المسجلة</span>
+          <span id="companiesCount" class="num-font" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">0</span>
         </div>
-        <div id="companiesList" style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none;"></div>
+        <div id="companiesList" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none;"></div>
       </section>
 
-      <section>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; margin-top: 8px;">
-          <span style="font-size: 14px; font-weight: 900; color: var(--text-muted);">نظام التتبع الهندسي الجاري</span>
-          <span id="activeCountBadge" class="num-font" style="font-size: 12px; font-weight: 800; color: var(--gold); background: var(--gold-dim); padding: 4px 12px; border-radius: var(--radius-sm);">0</span>
+      <section style="margin-top: 4px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <span style="font-size: 13px; font-weight: 800; color: var(--text-muted);">سجل التتبع الميداني</span>
         </div>
-        <div id="activeTransactionsList" style="display: flex; flex-direction: column; gap: 24px;"></div>
+        <div id="activeTransactionsList" style="display: flex; flex-direction: column; gap: 16px;"></div>
       </section>
     </div>
 
-    <!-- نظام 2: الرادار والتنبيهات -->
+    <!-- قسم الرادار والتنبيهات -->
     <div id="tab-alerts" class="tab-section">
-      <div class="bento-card">
-        <h3 style="font-size: 20px; font-weight: 900; margin-bottom: 8px; color: var(--danger);">رادار التنبيهات المتقدم</h3>
-        <p style="font-size: 13px; color: var(--text-muted);">تنبيهات تلقائية للمعاملات المتوقفة في الدوائر لضمان عدم نسيان أي عمل.</p>
+      <div class="exec-card">
+        <h3 style="font-size: 18px; font-weight: 900; margin-bottom: 4px; color: var(--danger);">رادار متابعة الركود</h3>
+        <p style="font-size: 12px; color: var(--text-muted);">تنبيهات تلقائية للمعاملات المتوقفة في المحطات لأكثر من 3 أيام.</p>
       </div>
-      <div id="notificationsList" style="display: flex; flex-direction: column; gap: 16px;"></div>
+      <div id="notificationsList" style="display: flex; flex-direction: column; gap: 12px;"></div>
     </div>
 
-    <!-- نظام 3: الحسابات والمالية الأسبوعية -->
+    <!-- قسم الحسابات والمالية -->
     <div id="tab-finance" class="tab-section">
-      <div class="bento-card" style="border-color: var(--gold); position: relative; overflow: hidden;">
-        <span style="font-size: 11px; font-weight: 800; color: var(--gold); background: var(--gold-dim); padding: 4px 12px; border-radius: var(--radius-sm); width: fit-content; margin-bottom: 16px;">المحاسبة الأسبوعية (الأحد - الخميس)</span>
-        <h3 style="font-size: 14px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">إجمالي الديون والأتعاب المعلقة</h3>
-        <h2 id="weeklyTotalSumBadge" class="num-font" style="font-size: 36px; font-weight: 900; color: var(--gold); margin-bottom: 24px; letter-spacing: -1px;">0 د.ع</h2>
-        <div style="display: flex; gap: 12px;">
-          <button onclick="exportAccountsToCSV()" class="btn-outline" style="flex: 1; padding: 12px;">تصدير CSV</button>
-          <button onclick="openPDFPreviewModal()" class="btn-gold" style="flex: 1; padding: 12px;">تقرير مالي PDF</button>
+      <div class="exec-card" style="border-color: rgba(245, 158, 11, 0.3);">
+        <span style="font-size: 10px; font-weight: 800; color: var(--gold); background: rgba(245, 158, 11, 0.1); padding: 3px 10px; border-radius: 20px; width: fit-content; margin-bottom: 8px;">دورة العمل الأسبوعية (الأحد - الخميس)</span>
+        <h3 style="font-size: 13px; font-weight: 700; color: var(--text-muted);">إجمالي الديون والأتعاب المعلقة</h3>
+        <h2 id="weeklyTotalSumBadge" class="num-font" style="font-size: 32px; font-weight: 900; color: var(--gold); margin: 6px 0 16px; letter-spacing: -1px;">0 د.ع</h2>
+        <div style="display: flex; gap: 10px;">
+          <button onclick="exportAccountsToCSV()" class="btn-action-outline" style="flex: 1; padding: 12px;">تصدير CSV</button>
+          <button onclick="openPDFPreviewModal()" class="btn-action-gold" style="flex: 1; padding: 12px;">تقرير PDF</button>
         </div>
       </div>
-      <div id="accountsList" style="display: flex; flex-direction: column; gap: 16px;"></div>
+      <div id="accountsList" style="display: flex; flex-direction: column; gap: 12px;"></div>
     </div>
 
-    <!-- نظام 4: المكتبة الأرشيفية المعزولة -->
+    <!-- قسم الأرشيف والمكتبة -->
     <div id="tab-archive" class="tab-section">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <h3 style="font-size: 20px; font-weight: 900;">المكتبة الأرشيفية للشركات</h3>
-        <span id="allDocsTotalBadge" class="num-font" style="font-size: 14px; font-weight: 800; color: var(--text-muted);">0</span>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+        <h3 style="font-size: 18px; font-weight: 900;">الأرشيف السحابي</h3>
+        <span id="allDocsTotalBadge" class="num-font" style="font-size: 13px; font-weight: 800; color: var(--text-muted);">0 ملفات</span>
       </div>
-      <div class="search-block" style="margin-top: 8px;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+      <div class="search-wrapper" style="margin-top: 4px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
         <input type="text" placeholder="ابحث عن شركة لفتح أرشيفها المستقل..." oninput="renderArchiveLibrary(this.value)">
       </div>
-      <div id="libraryCompaniesList" style="display: flex; flex-direction: column; gap: 16px;"></div>
+      <div id="libraryCompaniesList" style="display: flex; flex-direction: column; gap: 12px;"></div>
     </div>
 
-    <!-- نظام 5: الإعدادات والنظام -->
+    <!-- قسم الإعدادات والنظام -->
     <div id="tab-system" class="tab-section">
-      <div class="bento-card">
-        <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 24px;">معلومات المكتب والمراسلة</h3>
-        <div style="display: flex; flex-direction: column; gap: 16px;">
-          <input id="setOfficeName" type="text" class="editorial-input" placeholder="اسم المكتب الرسمي">
-          <input id="setOfficePhone" type="tel" class="editorial-input num-font" placeholder="رقم الهاتف">
-          <button onclick="saveSettings()" class="btn-outline">حفظ البيانات</button>
-        </div>
-      </div>
-      <div class="bento-card">
-        <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 24px;">النسخ الاحتياطي والرقابة</h3>
+      <div class="exec-card">
+        <h3 style="font-size: 15px; font-weight: 900; margin-bottom: 16px;">إعدادات المكتب والمراسلة</h3>
         <div style="display: flex; flex-direction: column; gap: 12px;">
-          <button onclick="exportJSONBackup()" class="btn-outline">تنزيل نسخة احتياطية (JSON)</button>
-          <button onclick="openSheet('auditLogModal'); renderAuditLogs();" class="btn-outline">سجل العمليات (Audit Log)</button>
+          <input id="setOfficeName" type="text" class="modern-input" placeholder="اسم المكتب الرسمي">
+          <input id="setOfficePhone" type="tel" class="modern-input num-font" placeholder="رقم الهاتف">
+          <button onclick="saveSettings()" class="btn-action-outline">حفظ البيانات</button>
         </div>
       </div>
-      <div class="bento-card" style="border-color: rgba(244, 63, 94, 0.3);">
-        <button onclick="handleLogout()" class="btn-outline" style="color: var(--danger); border-color: rgba(244, 63, 94, 0.3);">تسجيل الخروج</button>
+      <div class="exec-card">
+        <h3 style="font-size: 15px; font-weight: 900; margin-bottom: 16px;">النسخ الاحتياطي والرقابة</h3>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <button onclick="exportJSONBackup()" class="btn-action-outline">تنزيل نسخة احتياطية (JSON)</button>
+          <button onclick="openSheet('auditLogModal'); renderAuditLogs();" class="btn-action-outline">سجل الحركات (Audit Log)</button>
+        </div>
+      </div>
+      <div class="exec-card" style="border-color: rgba(239, 68, 68, 0.3);">
+        <button onclick="handleLogout()" class="btn-action-outline" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.3);">تسجيل الخروج من النظام</button>
       </div>
     </div>
   </main>
 
-  <!-- شريط التنقل السفلي -->
-  <div class="dock-wrapper">
-    <nav class="dock-container">
-      <button onclick="switchTab('tracking')" id="nav-tracking" class="dock-item active">
+  <!-- شريط التنقل السفلي المطور -->
+  <div class="dock-bar-wrapper">
+    <nav class="dock-bar">
+      <button onclick="switchTab('tracking')" id="nav-tracking" class="dock-tab active">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
         <span>التتبع</span>
       </button>
-      <button onclick="switchTab('alerts')" id="nav-alerts" class="dock-item">
+      <button onclick="switchTab('alerts')" id="nav-alerts" class="dock-tab">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path></svg>
         <span>التنبيهات</span>
       </button>
-      <button onclick="switchTab('finance')" id="nav-finance" class="dock-item">
+      <button onclick="switchTab('finance')" id="nav-finance" class="dock-tab">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
         <span>المالية</span>
       </button>
-      <button onclick="switchTab('archive')" id="nav-archive" class="dock-item">
+      <button onclick="switchTab('archive')" id="nav-archive" class="dock-tab">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-        <span>المكتبة</span>
+        <span>الأرشيف</span>
       </button>
-      <button onclick="switchTab('system')" id="nav-system" class="dock-item">
+      <button onclick="switchTab('system')" id="nav-system" class="dock-tab">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"></circle></svg>
         <span>النظام</span>
       </button>
     </nav>
   </div>
 
-  <!-- ================= النوافذ المنبثقة للأنظمة المتكاملة ================= -->
+  <!-- ================= النوافذ المنبثقة المحسنة ================= -->
 
+  <!-- نافذة تفاصيل المعاملة -->
   <div id="transactionDetailsModal" class="sheet-overlay">
-    <div class="sheet-content" style="max-width: 560px;">
-      <div class="sheet-drag"></div>
-      <div style="margin-bottom: 24px;">
-        <span id="dtCompNameBadge" style="font-size: 13px; font-weight: 800; color: var(--text-muted); display: block; margin-bottom: 4px;">الشركة</span>
-        <h3 id="dtTxTitle" style="font-size: 22px; font-weight: 900; color: #FFF;">المعاملة</h3>
+    <div class="sheet-panel" style="max-width: 520px;">
+      <div class="sheet-handle"></div>
+      <div style="margin-bottom: 20px;">
+        <span id="dtCompNameBadge" style="font-size: 12px; font-weight: 800; color: var(--text-muted); display: block; margin-bottom: 4px;">الشركة</span>
+        <h3 id="dtTxTitle" style="font-size: 20px; font-weight: 900; color: #FFF;">المعاملة</h3>
       </div>
 
-      <div style="background: var(--card-elevated); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 20px;">
-        <span style="font-size: 13px; font-weight: 800; color: var(--text-muted);">الأتعاب الإجمالية</span>
+      <div style="background: var(--surface-color); border: 1px solid var(--border-subtle); border-radius: var(--radius-card); padding: 16px; margin-bottom: 16px;">
+        <span style="font-size: 12px; font-weight: 800; color: var(--text-muted);">الأتعاب الإجمالية</span>
         <h4 id="dtFinancialSummary" class="num-font" style="font-size: 16px; font-weight: 900; color: var(--gold); margin-top: 4px;">0 د.ع</h4>
       </div>
 
-      <div style="background: var(--card-elevated); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 20px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <span style="font-size: 13px; font-weight: 800; color: var(--text-muted);">المسار الميداني الهندسي</span>
-          <button onclick="openAdvancedStepModal(currentDetailTxId)" class="btn-ghost" style="padding: 6px 12px; color: var(--gold);">تحديث المحطة والحالة</button>
+      <div style="background: var(--surface-color); border: 1px solid var(--border-subtle); border-radius: var(--radius-card); padding: 16px; margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span style="font-size: 12px; font-weight: 800; color: var(--text-muted);">المسار الميداني الحالي</span>
+          <button onclick="openAdvancedStepModal(currentDetailTxId)" class="btn-subtle" style="padding: 6px 12px; color: var(--gold); border-color: rgba(245,158,11,0.3);">تحديث المحطة</button>
         </div>
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-          <span id="dtStatusIndicator" style="width: 10px; height: 10px; border-radius: 50%; background: var(--blue);"></span>
-          <p id="dtCurrentLocText" style="font-size: 15px; font-weight: 900; color: #FFF;">المحطة...</p>
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+          <span id="dtStatusIndicator" style="width: 8px; height: 8px; border-radius: 50%; background: var(--blue);"></span>
+          <p id="dtCurrentLocText" style="font-size: 14px; font-weight: 900; color: #FFF;">المحطة...</p>
         </div>
-        <p id="dtLastNoteText" style="font-size: 12px; color: var(--text-muted); background: var(--bg-color); padding: 10px; border-radius: var(--radius-sm); margin-bottom: 16px; border: 1px solid var(--border-color);"></p>
+        <p id="dtLastNoteText" style="font-size: 11px; color: var(--text-muted); background: var(--bg-color); padding: 10px; border-radius: var(--radius-sm); margin-bottom: 14px; border: 1px solid var(--border-subtle);"></p>
         
-        <h5 style="font-size: 12px; font-weight: 800; color: var(--text-muted); margin-bottom: 8px;">السجل التاريخي للمحطات:</h5>
-        <div id="dtTimelineList" style="display: flex; flex-direction: column; gap: 8px; max-height: 160px; overflow-y: auto;"></div>
+        <h5 style="font-size: 11px; font-weight: 800; color: var(--text-muted); margin-bottom: 6px;">سجل المحطات السابق:</h5>
+        <div id="dtTimelineList" style="display: flex; flex-direction: column; gap: 6px; max-height: 140px; overflow-y: auto;"></div>
       </div>
 
-      <div style="background: var(--card-elevated); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 20px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <span style="font-size: 13px; font-weight: 800; color: var(--text-muted);">المستمسكات والنواقص</span>
-          <span id="dtChecklistProgressText" class="num-font" style="font-size: 14px; font-weight: 900; color: var(--gold);">0%</span>
+      <div style="background: var(--surface-color); border: 1px solid var(--border-subtle); border-radius: var(--radius-card); padding: 16px; margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span style="font-size: 12px; font-weight: 800; color: var(--text-muted);">المستمسكات والنواقص</span>
+          <span id="dtChecklistProgressText" class="num-font" style="font-size: 13px; font-weight: 900; color: var(--gold);">0%</span>
         </div>
-        <div id="dtChecklistsContainer" style="display: flex; flex-direction: column; gap: 8px; max-height: 160px; overflow-y: auto; margin-bottom: 12px;"></div>
-        <button onclick="openAddChecklistModal(currentDetailTxId); closeSheet('transactionDetailsModal');" class="btn-outline" style="width: 100%; font-size: 12px; padding: 12px;">+ إضافة متطلب</button>
+        <div id="dtChecklistsContainer" style="display: flex; flex-direction: column; gap: 6px; max-height: 140px; overflow-y: auto; margin-bottom: 10px;"></div>
+        <button onclick="openAddChecklistModal(currentDetailTxId); closeSheet('transactionDetailsModal');" class="btn-action-outline" style="width: 100%; font-size: 12px; padding: 10px;">+ إضافة متطلب جديد</button>
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-        <button onclick="openWhatsAppQuickModal(currentDetailTxId); closeSheet('transactionDetailsModal');" class="btn-outline" style="padding: 12px;">مراسلة واتساب</button>
-        <button onclick="completeTx(currentDetailTxId); closeSheet('transactionDetailsModal');" class="btn-outline" style="color: var(--emerald); border-color: rgba(16,185,129,0.3); padding: 12px;">تم الإنجاز ✅</button>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+        <button onclick="openWhatsAppQuickModal(currentDetailTxId); closeSheet('transactionDetailsModal');" class="btn-action-outline" style="padding: 12px;">مراسلة واتساب</button>
+        <button onclick="completeTx(currentDetailTxId); closeSheet('transactionDetailsModal');" class="btn-action-outline" style="color: var(--emerald); border-color: rgba(16,185,129,0.3); padding: 12px;">إنجاز العمل ✅</button>
       </div>
-      <button onclick="closeSheet('transactionDetailsModal')" class="btn-ghost" style="width: 100%;">إغلاق</button>
+      <button onclick="closeSheet('transactionDetailsModal')" class="btn-subtle" style="width: 100%;">إغلاق</button>
     </div>
   </div>
 
+  <!-- محرك تحديث المسار (دائرتان فقط مع تحديث يدوي) -->
   <div id="advancedStepModal" class="sheet-overlay">
-    <div class="sheet-content">
-      <div class="sheet-drag"></div>
-      <h3 style="font-size: 20px; font-weight: 900; margin-bottom: 20px;">محرك التتبع الميداني المتقدم</h3>
-      <div style="display: flex; flex-direction: column; gap: 16px;">
+    <div class="sheet-panel">
+      <div class="sheet-handle"></div>
+      <h3 style="font-size: 18px; font-weight: 900; margin-bottom: 18px;">تحديث محطة المعاملة</h3>
+      <div style="display: flex; flex-direction: column; gap: 14px;">
         <div>
-          <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px;">الدائرة الرسمية</label>
-          <select id="advDeptSelect" class="editorial-input" style="color: #FFF; background: var(--bg-color);">
+          <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px;">الدائرة الرسمية</label>
+          <select id="advDeptSelect" class="modern-input" style="color: #FFF; background: var(--surface-color);">
             <option value="دائرة مسجل الشركات">دائرة مسجل الشركات</option>
             <option value="دائرة الاستيراد">دائرة الاستيراد</option>
           </select>
         </div>
 
         <div>
-          <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px;">المحطة أو الشعبة الفرعية (تحديث يدوي)</label>
-          <input id="advStageInput" type="text" placeholder="اكتب اسم المحطة الحالية (مثال: التدقيق، الواردة...)" class="editorial-input">
+          <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px;">المحطة أو الشعبة الفرعية (كتابة يدوية)</label>
+          <input id="advStageInput" type="text" placeholder="مثال: التدقيق القانوني، الحسابات..." class="modern-input">
         </div>
 
         <div>
-          <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px;">حالة المعاملة الحالية</label>
-          <select id="advStatusSelect" class="editorial-input" style="color: #FFF; background: var(--bg-color);">
-            <option value="active">تحت الإجراء الاعتيادي (مستمرة)</option>
-            <option value="pending">معلقة / بانتظار نقص أو مستمسك من العميل</option>
-            <option value="objection">وجود اعتراض أو كتاب استفسار رسمي</option>
-            <option value="ready">جاهزة للإصدار أو التسليم النهائي</option>
+          <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px;">حالة المعاملة الحالية</label>
+          <select id="advStatusSelect" class="modern-input" style="color: #FFF; background: var(--surface-color);">
+            <option value="active">مستمرة (تحت الإجراء الاعتيادي)</option>
+            <option value="pending">معلقة (بانتظار نقص من العميل)</option>
+            <option value="objection">معترضة (وجود استفسار أو اعتراض)</option>
+            <option value="ready">جاهزة للإصدار النهائي</option>
           </select>
         </div>
 
         <div>
-          <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px;">ملاحظات المراجعة الميدانية</label>
-          <textarea id="advNoteInput" rows="3" placeholder="سجل تفاصيل ما جرى في هذه الدائرة..." class="editorial-input"></textarea>
+          <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px;">ملاحظات المراجعة الميدانية</label>
+          <textarea id="advNoteInput" rows="3" placeholder="سجل تفاصيل ما حدث في الدائرة..." class="modern-input"></textarea>
         </div>
 
-        <div style="display: flex; gap: 12px; margin-top: 8px;">
-          <button onclick="confirmAdvancedStepUpdate()" class="btn-gold" style="flex: 1;">اعتماد وتحديث المسار</button>
-          <button onclick="closeSheet('advancedStepModal')" class="btn-outline" style="flex: 1;">إلغاء</button>
+        <div style="display: flex; gap: 10px; margin-top: 6px;">
+          <button onclick="confirmAdvancedStepUpdate()" class="btn-action-gold" style="flex: 1;">اعتماد التحديث</button>
+          <button onclick="closeSheet('advancedStepModal')" class="btn-action-outline" style="flex: 1;">إلغاء</button>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- استلام معاملة -->
   <div id="newTxModal" class="sheet-overlay">
-    <div class="sheet-content">
-      <div class="sheet-drag"></div>
-      <h3 style="font-size: 20px; font-weight: 900; margin-bottom: 24px;">استلام معاملة جديدة</h3>
-      <div style="display: flex; flex-direction: column; gap: 16px;">
-        <select id="txCompanySelect" class="editorial-input" style="color: #FFF; background: var(--bg-color);"></select>
-        <input id="txType" type="text" placeholder="نوع المعاملة" class="editorial-input">
-        <input id="txFee" type="number" placeholder="الأتعاب الكلية (د.ع)" class="editorial-input num-font">
-        <textarea id="txChecklist" rows="3" placeholder="المستمسكات المطلوبة (كل مستمسك بسطر)" class="editorial-input"></textarea>
-        <div style="display: flex; gap: 12px;">
-          <button onclick="saveTransaction()" class="btn-gold" style="flex: 1;">حفظ بالنظام</button>
-          <button onclick="closeSheet('newTxModal')" class="btn-outline" style="flex: 1;">إلغاء</button>
+    <div class="sheet-panel">
+      <div class="sheet-handle"></div>
+      <h3 style="font-size: 18px; font-weight: 900; margin-bottom: 18px;">استلام معاملة جديدة</h3>
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <select id="txCompanySelect" class="modern-input" style="color: #FFF; background: var(--surface-color);"></select>
+        <input id="txType" type="text" placeholder="نوع المعاملة" class="modern-input">
+        <input id="txFee" type="number" placeholder="الأتعاب الكلية (د.ع)" class="modern-input num-font">
+        <textarea id="txChecklist" rows="3" placeholder="المستمسكات المطلوبة (كل مستمسك بسطر)" class="modern-input"></textarea>
+        <div style="display: flex; gap: 10px;">
+          <button onclick="saveTransaction()" class="btn-action-gold" style="flex: 1;">حفظ بالنظام</button>
+          <button onclick="closeSheet('newTxModal')" class="btn-action-outline" style="flex: 1;">إلغاء</button>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- تسجيل شركة -->
   <div id="newCompanyModal" class="sheet-overlay">
-    <div class="sheet-content">
-      <div class="sheet-drag"></div>
-      <h3 style="font-size: 20px; font-weight: 900; margin-bottom: 24px;">تسجيل شركة جديدة</h3>
-      <div style="display: flex; flex-direction: column; gap: 16px;">
-        <input id="compName" type="text" placeholder="اسم الشركة" class="editorial-input">
-        <input id="compPhone" type="tel" placeholder="رقم الهاتف (اختياري)" class="editorial-input num-font">
-        <div style="display: flex; gap: 12px;">
-          <button onclick="saveCompany()" class="btn-gold" style="flex: 1;">حفظ</button>
-          <button onclick="closeSheet('newCompanyModal')" class="btn-outline" style="flex: 1;">إلغاء</button>
+    <div class="sheet-panel">
+      <div class="sheet-handle"></div>
+      <h3 style="font-size: 18px; font-weight: 900; margin-bottom: 18px;">تسجيل شركة جديدة</h3>
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <input id="compName" type="text" placeholder="اسم الشركة" class="modern-input">
+        <input id="compPhone" type="tel" placeholder="رقم الهاتف (اختياري)" class="modern-input num-font">
+        <div style="display: flex; gap: 10px;">
+          <button onclick="saveCompany()" class="btn-action-gold" style="flex: 1;">حفظ</button>
+          <button onclick="closeSheet('newCompanyModal')" class="btn-action-outline" style="flex: 1;">إلغاء</button>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- واتساب الآلي -->
   <div id="whatsappQuickModal" class="sheet-overlay">
-    <div class="sheet-content">
-      <div class="sheet-drag"></div>
-      <h3 style="font-size: 20px; font-weight: 900; margin-bottom: 8px;">محرك المراسلة الآلي</h3>
-      <p id="waModalTxInfo" style="font-size: 13px; font-weight: 700; color: var(--gold); margin-bottom: 24px;"></p>
-      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
-        <button onclick="generateWAMessage('status')" class="btn-outline" style="justify-content: flex-start;">📍 إشعار بموقع المعاملة الحالي</button>
-        <button onclick="generateWAMessage('missing')" class="btn-outline" style="justify-content: flex-start;">⏳ طلب جلب مستمسكات ناقصة</button>
-        <button onclick="generateWAMessage('completed')" class="btn-outline" style="justify-content: flex-start;">🎉 إشعار بإنجاز المعاملة كلياً</button>
+    <div class="sheet-panel">
+      <div class="sheet-handle"></div>
+      <h3 style="font-size: 18px; font-weight: 900; margin-bottom: 6px;">محرك المراسلة للعملاء</h3>
+      <p id="waModalTxInfo" style="font-size: 12px; font-weight: 700; color: var(--gold); margin-bottom: 20px;"></p>
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+        <button onclick="generateWAMessage('status')" class="btn-action-outline" style="justify-content: flex-start;">📍 إشعار بموقع المعاملة الحالي</button>
+        <button onclick="generateWAMessage('missing')" class="btn-action-outline" style="justify-content: flex-start;">⏳ طلب جلب مستمسكات ناقصة</button>
+        <button onclick="generateWAMessage('completed')" class="btn-action-outline" style="justify-content: flex-start;">🎉 إشعار بإنجاز المعاملة كلياً</button>
       </div>
-      <textarea id="waPreviewText" rows="4" class="editorial-input" style="margin-bottom: 16px; font-size: 13px;"></textarea>
-      <button onclick="copyAndSendWA()" class="btn-gold" style="width: 100%;">فتح الواتساب والإرسال</button>
-      <button onclick="closeSheet('whatsappQuickModal')" class="btn-ghost" style="width: 100%; margin-top: 12px;">إغلاق</button>
+      <textarea id="waPreviewText" rows="4" class="modern-input" style="margin-bottom: 14px; font-size: 12px;"></textarea>
+      <button onclick="copyAndSendWA()" class="btn-action-gold" style="width: 100%;">فتح الواتساب والإرسال</button>
+      <button onclick="closeSheet('whatsappQuickModal')" class="btn-subtle" style="width: 100%; margin-top: 10px;">إغلاق</button>
     </div>
   </div>
 
+  <!-- الأرشيف السحابي -->
   <div id="docVaultModal" class="sheet-overlay">
-    <div class="sheet-content">
-      <div class="sheet-drag"></div>
-      <h3 id="vaultCompTitle" style="font-size: 22px; font-weight: 900; margin-bottom: 20px;">الشركة</h3>
-      <div style="background: var(--card-elevated); padding: 20px; border-radius: var(--radius-lg); margin-bottom: 24px;">
-        <input id="docCustomName" type="text" placeholder="اسم المستند (مثال: وصل رسم)" class="editorial-input" style="margin-bottom: 12px;">
+    <div class="sheet-panel">
+      <div class="sheet-handle"></div>
+      <h3 id="vaultCompTitle" style="font-size: 20px; font-weight: 900; margin-bottom: 16px;">الشركة</h3>
+      <div style="background: var(--surface-color); padding: 16px; border-radius: var(--radius-card); margin-bottom: 20px; border: 1px solid var(--border-subtle);">
+        <input id="docCustomName" type="text" placeholder="اسم المستند (مثال: وصل رسم)" class="modern-input" style="margin-bottom: 10px;">
         <input type="file" id="docFileInput" accept="image/*,application/pdf" style="display: none;" onchange="handleFileSelection(this)">
-        <button onclick="document.getElementById('docFileInput').click()" class="btn-outline" style="border-style: dashed; margin-bottom: 12px;">
+        <button onclick="document.getElementById('docFileInput').click()" class="btn-action-outline" style="border-style: dashed; margin-bottom: 10px; width: 100%;">
           <span id="selectedFileNameLabel">اختر الملف من الجهاز 📁</span>
         </button>
-        <button id="btnUploadDoc" onclick="uploadCompanyDocument()" class="btn-gold" style="width: 100%;">رفع وأرشفة سحابية</button>
+        <button id="btnUploadDoc" onclick="uploadCompanyDocument()" class="btn-action-gold" style="width: 100%;">رفع وأرشفة سحابية</button>
       </div>
-      <span style="font-size: 14px; font-weight: 900; display: block; margin-bottom: 12px;">الملفات المؤرشفة (<span id="vaultDocsCount" class="num-font">0</span>)</span>
-      <div id="companyDocsList" style="display: flex; flex-direction: column; gap: 12px; max-height: 200px; overflow-y: auto; margin-bottom: 20px;"></div>
-      <button onclick="closeSheet('docVaultModal')" class="btn-ghost" style="width: 100%;">إغلاق الخزانة</button>
+      <span style="font-size: 13px; font-weight: 900; display: block; margin-bottom: 10px;">الملفات المؤرشفة (<span id="vaultDocsCount" class="num-font">0</span>)</span>
+      <div id="companyDocsList" style="display: flex; flex-direction: column; gap: 10px; max-height: 180px; overflow-y: auto; margin-bottom: 16px;"></div>
+      <button onclick="closeSheet('docVaultModal')" class="btn-subtle" style="width: 100%;">إغلاق الأرشيف</button>
     </div>
   </div>
 
+  <!-- إضافة مستند مطلوب -->
   <div id="addChecklistModal" class="sheet-overlay">
-    <div class="sheet-content">
-      <div class="sheet-drag"></div>
-      <h3 style="font-size: 20px; font-weight: 900; margin-bottom: 24px;">إضافة مستند مطلوب</h3>
-      <input id="newChecklistInput" type="text" placeholder="اسم المستمسك..." class="editorial-input" style="margin-bottom: 24px;">
-      <div style="display: flex; gap: 12px;">
-        <button onclick="confirmAddChecklistItem()" class="btn-gold" style="flex: 1;">إضافة</button>
-        <button onclick="closeSheet('addChecklistModal')" class="btn-outline" style="flex: 1;">إلغاء</button>
+    <div class="sheet-panel">
+      <div class="sheet-handle"></div>
+      <h3 style="font-size: 18px; font-weight: 900; margin-bottom: 18px;">إضافة متطلب جديد</h3>
+      <input id="newChecklistInput" type="text" placeholder="اسم المستمسك..." class="modern-input" style="margin-bottom: 18px;">
+      <div style="display: flex; gap: 10px;">
+        <button onclick="confirmAddChecklistItem()" class="btn-action-gold" style="flex: 1;">إضافة</button>
+        <button onclick="closeSheet('addChecklistModal')" class="btn-action-outline" style="flex: 1;">إلغاء</button>
       </div>
     </div>
   </div>
 
+  <!-- سند التسوية الأسبوعي -->
   <div id="weeklyReceiptModal" class="sheet-overlay">
-    <div class="sheet-content" style="max-width: 500px;">
-      <div class="sheet-drag"></div>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-        <h3 style="font-size: 20px; font-weight: 900;">سند تسوية الأتعاب الأسبوعي</h3>
-        <button onclick="printWeeklyReceiptVoucher()" class="btn-gold" style="padding: 10px 16px; font-size: 12px;">طباعة</button>
+    <div class="sheet-panel" style="max-width: 480px;">
+      <div class="sheet-handle"></div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 style="font-size: 18px; font-weight: 900;">سند تسوية الأتعاب</h3>
+        <button onclick="printWeeklyReceiptVoucher()" class="btn-action-gold" style="padding: 8px 14px; font-size: 11px;">طباعة</button>
       </div>
-      <div id="printableWeeklyArea" style="background: #FFF; color: #000; padding: 24px; border-radius: 12px; font-size: 13px; line-height: 1.8;">
-        <h2 style="font-size: 18px; font-weight: 900; margin-bottom: 4px;">إدارة المراجعات</h2>
+      <div id="printableWeeklyArea" style="background: #FFF; color: #000; padding: 20px; border-radius: 12px; font-size: 12px; line-height: 1.8;">
+        <h2 style="font-size: 16px; font-weight: 900; margin-bottom: 4px;">إدارة العمليات</h2>
         <p>المطابقة مع الجهة: <b id="weeklyRecCompanyName"></b></p>
-        <p>إجمالي الأتعاب المستحقة: <b id="weeklyRecAmountNum" style="font-size: 16px;"></b> د.ع</p>
+        <p>إجمالي الأتعاب المستحقة: <b id="weeklyRecAmountNum" style="font-size: 15px;"></b> د.ع</p>
         <p>دورة الأسبوع: <b id="weeklyRecDateRange"></b></p>
       </div>
-      <button onclick="settleAllWeeklyDuesForCompany()" class="btn-outline" style="width: 100%; margin-top: 24px; color: var(--emerald); border-color: rgba(16,185,129,0.3);">تأكيد استلام الأتعاب وتصفير الديون ✅</button>
-      <button onclick="closeSheet('weeklyReceiptModal')" class="btn-ghost" style="width: 100%; margin-top: 12px;">إغلاق</button>
+      <button onclick="settleAllWeeklyDuesForCompany()" class="btn-action-outline" style="width: 100%; margin-top: 20px; color: var(--emerald); border-color: rgba(16,185,129,0.3);">تأكيد استلام الأتعاب وتصفير الدين ✅</button>
+      <button onclick="closeSheet('weeklyReceiptModal')" class="btn-subtle" style="width: 100%; margin-top: 10px;">إغلاق</button>
     </div>
   </div>
 
+  <!-- سجل النظام -->
   <div id="auditLogModal" class="sheet-overlay">
-    <div class="sheet-content">
-      <div class="sheet-drag"></div>
-      <h3 style="font-size: 20px; font-weight: 900; margin-bottom: 24px;">سجل الحركات (Audit Log)</h3>
-      <div id="auditLogsContainer" style="display: flex; flex-direction: column; gap: 12px; max-height: 400px; overflow-y: auto;"></div>
-      <button onclick="closeSheet('auditLogModal')" class="btn-ghost" style="width: 100%; margin-top: 24px;">إغلاق</button>
+    <div class="sheet-panel">
+      <div class="sheet-handle"></div>
+      <h3 style="font-size: 18px; font-weight: 900; margin-bottom: 18px;">سجل الحركات (Audit Log)</h3>
+      <div id="auditLogsContainer" style="display: flex; flex-direction: column; gap: 10px; max-height: 350px; overflow-y: auto;"></div>
+      <button onclick="closeSheet('auditLogModal')" class="btn-subtle" style="width: 100%; margin-top: 18px;">إغلاق</button>
     </div>
   </div>
 
+  <!-- التقرير المالي العام -->
   <div id="pdfModal" class="sheet-overlay">
-    <div class="sheet-content" style="max-width: 600px;">
-      <div class="sheet-drag"></div>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-        <h3 style="font-size: 20px; font-weight: 900;">التقرير المالي العام</h3>
-        <button onclick="window.print()" class="btn-gold" style="padding: 10px 16px; font-size: 12px;">طباعة</button>
+    <div class="sheet-panel" style="max-width: 560px;">
+      <div class="sheet-handle"></div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 style="font-size: 18px; font-weight: 900;">التقرير المالي العام</h3>
+        <button onclick="window.print()" class="btn-action-gold" style="padding: 8px 14px; font-size: 11px;">طباعة</button>
       </div>
-      <div id="printableArea" style="background: #FFF; color: #000; padding: 24px; border-radius: 12px; font-size: 13px;">
-        <h2>التقرير المالي للديون المعلقة</h2>
-        <table style="width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 12px;">
-          <thead><tr style="border-bottom: 2px solid #000;"><th style="text-align:right; padding:8px;">الشركة</th><th style="text-align:right; padding:8px;">المعاملة</th><th style="text-align:center; padding:8px;">الأتعاب</th><th style="text-align:left; padding:8px;">الدين</th></tr></thead>
+      <div id="printableArea" style="background: #FFF; color: #000; padding: 20px; border-radius: 12px; font-size: 12px;">
+        <h2>تقرير الديون المعلقة</h2>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 11px;">
+          <thead><tr style="border-bottom: 2px solid #000;"><th style="text-align:right; padding:6px;">الشركة</th><th style="text-align:right; padding:6px;">المعاملة</th><th style="text-align:center; padding:6px;">الأتعاب</th><th style="text-align:left; padding:6px;">الدين</th></tr></thead>
           <tbody id="pdfTableBody"></tbody>
         </table>
-        <div style="margin-top: 16px; font-weight: 900;">إجمالي الديون: <span id="pdfTotalDebt"></span></div>
+        <div style="margin-top: 14px; font-weight: 900;">إجمالي الديون: <span id="pdfTotalDebt"></span></div>
       </div>
-      <button onclick="closeSheet('pdfModal')" class="btn-ghost" style="width: 100%; margin-top: 24px;">رجوع</button>
+      <button onclick="closeSheet('pdfModal')" class="btn-subtle" style="width: 100%; margin-top: 18px;">رجوع</button>
     </div>
   </div>
 
@@ -619,7 +665,7 @@
     let toastTimeout = null;
     let statsChartInstance = null;
 
-    const companyIconSVG = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 21h18M5 21V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14M9 9h6M9 13h6M9 17h6"/></svg>`;
+    const companyIconSVG = `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 21h18M5 21V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14M9 9h6M9 13h6M9 17h6"/></svg>`;
 
     document.getElementById('headerDateDisplay').innerText = new Date().toLocaleDateString('ar-IQ', { day: 'numeric', month: 'long' });
 
@@ -637,7 +683,7 @@
 
     function switchTab(t) {
       document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.dock-item').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.dock-tab').forEach(el => el.classList.remove('active'));
       
       const targetTab = document.getElementById(`tab-${t}`);
       const targetNav = document.getElementById(`nav-${t}`);
@@ -708,7 +754,7 @@
         allTransactionsGlobal = txData || [];
         activeTransactions = allTransactionsGlobal.filter(t => t.status === 'in_progress');
         
-        document.getElementById('activeCountBadge').innerText = activeTransactions.length;
+        document.getElementById('activeCountBadge').innerText = `${activeTransactions.length} نشطة`;
         renderActive();
         renderAccounts(allTransactionsGlobal);
         updateSmartRadarAlerts();
@@ -738,10 +784,10 @@
       statsChartInstance = new Chart(ctx, {
         type: 'doughnut',
         data: {
-          labels: ['مستمرة', 'بانتظار نقص', 'معترضة', 'جاهزة'],
+          labels: ['مستمرة', 'نواقص', 'معترضة', 'جاهزة'],
           datasets: [{
             data: [activeCount, pendingCount, objectionCount, readyCount],
-            backgroundColor: ['#3B82F6', '#F59E0B', '#F43F5E', '#10B981'],
+            backgroundColor: ['#3B82F6', '#F59E0B', '#EF4444', '#10B981'],
             borderWidth: 0,
             hoverOffset: 4
           }]
@@ -752,10 +798,10 @@
           plugins: {
             legend: {
               position: 'right',
-              labels: { font: { family: "'Tajawal', sans-serif", size: 12 }, color: '#F9FAFB' }
+              labels: { font: { family: "'Tajawal', sans-serif", size: 11 }, color: '#F3F4F6' }
             }
           },
-          cutout: '75%'
+          cutout: '72%'
         }
       });
     }
@@ -774,13 +820,13 @@
 
       filtered.forEach(c => {
         list.innerHTML += `
-          <div onclick="selectCompany('${c.id}', '${c.name}')" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 14px 20px; min-width: 180px; display: flex; align-items: center; gap: 14px; cursor: pointer;">
-            <div style="width: 38px; height: 38px; border-radius: 10px; background: var(--card-elevated); border: 1px solid var(--border-light); display: flex; align-items: center; justify-content: center; color: var(--gold); flex-shrink: 0;">
+          <div onclick="selectCompany('${c.id}', '${c.name}')" style="background: var(--surface-color); border: 1px solid var(--border-subtle); border-radius: var(--radius-btn); padding: 12px 16px; min-width: 150px; display: flex; align-items: center; gap: 12px; cursor: pointer;">
+            <div style="width: 32px; height: 32px; border-radius: 8px; background: var(--surface-elevated); border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: center; color: var(--gold); flex-shrink: 0;">
               ${companyIconSVG}
             </div>
             <div style="overflow: hidden;">
-              <p style="font-size: 14px; font-weight: 900; color: #FFF; white-space: nowrap; max-width: 120px; overflow: hidden; text-overflow: ellipsis;">${c.name}</p>
-              <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">فتح الملف والأرشيف</p>
+              <p style="font-size: 13px; font-weight: 900; color: #FFF; white-space: nowrap; max-width: 100px; overflow: hidden; text-overflow: ellipsis;">${c.name}</p>
+              <p style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">الأرشيف</p>
             </div>
           </div>`;
         select.innerHTML += `<option value="${c.id}">${c.name}</option>`;
@@ -797,7 +843,7 @@
       });
 
       if (filtered.length === 0) {
-        container.innerHTML = `<div class="bento-card" style="text-align: center; color: var(--text-muted); font-size: 14px;">لا توجد معاملات جارية</div>`;
+        container.innerHTML = `<div class="exec-card" style="text-align: center; color: var(--text-muted); font-size: 13px;">لا توجد معاملات جارية حالياً</div>`;
         return;
       }
 
@@ -812,52 +858,52 @@
 
         let statusColor = "var(--blue)";
         let statusTextBadge = "مستمرة";
-        if (latestStep.status === 'pending') { statusColor = "var(--amber)"; statusTextBadge = "بانتظار نقص"; }
-        else if (latestStep.status === 'objection') { statusColor = "var(--danger)"; statusTextBadge = "معترضة / استفسار"; }
-        else if (latestStep.status === 'ready') { statusColor = "var(--emerald)"; statusTextBadge = "جاهزة للإصدار"; }
+        if (latestStep.status === 'pending') { statusColor = "var(--gold)"; statusTextBadge = "بانتظار نقص"; }
+        else if (latestStep.status === 'objection') { statusColor = "var(--danger)"; statusTextBadge = "معترضة"; }
+        else if (latestStep.status === 'ready') { statusColor = "var(--emerald)"; statusTextBadge = "جاهزة"; }
 
         return `
-          <div class="bento-card">
+          <div class="exec-card">
             <div onclick="window.openTransactionFullDetails('${tx.id}')" style="cursor: pointer;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                  <div style="width: 38px; height: 38px; border-radius: 10px; background: var(--card-elevated); border: 1px solid var(--border-light); display: flex; align-items: center; justify-content: center; color: var(--gold);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <div style="width: 32px; height: 32px; border-radius: 8px; background: var(--surface-elevated); border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: center; color: var(--gold);">
                     ${companyIconSVG}
                   </div>
-                  <span style="font-size: 15px; font-weight: 900; color: #FFF;">${tx.companies?.name || 'شركة'}</span>
+                  <span style="font-size: 14px; font-weight: 900; color: #FFF;">${tx.companies?.name || 'شركة'}</span>
                 </div>
-                <span style="font-size: 11px; font-weight: 800; background: rgba(255,255,255,0.05); color: ${statusColor}; padding: 4px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">${statusTextBadge}</span>
+                <span style="font-size: 11px; font-weight: 800; background: rgba(255,255,255,0.04); color: ${statusColor}; padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border-subtle);">${statusTextBadge}</span>
               </div>
 
-              <h3 style="font-size: 20px; font-weight: 900; line-height: 1.4; margin-bottom: 16px;">${tx.transaction_type}</h3>
+              <h3 style="font-size: 17px; font-weight: 900; line-height: 1.4; margin-bottom: 12px;">${tx.transaction_type}</h3>
 
-              <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid var(--border-color); padding-top: 16px; margin-bottom: 16px;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid var(--border-subtle); padding-top: 12px; margin-bottom: 12px;">
                 <div>
-                  <p style="font-size: 11px; color: var(--text-muted);">الأتعاب الكلية</p>
-                  <p class="num-font" style="font-size: 16px; font-weight: 900; color: var(--gold);">${fee.toLocaleString('ar-IQ')} د.ع</p>
+                  <p style="font-size: 10px; color: var(--text-muted);">الأتعاب الكلية</p>
+                  <p class="num-font" style="font-size: 15px; font-weight: 900; color: var(--gold);">${fee.toLocaleString('ar-IQ')} د.ع</p>
                 </div>
               </div>
 
-              <div style="background: var(--card-elevated); border-radius: var(--radius-sm); padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; margin-bottom: 20px; border: 1px solid var(--border-color);">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <span style="width: 8px; height: 8px; border-radius: 50%; background: ${statusColor};"></span>
-                  <span style="font-size: 13px; font-weight: 900; color: #FFF;">${latestStep.dept}</span>
+              <div style="background: var(--surface-elevated); border-radius: var(--radius-sm); padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; margin-bottom: 14px; border: 1px solid var(--border-subtle);">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span style="width: 6px; height: 6px; border-radius: 50%; background: ${statusColor};"></span>
+                  <span style="font-size: 12px; font-weight: 900; color: #FFF;">${latestStep.dept}</span>
                 </div>
-                <p style="font-size: 11px; color: var(--text-muted); padding-right: 16px;">${latestStep.stage || 'متابعة ميدانية'}</p>
+                <p style="font-size: 11px; color: var(--text-muted); padding-right: 12px;">${latestStep.stage || 'متابعة ميدانية'}</p>
               </div>
             </div>
 
             <div>
-              <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 800; color: var(--text-muted); margin-bottom: 8px;">
+              <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 800; color: var(--text-muted); margin-bottom: 6px;">
                 <span>المستمسكات (${completedCount}/${checklists.length})</span>
                 <span class="num-font">${progressPercent}%</span>
               </div>
-              <div style="width: 100%; height: 6px; background: var(--card-elevated); border-radius: 10px; overflow: hidden; margin-bottom: 16px;">
+              <div style="width: 100%; height: 5px; background: var(--surface-elevated); border-radius: 10px; overflow: hidden; margin-bottom: 12px;">
                 <div style="width: ${progressPercent}%; height: 100%; background: var(--gold); border-radius: 10px;"></div>
               </div>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                <button onclick="openWhatsAppQuickModal('${tx.id}')" class="btn-ghost">مراسلة</button>
-                <button onclick="completeTx('${tx.id}')" class="btn-ghost" style="color: var(--emerald);">إنجاز</button>
+                <button onclick="openWhatsAppQuickModal('${tx.id}')" class="btn-subtle">مراسلة واتساب</button>
+                <button onclick="completeTx('${tx.id}')" class="btn-subtle" style="color: var(--emerald);">إنجاز كلي</button>
               </div>
             </div>
           </div>
@@ -881,7 +927,7 @@
       let latest = hist.length > 0 ? hist[hist.length - 1] : { dept: tx.current_location_step || 'مسجل الشركات', stage: 'قيد المراجعة', status: 'active', note: 'بدء المعاملة' };
 
       let statusColor = "var(--blue)";
-      if (latest.status === 'pending') statusColor = "var(--amber)";
+      if (latest.status === 'pending') statusColor = "var(--gold)";
       else if (latest.status === 'objection') statusColor = "var(--danger)";
       else if (latest.status === 'ready') statusColor = "var(--emerald)";
 
@@ -894,24 +940,24 @@
       document.getElementById('dtChecklistProgressText').innerText = `${checklists.length > 0 ? Math.round((completedCount / checklists.length) * 100) : 0}%`;
 
       document.getElementById('dtChecklistsContainer').innerHTML = checklists.length > 0 ? checklists.map(c => `
-        <div style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-color); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-          <label style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: ${c.is_completed ? 'var(--text-muted)' : '#FFF'}; cursor: pointer; flex: 1;">
-            <input type="checkbox" ${c.is_completed ? 'checked' : ''} onchange="toggleCheck('${c.id}', ${!c.is_completed}); setTimeout(() => openTransactionFullDetails('${txId}'), 200);" style="width: 16px; height: 16px; accent-color: var(--gold);">
+        <div style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-color); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: ${c.is_completed ? 'var(--text-muted)' : '#FFF'}; cursor: pointer; flex: 1;">
+            <input type="checkbox" ${c.is_completed ? 'checked' : ''} onchange="toggleCheck('${c.id}', ${!c.is_completed}); setTimeout(() => openTransactionFullDetails('${txId}'), 200);" style="width: 15px; height: 15px; accent-color: var(--gold);">
             <span style="${c.is_completed ? 'text-decoration: line-through;' : ''}">${c.item_text}</span>
           </label>
-          <button onclick="deleteChecklistItem('${c.id}'); setTimeout(() => openTransactionFullDetails('${txId}'), 200);" style="background: none; border: none; color: var(--danger); cursor: pointer;">✕</button>
+          <button onclick="deleteChecklistItem('${c.id}'); setTimeout(() => openTransactionFullDetails('${txId}'), 200);" style="background: none; border: none; color: var(--danger); cursor: pointer; padding: 4px;">✕</button>
         </div>
-      `).join('') : '<p style="font-size:12px; color:var(--text-muted); text-align:center;">لا توجد متطلبات</p>';
+      `).join('') : '<p style="font-size:11px; color:var(--text-muted); text-align:center;">لا توجد متطلبات</p>';
 
       document.getElementById('dtTimelineList').innerHTML = hist.slice().reverse().map((h, i) => `
-        <div style="background: var(--bg-color); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 4px;">
+        <div style="background: var(--bg-color); padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); display: flex; flex-direction: column; gap: 3px;">
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 13px; font-weight: 900; color: ${i === 0 ? 'var(--gold)' : '#FFF'};">${h.dept} (${h.stage || ''})</span>
+            <span style="font-size: 12px; font-weight: 900; color: ${i === 0 ? 'var(--gold)' : '#FFF'};">${h.dept} (${h.stage || ''})</span>
             <span class="num-font" style="font-size: 10px; color: var(--text-muted);">${new Date(h.time).toLocaleDateString('ar-IQ')}</span>
           </div>
           <p style="font-size: 11px; color: var(--text-muted);">${h.note || 'لا توجد ملاحظات'}</p>
         </div>
-      `).join('') || '<p style="font-size:12px; color:var(--text-muted); text-align:center;">لا يوجد سجل حركات سابق</p>';
+      `).join('') || '<p style="font-size:11px; color:var(--text-muted); text-align:center;">لا يوجد سجل حركات سابق</p>';
 
       openSheet('transactionDetailsModal');
     };
@@ -966,7 +1012,7 @@
       await db.from('companies').insert([{ name, phone }]);
       logActivity("إضافة", `شركة: ${name}`);
       document.getElementById('compName').value = '';
-      closeSheet('newCompanyModal'); showToast("تم التسجيل"); loadData();
+      closeSheet('newCompanyModal'); showToast("تم تسجيل الشركة"); loadData();
     }
 
     async function saveTransaction() {
@@ -991,13 +1037,13 @@
 
       logActivity("معاملة", `استلام ${transaction_type}`);
       document.getElementById('txType').value = ''; document.getElementById('txChecklist').value = ''; document.getElementById('txFee').value = '';
-      closeSheet('newTxModal'); showToast("تم استلام المعاملة"); loadData();
+      closeSheet('newTxModal'); showToast("تم استلام المعاملة بنجاح"); loadData();
     }
 
     async function completeTx(id) { 
       await db.from('transactions').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', id); 
       pushStepHistory(id, { dept: 'الإنجاز النهائي', stage: 'تسليم المعاملة', status: 'ready', note: 'تم إنجاز وتسليم العمل كلياً', time: new Date().toISOString() });
-      showToast("تم إنجاز المعاملة ✅"); loadData(); 
+      showToast("تم إنجاز المعاملة كلياً ✅"); loadData(); 
     }
 
     function openAddChecklistModal(txId) { targetTxIdForChecklist = txId; openSheet('addChecklistModal'); }
@@ -1029,12 +1075,12 @@
 
       if (alerts.length > 0) {
         list.innerHTML = alerts.map(a => `
-          <div style="background: var(--card-elevated); border: 1px solid rgba(244, 63, 94, 0.4); padding: 16px; border-radius: var(--radius-sm);">
+          <div class="exec-card" style="border-color: rgba(239, 68, 68, 0.3);">
             <p style="font-size: 13px; font-weight: 800; color: var(--danger);">${a}</p>
           </div>
         `).join('');
       } else {
-        list.innerHTML = '<div style="text-align:center; color:var(--emerald); padding:30px; font-weight:900;">الرادار يعمل، لا توجد معاملات راكدة 🚀</div>';
+        list.innerHTML = '<div class="exec-card" style="text-align:center; color:var(--emerald); font-weight:900;">الرادار يعمل بكفاءة، لا توجد معاملات راكدة 🚀</div>';
       }
     }
 
@@ -1068,15 +1114,15 @@
         const debt = cTxs.reduce((s, t) => s + (Number(t.fee_iqd) || 0) - (Number(localStorage.getItem(`tx_paid_${t.id}`)) || 0), 0);
         if (debt === 0) return '';
         return `
-          <div class="bento-card" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+          <div class="exec-card" style="padding: 16px 20px;">
             <div>
-              <p style="font-size: 15px; font-weight: 900; color: #FFF;">${c.name}</p>
-              <p style="font-size: 13px; color: var(--danger); font-weight: 800; margin-top: 4px;">ديون معلقة: ${debt.toLocaleString('ar-IQ')} د.ع</p>
+              <p style="font-size: 14px; font-weight: 900; color: #FFF;">${c.name}</p>
+              <p style="font-size: 12px; color: var(--danger); font-weight: 800; margin-top: 4px;">ديون معلقة: ${debt.toLocaleString('ar-IQ')} د.ع</p>
             </div>
-            <button onclick="openWeeklyReceiptForCompany('${c.id}')" class="btn-ghost" style="background: rgba(245, 158, 11, 0.1); color: var(--gold);">تسوية وتصفير أسبوعي</button>
+            <button onclick="openWeeklyReceiptForCompany('${c.id}')" class="btn-subtle" style="background: rgba(245, 158, 11, 0.1); color: var(--gold); border-color: rgba(245,158,11,0.3);">تسوية وتصفير أسبوعي</button>
           </div>
         `;
-      }).join('') || '<p style="text-align:center; color:var(--text-muted); padding:20px;">لا توجد ديون معلقة حالياً</p>';
+      }).join('') || '<div class="exec-card" style="text-align:center; color:var(--text-muted);">لا توجد ديون معلقة حالياً</div>';
     }
 
     function openWeeklyReceiptForCompany(compId) {
@@ -1126,10 +1172,10 @@
             totalDebtAll += debt;
             tbody.innerHTML += `
               <tr style="border-bottom: 1px solid #ddd;">
-                <td style="padding: 8px;">${c.name}</td>
-                <td style="padding: 8px;">${t.transaction_type}</td>
-                <td style="text-align:center; padding: 8px;">${fee.toLocaleString('ar-IQ')}</td>
-                <td style="text-align:left; padding: 8px; color: red;">${debt.toLocaleString('ar-IQ')} د.ع</td>
+                <td style="padding: 6px;">${c.name}</td>
+                <td style="padding: 6px;">${t.transaction_type}</td>
+                <td style="text-align:center; padding: 6px;">${fee.toLocaleString('ar-IQ')}</td>
+                <td style="text-align:left; padding: 6px; color: red;">${debt.toLocaleString('ar-IQ')} د.ع</td>
               </tr>
             `;
           }
@@ -1172,16 +1218,16 @@
       container.innerHTML = companies.filter(c => c.name.toLowerCase().includes(q)).map(c => {
         const count = allDocumentsGlobal.filter(d => d.company_id === c.id).length;
         return `
-          <div class="bento-card" style="padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
+          <div class="exec-card" style="padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
             <div>
-              <p style="font-size: 15px; font-weight: 900; color: #FFF;">${c.name}</p>
+              <p style="font-size: 14px; font-weight: 900; color: #FFF;">${c.name}</p>
               <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">${count} مستندات مؤرشفة</p>
             </div>
-            <button onclick="selectCompany('${c.id}', '${c.name}'); openDocVault();" class="btn-ghost" style="background: var(--card-elevated);">فتح الأرشيف</button>
+            <button onclick="selectCompany('${c.id}', '${c.name}'); openDocVault();" class="btn-subtle">فتح الأرشيف</button>
           </div>
         `;
-      }).join('') || '<p style="text-align:center; color:var(--text-muted); padding:20px;">لا توجد شركات</p>';
-      document.getElementById('allDocsTotalBadge').innerText = allDocumentsGlobal.length;
+      }).join('') || '<div class="exec-card" style="text-align:center; color:var(--text-muted);">لا توجد شركات مسجلة</div>';
+      document.getElementById('allDocsTotalBadge').innerText = `${allDocumentsGlobal.length} ملفات`;
     }
 
     async function uploadCompanyDocument() {
@@ -1196,7 +1242,7 @@
       if (!error) {
         const { data: urlData } = db.storage.from('documents').getPublicUrl(fileName);
         await db.from('company_documents').insert([{ company_id: selectedCompanyId, document_name: customName, file_url: urlData.publicUrl }]);
-        showToast("تمت الأرشفة بنجاح 📁");
+        showToast("تمت الأرشفة السحابية بنجاح 📁");
         document.getElementById('docCustomName').value = '';
         document.getElementById('selectedFileNameLabel').innerText = 'اختر الملف من الجهاز 📁';
         loadData(); openDocVault();
@@ -1213,13 +1259,13 @@
       const { data: docs } = await db.from('company_documents').select('*').eq('company_id', comp_id).order('created_at', { ascending: false });
       document.getElementById('vaultDocsCount').innerText = docs ? docs.length : 0;
       document.getElementById('companyDocsList').innerHTML = docs && docs.length > 0 ? docs.map(d => `
-        <div style="background: var(--bg-color); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+        <div style="background: var(--bg-color); padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
           <div>
-            <p style="font-size: 13px; font-weight: 900;">📄 ${d.document_name}</p>
+            <p style="font-size: 12px; font-weight: 900;">📄 ${d.document_name}</p>
           </div>
-          <a href="${d.file_url}" target="_blank" class="btn-ghost" style="text-decoration: none; padding: 6px 12px;">عرض</a>
+          <a href="${d.file_url}" target="_blank" class="btn-subtle" style="text-decoration: none; padding: 6px 12px;">عرض</a>
         </div>
-      `).join('') : '<p style="font-size:12px; color:var(--text-muted); text-align:center;">لا توجد ملفات مؤرشفة</p>';
+      `).join('') : '<p style="font-size:11px; color:var(--text-muted); text-align:center;">لا توجد ملفات مؤرشفة لهذه الشركة</p>';
     }
 
     function openWhatsAppQuickModal(txId) {
@@ -1267,17 +1313,17 @@
     function renderAuditLogs() {
       const logs = JSON.parse(localStorage.getItem('sys_audit_logs') || '[]');
       document.getElementById('auditLogsContainer').innerHTML = logs.map(l => `
-        <div style="background: var(--card-elevated); padding: 12px; border-radius: var(--radius-sm);">
-          <b style="color:var(--gold); font-size:12px;">${l.action}</b>
-          <p style="font-size:12px; color:#FFF; margin-top:4px;">${l.details}</p>
+        <div style="background: var(--surface-color); padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+          <b style="color:var(--gold); font-size:11px;">${l.action}</b>
+          <p style="font-size:11px; color:#FFF; margin-top:2px;">${l.details}</p>
         </div>
-      `).join('') || '<p style="text-align:center; color:var(--text-muted);">لا حركات مسجلة</p>';
+      `).join('') || '<p style="text-align:center; color:var(--text-muted); font-size:11px;">لا حركات مسجلة</p>';
     }
     function exportJSONBackup() {
       const blob = new Blob([JSON.stringify({ localStorageData: { ...localStorage }, companies, transactions: allTransactionsGlobal }, null, 2)], { type: 'application/json' });
       const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.setAttribute('download', `Backup_${Date.now()}.json`);
       document.body.appendChild(link); link.click(); document.body.removeChild(link);
-      showToast("تم تنزيل النسخة");
+      showToast("تم تنزيل النسخة الاحتياطية");
     }
 
     loadSettings();
