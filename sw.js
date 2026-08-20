@@ -1,15 +1,14 @@
 self.addEventListener('install', (e) => {
-  e.waitUntil(
-    caches.open('office-sys-v1').then((cache) => {
-      return cache.addAll(['./index.html']);
-    })
-  );
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (e) => {
+  e.waitUntil(clients.claim());
 });
 
 self.addEventListener('fetch', (e) => {
+  // جلب التحديث الجديد من الإنترنت مباشرة، وإذا كان الهاتف مقطوعاً من الإنترنت يفتح من الذاكرة
   e.respondWith(
-    caches.match(e.request).then((response) => {
-      return response || fetch(e.request);
-    })
+    fetch(e.request).catch(() => caches.match(e.request))
   );
 });
