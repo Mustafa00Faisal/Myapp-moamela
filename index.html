@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>نظام إدارة المعاملات المؤسسية - النسخة التنفيذية الخارقة</title>
+  <title>نظام إدارة المعاملات المؤسسية</title>
   
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#070A12">
@@ -149,7 +149,6 @@
     }
     .btn-subtle:active { filter: brightness(1.2); }
 
-    /* شريط الفلاتر السريع الفوري */
     .filter-chips {
       display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; margin-bottom: 16px;
     }
@@ -229,15 +228,6 @@
     #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
     main { max-width: 500px; margin: 0 auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
-
-    .chart-box {
-      position: relative;
-      height: 160px;
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
   </style>
 </head>
 <body>
@@ -284,17 +274,22 @@
   <main>
     <!-- قسم التتبع والعمليات -->
     <div id="tab-tracking" class="tab-section active">
-      <div class="exec-card" style="padding: 16px 20px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <span style="font-size: 13px; font-weight: 800; color: var(--text-muted);">تحليل المعاملات الجارية</span>
-          <span id="activeCountBadge" class="num-font" style="font-size: 11px; font-weight: 900; color: var(--gold); background: rgba(245, 158, 11, 0.1); padding: 3px 10px; border-radius: 20px;">0 نشطة</span>
+      
+      <!-- لوحة القيادة التنفيذية الحديثة -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="exec-card" style="padding: 16px; gap: 6px;">
+          <span style="font-size: 11px; font-weight: 700; color: var(--text-muted);">المعاملات النشطة</span>
+          <h2 id="dashActiveCount" class="num-font" style="font-size: 24px; font-weight: 900; color: var(--blue);">0</h2>
+          <span style="font-size: 10px; color: var(--text-muted);">تحت المتابعة الميدانية</span>
         </div>
-        <div class="chart-box">
-          <canvas id="statusChart"></canvas>
+        <div class="exec-card" style="padding: 16px; gap: 6px;">
+          <span style="font-size: 11px; font-weight: 700; color: var(--text-muted);">المعاملات المنجزة</span>
+          <h2 id="dashCompletedCount" class="num-font" style="font-size: 24px; font-weight: 900; color: var(--emerald);">0</h2>
+          <span style="font-size: 10px; color: var(--text-muted);">محفوظة في الأرشيف</span>
         </div>
       </div>
 
-      <div class="search-wrapper">
+      <div class="search-wrapper" style="margin-top: 4px;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
         <input id="globalSearchInput" type="text" placeholder="بحث فوري باسم الشركة أو المعاملة..." oninput="handleGlobalSearch(this.value)">
       </div>
@@ -308,7 +303,7 @@
         <div onclick="setFilter('ready', this)" class="chip">جاهزة</div>
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 4px;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
         <button onclick="openSheet('newTxModal')" class="btn-action-gold">+ استلام معاملة</button>
         <button onclick="openSheet('newCompanyModal')" class="btn-action-outline">+ تسجيل شركة</button>
       </div>
@@ -324,6 +319,7 @@
       <section style="margin-top: 4px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
           <span style="font-size: 13px; font-weight: 800; color: var(--text-muted);">سجل التتبع الميداني</span>
+          <span id="activeCountBadge" class="num-font" style="font-size: 11px; font-weight: 900; color: var(--gold);">0 نشطة</span>
         </div>
         <div id="activeTransactionsList" style="display: flex; flex-direction: column; gap: 16px;"></div>
       </section>
@@ -545,7 +541,7 @@
     </div>
   </div>
 
-  <!-- إدارة الشركة (حذف الشركة وأرشيفها) -->
+  <!-- إدارة الشركة -->
   <div id="companyManagementModal" class="sheet-overlay">
     <div class="sheet-panel">
       <div class="sheet-handle"></div>
@@ -686,14 +682,10 @@
     let allTransactionsGlobal = [];
     let allDocumentsGlobal = [];
     let toastTimeout = null;
-    let statsChartInstance = null;
 
     const companyIconSVG = `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 21h18M5 21V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14M9 9h6M9 13h6M9 17h6"/></svg>`;
 
     document.getElementById('headerDateDisplay').innerText = new Date().toLocaleDateString('ar-IQ', { day: 'numeric', month: 'long' });
-
-    Chart.defaults.color = '#9CA3AF';
-    Chart.defaults.font.family = "'Tajawal', sans-serif";
 
     function showToast(msg, icon = "✨") {
       const t = document.getElementById('toast');
@@ -778,12 +770,14 @@
         activeTransactions = allTransactionsGlobal.filter(t => t.status === 'in_progress');
         completedTransactions = allTransactionsGlobal.filter(t => t.status === 'completed');
         
+        document.getElementById('dashActiveCount').innerText = activeTransactions.length;
+        document.getElementById('dashCompletedCount').innerText = completedTransactions.length;
         document.getElementById('activeCountBadge').innerText = `${activeTransactions.length} نشطة`;
+        
         renderActive();
         renderCompletedArchive();
         renderAccounts(allTransactionsGlobal);
         updateSmartRadarAlerts();
-        renderDashboard();
         
         const { data: docs } = await db.from('company_documents').select('*, companies(name)').order('created_at', { ascending: false });
         allDocumentsGlobal = docs || [];
@@ -791,44 +785,8 @@
     }
     
     function renderDashboard() {
-      let activeCount = 0, pendingCount = 0, objectionCount = 0, readyCount = 0;
-      
-      activeTransactions.forEach(tx => {
-        let hist = getStepHistory(tx.id);
-        let latestStatus = hist.length > 0 ? hist[hist.length - 1].status : 'active';
-        
-        if (latestStatus === 'active') activeCount++;
-        else if (latestStatus === 'pending') pendingCount++;
-        else if (latestStatus === 'objection') objectionCount++;
-        else if (latestStatus === 'ready') readyCount++;
-      });
-      
-      const ctx = document.getElementById('statusChart').getContext('2d');
-      if (statsChartInstance) statsChartInstance.destroy();
-      
-      statsChartInstance = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: ['مستمرة', 'نواقص', 'معترضة', 'جاهزة'],
-          datasets: [{
-            data: [activeCount, pendingCount, objectionCount, readyCount],
-            backgroundColor: ['#3B82F6', '#F59E0B', '#EF4444', '#10B981'],
-            borderWidth: 0,
-            hoverOffset: 4
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'right',
-              labels: { font: { family: "'Tajawal', sans-serif", size: 11 }, color: '#F3F4F6' }
-            }
-          },
-          cutout: '72%'
-        }
-      });
+      document.getElementById('dashActiveCount').innerText = activeTransactions.length;
+      document.getElementById('dashCompletedCount').innerText = completedTransactions.length;
     }
 
     function handleGlobalSearch(val) {
