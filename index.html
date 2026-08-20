@@ -53,7 +53,6 @@
 
     .num-font { font-family: 'Plus Jakarta Sans', sans-serif; }
 
-    /* إعادة تصميم المدخلات لتكون أكثر عصرية ونظافة */
     .modern-input {
       background: var(--surface-color);
       border: 1px solid var(--border-subtle);
@@ -72,7 +71,6 @@
       box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.12);
     }
 
-    /* شريط البحث المطور */
     .search-wrapper {
       background: var(--surface-color);
       border: 1px solid var(--border-subtle);
@@ -90,7 +88,6 @@
     }
     .search-wrapper svg { position: absolute; right: 16px; color: var(--text-muted); width: 18px; height: 18px; }
 
-    /* بطاقات النظام بأسلوب عائم ونظيف */
     .exec-card {
       background: var(--surface-color);
       border: 1px solid var(--border-subtle);
@@ -102,9 +99,7 @@
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
       transition: all 0.2s ease;
     }
-    .exec-card:active { transform: scale(0.99); }
 
-    /* أزرار العمليات التنفيذية */
     .btn-action-gold {
       background: var(--gold-gradient);
       color: #000;
@@ -154,7 +149,6 @@
     }
     .btn-subtle:active { filter: brightness(1.2); }
 
-    /* شريط التنقل السفلي المطور (Floating Island Dock) */
     .dock-bar-wrapper {
       position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
       width: 92%; max-width: 480px; z-index: 100;
@@ -179,7 +173,6 @@
     .dock-tab.active { background: var(--surface-elevated); color: var(--text-main); }
     .dock-tab.active svg { color: var(--gold); stroke-width: 2.5; }
 
-    /* رأس الصفحة التنفيذي */
     header {
       position: sticky; top: 0; z-index: 50;
       background: rgba(9, 13, 22, 0.85); backdrop-filter: blur(15px);
@@ -194,7 +187,6 @@
       font-weight: 900; font-size: 16px; color: var(--gold);
     }
 
-    /* النوافذ المنبثقة (Bottom Sheets) */
     .sheet-overlay {
       position: fixed; inset: 0;
       background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
@@ -216,7 +208,6 @@
     .tab-section.active { display: flex; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* التنبيه العائم (Toast) */
     #toast {
       position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
       background: var(--surface-elevated); border: 1px solid var(--border-subtle);
@@ -228,14 +219,6 @@
 
     main { max-width: 500px; margin: 0 auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
 
-    @media print {
-      body * { visibility: hidden; }
-      body { background-color: #FFF !important; }
-      .sheet-panel { background: #FFF !important; box-shadow: none !important; padding: 0 !important; }
-      #printableWeeklyArea, #printableWeeklyArea *, #printableCustomArea, #printableCustomArea *, #printableArea, #printableArea * { visibility: visible; color: #000 !important; }
-      #printableWeeklyArea, #printableCustomArea, #printableArea { position: absolute; left: 0; top: 0; width: 100%; background: #fff; padding: 20px; font-family: 'Tajawal', sans-serif; border: none !important; }
-    }
-    
     .chart-box {
       position: relative;
       height: 160px;
@@ -248,7 +231,7 @@
 </head>
 <body>
 
-  <!-- شاشة الدخول السحابي -->
+  <!-- شاشة الدخول -->
   <div id="authOverlay" style="position: fixed; inset: 0; background: var(--bg-color); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 24px;">
     <div style="width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 28px;">
       <div style="text-align: center;">
@@ -271,7 +254,6 @@
     <span id="toastMsg">تم الإجراء</span>
   </div>
 
-  <!-- رأس الصفحة التنفيذي المطور -->
   <header>
     <div style="display: flex; align-items: center; gap: 12px;">
       <div class="user-avatar">م</div>
@@ -291,8 +273,6 @@
   <main>
     <!-- قسم التتبع والعمليات -->
     <div id="tab-tracking" class="tab-section active">
-      
-      <!-- بطاقة إحصائيات بصرية عصرية -->
       <div class="exec-card" style="padding: 16px 20px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
           <span style="font-size: 13px; font-weight: 800; color: var(--text-muted);">حالة المعاملات الحالية</span>
@@ -315,7 +295,7 @@
 
       <section style="margin-top: 4px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <span style="font-size: 13px; font-weight: 800; color: var(--text-muted);">الشركات المسجلة</span>
+          <span style="font-size: 13px; font-weight: 800; color: var(--text-muted);">الشركات المسجلة (اضغط لإدارة الشركة)</span>
           <span id="companiesCount" class="num-font" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">0</span>
         </div>
         <div id="companiesList" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none;"></div>
@@ -352,10 +332,16 @@
       <div id="accountsList" style="display: flex; flex-direction: column; gap: 12px;"></div>
     </div>
 
-    <!-- قسم الأرشيف والمكتبة -->
+    <!-- قسم الأرشيف والمكتبة (شامل أرشيف المعاملات المنجزة) -->
     <div id="tab-archive" class="tab-section">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-        <h3 style="font-size: 18px; font-weight: 900;">الأرشيف السحابي</h3>
+        <h3 style="font-size: 18px; font-weight: 900;">أرشيف المعاملات المنجزة</h3>
+        <span id="completedTxCountBadge" class="num-font" style="font-size: 13px; font-weight: 800; color: var(--emerald);">0 منجزة</span>
+      </div>
+      <div id="completedTransactionsList" style="display: flex; flex-direction: column; gap: 14px; margin-top: 6px;"></div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px; margin-bottom: 4px;">
+        <h3 style="font-size: 18px; font-weight: 900;">أرشيف مستندات الشركات</h3>
         <span id="allDocsTotalBadge" class="num-font" style="font-size: 13px; font-weight: 800; color: var(--text-muted);">0 ملفات</span>
       </div>
       <div class="search-wrapper" style="margin-top: 4px;">
@@ -388,7 +374,7 @@
     </div>
   </main>
 
-  <!-- شريط التنقل السفلي المطور -->
+  <!-- شريط التنقل السفلي -->
   <div class="dock-bar-wrapper">
     <nav class="dock-bar">
       <button onclick="switchTab('tracking')" id="nav-tracking" class="dock-tab active">
@@ -414,7 +400,7 @@
     </nav>
   </div>
 
-  <!-- ================= النوافذ المنبثقة المحسنة ================= -->
+  <!-- ================= النوافذ المنبثقة ================= -->
 
   <!-- نافذة تفاصيل المعاملة -->
   <div id="transactionDetailsModal" class="sheet-overlay">
@@ -458,11 +444,12 @@
         <button onclick="openWhatsAppQuickModal(currentDetailTxId); closeSheet('transactionDetailsModal');" class="btn-action-outline" style="padding: 12px;">مراسلة واتساب</button>
         <button onclick="completeTx(currentDetailTxId); closeSheet('transactionDetailsModal');" class="btn-action-outline" style="color: var(--emerald); border-color: rgba(16,185,129,0.3); padding: 12px;">إنجاز العمل ✅</button>
       </div>
+      <button onclick="deleteTx(currentDetailTxId); closeSheet('transactionDetailsModal');" class="btn-subtle" style="width: 100%; margin-bottom: 10px; color: var(--danger); border-color: rgba(239,68,68,0.3);">حذف المعاملة نهائياً 🗑️</button>
       <button onclick="closeSheet('transactionDetailsModal')" class="btn-subtle" style="width: 100%;">إغلاق</button>
     </div>
   </div>
 
-  <!-- محرك تحديث المسار (دائرتان فقط مع تحديث يدوي) -->
+  <!-- محرك تحديث المسار -->
   <div id="advancedStepModal" class="sheet-overlay">
     <div class="sheet-panel">
       <div class="sheet-handle"></div>
@@ -538,6 +525,20 @@
     </div>
   </div>
 
+  <!-- نافذة إدارة الشركة المحددة (حذف الشركة) -->
+  <div id="companyManagementModal" class="sheet-overlay">
+    <div class="sheet-panel">
+      <div class="sheet-handle"></div>
+      <h3 id="mgmtCompTitle" style="font-size: 20px; font-weight: 900; margin-bottom: 16px;">إدارة الشركة</h3>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">يمكنك فتح أرشيف هذه الشركة أو حذفها نهائياً من النظام.</p>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <button onclick="openDocVaultFromMgmt()" class="btn-action-outline">📁 فتح أرشيف مستندات الشركة</button>
+        <button onclick="deleteCompany(selectedCompanyId)" class="btn-subtle" style="color: var(--danger); border-color: rgba(239,68,68,0.3);">🗑️ حذف الشركة نهائياً</button>
+        <button onclick="closeSheet('companyManagementModal')" class="btn-subtle" style="margin-top: 10px;">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
   <!-- واتساب الآلي -->
   <div id="whatsappQuickModal" class="sheet-overlay">
     <div class="sheet-panel">
@@ -555,7 +556,7 @@
     </div>
   </div>
 
-  <!-- الأرشيف السحابي -->
+  <!-- الأرشيف السحابي للمستندات -->
   <div id="docVaultModal" class="sheet-overlay">
     <div class="sheet-panel">
       <div class="sheet-handle"></div>
@@ -660,6 +661,7 @@
 
     let companies = [];
     let activeTransactions = [];
+    let completedTransactions = [];
     let allTransactionsGlobal = [];
     let allDocumentsGlobal = [];
     let toastTimeout = null;
@@ -692,7 +694,7 @@
       if(targetNav) targetNav.classList.add('active');
 
       if (t === 'alerts') updateSmartRadarAlerts();
-      if (t === 'archive') renderArchiveLibrary('');
+      if (t === 'archive') { renderArchiveLibrary(''); renderCompletedArchive(); }
       if (t === 'finance') renderAccounts(allTransactionsGlobal);
       if (t === 'tracking') renderDashboard();
       
@@ -753,9 +755,11 @@
         const { data: txData } = await db.from('transactions').select(`*, companies(name), transaction_checklists(*)`).order('created_at', { ascending: false });
         allTransactionsGlobal = txData || [];
         activeTransactions = allTransactionsGlobal.filter(t => t.status === 'in_progress');
+        completedTransactions = allTransactionsGlobal.filter(t => t.status === 'completed');
         
         document.getElementById('activeCountBadge').innerText = `${activeTransactions.length} نشطة`;
         renderActive();
+        renderCompletedArchive();
         renderAccounts(allTransactionsGlobal);
         updateSmartRadarAlerts();
         renderDashboard();
@@ -820,17 +824,46 @@
 
       filtered.forEach(c => {
         list.innerHTML += `
-          <div onclick="selectCompany('${c.id}', '${c.name}')" style="background: var(--surface-color); border: 1px solid var(--border-subtle); border-radius: var(--radius-btn); padding: 12px 16px; min-width: 150px; display: flex; align-items: center; gap: 12px; cursor: pointer;">
+          <div onclick="openCompanyManagement('${c.id}', '${c.name}')" style="background: var(--surface-color); border: 1px solid var(--border-subtle); border-radius: var(--radius-btn); padding: 12px 16px; min-width: 150px; display: flex; align-items: center; gap: 12px; cursor: pointer;">
             <div style="width: 32px; height: 32px; border-radius: 8px; background: var(--surface-elevated); border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: center; color: var(--gold); flex-shrink: 0;">
               ${companyIconSVG}
             </div>
             <div style="overflow: hidden;">
               <p style="font-size: 13px; font-weight: 900; color: #FFF; white-space: nowrap; max-width: 100px; overflow: hidden; text-overflow: ellipsis;">${c.name}</p>
-              <p style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">الأرشيف</p>
+              <p style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">إدارة وحذف</p>
             </div>
           </div>`;
         select.innerHTML += `<option value="${c.id}">${c.name}</option>`;
       });
+    }
+
+    function openCompanyManagement(id, name) {
+      selectedCompanyId = id;
+      selectedCompanyName = name;
+      document.getElementById('mgmtCompTitle').innerText = `إدارة شركة: ${name}`;
+      openSheet('companyManagementModal');
+    }
+
+    function openDocVaultFromMgmt() {
+      closeSheet('companyManagementModal');
+      openDocVault();
+    }
+
+    async function deleteCompany(compId) {
+      if (!confirm(`هل أنت متأكد من حذف شركة (${selectedCompanyName})؟ سيتم حذف جميع المعاملات والمستندات التابعة لها نهائياً.`)) return;
+      
+      // حذف المستندات والمعاملات أولاً ثم الشركة
+      await db.from('company_documents').delete().eq('company_id', compId);
+      await db.from('transactions').delete().eq('company_id', compId);
+      const { error } = await db.from('companies').delete().eq('id', compId);
+      
+      if (!error) {
+        showToast("تم حذف الشركة بنجاح 🗑️");
+        closeSheet('companyManagementModal');
+        loadData();
+      } else {
+        showToast("فشل الحذف، قد توجد ارتباطات", "❌");
+      }
     }
 
     function renderActive() {
@@ -902,9 +935,41 @@
                 <div style="width: ${progressPercent}%; height: 100%; background: var(--gold); border-radius: 10px;"></div>
               </div>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                <button onclick="openWhatsAppQuickModal('${tx.id}')" class="btn-subtle">مراسلة واتساب</button>
-                <button onclick="completeTx('${tx.id}')" class="btn-subtle" style="color: var(--emerald);">إنجاز كلي</button>
+                <button onclick="openWhatsAppQuickModal('${tx.id}')" class="btn-subtle">مراسلة</button>
+                <button onclick="completeTx('${tx.id}')" class="btn-subtle" style="color: var(--emerald);">إنجاز</button>
               </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // أرشيف المعاملات المنجزة
+    function renderCompletedArchive() {
+      const container = document.getElementById('completedTransactionsList');
+      document.getElementById('completedTxCountBadge').innerText = `${completedTransactions.length} منجزة`;
+
+      if (completedTransactions.length === 0) {
+        container.innerHTML = `<div class="exec-card" style="text-align: center; color: var(--text-muted); font-size: 13px;">لا توجد معاملات منجزة في الأرشيف</div>`;
+        return;
+      }
+
+      container.innerHTML = completedTransactions.map(tx => {
+        const fee = Number(tx.fee_iqd) || 0;
+        const dateStr = tx.completed_at ? new Date(tx.completed_at).toLocaleDateString('ar-IQ') : 'مؤرشف';
+        return `
+          <div class="exec-card" style="opacity: 0.9;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 13px; font-weight: 900; color: var(--emerald);">✅ منجزة (${dateStr})</span>
+              <span class="num-font" style="font-size: 13px; font-weight: 900; color: var(--gold);">${fee.toLocaleString('ar-IQ')} د.ع</span>
+            </div>
+            <div>
+              <p style="font-size: 15px; font-weight: 900; color: #FFF;">${tx.transaction_type}</p>
+              <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">الشركة: ${tx.companies?.name || 'غير معروفة'}</p>
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 4px;">
+              <button onclick="reopenTx('${tx.id}')" class="btn-subtle" style="flex: 1; font-size: 11px;">إعادة تنشيط 🔄</button>
+              <button onclick="deleteTx('${tx.id}')" class="btn-subtle" style="color: var(--danger); border-color: rgba(239,68,68,0.3); font-size: 11px;">حذف 🗑️</button>
             </div>
           </div>
         `;
@@ -1043,7 +1108,25 @@
     async function completeTx(id) { 
       await db.from('transactions').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', id); 
       pushStepHistory(id, { dept: 'الإنجاز النهائي', stage: 'تسليم المعاملة', status: 'ready', note: 'تم إنجاز وتسليم العمل كلياً', time: new Date().toISOString() });
-      showToast("تم إنجاز المعاملة كلياً ✅"); loadData(); 
+      showToast("تم إنجاز المعاملة ونقلها للأرشيف ✅"); loadData(); 
+    }
+
+    async function reopenTx(id) {
+      await db.from('transactions').update({ status: 'in_progress' }).eq('id', id);
+      showToast("تم إعادة تنشيط المعاملة إلى قيد المراجعة 🔄");
+      loadData();
+    }
+
+    async function deleteTx(id) {
+      if (!confirm("هل أنت متأكد من حذف هذه المعاملة نهائياً؟")) return;
+      await db.from('transaction_checklists').delete().eq('transaction_id', id);
+      const { error } = await db.from('transactions').delete().eq('id', id);
+      if (!error) {
+        showToast("تم حذف المعاملة نهائياً 🗑️");
+        loadData();
+      } else {
+        showToast("فشل حذف المعاملة", "❌");
+      }
     }
 
     function openAddChecklistModal(txId) { targetTxIdForChecklist = txId; openSheet('addChecklistModal'); }
