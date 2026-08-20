@@ -7,7 +7,6 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  // جلب التحديث الجديد من الإنترنت مباشرة، وإذا كان الهاتف مقطوعاً من الإنترنت يفتح من الذاكرة
   e.respondWith(
     fetch(e.request).catch(() => caches.match(e.request))
   );
