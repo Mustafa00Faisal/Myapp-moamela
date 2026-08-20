@@ -190,6 +190,15 @@
       #printableWeeklyArea, #printableWeeklyArea *, #printableCustomArea, #printableCustomArea *, #printableArea, #printableArea * { visibility: visible; color: #000 !important; }
       #printableWeeklyArea, #printableCustomArea, #printableArea { position: absolute; left: 0; top: 0; width: 100%; background: #fff; padding: 20px; font-family: 'Tajawal', sans-serif; border: none !important; }
     }
+    
+    .chart-container {
+      position: relative;
+      height: 180px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
   </style>
 </head>
 <body>
@@ -222,7 +231,7 @@
     <div style="display: flex; align-items: center; gap: 12px;">
       <div class="avatar-logo">M</div>
       <div>
-        <h1 style="font-size: 16px; font-weight: 900;">مصطفى فيصل</h1>
+        <h1 style="font-size: 16px; font-weight: 900;">إدارة العمليات</h1>
         <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px;">
           <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--emerald);"></span>
           <span style="font-size: 11px; color: var(--text-muted); font-weight: 700;">النظام السحابي متصل</span>
@@ -237,6 +246,15 @@
   <main>
     <!-- نظام 1: التتبع المعاملاتي المتقدم -->
     <div id="tab-tracking" class="tab-section active">
+      
+      <!-- لوحة القيادة البصرية (الجديدة) -->
+      <div class="bento-card" style="padding: 16px; margin-bottom: -8px;">
+        <h3 style="font-size: 14px; font-weight: 900; color: var(--text-muted); margin-bottom: 12px; text-align: center;">إحصائيات المعاملات الجارية</h3>
+        <div class="chart-container">
+          <canvas id="statusChart"></canvas>
+        </div>
+      </div>
+
       <div class="search-block">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
         <input id="globalSearchInput" type="text" placeholder="بحث باسم الشركة أو المعاملة..." oninput="handleGlobalSearch(this.value)">
@@ -397,28 +415,23 @@
     </div>
   </div>
 
-  <!-- محرك تحديث المسار المتقدم (بديل النوافذ السطحية) -->
+  <!-- محرك تحديث المسار المتقدم (مخصص لدائرتين فقط مع إدخال يدوي) -->
   <div id="advancedStepModal" class="sheet-overlay">
     <div class="sheet-content">
       <div class="sheet-drag"></div>
       <h3 style="font-size: 20px; font-weight: 900; margin-bottom: 20px;">محرك التتبع الميداني المتقدم</h3>
       <div style="display: flex; flex-direction: column; gap: 16px;">
         <div>
-          <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px;">الدائرة الرسمية الرئيسية</label>
+          <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px;">الدائرة الرسمية</label>
           <select id="advDeptSelect" class="editorial-input" style="color: #FFF; background: var(--bg-color);">
             <option value="دائرة مسجل الشركات">دائرة مسجل الشركات</option>
             <option value="دائرة الاستيراد">دائرة الاستيراد</option>
-            <option value="الهيئة العامة للضرائب">الهيئة العامة للضرائب</option>
-            <option value="دائرة التنمية الصناعية">دائرة التنمية الصناعية</option>
-            <option value="كاتب العدل">كاتب العدل</option>
-            <option value="وزارة العمل والشؤون الاجتماعية">وزارة العمل والشؤون الاجتماعية</option>
-            <option value="أخرى (جهة خارجية)">أخرى (جهة خارجية)</option>
           </select>
         </div>
 
         <div>
-          <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px;">المحطة أو الشعبة الفرعية</label>
-          <input id="advStageInput" type="text" placeholder="مثال: الشعبة القانونية / التدقيق المالي / توقيع المدير" class="editorial-input">
+          <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px;">المحطة أو الشعبة الفرعية (تحديث يدوي)</label>
+          <input id="advStageInput" type="text" placeholder="اكتب اسم المحطة الحالية (مثال: التدقيق، الواردة...)" class="editorial-input">
         </div>
 
         <div>
@@ -598,10 +611,17 @@
     let allTransactionsGlobal = [];
     let allDocumentsGlobal = [];
     let toastTimeout = null;
+    
+    // متغير الرسوم البيانية
+    let statsChartInstance = null;
 
     const companyIconSVG = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 21h18M5 21V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14M9 9h6M9 13h6M9 17h6"/></svg>`;
 
     document.getElementById('headerDateDisplay').innerText = new Date().toLocaleDateString('ar-IQ', { day: 'numeric', month: 'long' });
+
+    // إعدادات مكتبة الرسم البياني للوضع المظلم
+    Chart.defaults.color = '#8A8F98';
+    Chart.defaults.font.family = "'Tajawal', sans-serif";
 
     function showToast(msg, icon = "✨") {
       const t = document.getElementById('toast');
@@ -625,6 +645,7 @@
       if (t === 'alerts') updateSmartRadarAlerts();
       if (t === 'archive') renderArchiveLibrary('');
       if (t === 'finance') renderAccounts(allTransactionsGlobal);
+      if (t === 'tracking') renderDashboard();
       
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -688,10 +709,61 @@
         renderActive();
         renderAccounts(allTransactionsGlobal);
         updateSmartRadarAlerts();
+        renderDashboard(); // رسم اللوحة البيانية
         
         const { data: docs } = await db.from('company_documents').select('*, companies(name)').order('created_at', { ascending: false });
         allDocumentsGlobal = docs || [];
       } catch (err) { console.error(err); }
+    }
+    
+    // دالة إنشاء اللوحة البيانية (Dashboard)
+    function renderDashboard() {
+      let activeCount = 0, pendingCount = 0, objectionCount = 0, readyCount = 0;
+      
+      activeTransactions.forEach(tx => {
+        let hist = getStepHistory(tx.id);
+        let latestStatus = hist.length > 0 ? hist[hist.length - 1].status : 'active';
+        
+        if (latestStatus === 'active') activeCount++;
+        else if (latestStatus === 'pending') pendingCount++;
+        else if (latestStatus === 'objection') objectionCount++;
+        else if (latestStatus === 'ready') readyCount++;
+      });
+      
+      const ctx = document.getElementById('statusChart').getContext('2d');
+      
+      if (statsChartInstance) {
+        statsChartInstance.destroy();
+      }
+      
+      statsChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['مستمرة', 'بانتظار نقص', 'معترضة', 'جاهزة'],
+          datasets: [{
+            data: [activeCount, pendingCount, objectionCount, readyCount],
+            backgroundColor: [
+              '#3B82F6', // أزرق - مستمرة
+              '#F59E0B', // برتقالي - بانتظار نقص
+              '#F43F5E', // أحمر - معترضة
+              '#10B981'  // أخضر - جاهزة
+            ],
+            borderWidth: 0,
+            hoverOffset: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: { font: { family: "'Tajawal', sans-serif", size: 12 }, color: '#FFF' }
+            }
+          },
+          cutout: '75%'
+        }
+      });
     }
 
     function handleGlobalSearch(val) {
@@ -767,7 +839,7 @@
 
               <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid var(--border-color); padding-top: 16px; margin-bottom: 16px;">
                 <div>
-                  <p style="font-size: 11px; color: var(--text-muted);">الأتعاب المعلقة</p>
+                  <p style="font-size: 11px; color: var(--text-muted);">الأتعاب الكلية</p>
                   <p class="num-font" style="font-size: 16px; font-weight: 900; color: var(--gold);">${fee.toLocaleString('ar-IQ')} د.ع</p>
                 </div>
               </div>
@@ -851,7 +923,7 @@
       openSheet('transactionDetailsModal');
     };
 
-    // إدارة محرك التتبع المتقدم (Modal)
+    // إدارة محرك التتبع المتقدم (التحديث اليدوي)
     function openAdvancedStepModal(txId) {
       currentDetailTxId = txId;
       const tx = allTransactionsGlobal.find(t => t.id === txId);
@@ -878,7 +950,7 @@
       await db.from('transactions').update({ current_location_step: dept }).eq('id', currentDetailTxId);
 
       closeSheet('advancedStepModal');
-      showToast("تم تحديث المحطة الهندسية بنجاح 🚀");
+      showToast("تم تحديث المحطة الميدانية بنجاح 🚀");
       loadData();
       openTransactionFullDetails(currentDetailTxId);
     }
@@ -1175,8 +1247,8 @@
       const comp = targetTxForWA.companies?.name || 'العميل';
       const txName = targetTxForWA.transaction_type;
       let hist = getStepHistory(targetTxForWA.id);
-      let latest = hist.length > 0 ? hist[hist.length - 1] : { dept: targetTxForWA.current_location_step || 'مسجل الشركات' };
-      const office = localStorage.getItem('office_name') || 'إدارة المراجعات';
+      let latest = hist.length > 0 ? hist[hist.length - 1] : { dept: targetTxForWA.current_location_step || 'دائرة مسجل الشركات' };
+      const office = localStorage.getItem('office_name') || 'إدارة العمليات';
 
       let msg = "";
       if (type === 'status') msg = `السادة *${comp}* المحترمون،\n\nنحيطكم علماً بأن معاملتكم (*${txName}*) متواجدة حالياً في: 📍 *${latest.dept}* (${latest.stage || ''}).\n\nتحياتنا،\n_${office}_`;
