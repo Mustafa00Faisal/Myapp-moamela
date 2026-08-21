@@ -3,645 +3,523 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- تم حذف أمر إجبار الواجهة البيضاء بالكامل -->
-    <title>إنجاز - لإدارة المعاملات</title>
+    <title>نظام إنجاز - النسخة الماسية</title>
+    <!-- خط تجوال للفخامة -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <!-- مكتبة الأيقونات -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- مكتبة Chart.js للرسوم البيانية -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- مكتبات التصميم والأيقونات -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <!-- مكتبة توليد الـ PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
     <style>
-        body { 
-            font-family: 'Cairo', sans-serif; 
-            background-color: #09090b; /* أسود عميق */
-            color: #f8fafc;
+        :root {
+            /* الألوان الماسية العميقة */
+            --bg-base: #05050A; /* أسود حالك */
+            --bg-surface: rgba(18, 18, 30, 0.65); /* زجاج داكن */
+            --text-primary: #FFFFFF;
+            --text-secondary: #8E9BB0;
+            
+            /* ألوان النيون والتدرجات الساحرة */
+            --neon-purple: #9D00FF;
+            --neon-blue: #00F0FF;
+            --neon-pink: #FF0055;
+            
+            --gradient-primary: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+            --gradient-card: linear-gradient(160deg, rgba(30, 20, 60, 0.8) 0%, rgba(10, 20, 40, 0.95) 100%);
+            
+            /* إطارات الزجاج */
+            --glass-border: rgba(255, 255, 255, 0.05);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        body.light-mode {
+            --bg-base: #F4F7FE;
+            --bg-surface: rgba(255, 255, 255, 0.7);
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --glass-border: rgba(0, 0, 0, 0.05);
+            --glass-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.05);
+            --gradient-card: linear-gradient(160deg, rgba(255,255,255,1) 0%, rgba(240,245,255,1) 100%);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Tajawal', sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
-        
-        /* الكروت الزجاجية الداكنة الراقية */
-        .glass-card {
-            background-color: #18181b; 
-            border-radius: 1.75rem;
-            border: 1px solid #27272a;
-            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            background-image: radial-gradient(circle at 50% 0%, rgba(157, 0, 255, 0.1), transparent 50%);
+            background-attachment: fixed;
+            transition: all 0.5s ease;
+            padding-bottom: 90px;
+        }
+
+        /* --- الهيدر الفخم --- */
+        header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 900;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        /* --- الرسم البياني (Line Chart) --- */
+        .chart-container {
+            margin: 20px;
+            padding: 20px;
+            background: var(--bg-surface);
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            backdrop-filter: blur(10px);
+            position: relative;
         }
         
-        /* التدرجات الفخمة */
-        .bg-gradient-finance {
-            background: linear-gradient(135deg, #4f46e5 0%, #9333ea 50%, #db2777 100%);
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
         }
-        
-        .text-gradient {
-            background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
+        .chart-title { font-weight: 700; font-size: 16px; }
+        .chart-total { font-weight: 900; font-size: 20px; color: var(--neon-blue); }
+
+        /* --- بوابات الدوائر (العزل التام) --- */
+        .gates-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            padding: 0 20px;
+            margin-top: 25px;
+        }
+
+        .gate-btn {
+            position: relative;
+            padding: 25px 15px;
+            border-radius: 20px;
+            background: var(--bg-surface);
+            border: 1px solid var(--glass-border);
+            text-align: center;
+            overflow: hidden;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .gate-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--gradient-primary);
+            opacity: 0.1;
+            z-index: 0;
+            transition: opacity 0.3s;
+        }
+
+        .gate-btn:active { transform: scale(0.95); }
+
+        .gate-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+            background: var(--gradient-primary);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        /* تنسيق مستطيلات الإدخال لتلائم الوضع الليلي بفخامة */
-        input, select, textarea {
-            background-color: #18181b !important;
-            color: #f8fafc !important;
-            border: 1px solid #3f3f46 !important;
-            transition: all 0.2s ease;
-        }
-        input:focus, select:focus, textarea:focus {
-            border-color: #818cf8 !important;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
-            outline: none !important;
+        .gate-text {
+            font-size: 15px;
+            font-weight: 900;
+            position: relative;
+            z-index: 1;
         }
 
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
-        
-        .modal-overlay {
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(6px);
+        /* --- كروت المعاملات الساحرة --- */
+        .section-title {
+            margin: 30px 20px 15px 20px;
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
         }
+
+        .cards-container {
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .magic-card-wrapper {
+            position: relative;
+            border-radius: 24px;
+            padding: 2px; /* مساحة الإطار المضيء */
+            background: var(--gradient-primary); /* الإطار المتدرج */
+            box-shadow: 0 0 20px rgba(157, 0, 255, 0.2);
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .magic-card-wrapper:active { transform: scale(0.98); }
+
+        /* حالة الركود المتلكئة */
+        .magic-card-wrapper.stagnant {
+            background: linear-gradient(135deg, var(--neon-pink), #FF8800);
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.3);
+        }
+
+        .magic-card {
+            background: var(--gradient-card);
+            border-radius: 22px;
+            padding: 20px;
+            height: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        .mc-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .mc-company { font-size: 20px; font-weight: 900; margin-bottom: 5px; }
+        .mc-lawyer { font-size: 14px; color: var(--neon-blue); display: flex; align-items: center; gap: 5px; }
+        .mc-fee { 
+            background: rgba(255,255,255,0.1); 
+            padding: 5px 12px; 
+            border-radius: 20px; 
+            font-weight: 900; 
+            font-size: 14px;
+            border: 1px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        .mc-details {
+            margin-top: 15px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .mc-station {
+            margin-top: 15px;
+            background: rgba(0,0,0,0.4);
+            padding: 12px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+        }
+        body.light-mode .mc-station { background: rgba(255,255,255,0.6); border: 1px solid var(--glass-border);}
+
+        .stagnant .mc-station {
+            color: var(--neon-pink);
+            background: rgba(255, 0, 85, 0.1);
+        }
+
+        /* --- النافذة المنبثقة السينمائية (Modal) --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px); /* تأثير الطمس القوي */
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-box {
+            background: var(--bg-surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            width: 90%;
+            padding: 30px 20px;
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* تأثير إضاءة داخل النافذة */
+        .modal-box::before {
+            content: '';
+            position: absolute;
+            top: -50px; left: -50px;
+            width: 150px; height: 150px;
+            background: var(--neon-purple);
+            filter: blur(80px);
+            opacity: 0.5;
+            z-index: 0;
+        }
+
+        .modal-overlay.active .modal-box {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-content-inner {
+            position: relative;
+            z-index: 1;
+        }
+
+        .m-title { font-size: 22px; font-weight: 900; margin-bottom: 20px; text-align: center; }
+
+        .custom-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 15px;
+            color: var(--text-primary);
+            font-size: 16px;
+            margin-bottom: 20px;
+            outline: none;
+            transition: border 0.3s;
+        }
+        body.light-mode .custom-input { background: rgba(255,255,255,0.8); }
+        
+        .custom-input:focus { border-color: var(--neon-blue); }
+
+        .modal-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .btn-magic {
+            padding: 15px;
+            border-radius: 15px;
+            border: none;
+            font-weight: 900;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            color: white;
+        }
+
+        .btn-save { background: var(--gradient-primary); grid-column: span 2; }
+        .btn-archive { background: rgba(0, 255, 136, 0.15); color: #00FF88; border: 1px solid rgba(0, 255, 136, 0.3); }
+        .btn-stagnant { background: rgba(255, 0, 85, 0.15); color: var(--neon-pink); border: 1px solid rgba(255, 0, 85, 0.3); }
+
+        /* --- الشريط السفلي --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: rgba(18, 18, 30, 0.85);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 10px 25px 10px;
+            z-index: 1000;
+        }
+        
+        body.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center;
+            color: var(--text-secondary); font-size: 12px; gap: 5px;
+        }
+        .nav-item.active { color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); }
+        .nav-item i { font-size: 22px; }
+
     </style>
 </head>
-<body class="pb-28">
+<body>
 
-    <main id="app-content" class="p-4 max-w-md mx-auto min-h-screen"></main>
+    <!-- Header -->
+    <header>
+        <div class="logo">إنجاز <i class="fa-solid fa-gem" style="font-size: 18px; color: var(--neon-blue);"></i></div>
+        <div style="font-size: 20px;">
+            <i class="fa-solid fa-circle-half-stroke" onclick="toggleTheme()" style="margin-right: 15px; cursor: pointer;"></i>
+            <i class="fa-solid fa-sliders"></i>
+        </div>
+    </header>
 
-    <!-- شريط التنقل السفلي الليلي -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-[#09090b]/95 backdrop-blur-md border-t border-zinc-800 pb-safe z-40">
-        <div class="max-w-md mx-auto flex justify-around items-center h-20 px-2" id="bottom-nav"></div>
-    </nav>
-
-    <!-- حاوية النافذة المنبثقة -->
-    <div id="modal-container" class="fixed inset-0 z-50 hidden items-center justify-center modal-overlay p-4 opacity-0 transition-opacity duration-300">
-        <div id="modal-content" class="bg-zinc-900 border border-zinc-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl transform scale-95 transition-transform duration-300 max-h-[90vh] overflow-y-auto"></div>
+    <!-- الرسم البياني (Line Chart) المضيء -->
+    <div class="chart-container">
+        <div class="chart-header">
+            <div class="chart-title">أتعاب الأسبوع</div>
+            <div class="chart-total">2,450,000 د.ع</div>
+        </div>
+        <canvas id="profitChart" height="120"></canvas>
     </div>
 
-    <!-- عنصر توليد الـ PDF -->
-    <div id="pdf-container" class="hidden"></div>
+    <!-- بوابات الدوائر المعزولة -->
+    <div class="gates-section">
+        <div class="gate-btn">
+            <div class="gate-icon"><i class="fa-solid fa-building-columns"></i></div>
+            <div class="gate-text">مسجل الشركات</div>
+        </div>
+        <div class="gate-btn">
+            <div class="gate-icon"><i class="fa-solid fa-ship"></i></div>
+            <div class="gate-text">الاستيراد والتصدير</div>
+        </div>
+    </div>
+
+    <!-- قسم المعاملات الجارية -->
+    <div class="section-title">
+        <span>المعاملات الجارية (ساحة العمليات)</span>
+    </div>
+
+    <div class="cards-container">
+        
+        <!-- الكرت الأول: سليم -->
+        <div class="magic-card-wrapper" onclick="openModal()">
+            <div class="magic-card">
+                <div class="mc-header">
+                    <div>
+                        <div class="mc-company">شركة إبهار المستقبل</div>
+                        <div class="mc-lawyer"><i class="fa-solid fa-user-tie"></i> المحامي: أحمد العبيدي</div>
+                    </div>
+                    <div class="mc-fee">500,000 د.ع</div>
+                </div>
+                <div class="mc-details">
+                    <i class="fa-solid fa-file-signature"></i> تصديق وثائق (مسجل الشركات)
+                </div>
+                <div class="mc-station">
+                    <i class="fa-solid fa-location-dot" style="color: var(--neon-blue);"></i>
+                    <span>قسم التدقيق - الموظف ياسر (منذ ساعتين)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- الكرت الثاني: راكد (متلكئ) -->
+        <div class="magic-card-wrapper stagnant" onclick="openModal()">
+            <div class="magic-card">
+                <div class="mc-header">
+                    <div>
+                        <div class="mc-company">شركة النوارس</div>
+                        <div class="mc-lawyer"><i class="fa-solid fa-user-tie"></i> المحامي: محمد سعد</div>
+                    </div>
+                    <div class="mc-fee">750,000 د.ع</div>
+                </div>
+                <div class="mc-details">
+                    <i class="fa-solid fa-file-invoice"></i> حسابات ختامية (الاستيراد والتصدير)
+                </div>
+                <div class="mc-station">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>تجاوزت 24 ساعة! - الضريبة (علي)</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- النافذة المنبثقة السينمائية -->
+    <div class="modal-overlay" id="cinematicModal" onclick="closeModal(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-content-inner">
+                <div class="m-title">تحديث المسار الدقيق</div>
+                
+                <label style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; display: block;">أين المعاملة الآن؟ (القسم والموظف)</label>
+                <input type="text" class="custom-input" value="قسم التدقيق - الموظف ياسر">
+                
+                <div class="modal-actions">
+                    <button class="btn-magic btn-save" onclick="closeModalDirect()"><i class="fa-solid fa-check"></i> تحديث وحفظ</button>
+                    <button class="btn-magic btn-archive"><i class="fa-solid fa-box-archive"></i> إنجاز للأرشيف</button>
+                    <button class="btn-magic btn-stagnant"><i class="fa-solid fa-bug"></i> بها نقص/متلكئة</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- الشريط السفلي -->
+    <div class="bottom-nav">
+        <div class="nav-item active"><i class="fa-solid fa-layer-group"></i><span>العمليات</span></div>
+        <div class="nav-item"><i class="fa-solid fa-building-shield"></i><span>الشركات</span></div>
+        <div class="nav-item"><i class="fa-solid fa-folder-open"></i><span>الأرشيف</span></div>
+        <div class="nav-item"><i class="fa-solid fa-file-invoice-dollar"></i><span>الحسابات</span></div>
+    </div>
 
     <script>
-        let appData = JSON.parse(localStorage.getItem('enjaz_data')) || {
-            lawyers: ['أ. محمد العبيدي', 'أ. أحمد الجبوري'],
-            companies: [
-                { name: 'شركة إبهار المستقبل', lawyer: 'أ. محمد العبيدي' },
-                { name: 'شركة أرض البيطرة', lawyer: 'أ. أحمد الجبوري' }
-            ],
-            transactions: [
-                { id: 1, company: 'شركة إبهار المستقبل', lawyer: 'أ. محمد العبيدي', type: 'تصديق وثائق', department: 'مسجل الشركات', fee: 25000, status: 'active', station: 'قسم التدقيق - أ. ياسر', timestamp: Date.now(), notes: '' }
-            ]
-        };
-
-        function saveData() {
-            localStorage.setItem('enjaz_data', JSON.stringify(appData));
-            renderContent();
-        }
-
-        const tabs = [
-            { id: 'dashboard', label: 'الرئيسية', icon: 'layout-grid' },
-            { id: 'new', label: 'معاملة', icon: 'plus-circle' },
-            { id: 'active', label: 'جارية', icon: 'loader' },
-            { id: 'stuck', label: 'متلكئة', icon: 'alert-triangle' },
-            { id: 'finance', label: 'تحاسب', icon: 'wallet' },
-            { id: 'archive', label: 'الأرشيف', icon: 'archive' },
-            { id: 'settings', label: 'إعدادات', icon: 'settings' }
-        ];
-
-        let currentTab = 'dashboard';
-
-        function renderNav() {
-            const navContainer = document.getElementById('bottom-nav');
-            navContainer.innerHTML = tabs.map(tab => `
-                <button onclick="switchTab('${tab.id}')" class="flex flex-col items-center justify-center w-full space-y-1 transition-all duration-300 ${currentTab === tab.id ? 'text-indigo-400 scale-105' : 'text-zinc-500 hover:text-zinc-300'}">
-                    <i data-lucide="${tab.icon}" class="w-6 h-6 ${currentTab === tab.id ? 'fill-indigo-900/50' : ''}"></i>
-                    <span class="text-[10px] font-bold">${tab.label}</span>
-                </button>
-            `).join('');
-            lucide.createIcons();
-        }
-
-        function switchTab(tabId) {
-            currentTab = tabId;
-            renderNav();
-            renderContent();
-            window.scrollTo(0,0);
-        }
-
-        function renderContent() {
-            const content = document.getElementById('app-content');
-            
-            if (currentTab === 'dashboard') {
-                const activeCount = appData.transactions.filter(t => t.status === 'active').length;
-                const stuckCount = appData.transactions.filter(t => t.status === 'stuck').length;
-                const completedTxs = appData.transactions.filter(t => t.status === 'completed');
-                const totalEarnings = completedTxs.reduce((sum, t) => sum + Number(t.fee), 0);
-                
-                content.innerHTML = `
-                    <div class="mb-6 flex items-center gap-3">
-                        <div class="bg-indigo-900/40 p-2.5 rounded-2xl border border-indigo-700/50 shadow-sm">
-                            <i data-lucide="layout-grid" class="text-indigo-400 w-7 h-7"></i>
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-extrabold text-white">الرئيسية</h1>
-                            <p class="text-xs text-zinc-400 font-bold">نظرة عامة على نشاطك المكتبي</p>
-                        </div>
-                    </div>
-
-                    <div class="bg-gradient-finance rounded-3xl p-6 text-white mb-5 shadow-lg">
-                        <div class="flex justify-between items-start mb-4">
-                            <h2 class="text-sm font-semibold opacity-90">أرباح هذا الأسبوع (لحد الآن)</h2>
-                            <i data-lucide="trending-up" class="w-5 h-5 opacity-90"></i>
-                        </div>
-                        <div class="text-4xl font-extrabold mb-1">${totalEarnings.toLocaleString()} <span class="text-lg opacity-80">د.ع</span></div>
-                        <p class="text-xs opacity-80 mt-2">الدورة الحالية: من الأحد إلى الخميس</p>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div onclick="manageLawyers()" class="glass-card p-5 flex flex-col justify-center active:scale-95 transition-transform cursor-pointer hover:border-indigo-500/50">
-                            <div class="bg-blue-900/30 w-11 h-11 rounded-2xl flex items-center justify-center mb-3">
-                                <i data-lucide="users" class="text-blue-400 w-5 h-5"></i>
-                            </div>
-                            <div class="text-2xl font-extrabold text-white">${appData.lawyers.length}</div>
-                            <div class="text-xs text-zinc-400 font-bold mt-1">محامون مسجلون</div>
-                        </div>
-
-                        <div onclick="manageCompanies()" class="glass-card p-5 flex flex-col justify-center active:scale-95 transition-transform cursor-pointer hover:border-purple-500/50">
-                            <div class="bg-purple-900/30 w-11 h-11 rounded-2xl flex items-center justify-center mb-3">
-                                <i data-lucide="building-2" class="text-purple-400 w-5 h-5"></i>
-                            </div>
-                            <div class="text-2xl font-extrabold text-white">${appData.companies.length}</div>
-                            <div class="text-xs text-zinc-400 font-bold mt-1">الشركات</div>
-                        </div>
-
-                        <div class="glass-card p-5 flex flex-col justify-center border-r-4 border-r-indigo-500">
-                            <div class="bg-indigo-900/30 w-11 h-11 rounded-2xl flex items-center justify-center mb-3">
-                                <i data-lucide="loader" class="text-indigo-400 w-5 h-5"></i>
-                            </div>
-                            <div class="text-2xl font-extrabold text-white">${activeCount}</div>
-                            <div class="text-xs text-zinc-400 font-bold mt-1">معاملات جارية</div>
-                        </div>
-
-                        <div class="glass-card p-5 flex flex-col justify-center border-r-4 border-r-rose-500">
-                            <div class="bg-rose-900/30 w-11 h-11 rounded-2xl flex items-center justify-center mb-3">
-                                <i data-lucide="alert-triangle" class="text-rose-400 w-5 h-5"></i>
-                            </div>
-                            <div class="text-2xl font-extrabold text-white">${stuckCount}</div>
-                            <div class="text-xs text-zinc-400 font-bold mt-1">معاملات متلكئة</div>
-                        </div>
-                    </div>
-                `;
-            } 
-            else if (currentTab === 'new') {
-                content.innerHTML = `
-                    <div class="mb-6">
-                        <h1 class="text-2xl font-extrabold text-white">إضافة معاملة</h1>
-                        <p class="text-xs text-zinc-400 font-bold">بدء مسار جديد لشركة</p>
-                    </div>
-                    <div class="glass-card p-6 space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold text-zinc-400 mb-2">اسم المحامي</label>
-                            <select id="new-lawyer" onchange="updateCompaniesList()" class="w-full rounded-xl p-3 text-sm font-semibold">
-                                <option value="">- اختر المحامي -</option>
-                                ${appData.lawyers.map(l => `<option value="${l}">${l}</option>`).join('')}
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-zinc-400 mb-2">الشركة</label>
-                            <select id="new-company" class="w-full rounded-xl p-3 text-sm font-semibold">
-                                <option value="">- اختر المحامي أولاً -</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-zinc-400 mb-2">الدائرة</label>
-                            <select id="new-dept" class="w-full rounded-xl p-3 text-sm font-semibold">
-                                <option value="مسجل الشركات">مسجل الشركات</option>
-                                <option value="الاستيراد والتصدير">الاستيراد والتصدير</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-zinc-400 mb-2">نوع المعاملة</label>
-                            <input type="text" id="new-type" placeholder="مثال: تصديق وثائق" class="w-full rounded-xl p-3 text-sm font-semibold">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-zinc-400 mb-2">الأتعاب (د.ع)</label>
-                            <input type="number" id="new-fee" placeholder="0" class="w-full rounded-xl p-3 text-sm font-semibold">
-                        </div>
-                        <button onclick="addTransaction()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-900/50 active:scale-95 transition-transform mt-6">
-                            بدء المعاملة
-                        </button>
-                    </div>
-                `;
-            }
-            else if (currentTab === 'active') {
-                const activeTx = appData.transactions.filter(t => t.status === 'active');
-                content.innerHTML = `
-                    <div class="mb-6">
-                        <h1 class="text-2xl font-extrabold text-white">المعاملات الجارية</h1>
-                        <p class="text-xs text-zinc-400 font-bold">تتبع مسار معاملاتك الميدانية</p>
-                    </div>
-                    <div class="space-y-4">
-                        ${activeTx.length === 0 ? '<div class="text-center text-zinc-500 mt-10 font-bold">لا توجد معاملات جارية حالياً</div>' : 
-                        activeTx.map(t => `
-                            <div onclick="openModal(${t.id})" class="glass-card p-5 active:scale-95 transition-transform duration-200 cursor-pointer border-r-4 border-r-indigo-500 relative">
-                                <div class="flex justify-between items-start mb-2">
-                                    <h3 class="font-extrabold text-lg text-white">${t.company}</h3>
-                                    <span class="bg-indigo-900/30 text-indigo-400 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-indigo-800">${t.department}</span>
-                                </div>
-                                <div class="text-sm mb-4 font-bold text-cyan-400">${t.type}</div>
-                                
-                                <div class="bg-zinc-900 p-3.5 rounded-2xl border border-zinc-800 flex items-center gap-3">
-                                    <div class="bg-zinc-800 shadow-sm p-2 rounded-xl border border-zinc-700">
-                                        <i data-lucide="map-pin" class="w-4 h-4 text-indigo-400"></i>
-                                    </div>
-                                    <div>
-                                        <div class="text-[10px] text-zinc-500 font-bold">المحطة الحالية</div>
-                                        <div class="text-sm font-bold text-zinc-100">${t.station}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            }
-            else if (currentTab === 'stuck') {
-                const stuckTx = appData.transactions.filter(t => t.status === 'stuck');
-                content.innerHTML = `
-                    <div class="mb-6">
-                        <h1 class="text-2xl font-extrabold text-white">المعاملات المتلكئة</h1>
-                        <p class="text-xs text-zinc-400 font-bold">المعاملات المتوقفة لوجود أخطاء</p>
-                    </div>
-                    <div class="space-y-4">
-                        ${stuckTx.length === 0 ? '<div class="text-center text-zinc-500 mt-10 font-bold">الحمدلله، لا يوجد تلكؤ!</div>' : 
-                        stuckTx.map(t => `
-                            <div class="glass-card p-5 border-r-4 border-r-rose-600">
-                                <h3 class="font-extrabold text-lg text-white">${t.company}</h3>
-                                <div class="text-sm font-bold text-rose-500 mb-3">${t.type}</div>
-                                <div class="bg-rose-950/30 p-3.5 rounded-2xl border border-rose-900/50 mb-4">
-                                    <div class="text-[10px] text-rose-400 font-bold">سبب التلكؤ:</div>
-                                    <div class="text-sm font-semibold text-white">${t.notes || 'لم يكتب سبب'}</div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button onclick="changeStatus(${t.id}, 'active')" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold py-3 rounded-xl transition-colors">
-                                        إعادة للعمل
-                                    </button>
-                                    <button onclick="notifyLawyer('${t.lawyer}', '${t.company}', '${t.notes}')" class="flex-1 bg-emerald-900/30 text-emerald-400 border border-emerald-800 hover:bg-emerald-900/50 text-xs font-bold py-3 rounded-xl flex items-center justify-center gap-1.5 transition-colors">
-                                        <i data-lucide="message-circle" class="w-4 h-4"></i> إبلاغ واتساب
-                                    </button>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            }
-            else if (currentTab === 'finance') {
-                const completed = appData.transactions.filter(t => t.status === 'completed');
-                const lawyerTotals = {};
-                completed.forEach(t => {
-                    if (!lawyerTotals[t.lawyer]) lawyerTotals[t.lawyer] = { total: 0, txs: [] };
-                    lawyerTotals[t.lawyer].total += Number(t.fee);
-                    lawyerTotals[t.lawyer].txs.push(t);
-                });
-
-                content.innerHTML = `
-                    <div class="mb-6">
-                        <h1 class="text-2xl font-extrabold text-white">التحاسب المالي</h1>
-                        <p class="text-xs text-zinc-400 font-bold">إغلاق دورة الخميس</p>
-                    </div>
-                    <div class="space-y-4">
-                        ${Object.keys(lawyerTotals).length === 0 ? '<div class="text-center text-zinc-500 mt-10 font-bold">لا توجد معاملات منجزة للتحاسب</div>' : 
-                        Object.keys(lawyerTotals).map(lawyer => `
-                            <div class="glass-card p-5">
-                                <div class="flex justify-between items-center mb-3">
-                                    <h3 class="font-extrabold text-lg text-white">${lawyer}</h3>
-                                    <div class="text-lg font-extrabold text-indigo-400">${lawyerTotals[lawyer].total.toLocaleString()} <span class="text-xs">د.ع</span></div>
-                                </div>
-                                <p class="text-xs text-zinc-400 font-bold mb-4">${lawyerTotals[lawyer].txs.length} معاملات منجزة</p>
-                                
-                                <button onclick="generatePDF('${lawyer}')" class="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors">
-                                    <i data-lucide="file-down" class="w-4 h-4"></i>
-                                    تنزيل تقرير PDF
-                                </button>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            }
-            else if (currentTab === 'archive') {
-                const archived = appData.transactions.filter(t => t.status === 'completed');
-                content.innerHTML = `
-                    <div class="mb-6">
-                        <h1 class="text-2xl font-extrabold text-white">الأرشيف</h1>
-                        <p class="text-xs text-zinc-400 font-bold">سجل المعاملات المنجزة</p>
-                    </div>
-                    <div class="space-y-3">
-                        ${archived.length === 0 ? '<div class="text-center text-zinc-500 mt-10 font-bold">الأرشيف فارغ</div>' : 
-                        archived.map(t => `
-                            <div class="glass-card p-4 flex justify-between items-center">
-                                <div>
-                                    <h3 class="font-bold text-white text-sm">${t.company}</h3>
-                                    <p class="text-xs text-indigo-400 font-bold">${t.type}</p>
-                                </div>
-                                <div class="text-[10px] text-emerald-400 font-extrabold bg-emerald-900/30 px-3 py-1 rounded-full border border-emerald-800">
-                                    منجزة
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            }
-            else if (currentTab === 'settings') {
-                content.innerHTML = `
-                    <div class="mb-6">
-                        <h1 class="text-2xl font-extrabold text-white">الإعدادات</h1>
-                    </div>
-                    <div class="glass-card p-5 space-y-4">
-                        <h3 class="text-zinc-400 font-bold text-sm mb-2">إدارة النظام</h3>
-                        <button onclick="factoryReset()" class="w-full bg-rose-900/30 text-rose-400 border border-rose-800/50 hover:bg-rose-900/50 font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors">
-                            <i data-lucide="trash-2" class="w-5 h-5"></i>
-                            تصفير أرباح الأسبوع
-                        </button>
-                    </div>
-                `;
-            }
-            
-            lucide.createIcons();
-        }
-
-        // --- النوافذ المنبثقة التفاعلية للمحامين والشركات والمعاملات ---
+        // إعداد الرسم البياني (Line Chart) المضيء
+        const ctx = document.getElementById('profitChart').getContext('2d');
         
-        function manageLawyers() {
-            let html = `
-                <div class="flex justify-between items-center mb-5">
-                    <h2 class="text-xl font-extrabold text-white">إدارة المحامين</h2>
-                    <button onclick="closeModal()" class="bg-zinc-800 p-2 rounded-full text-zinc-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-                </div>
-                
-                <div class="bg-zinc-800 p-3.5 rounded-2xl border border-zinc-700 mb-4 flex gap-2">
-                    <input type="text" id="new-lawyer-name" placeholder="اسم المحامي الجديد..." class="w-full rounded-xl p-2.5 text-sm font-semibold">
-                    <button onclick="addNewLawyer()" class="bg-indigo-600 text-white px-4 rounded-xl font-bold text-sm">إضافة</button>
-                </div>
+        // إنشاء تدرج لوني تحت الخط
+        let gradientFill = ctx.createLinearGradient(0, 0, 0, 150);
+        gradientFill.addColorStop(0, 'rgba(157, 0, 255, 0.5)'); // بنفسجي شفاف
+        gradientFill.addColorStop(1, 'rgba(0, 240, 255, 0.0)'); // أزرق مختفي
 
-                <div class="max-h-60 overflow-y-auto space-y-2 pr-1">
-                    ${appData.lawyers.map(l => `
-                        <div class="flex justify-between items-center bg-zinc-800 border border-zinc-700 p-3.5 rounded-2xl shadow-sm">
-                            <div class="font-bold text-sm text-white">${l}</div>
-                            <button onclick="deleteLawyer('${l}')" class="text-rose-400 bg-rose-900/30 border border-rose-900 hover:bg-rose-900/50 p-2 rounded-xl transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-            showModalHTML(html);
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'],
+                datasets: [{
+                    label: 'أتعاب الإنجاز',
+                    data: [200, 450, 300, 600, 400, 950], // أرقام وهمية للتجربة
+                    borderColor: '#00F0FF', // خط أزرق نيون
+                    borderWidth: 3,
+                    backgroundColor: gradientFill,
+                    fill: true,
+                    tension: 0.4, // انحناء الخطوط بنعومة
+                    pointBackgroundColor: '#9D00FF',
+                    pointBorderColor: '#FFF',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false, color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#8E9BB0' } },
+                    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { display: false } }
+                }
+            }
+        });
+
+        // تبديل الثيم
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
         }
 
-        function addNewLawyer() {
-            const val = document.getElementById('new-lawyer-name').value.trim();
-            if(val && !appData.lawyers.includes(val)) {
-                appData.lawyers.push(val);
-                saveData();
-                manageLawyers();
+        // النوافذ المنبثقة
+        function openModal() {
+            document.getElementById('cinematicModal').classList.add('active');
+            document.body.style.overflow = 'hidden'; // منع التمرير
+        }
+
+        function closeModal(e) {
+            if (e.target.classList.contains('modal-overlay')) {
+                document.getElementById('cinematicModal').classList.remove('active');
+                document.body.style.overflow = 'auto';
             }
         }
-
-        function deleteLawyer(name) {
-            if(confirm(`هل أنت متأكد من حذف ${name}؟`)) {
-                appData.lawyers = appData.lawyers.filter(l => l !== name);
-                saveData();
-                manageLawyers();
-            }
+        
+        function closeModalDirect() {
+            document.getElementById('cinematicModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
         }
-
-        function manageCompanies() {
-            let html = `
-                <div class="flex justify-between items-center mb-5">
-                    <h2 class="text-xl font-extrabold text-white">إدارة الشركات</h2>
-                    <button onclick="closeModal()" class="bg-zinc-800 p-2 rounded-full text-zinc-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-                </div>
-                
-                <div class="bg-zinc-800 p-4 rounded-2xl border border-zinc-700 mb-4 space-y-3">
-                    <select id="new-comp-lawyer" class="w-full rounded-xl p-3 text-sm font-semibold">
-                        <option value="">- اختر المحامي -</option>
-                        ${appData.lawyers.map(l => `<option value="${l}">${l}</option>`).join('')}
-                    </select>
-                    <div class="flex gap-2">
-                        <input type="text" id="new-comp-name" placeholder="اسم الشركة..." class="w-full rounded-xl p-3 text-sm font-semibold">
-                        <button onclick="addNewCompany()" class="bg-indigo-600 text-white px-4 rounded-xl font-bold text-sm">إضافة</button>
-                    </div>
-                </div>
-
-                <div class="max-h-60 overflow-y-auto space-y-2 pr-1">
-                    ${appData.companies.map(c => `
-                        <div class="flex justify-between items-center bg-zinc-800 border border-zinc-700 p-3.5 rounded-2xl shadow-sm">
-                            <div>
-                                <div class="font-bold text-sm text-white">${c.name}</div>
-                                <div class="text-[10px] text-zinc-400 font-bold">${c.lawyer}</div>
-                            </div>
-                            <button onclick="deleteCompany('${c.name}')" class="text-rose-400 bg-rose-900/30 border border-rose-900 hover:bg-rose-900/50 p-2 rounded-xl transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-            showModalHTML(html);
-        }
-
-        function addNewCompany() {
-            const lawyer = document.getElementById('new-comp-lawyer').value;
-            const name = document.getElementById('new-comp-name').value.trim();
-            if(lawyer && name) {
-                appData.companies.push({ name, lawyer });
-                saveData();
-                manageCompanies();
-            } else {
-                alert("يرجى اختيار المحامي وكتابة اسم الشركة");
-            }
-        }
-
-        function deleteCompany(name) {
-            if(confirm(`هل أنت متأكد من حذف ${name}؟`)) {
-                appData.companies = appData.companies.filter(c => c.name !== name);
-                saveData();
-                manageCompanies();
-            }
-        }
-
-        function updateCompaniesList() {
-            const lawyer = document.getElementById('new-lawyer').value;
-            const companySelect = document.getElementById('new-company');
-            const comps = appData.companies.filter(c => c.lawyer === lawyer);
-            companySelect.innerHTML = comps.length > 0 
-                ? comps.map(c => `<option value="${c.name}">${c.name}</option>`).join('')
-                : '<option value="">لا توجد شركات لهذا المحامي</option>';
-        }
-
-        function addTransaction() {
-            const lawyer = document.getElementById('new-lawyer').value;
-            const company = document.getElementById('new-company').value;
-            const dept = document.getElementById('new-dept').value;
-            const type = document.getElementById('new-type').value;
-            const fee = document.getElementById('new-fee').value;
-
-            if(!lawyer || !company || !type || !fee) {
-                alert('يرجى تعبئة جميع الحقول'); return;
-            }
-
-            appData.transactions.push({
-                id: Date.now(), company, lawyer, department: dept, type, fee, status: 'active', station: 'قيد الاستلام', timestamp: Date.now(), notes: ''
-            });
-            saveData();
-            switchTab('active');
-        }
-
-        function openModal(id) {
-            const tx = appData.transactions.find(t => t.id === id);
-            let html = `
-                <div class="flex justify-between items-center mb-5">
-                    <h2 class="text-xl font-extrabold text-white">إدارة المعاملة</h2>
-                    <button onclick="closeModal()" class="bg-zinc-800 p-2 rounded-full text-zinc-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-                </div>
-                
-                <div class="mb-5">
-                    <div class="text-xs text-zinc-500 font-bold mb-1">الشركة</div>
-                    <div class="font-extrabold text-lg text-indigo-400">${tx.company}</div>
-                </div>
-
-                <div class="space-y-4">
-                    <div class="bg-zinc-800 p-4 rounded-2xl border border-zinc-700">
-                        <label class="block text-xs font-bold text-zinc-400 mb-2">تحديث المحطة:</label>
-                        <div class="flex gap-2">
-                            <input type="text" id="update-station-val" value="${tx.station}" class="w-full rounded-xl p-3 text-sm font-semibold">
-                            <button onclick="updateStation(${tx.id})" class="bg-indigo-600 text-white px-4 rounded-xl font-bold text-sm">حفظ</button>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-rose-950/30 p-4 rounded-2xl border border-rose-900/50">
-                        <label class="block text-xs font-bold text-rose-400 mb-2">نقل للمتلكئة (اكتب السبب):</label>
-                        <div class="flex gap-2">
-                            <input type="text" id="stuck-reason-val" placeholder="المشكلة..." class="w-full rounded-xl p-3 text-sm font-semibold border-rose-900 focus:border-rose-500">
-                            <button onclick="moveToStuck(${tx.id})" class="bg-rose-600 text-white px-4 rounded-xl font-bold text-sm">نقل</button>
-                        </div>
-                    </div>
-
-                    <button onclick="changeStatus(${tx.id}, 'completed')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 mt-2 transition-colors">
-                        <i data-lucide="check-circle-2" class="w-5 h-5"></i>
-                        <span>إنجاز المعاملة نهائياً</span>
-                    </button>
-                </div>
-            `;
-            showModalHTML(html);
-        }
-
-        function showModalHTML(html) {
-            const modalContainer = document.getElementById('modal-container');
-            const modalContent = document.getElementById('modal-content');
-            modalContent.innerHTML = html;
-            
-            modalContainer.classList.remove('hidden');
-            modalContainer.classList.add('flex');
-            setTimeout(() => {
-                modalContainer.classList.remove('opacity-0');
-                modalContent.classList.remove('scale-95');
-            }, 10);
-            lucide.createIcons();
-        }
-
-        function closeModal() {
-            const modalContainer = document.getElementById('modal-container');
-            const modalContent = document.getElementById('modal-content');
-            
-            modalContainer.classList.add('opacity-0');
-            modalContent.classList.add('scale-95');
-            setTimeout(() => {
-                modalContainer.classList.add('hidden');
-                modalContainer.classList.remove('flex');
-            }, 300);
-        }
-
-        function updateStation(id) {
-            const val = document.getElementById('update-station-val').value;
-            const tx = appData.transactions.find(t => t.id === id);
-            tx.station = val;
-            tx.timestamp = Date.now();
-            saveData();
-            closeModal();
-        }
-
-        function moveToStuck(id) {
-            const val = document.getElementById('stuck-reason-val').value;
-            const tx = appData.transactions.find(t => t.id === id);
-            tx.status = 'stuck';
-            tx.notes = val;
-            saveData();
-            closeModal();
-        }
-
-        function changeStatus(id, newStatus) {
-            const tx = appData.transactions.find(t => t.id === id);
-            tx.status = newStatus;
-            if(newStatus === 'active') tx.notes = ''; 
-            saveData();
-            closeModal();
-        }
-
-        function notifyLawyer(lawyer, company, note) {
-            const text = encodeURIComponent(`مرحباً ${lawyer}،\nتوجد مشكلة في معاملة شركة (${company}).\nالسبب: ${note || 'يرجى التواصل'}.`);
-            window.open(`https://wa.me/?text=${text}`, '_blank');
-        }
-
-        function generatePDF(lawyerName) {
-            const txs = appData.transactions.filter(t => t.status === 'completed' && t.lawyer === lawyerName);
-            const total = txs.reduce((sum, t) => sum + Number(t.fee), 0);
-            
-            // تصميم فاتح مخصص لطباعة الـ PDF فقط
-            const pdfHTML = `
-                <div style="padding: 40px; font-family: 'Cairo', sans-serif; direction: rtl; text-align: right; background: white; color: #0f172a;">
-                    <h1 style="color: #4f46e5; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">كشف حساب - إنجاز</h1>
-                    <h3 style="margin-top: 20px;">المحامي: <strong>${lawyerName}</strong></h3>
-                    <p>التاريخ: ${new Date().toLocaleDateString('ar-IQ')}</p>
-                    
-                    <table style="width: 100%; margin-top: 30px; border-collapse: collapse;">
-                        <tr style="background: #f8fafc;">
-                            <th style="padding: 12px; border: 1px solid #cbd5e1;">الشركة</th>
-                            <th style="padding: 12px; border: 1px solid #cbd5e1;">المعاملة</th>
-                            <th style="padding: 12px; border: 1px solid #cbd5e1;">الأتعاب</th>
-                        </tr>
-                        ${txs.map(t => `
-                            <tr>
-                                <td style="padding: 12px; border: 1px solid #cbd5e1;">${t.company}</td>
-                                <td style="padding: 12px; border: 1px solid #cbd5e1;">${t.type}</td>
-                                <td style="padding: 12px; border: 1px solid #cbd5e1;">${t.fee} د.ع</td>
-                            </tr>
-                        `).join('')}
-                    </table>
-                    
-                    <h2 style="margin-top: 30px; background: linear-gradient(135deg, #4f46e5, #9333ea); color: white; padding: 15px; text-align: center; border-radius: 12px;">
-                        الإجمالي: ${total.toLocaleString()} دينار عراقي
-                    </h2>
-                </div>
-            `;
-            
-            const container = document.getElementById('pdf-container');
-            container.innerHTML = pdfHTML;
-            container.classList.remove('hidden');
-            
-            html2pdf().from(container).set({
-                margin: 1,
-                filename: `كشف_حساب_${lawyerName}.pdf`,
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-            }).save().then(() => {
-                container.classList.add('hidden');
-            });
-        }
-
-        function factoryReset() {
-            if(confirm('هل أنت متأكد من مسح جميع المعاملات وتصفير الأرباح؟ (هذا لن يمسح المحامين والشركات)')) {
-                appData.transactions = [];
-                saveData();
-                alert('تم التصفير بنجاح!');
-            }
-        }
-
-        renderNav();
-        renderContent();
     </script>
 </body>
 </html>
