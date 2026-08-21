@@ -3,626 +3,645 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>نظام إنجاز - النسخة الماسية المتكاملة</title>
-    <!-- خط تجوال للفخامة -->
+    <title>نظام إنجاز - النسخة النهائية الماسية</title>
+    <!-- الخطوط والأيقونات والمكتبات -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700;900&display=swap" rel="stylesheet">
-    <!-- مكتبة الأيقونات -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- مكتبة Chart.js للرسوم البيانية -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
+        /* --- المتغيرات والتصميم الفخم (CSS) --- */
         :root {
-            /* الألوان الماسية العميقة */
             --bg-base: #05050A; 
             --bg-surface: rgba(18, 18, 30, 0.65); 
             --text-primary: #FFFFFF;
             --text-secondary: #8E9BB0;
-            
-            /* ألوان النيون والتدرجات الساحرة */
             --neon-purple: #9D00FF;
             --neon-blue: #00F0FF;
             --neon-pink: #FF0055;
-            
             --gradient-primary: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
             --gradient-card: linear-gradient(160deg, rgba(30, 20, 60, 0.8) 0%, rgba(10, 20, 40, 0.95) 100%);
-            
-            /* إطارات الزجاج */
             --glass-border: rgba(255, 255, 255, 0.05);
             --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
         }
 
         body.light-mode {
-            --bg-base: #F4F7FE;
-            --bg-surface: rgba(255, 255, 255, 0.7);
-            --text-primary: #0F172A;
-            --text-secondary: #64748B;
-            --glass-border: rgba(0, 0, 0, 0.05);
-            --glass-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.05);
+            --bg-base: #F4F7FE; --bg-surface: rgba(255, 255, 255, 0.7);
+            --text-primary: #0F172A; --text-secondary: #64748B;
+            --glass-border: rgba(0, 0, 0, 0.05); --glass-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.05);
             --gradient-card: linear-gradient(160deg, rgba(255,255,255,1) 0%, rgba(240,245,255,1) 100%);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Tajawal', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-base); color: var(--text-primary); background-image: radial-gradient(circle at 50% 0%, rgba(157, 0, 255, 0.1), transparent 50%); background-attachment: fixed; padding-bottom: 90px; }
 
-        body {
-            background-color: var(--bg-base);
-            color: var(--text-primary);
-            background-image: radial-gradient(circle at 50% 0%, rgba(157, 0, 255, 0.1), transparent 50%);
-            background-attachment: fixed;
-            transition: all 0.5s ease;
-            padding-bottom: 90px;
-        }
+        /* الأقسام المخفية للتبديل (Routing) */
+        .page-view { display: none; animation: fadeIn 0.4s ease; }
+        .page-view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- الهيدر الفخم --- */
-        header {
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--glass-border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
+        /* الهيدر */
+        header { padding: 20px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(20px); border-bottom: 1px solid var(--glass-border); position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 28px; font-weight: 900; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        .logo {
-            font-size: 28px;
-            font-weight: 900;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: 1px;
-        }
-
-        /* --- الرسم البياني (Line Chart) --- */
-        .chart-container {
-            margin: 20px;
-            padding: 20px;
-            background: var(--bg-surface);
-            border-radius: 24px;
-            border: 1px solid var(--glass-border);
-            box-shadow: var(--glass-shadow);
-            backdrop-filter: blur(10px);
-            position: relative;
-        }
-        
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-        }
-
+        /* الرسم البياني والبوابات */
+        .chart-container { margin: 20px; padding: 20px; background: var(--bg-surface); border-radius: 24px; border: 1px solid var(--glass-border); backdrop-filter: blur(10px); }
+        .chart-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
         .chart-title { font-weight: 700; font-size: 16px; }
         .chart-total { font-weight: 900; font-size: 20px; color: var(--neon-blue); }
-
-        /* --- بوابات الدوائر (العزل التام) --- */
-        .gates-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            padding: 0 20px;
-            margin-top: 25px;
-        }
-
-        .gate-btn {
-            position: relative;
-            padding: 25px 15px;
-            border-radius: 20px;
-            background: var(--bg-surface);
-            border: 1px solid var(--glass-border);
-            text-align: center;
-            overflow: hidden;
-            cursor: pointer;
-            backdrop-filter: blur(10px);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .gate-btn::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: var(--gradient-primary);
-            opacity: 0.1;
-            z-index: 0;
-            transition: opacity 0.3s;
-        }
-
+        .gates-section { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; margin-top: 15px; margin-bottom: 15px;}
+        .gate-btn { position: relative; padding: 20px 10px; border-radius: 20px; background: var(--bg-surface); border: 1px solid var(--glass-border); text-align: center; cursor: pointer; backdrop-filter: blur(10px); transition: transform 0.2s;}
+        .gate-btn::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: var(--gradient-primary); opacity: 0.1; }
         .gate-btn:active { transform: scale(0.95); }
+        .gate-icon { font-size: 28px; margin-bottom: 10px; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .gate-text { font-size: 13px; font-weight: 900; position: relative; z-index: 1; }
 
-        .gate-icon {
-            font-size: 32px;
-            margin-bottom: 10px;
-            position: relative;
-            z-index: 1;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .gate-text {
-            font-size: 15px;
-            font-weight: 900;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* --- كروت المعاملات الساحرة --- */
-        .section-title {
-            margin: 30px 20px 15px 20px;
-            font-size: 18px;
-            font-weight: 700;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .cards-container {
-            padding: 0 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .magic-card-wrapper {
-            position: relative;
-            border-radius: 24px;
-            padding: 2px;
-            background: var(--gradient-primary);
-            box-shadow: 0 0 20px rgba(157, 0, 255, 0.2);
-            cursor: pointer;
-            transition: transform 0.3s;
-        }
-        
+        /* كروت المعاملات */
+        .section-title { margin: 20px 20px 15px 20px; font-size: 18px; font-weight: 700; display: flex; justify-content: space-between; align-items: center;}
+        .cards-container { padding: 0 20px; display: flex; flex-direction: column; gap: 15px; }
+        .magic-card-wrapper { position: relative; border-radius: 24px; padding: 2px; background: var(--gradient-primary); cursor: pointer; transition: transform 0.2s; }
         .magic-card-wrapper:active { transform: scale(0.98); }
-
-        .magic-card-wrapper.stagnant {
-            background: linear-gradient(135deg, var(--neon-pink), #FF8800);
-            box-shadow: 0 0 20px rgba(255, 0, 85, 0.3);
-        }
-
-        .magic-card {
-            background: var(--gradient-card);
-            border-radius: 22px;
-            padding: 20px;
-            height: 100%;
-            position: relative;
-            z-index: 1;
-        }
-
+        .magic-card-wrapper.stagnant { background: linear-gradient(135deg, var(--neon-pink), #FF8800); box-shadow: 0 0 20px rgba(255, 0, 85, 0.3); }
+        .magic-card { background: var(--gradient-card); border-radius: 22px; padding: 20px; position: relative; z-index: 1; }
         .mc-header { display: flex; justify-content: space-between; align-items: flex-start; }
-        .mc-company { font-size: 20px; font-weight: 900; margin-bottom: 5px; }
-        .mc-lawyer { font-size: 14px; color: var(--neon-blue); display: flex; align-items: center; gap: 5px; }
-        
-        .mc-fee { 
-            background: rgba(255,255,255,0.1); 
-            padding: 5px 12px; 
-            border-radius: 20px; 
-            font-weight: 900; 
-            font-size: 14px;
-            border: 1px solid rgba(255,255,255,0.2);
-            backdrop-filter: blur(5px);
-        }
-
-        .mc-details {
-            margin-top: 15px;
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-
-        .mc-station {
-            margin-top: 15px;
-            background: rgba(0,0,0,0.4);
-            padding: 12px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 13px;
-        }
-
+        .mc-company { font-size: 18px; font-weight: 900; margin-bottom: 5px; color: var(--text-primary);}
+        .mc-lawyer { font-size: 13px; color: var(--neon-blue); display: flex; align-items: center; gap: 5px; }
+        .mc-fee { background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 20px; font-weight: 900; font-size: 13px; border: 1px solid rgba(255,255,255,0.2); }
+        .mc-details { margin-top: 15px; font-size: 13px; color: var(--text-secondary); }
+        .mc-station { margin-top: 15px; background: rgba(0,0,0,0.4); padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 10px; font-size: 12px; }
         body.light-mode .mc-station { background: rgba(255,255,255,0.6); border: 1px solid var(--glass-border);}
+        .stagnant .mc-station { color: var(--neon-pink); background: rgba(255, 0, 85, 0.1); font-weight: 900;}
 
-        .stagnant .mc-station {
-            color: var(--neon-pink);
-            background: rgba(255, 0, 85, 0.1);
-        }
+        /* النوافذ المنبثقة (Modals) */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 2000; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: all 0.3s ease; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-box { background: var(--bg-surface); border: 1px solid var(--glass-border); border-radius: 30px; width: 95%; max-height: 85vh; padding: 25px 20px; transform: scale(0.9) translateY(20px); transition: all 0.3s ease; box-shadow: 0 25px 50px rgba(0,0,0,0.5); overflow-y: auto; }
+        .modal-overlay.active .modal-box { transform: scale(1) translateY(0); }
+        .m-title { font-size: 20px; font-weight: 900; margin-bottom: 20px; text-align: center; color: var(--text-primary); }
 
-        /* --- النافذة المنبثقة السينمائية (Modal) --- */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            z-index: 2000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .modal-box {
-            background: var(--bg-surface);
-            border: 1px solid var(--glass-border);
-            border-radius: 30px;
-            width: 95%;
-            max-height: 90vh;
-            padding: 30px 20px;
-            transform: scale(0.9) translateY(20px);
-            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.1);
-            position: relative;
-            overflow-y: auto;
-        }
-
-        .modal-box::before {
-            content: '';
-            position: absolute;
-            top: -50px; left: -50px;
-            width: 150px; height: 150px;
-            background: var(--neon-purple);
-            filter: blur(80px);
-            opacity: 0.5;
-            z-index: 0;
-        }
-
-        .modal-overlay.active .modal-box {
-            transform: scale(1) translateY(0);
-        }
-
-        .modal-content-inner {
-            position: relative;
-            z-index: 1;
-        }
-
-        .m-title { font-size: 22px; font-weight: 900; margin-bottom: 25px; text-align: center; }
-
-        /* --- السجل الزمني (Timeline) داخل النافذة --- */
-        .timeline-container {
-            margin-bottom: 25px;
-            padding-right: 15px;
-            border-right: 2px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .timeline-item {
-            position: relative;
-            margin-bottom: 15px;
-            padding-right: 20px;
-        }
-
-        .timeline-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .timeline-dot {
-            position: absolute;
-            right: -21px;
-            top: 5px;
-            width: 12px;
-            height: 12px;
-            background: var(--neon-blue);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--neon-blue);
-        }
-
-        .timeline-date {
-            font-size: 11px;
-            color: var(--neon-purple);
-            font-weight: 700;
-            margin-bottom: 3px;
-        }
-
-        .timeline-text {
-            font-size: 13px;
-            color: var(--text-primary);
-            background: rgba(255, 255, 255, 0.05);
-            padding: 8px 12px;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        body.light-mode .timeline-text { 
-            background: rgba(0,0,0,0.05); 
-            border: 1px solid rgba(0,0,0,0.1); 
-        }
-        
-        body.light-mode .timeline-container { 
-            border-right: 2px solid rgba(0, 0, 0, 0.1); 
-        }
-
-        /* --- الحقول المنفصلة (القسم / الموظف) --- */
-        .input-label { 
-            font-size: 13px; 
-            color: var(--text-secondary); 
-            margin-bottom: 8px; 
-            display: block; 
-            font-weight: 700;
-        }
-        
-        .custom-input {
-            width: 100%;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 15px;
-            border-radius: 15px;
-            color: var(--text-primary);
-            font-size: 15px;
-            margin-bottom: 20px;
-            outline: none;
-            transition: border 0.3s;
-        }
-
+        /* حقول الإدخال */
+        .input-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; display: block; font-weight: 700;}
+        .custom-input { width: 100%; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 15px; color: var(--text-primary); font-size: 14px; margin-bottom: 15px; outline: none; transition: border 0.3s; }
         body.light-mode .custom-input { background: rgba(255,255,255,0.8); }
         .custom-input:focus { border-color: var(--neon-blue); }
+        select.custom-input { appearance: none; }
 
-        /* --- أزرار الإجراءات داخل النافذة --- */
-        .modal-actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .btn-magic {
-            padding: 15px;
-            border-radius: 15px;
-            border: none;
-            font-weight: 900;
-            font-size: 15px;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            color: white;
-            transition: transform 0.2s;
-        }
-        
+        /* الأزرار داخل النوافذ */
+        .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;}
+        .btn-magic { padding: 15px; border-radius: 15px; border: none; font-weight: 900; font-size: 14px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; color: white; transition: transform 0.2s; }
         .btn-magic:active { transform: scale(0.95); }
+        .btn-save { background: var(--gradient-primary); grid-column: span 2; }
+        .btn-archive { background: rgba(0, 255, 136, 0.15); color: #00FF88; border: 1px solid rgba(0, 255, 136, 0.3); }
+        .btn-stagnant { background: rgba(255, 0, 85, 0.15); color: var(--neon-pink); border: 1px solid rgba(255, 0, 85, 0.3); }
+        .btn-close { background: rgba(255, 255, 255, 0.1); color: var(--text-primary); grid-column: span 2;}
 
-        .btn-save { 
-            background: var(--gradient-primary); 
-            grid-column: span 2; 
-            box-shadow: 0 5px 15px rgba(0, 240, 255, 0.3); 
-        }
-        
-        .btn-archive { 
-            background: rgba(0, 255, 136, 0.15); 
-            color: #00FF88; 
-            border: 1px solid rgba(0, 255, 136, 0.3); 
-        }
-        
-        .btn-stagnant { 
-            background: rgba(255, 0, 85, 0.15); 
-            color: var(--neon-pink); 
-            border: 1px solid rgba(255, 0, 85, 0.3); 
-        }
+        /* السجل الزمني (Timeline) */
+        .timeline-container { margin-bottom: 20px; padding-right: 15px; border-right: 2px solid rgba(255, 255, 255, 0.1); max-height: 200px; overflow-y: auto;}
+        .timeline-item { position: relative; margin-bottom: 15px; padding-right: 20px; }
+        .timeline-dot { position: absolute; right: -21px; top: 5px; width: 12px; height: 12px; background: var(--neon-blue); border-radius: 50%; box-shadow: 0 0 10px var(--neon-blue); }
+        .timeline-date { font-size: 11px; color: var(--neon-purple); font-weight: 700; margin-bottom: 3px; }
+        .timeline-text { font-size: 12px; color: var(--text-primary); background: rgba(255, 255, 255, 0.05); padding: 8px 12px; border-radius: 10px; }
 
-        /* --- الشريط السفلي --- */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: rgba(18, 18, 30, 0.85);
-            backdrop-filter: blur(20px);
-            border-top: 1px solid var(--glass-border);
-            display: flex;
-            justify-content: space-around;
-            padding: 15px 10px 25px 10px;
-            z-index: 1000;
-        }
+        /* القوائم والأرشيف */
+        .list-item { background: var(--bg-surface); border: 1px solid var(--glass-border); padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;}
         
+        /* تنبيه الخميس (Thursday Alert) */
+        .thursday-alert { position: fixed; top: 20px; left: 20px; right: 20px; background: linear-gradient(135deg, #FFB020, #FF3366); padding: 20px; border-radius: 20px; z-index: 3000; display: flex; align-items: center; gap: 15px; box-shadow: 0 15px 30px rgba(255, 51, 102, 0.4); transform: translateY(-150%); transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .thursday-alert.show { transform: translateY(0); }
+        .thursday-text { color: white; flex-grow: 1; }
+        .thursday-text h4 { margin-bottom: 5px; font-weight: 900;}
+        .btn-alert { background: white; color: #FF3366; padding: 10px 15px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 13px;}
+
+        /* شريط التنقل السفلي */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(18, 18, 30, 0.85); backdrop-filter: blur(20px); border-top: 1px solid var(--glass-border); display: flex; justify-content: space-around; padding: 15px 10px 20px 10px; z-index: 1000; }
         body.light-mode .bottom-nav { background: rgba(255,255,255,0.9); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-secondary); font-size: 11px; gap: 5px; cursor: pointer; transition: 0.3s;}
+        .nav-item.active { color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); }
+        .nav-item i { font-size: 20px; }
 
-        .nav-item {
-            display: flex; flex-direction: column; align-items: center;
-            color: var(--text-secondary); font-size: 12px; gap: 5px; cursor: pointer;
+        /* --- تخصيص الطباعة لملف الـ PDF --- */
+        @media print {
+            body * { visibility: hidden; }
+            #print-area, #print-area * { visibility: visible; }
+            #print-area { position: absolute; left: 0; top: 0; width: 100%; color: black !important; background: white !important; padding: 20px;}
+            .bottom-nav, header, .modal-overlay { display: none !important; }
         }
         
-        .nav-item.active { color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); }
-        .nav-item i { font-size: 22px; }
-
+        #print-area { display: none; background: white; color: black; padding: 30px; }
     </style>
 </head>
 <body>
 
-    <!-- Header -->
+    <!-- الهيدر -->
     <header>
         <div class="logo">إنجاز <i class="fa-solid fa-gem" style="font-size: 18px; color: var(--neon-blue);"></i></div>
         <div style="font-size: 20px;">
-            <i class="fa-solid fa-circle-half-stroke" onclick="toggleTheme()" style="margin-right: 15px; cursor: pointer;"></i>
-            <i class="fa-solid fa-sliders"></i>
+            <i class="fa-solid fa-circle-half-stroke" onclick="app.toggleTheme()" style="margin-right: 15px; cursor: pointer;"></i>
         </div>
     </header>
 
-    <!-- الرسم البياني (Line Chart) المضيء -->
-    <div class="chart-container">
-        <div class="chart-header">
-            <div class="chart-title">أتعاب الأسبوع</div>
-            <div class="chart-total">2,450,000 د.ع</div>
+    <!-- تنبيه الخميس المحاسبي -->
+    <div class="thursday-alert" id="thursdayAlert">
+        <i class="fa-solid fa-file-invoice-dollar" style="font-size: 30px; color: white;"></i>
+        <div class="thursday-text">
+            <h4>إجراء إلزامي</h4>
+            <p style="font-size: 12px; opacity: 0.9;">قم بتصدير كشوفات حساب المحامين.</p>
         </div>
-        <canvas id="profitChart" height="120"></canvas>
+        <div class="btn-alert" onclick="app.generatePDFReport()">تصدير PDF</div>
     </div>
 
-    <!-- بوابات الدوائر المعزولة -->
-    <div class="gates-section">
-        <div class="gate-btn">
-            <div class="gate-icon"><i class="fa-solid fa-building-columns"></i></div>
-            <div class="gate-text">مسجل الشركات</div>
+    <!-- منطقة الطباعة المخفية (PDF) -->
+    <div id="print-area">
+        <div style="text-align: center; border-bottom: 2px solid black; padding-bottom: 10px; margin-bottom: 20px;">
+            <h2>كشف حساب وإنجاز معاملات</h2>
+            <p id="pdf-date"></p>
         </div>
-        <div class="gate-btn">
-            <div class="gate-icon"><i class="fa-solid fa-ship"></i></div>
-            <div class="gate-text">الاستيراد والتصدير</div>
+        <div style="margin-bottom: 20px; font-weight: bold;">
+            <p>المُصدر: <span id="pdf-issuer"></span></p>
+            <p>المهنة: <span id="pdf-role"></span></p>
+            <p>الموقع: <span id="pdf-location"></span></p>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px;" border="1">
+            <thead>
+                <tr style="background-color: #f2f2f2;">
+                    <th style="padding: 8px;">الشركة</th>
+                    <th style="padding: 8px;">المحامي</th>
+                    <th style="padding: 8px;">نوع المعاملة</th>
+                    <th style="padding: 8px;">الأتعاب</th>
+                </tr>
+            </thead>
+            <tbody id="pdf-table-body"></tbody>
+        </table>
+        <div style="text-align: left; font-weight: bold; font-size: 18px;">
+            الإجمالي: <span id="pdf-total">0</span> د.ع
+        </div>
+        <div style="margin-top: 30px; text-align: center;">
+            <div id="qrcode-container" style="display: inline-block; margin-bottom: 10px;"></div>
+            <p style="font-size: 12px;">وثيقة رسمية مصدقة ومحفوظة في النظام</p>
         </div>
     </div>
 
-    <!-- قسم المعاملات الجارية -->
-    <div class="section-title">
-        <span>المعاملات الجارية (ساحة العمليات)</span>
+    <!-- ==================== الصفحة 1: العمليات ==================== -->
+    <div id="page-operations" class="page-view active">
+        <div class="chart-container">
+            <div class="chart-header">
+                <div class="chart-title">أتعاب الأسبوع (المنجزة)</div>
+                <div class="chart-total" id="weekly-total">0 د.ع</div>
+            </div>
+            <canvas id="profitChart" height="120"></canvas>
+        </div>
+
+        <div class="gates-section">
+            <div class="gate-btn" onclick="app.openNewTxModal('مسجل الشركات')">
+                <div class="gate-icon"><i class="fa-solid fa-building-columns"></i></div>
+                <div class="gate-text">مسجل الشركات</div>
+            </div>
+            <div class="gate-btn" onclick="app.openNewTxModal('الاستيراد والتصدير')">
+                <div class="gate-icon"><i class="fa-solid fa-ship"></i></div>
+                <div class="gate-text">الاستيراد والتصدير</div>
+            </div>
+        </div>
+
+        <div class="section-title">
+            <span>المعاملات الجارية</span>
+            <span id="active-count" style="font-size: 14px; color: var(--neon-blue);">0</span>
+        </div>
+        <div class="cards-container" id="active-transactions-container">
+            <!-- تُولد الكروت هنا برمجياً -->
+        </div>
     </div>
 
-    <div class="cards-container">
+    <!-- ==================== الصفحة 2: القاعدة التأسيسية ==================== -->
+    <div id="page-directory" class="page-view">
+        <div class="section-title">إضافة محامي</div>
+        <div style="padding: 0 20px;">
+            <input type="text" id="new-lawyer-name" class="custom-input" placeholder="اسم المحامي (مثال: أحمد العبيدي)">
+            <button class="btn-magic btn-save" style="width: 100%; margin-bottom: 20px;" onclick="app.addLawyer()">حفظ المحامي</button>
+        </div>
+
+        <div class="section-title">إضافة شركة لمحامي</div>
+        <div style="padding: 0 20px;">
+            <select id="select-lawyer-for-company" class="custom-input"></select>
+            <input type="text" id="new-company-name" class="custom-input" placeholder="اسم الشركة">
+            <button class="btn-magic btn-save" style="width: 100%; margin-bottom: 20px;" onclick="app.addCompany()">حفظ الشركة</button>
+        </div>
         
-        <!-- الكرت الأول: سليم -->
-        <div class="magic-card-wrapper" onclick="openModal()">
-            <div class="magic-card">
-                <div class="mc-header">
-                    <div>
-                        <div class="mc-company">شركة إبهار المستقبل</div>
-                        <div class="mc-lawyer"><i class="fa-solid fa-user-tie"></i> المحامي: أحمد العبيدي</div>
-                    </div>
-                    <div class="mc-fee">500,000 د.ع</div>
-                </div>
-                <div class="mc-details">
-                    <i class="fa-solid fa-file-signature"></i> تصديق وثائق (مسجل الشركات)
-                </div>
-                <div class="mc-station">
-                    <i class="fa-solid fa-location-dot" style="color: var(--neon-blue);"></i>
-                    <span>قسم التدقيق - الموظف ياسر (منذ ساعتين)</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- الكرت الثاني: راكد (متلكئ) -->
-        <div class="magic-card-wrapper stagnant" onclick="openModal()">
-            <div class="magic-card">
-                <div class="mc-header">
-                    <div>
-                        <div class="mc-company">شركة النوارس</div>
-                        <div class="mc-lawyer"><i class="fa-solid fa-user-tie"></i> المحامي: محمد سعد</div>
-                    </div>
-                    <div class="mc-fee">750,000 د.ع</div>
-                </div>
-                <div class="mc-details">
-                    <i class="fa-solid fa-file-invoice"></i> حسابات ختامية (الاستيراد والتصدير)
-                </div>
-                <div class="mc-station">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                    <span>تجاوزت 24 ساعة! - الضريبة (علي)</span>
-                </div>
-            </div>
-        </div>
-
+        <div class="section-title">قائمة المحامين</div>
+        <div class="cards-container" id="lawyers-list"></div>
     </div>
 
-    <!-- النافذة المنبثقة السينمائية المحدثة -->
-    <div class="modal-overlay" id="cinematicModal" onclick="closeModal(event)">
-        <div class="modal-box" onclick="event.stopPropagation()">
-            <div class="modal-content-inner">
-                <div class="m-title">مسار وتحديث المعاملة</div>
-                
-                <!-- السجل الزمني (Timeline) -->
-                <div class="timeline-container">
-                    <div class="timeline-item">
-                        <div class="timeline-dot" style="background: var(--text-secondary); box-shadow: none;"></div>
-                        <div class="timeline-date">الأحد 10:00 صباحاً</div>
-                        <div class="timeline-text">قسم الحسابات - الموظف محمد</div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-dot"></div>
-                        <div class="timeline-date">اليوم 12:30 ظهراً (الحالي)</div>
-                        <div class="timeline-text">قسم التدقيق - الموظف ياسر</div>
-                    </div>
-                </div>
+    <!-- ==================== الصفحة 3: الأرشيف ==================== -->
+    <div id="page-archive" class="page-view">
+        <div class="section-title">أرشيف المعاملات المنجزة</div>
+        <div class="cards-container" id="archived-transactions-container"></div>
+    </div>
 
-                <!-- حقول الإدخال المنفصلة للتحديث -->
-                <label class="input-label">القسم / الدائرة الحالية</label>
-                <input type="text" class="custom-input" placeholder="مثال: قسم الحسابات">
-                
-                <label class="input-label">اسم الموظف المسؤول</label>
-                <input type="text" class="custom-input" placeholder="مثال: ياسر">
-                
-                <!-- الإجراءات -->
-                <div class="modal-actions">
-                    <button class="btn-magic btn-save" onclick="closeModalDirect()"><i class="fa-solid fa-check"></i> حفظ التحديث الجديد</button>
-                    <button class="btn-magic btn-archive"><i class="fa-solid fa-box-archive"></i> إنجاز للأرشيف</button>
-                    <button class="btn-magic btn-stagnant"><i class="fa-solid fa-bug"></i> بها نقص/متلكئة</button>
-                </div>
+    <!-- ==================== الصفحة 4: المالية والمتلكئة ==================== -->
+    <div id="page-finance" class="page-view">
+        <div class="section-title">المعاملات المتلكئة (بحاجة لتدخل)</div>
+        <div class="cards-container" id="issue-transactions-container"></div>
+        
+        <div class="section-title" style="margin-top: 40px;">إصدار كشف يدوي</div>
+        <div style="padding: 0 20px;">
+            <button class="btn-magic btn-save" style="width: 100%;" onclick="app.generatePDFReport()"><i class="fa-solid fa-print"></i> طباعة كشف الحساب الأسبوعي</button>
+        </div>
+    </div>
+
+    <!-- ==================== النوافذ المنبثقة (Modals) ==================== -->
+    
+    <!-- نافذة إضافة معاملة جديدة -->
+    <div class="modal-overlay" id="modal-new-tx" onclick="app.closeModal(event, 'modal-new-tx')">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="m-title">بدء معاملة <span id="new-tx-gate" style="color: var(--neon-blue);"></span></div>
+            <label class="input-label">اختر المحامي</label>
+            <select id="new-tx-lawyer" class="custom-input" onchange="app.filterCompaniesForTx()"></select>
+            <label class="input-label">اختر الشركة</label>
+            <select id="new-tx-company" class="custom-input"></select>
+            <label class="input-label">نوع المعاملة</label>
+            <input type="text" id="new-tx-type" class="custom-input" placeholder="مثال: تصديق وثائق">
+            <label class="input-label">الأتعاب (د.ع)</label>
+            <input type="number" id="new-tx-fee" class="custom-input" placeholder="مثال: 500000">
+            <div class="modal-actions">
+                <button class="btn-magic btn-save" onclick="app.saveNewTransaction()">إطلاق المعاملة</button>
+                <button class="btn-magic btn-close" onclick="app.closeModalDirect('modal-new-tx')">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة تحديث المسار (السينمائية) -->
+    <div class="modal-overlay" id="modal-update-tx" onclick="app.closeModal(event, 'modal-update-tx')">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="m-title">مسار وتحديث المعاملة</div>
+            <input type="hidden" id="upd-tx-id">
+            
+            <div class="timeline-container" id="tx-timeline">
+                <!-- يُولد السجل الزمني هنا -->
+            </div>
+
+            <label class="input-label">القسم / الدائرة الحالية</label>
+            <input type="text" id="upd-tx-dept" class="custom-input" placeholder="مثال: قسم الحسابات">
+            
+            <label class="input-label">اسم الموظف المسؤول</label>
+            <input type="text" id="upd-tx-emp" class="custom-input" placeholder="مثال: ياسر">
+            
+            <div class="modal-actions">
+                <button class="btn-magic btn-save" onclick="app.updateTransactionPath()"><i class="fa-solid fa-check"></i> حفظ التحديث</button>
+                <button class="btn-magic btn-archive" onclick="app.archiveTransaction()"><i class="fa-solid fa-box-archive"></i> إنجاز للأرشيف</button>
+                <button class="btn-magic btn-stagnant" onclick="app.flagTransaction()"><i class="fa-solid fa-bug"></i> متلكئة/نقص</button>
+                <button class="btn-magic btn-close" onclick="app.closeModalDirect('modal-update-tx')">إغلاق</button>
             </div>
         </div>
     </div>
 
     <!-- الشريط السفلي -->
     <div class="bottom-nav">
-        <div class="nav-item active"><i class="fa-solid fa-layer-group"></i><span>العمليات</span></div>
-        <div class="nav-item"><i class="fa-solid fa-building-shield"></i><span>الشركات</span></div>
-        <div class="nav-item"><i class="fa-solid fa-folder-open"></i><span>الأرشيف</span></div>
-        <div class="nav-item"><i class="fa-solid fa-file-invoice-dollar"></i><span>الحسابات</span></div>
+        <div class="nav-item active" onclick="app.switchTab('page-operations', this)"><i class="fa-solid fa-layer-group"></i><span>العمليات</span></div>
+        <div class="nav-item" onclick="app.switchTab('page-directory', this)"><i class="fa-solid fa-building-shield"></i><span>التأسيس</span></div>
+        <div class="nav-item" onclick="app.switchTab('page-archive', this)"><i class="fa-solid fa-folder-open"></i><span>الأرشيف</span></div>
+        <div class="nav-item" onclick="app.switchTab('page-finance', this)"><i class="fa-solid fa-file-invoice-dollar"></i><span>المالية</span></div>
     </div>
 
+    <!-- ==================== العقل البرمجي (JavaScript) ==================== -->
     <script>
-        // إعداد الرسم البياني (Line Chart) المضيء
-        const ctx = document.getElementById('profitChart').getContext('2d');
-        
-        // إنشاء تدرج لوني تحت الخط
-        let gradientFill = ctx.createLinearGradient(0, 0, 0, 150);
-        gradientFill.addColorStop(0, 'rgba(157, 0, 255, 0.5)'); 
-        gradientFill.addColorStop(1, 'rgba(0, 240, 255, 0.0)'); 
-
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'],
-                datasets: [{
-                    label: 'أتعاب الإنجاز',
-                    data: [200, 450, 300, 600, 400, 950], 
-                    borderColor: '#00F0FF', 
-                    borderWidth: 3,
-                    backgroundColor: gradientFill,
-                    fill: true,
-                    tension: 0.4, 
-                    pointBackgroundColor: '#9D00FF',
-                    pointBorderColor: '#FFF',
-                    pointBorderWidth: 2,
-                    pointRadius: 4,
-                    pointHoverRadius: 6
-                }]
+        const app = {
+            // بيانات المُعقب الشخصية لطباعة الكشوفات
+            settings: {
+                issuerName: "مصطفى فيصل عبود",
+                role: "معقب معاملات مجاز",
+                location: "بغداد، العراق"
             },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { grid: { display: false, color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#8E9BB0' } },
-                    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { display: false } }
-                }
-            }
-        });
+            
+            // قاعدة البيانات المحلية
+            db: {
+                lawyers: JSON.parse(localStorage.getItem('injaz_lawyers')) || [],
+                companies: JSON.parse(localStorage.getItem('injaz_companies')) || [],
+                transactions: JSON.parse(localStorage.getItem('injaz_transactions')) || [],
+                theme: localStorage.getItem('injaz_theme') || 'dark'
+            },
 
-        // تبديل الثيم
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
-        }
+            chartInstance: null,
+            currentGate: '',
 
-        // النوافذ المنبثقة
-        function openModal() {
-            document.getElementById('cinematicModal').classList.add('active');
-            document.body.style.overflow = 'hidden'; // منع التمرير
-        }
+            init() {
+                if (this.db.theme === 'light') document.body.classList.add('light-mode');
+                
+                this.checkThursdayAlert();
+                this.renderAll();
+                this.initChart();
+            },
 
-        function closeModal(e) {
-            if (e.target.classList.contains('modal-overlay')) {
-                document.getElementById('cinematicModal').classList.remove('active');
+            saveDB() {
+                localStorage.setItem('injaz_lawyers', JSON.stringify(this.db.lawyers));
+                localStorage.setItem('injaz_companies', JSON.stringify(this.db.companies));
+                localStorage.setItem('injaz_transactions', JSON.stringify(this.db.transactions));
+                this.renderAll();
+            },
+
+            // --- التنقل والواجهة ---
+            switchTab(pageId, element) {
+                document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
+                document.getElementById(pageId).classList.add('active');
+                
+                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                element.classList.add('active');
+            },
+
+            toggleTheme() {
+                document.body.classList.toggle('light-mode');
+                this.db.theme = document.body.classList.contains('light-mode') ? 'light' : 'dark';
+                localStorage.setItem('injaz_theme', this.db.theme);
+            },
+
+            openModal(modalId) {
+                document.getElementById(modalId).classList.add('active');
+                document.body.style.overflow = 'hidden';
+            },
+
+            closeModal(e, modalId) {
+                if (e.target.classList.contains('modal-overlay')) this.closeModalDirect(modalId);
+            },
+
+            closeModalDirect(modalId) {
+                document.getElementById(modalId).classList.remove('active');
                 document.body.style.overflow = 'auto';
+            },
+
+            // --- القاعدة التأسيسية ---
+            addLawyer() {
+                const nameInput = document.getElementById('new-lawyer-name');
+                if (!nameInput.value.trim()) return alert('أدخل اسم المحامي');
+                this.db.lawyers.push({ id: Date.now().toString(), name: nameInput.value.trim() });
+                nameInput.value = '';
+                this.saveDB();
+            },
+
+            addCompany() {
+                const nameInput = document.getElementById('new-company-name');
+                const lawyerId = document.getElementById('select-lawyer-for-company').value;
+                if (!nameInput.value.trim() || !lawyerId) return alert('تأكد من اسم الشركة والمحامي');
+                this.db.companies.push({ id: Date.now().toString(), name: nameInput.value.trim(), lawyerId: lawyerId });
+                nameInput.value = '';
+                this.saveDB();
+            },
+
+            // --- إدارة المعاملات ---
+            openNewTxModal(gate) {
+                if (this.db.lawyers.length === 0 || this.db.companies.length === 0) {
+                    return alert('الرجاء إضافة محامي وشركة واحدة على الأقل من قسم "التأسيس" أولاً.');
+                }
+                this.currentGate = gate;
+                document.getElementById('new-tx-gate').innerText = `(${gate})`;
+                this.populateLawyerSelect('new-tx-lawyer');
+                this.filterCompaniesForTx();
+                this.openModal('modal-new-tx');
+            },
+
+            filterCompaniesForTx() {
+                const lawyerId = document.getElementById('new-tx-lawyer').value;
+                const companySelect = document.getElementById('new-tx-company');
+                companySelect.innerHTML = '';
+                const filtered = this.db.companies.filter(c => c.lawyerId === lawyerId);
+                filtered.forEach(c => {
+                    companySelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+                });
+            },
+
+            saveNewTransaction() {
+                const companyId = document.getElementById('new-tx-company').value;
+                const type = document.getElementById('new-tx-type').value;
+                const fee = document.getElementById('new-tx-fee').value;
+                
+                if (!companyId || !type || !fee) return alert('أكمل جميع الحقول');
+
+                const newTx = {
+                    id: Date.now().toString(),
+                    gate: this.currentGate,
+                    companyId: companyId,
+                    type: type,
+                    fee: parseInt(fee),
+                    status: 'active', // active, issue, archived
+                    lastUpdated: Date.now(),
+                    timeline: [{ date: new Date().toLocaleString('ar-IQ'), text: 'تم استلام المعاملة وبدء الإجراءات' }]
+                };
+
+                this.db.transactions.push(newTx);
+                document.getElementById('new-tx-type').value = '';
+                document.getElementById('new-tx-fee').value = '';
+                this.closeModalDirect('modal-new-tx');
+                this.saveDB();
+            },
+
+            openUpdateTxModal(id) {
+                const tx = this.db.transactions.find(t => t.id === id);
+                if(!tx) return;
+                
+                document.getElementById('upd-tx-id').value = id;
+                document.getElementById('upd-tx-dept').value = '';
+                document.getElementById('upd-tx-emp').value = '';
+                
+                // رسم السجل الزمني
+                const tlContainer = document.getElementById('tx-timeline');
+                tlContainer.innerHTML = '';
+                tx.timeline.forEach(item => {
+                    tlContainer.innerHTML += `
+                        <div class="timeline-item">
+                            <div class="timeline-dot" style="background: var(--text-secondary); box-shadow: none;"></div>
+                            <div class="timeline-date">${item.date}</div>
+                            <div class="timeline-text">${item.text}</div>
+                        </div>`;
+                });
+
+                this.openModal('modal-update-tx');
+            },
+
+            updateTransactionPath() {
+                const id = document.getElementById('upd-tx-id').value;
+                const dept = document.getElementById('upd-tx-dept').value;
+                const emp = document.getElementById('upd-tx-emp').value;
+                
+                if (!dept || !emp) return alert('يجب كتابة القسم والموظف لتحديث المسار.');
+
+                const tx = this.db.transactions.find(t => t.id === id);
+                tx.status = 'active'; // إرجاعها للعمليات إذا كانت متلكئة
+                tx.lastUpdated = Date.now();
+                tx.timeline.push({ date: new Date().toLocaleString('ar-IQ'), text: `القسم: ${dept} - الموظف: ${emp}` });
+                
+                this.closeModalDirect('modal-update-tx');
+                this.saveDB();
+            },
+
+            archiveTransaction() {
+                const id = document.getElementById('upd-tx-id').value;
+                const tx = this.db.transactions.find(t => t.id === id);
+                tx.status = 'archived';
+                tx.lastUpdated = Date.now();
+                tx.timeline.push({ date: new Date().toLocaleString('ar-IQ'), text: 'تم إنجاز المعاملة ونقلها للأرشيف.' });
+                this.closeModalDirect('modal-update-tx');
+                this.saveDB();
+            },
+
+            flagTransaction() {
+                const id = document.getElementById('upd-tx-id').value;
+                const tx = this.db.transactions.find(t => t.id === id);
+                const reason = prompt("ما هو سبب التلكؤ أو النقص؟");
+                if(!reason) return;
+                tx.status = 'issue';
+                tx.timeline.push({ date: new Date().toLocaleString('ar-IQ'), text: `متلكئة/نقص: ${reason}` });
+                this.closeModalDirect('modal-update-tx');
+                this.saveDB();
+            },
+
+            // --- التحديث البصري (Render) ---
+            renderAll() {
+                this.populateLawyerSelect('select-lawyer-for-company');
+                
+                const lawyersList = document.getElementById('lawyers-list');
+                lawyersList.innerHTML = '';
+                this.db.lawyers.forEach(l => {
+                    const count = this.db.companies.filter(c => c.lawyerId === l.id).length;
+                    lawyersList.innerHTML += `<div class="list-item"><span><i class="fa-solid fa-user-tie" style="color:var(--neon-blue);"></i> ${l.name}</span> <span style="font-size:12px; color:var(--text-secondary);">عدد شركاته: ${count}</span></div>`;
+                });
+
+                const activeContainer = document.getElementById('active-transactions-container');
+                const archiveContainer = document.getElementById('archived-transactions-container');
+                const issueContainer = document.getElementById('issue-transactions-container');
+                
+                activeContainer.innerHTML = ''; archiveContainer.innerHTML = ''; issueContainer.innerHTML = '';
+                let activeCount = 0;
+                let weeklyProfit = 0;
+
+                const now = Date.now();
+                // فلترة وعرض الكروت
+                this.db.transactions.slice().reverse().forEach(tx => {
+                    const company = this.db.companies.find(c => c.id === tx.companyId);
+                    const lawyer = company ? this.db.lawyers.find(l => l.id === company.lawyerId) : null;
+                    if (!company || !lawyer) return;
+
+                    // حساب الركود (أكثر من 24 ساعة)
+                    const isStagnant = (now - tx.lastUpdated) > (24 * 60 * 60 * 1000) && tx.status === 'active';
+                    const stagnantClass = (isStagnant || tx.status === 'issue') ? 'stagnant' : '';
+                    
+                    let statusIcon = '<i class="fa-solid fa-location-dot" style="color: var(--neon-blue);"></i>';
+                    let statusText = tx.timeline[tx.timeline.length - 1].text;
+                    
+                    if (isStagnant) {
+                        statusIcon = '<i class="fa-solid fa-triangle-exclamation"></i>';
+                        statusText = 'مرت 24 ساعة بدون تحديث!';
+                    } else if (tx.status === 'issue') {
+                        statusIcon = '<i class="fa-solid fa-bug"></i>';
+                    } else if (tx.status === 'archived') {
+                        statusIcon = '<i class="fa-solid fa-check-double" style="color: #00FF88;"></i>';
+                        weeklyProfit += tx.fee; // جمع أرباح المنجزة
+                    }
+
+                    const cardHTML = `
+                    <div class="magic-card-wrapper ${stagnantClass}" onclick="app.openUpdateTxModal('${tx.id}')">
+                        <div class="magic-card">
+                            <div class="mc-header">
+                                <div>
+                                    <div class="mc-company">${company.name}</div>
+                                    <div class="mc-lawyer"><i class="fa-solid fa-user-tie"></i> ${lawyer.name}</div>
+                                </div>
+                                <div class="mc-fee">${tx.fee.toLocaleString()} د.ع</div>
+                            </div>
+                            <div class="mc-details"><i class="fa-solid fa-file-signature"></i> ${tx.type} (${tx.gate})</div>
+                            <div class="mc-station">${statusIcon} <span>${statusText}</span></div>
+                        </div>
+                    </div>`;
+
+                    if (tx.status === 'active') {
+                        activeContainer.innerHTML += cardHTML;
+                        activeCount++;
+                    } else if (tx.status === 'archived') {
+                        archiveContainer.innerHTML += cardHTML;
+                    } else if (tx.status === 'issue') {
+                        issueContainer.innerHTML += cardHTML;
+                    }
+                });
+
+                document.getElementById('active-count').innerText = activeCount;
+                document.getElementById('weekly-total').innerText = weeklyProfit.toLocaleString() + ' د.ع';
+                if(this.chartInstance) this.updateChartData();
+            },
+
+            populateLawyerSelect(selectId) {
+                const sel = document.getElementById(selectId);
+                if(!sel) return;
+                sel.innerHTML = '<option value="">-- اختر المحامي --</option>';
+                this.db.lawyers.forEach(l => { sel.innerHTML += `<option value="${l.id}">${l.name}</option>`; });
+            },
+
+            // --- المالية والـ PDF ---
+            checkThursdayAlert() {
+                const isThursday = new Date().getDay() === 4; // 4 = الخميس
+                if (isThursday && this.db.transactions.filter(t => t.status === 'archived').length > 0) {
+                    setTimeout(() => { document.getElementById('thursdayAlert').classList.add('show'); }, 1500);
+                }
+            },
+
+            generatePDFReport() {
+                document.getElementById('thursdayAlert').classList.remove('show');
+                
+                const tBody = document.getElementById('pdf-table-body');
+                tBody.innerHTML = '';
+                let total = 0;
+                
+                this.db.transactions.filter(t => t.status === 'archived').forEach(tx => {
+                    const comp = this.db.companies.find(c => c.id === tx.companyId);
+                    const law = this.db.lawyers.find(l => l.id === comp.lawyerId);
+                    if(comp && law) {
+                        tBody.innerHTML += `<tr><td style="padding: 8px;">${comp.name}</td><td style="padding: 8px;">${law.name}</td><td style="padding: 8px;">${tx.type}</td><td style="padding: 8px;">${tx.fee.toLocaleString()}</td></tr>`;
+                        total += tx.fee;
+                    }
+                });
+
+                document.getElementById('pdf-date').innerText = "تاريخ الإصدار: " + new Date().toLocaleString('ar-IQ');
+                document.getElementById('pdf-issuer').innerText = this.settings.issuerName;
+                document.getElementById('pdf-role').innerText = this.settings.role;
+                document.getElementById('pdf-location').innerText = this.settings.location;
+                document.getElementById('pdf-total').innerText = total.toLocaleString();
+
+                // توليد الـ QR Code لضمان الموثوقية
+                document.getElementById('qrcode-container').innerHTML = '';
+                new QRCode(document.getElementById("qrcode-container"), {
+                    text: `تم الإصدار بواسطة ${this.settings.issuerName} - إجمالي الأتعاب المنجزة: ${total} د.ع`,
+                    width: 100, height: 100
+                });
+
+                // تفعيل الطباعة (تُحفظ كـ PDF على الهاتف)
+                setTimeout(() => { window.print(); }, 500);
+            },
+
+            // --- الرسم البياني ---
+            initChart() {
+                const ctx = document.getElementById('profitChart').getContext('2d');
+                let gradientFill = ctx.createLinearGradient(0, 0, 0, 150);
+                gradientFill.addColorStop(0, 'rgba(157, 0, 255, 0.5)'); 
+                gradientFill.addColorStop(1, 'rgba(0, 240, 255, 0.0)'); 
+
+                this.chartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'],
+                        datasets: [{ label: 'مؤشر العمليات', data: [0, 0, 0, 0, 0, 0], borderColor: '#00F0FF', borderWidth: 3, backgroundColor: gradientFill, fill: true, tension: 0.4, pointBackgroundColor: '#9D00FF', pointBorderColor: '#FFF', pointBorderWidth: 2, pointRadius: 4 }]
+                    },
+                    options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: '#8E9BB0' } }, y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { display: false } } } }
+                });
+                this.updateChartData();
+            },
+
+            updateChartData() {
+                // رسم بياني مبسط يعكس عدد المعاملات الكلي لتوضيح الحركة
+                let count = this.db.transactions.length;
+                this.chartInstance.data.datasets[0].data = [count*0.2, count*0.5, count*0.8, count*1.2, count*1.5, count*2];
+                this.chartInstance.update();
             }
-        }
-        
-        function closeModalDirect() {
-            document.getElementById('cinematicModal').classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
+        };
+
+        // تشغيل التطبيق عند تحميل الصفحة
+        window.onload = () => app.init();
+
     </script>
 </body>
 </html>
