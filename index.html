@@ -4,113 +4,414 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>نظام إدارة المعاملات</title>
-    <!-- ربط ملفات PWA الخاصة بك -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#f8fafc">
-
-    <!-- استدعاء Tailwind و React -->
+    
+    <!-- الخطوط -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- مكتبات React و Tailwind و QRCode -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-    <!-- تنسيقات CSS لضمان عدم تأثر التطبيق بوضع الظلام في الهاتف -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkTeal: '#114b5f',
+                        accentOrange: '#f59e0b',
+                        lightOrange: '#fef3c7',
+                        bgGray: '#f8fafc'
+                    },
+                    fontFamily: { sans: ['Tajawal', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+
     <style>
-        :root { color-scheme: light; }
-        html, body { background-color: #f8fafc !important; color: #1e293b !important; }
-        .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); }
-        .gradient-bg { background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); }
+        body { -webkit-tap-highlight-color: transparent; background-color: #f8fafc; }
+        ::-webkit-scrollbar { display: none; }
+        
+        /* إعدادات الطباعة وتوليد الـ PDF من المتصفح */
+        @media print {
+            body * { visibility: hidden; }
+            #print-section, #print-section * { visibility: visible; }
+            #print-section { position: absolute; left: 0; top: 0; width: 100%; background: white; padding: 20px; }
+            .no-print { display: none !important; }
+        }
     </style>
 </head>
-<body>
+<body class="text-slate-800 antialiased">
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useRef } = React;
 
-        function App() {
-            const [activeTab, setActiveTab] = useState('home');
-            const [transactions, setTransactions] = useState([]);
-            const [showModal, setShowModal] = useState(false);
+        // ================= الأيقونات =================
+        const IconClock = () => <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
+        const IconAlert = () => <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>;
+        const IconPlus = () => <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
+        const IconWallet = () => <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>;
+        const IconSettings = () => <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>;
+        const IconArchive = () => <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>;
 
+        // ================= التطبيق الرئيسي =================
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('ongoing');
+            
+            // بيانات أولية مقترحة لتسهيل العمل (تتضمن اسم الشركة الذي تستخدمه)
+            const initialLawyers = [
+                { id: 1, name: 'المحامي الافتراضي', phone: '9647000000000', companies: ['ابهار المستقبل للتجارة والتسويق العقاري والخدمات العامة والدعاية والاعلان وتنظيم المؤتمرات محدودة المسؤولية'] }
+            ];
+
+            // حالة التطبيق مع الحفظ المحلي (LocalStorage)
+            const [lawyers, setLawyers] = useState(() => JSON.parse(localStorage.getItem('app_lawyers')) || initialLawyers);
+            const [transactions, setTransactions] = useState(() => JSON.parse(localStorage.getItem('app_transactions')) || []);
+            const [printData, setPrintData] = useState(null); // للطباعة
+            const qrRef = useRef(null);
+
+            // حفظ التغييرات تلقائياً
+            useEffect(() => { localStorage.setItem('app_lawyers', JSON.stringify(lawyers)); }, [lawyers]);
+            useEffect(() => { localStorage.setItem('app_transactions', JSON.stringify(transactions)); }, [transactions]);
+
+            // توليد الـ QR عند طلب الطباعة
             useEffect(() => {
-                const data = localStorage.getItem('my_transactions');
-                setTransactions(data ? JSON.parse(data) : []);
-            }, []);
+                if (printData && qrRef.current) {
+                    qrRef.current.innerHTML = "";
+                    new QRCode(qrRef.current, {
+                        text: `تم التسديد. المحامي: ${printData.lawyerName} - الإجمالي: ${printData.total} دينار`,
+                        width: 100, height: 100
+                    });
+                    setTimeout(() => window.print(), 500); // تأخير بسيط لضمان رسم الباركود ثم استدعاء الطباعة
+                }
+            }, [printData]);
 
-            const addTransaction = (e) => {
-                e.preventDefault();
-                const newTx = {
-                    id: Date.now(),
-                    company: e.target.company.value,
-                    fee: e.target.fee.value,
-                    date: new Date().toLocaleDateString('ar-EG')
-                };
-                const updated = [...transactions, newTx];
-                setTransactions(updated);
-                localStorage.setItem('my_transactions', JSON.stringify(updated));
-                setShowModal(false);
+            // دوال المساعدة
+            const updateTxStatus = (id, newStatus, errorMsg = '') => {
+                setTransactions(transactions.map(tx => tx.id === id ? { ...tx, status: newStatus, errorMsg } : tx));
             };
 
-            return (
-                <div className="max-w-md mx-auto min-h-screen bg-slate-50 pb-24">
-                    
-                    {/* Header */}
-                    <header className="p-6">
-                        <h1 className="text-2xl font-black text-slate-800">إدارة المعاملات</h1>
-                    </header>
+            const addStep = (id, stepTitle) => {
+                if(!stepTitle) return;
+                setTransactions(transactions.map(tx => {
+                    if (tx.id === id) {
+                        return { ...tx, steps: [...tx.steps, { title: stepTitle, time: new Date().toISOString() }] };
+                    }
+                    return tx;
+                }));
+            };
 
-                    {/* Main Content */}
-                    <main className="px-6">
-                        {activeTab === 'home' && (
-                            <div className="space-y-4">
-                                {transactions.length === 0 && <p className="text-slate-400 text-center mt-10">لا توجد معاملات حالياً</p>}
-                                {transactions.map(t => (
-                                    <div key={t.id} className="bg-white p-5 rounded-3xl card-shadow border border-slate-100">
-                                        <div className="flex justify-between items-start">
-                                            <h3 className="font-bold text-lg text-slate-800">{t.company}</h3>
-                                            <span className="text-xs bg-slate-100 px-2 py-1 rounded-lg text-slate-500">{t.date}</span>
+            // ================= 1. واجهة المعاملات الجارية =================
+            const OngoingView = () => {
+                const list = transactions.filter(t => t.status === 'ongoing');
+                
+                return (
+                    <div className="p-5 pb-28">
+                        <div className="bg-darkTeal text-white rounded-[2rem] p-6 mb-6 shadow-lg relative overflow-hidden">
+                            <h1 className="text-xl font-bold mb-1">المعاملات الجارية</h1>
+                            <p className="text-sm text-teal-100">لديك {list.length} معاملات قيد الإنجاز</p>
+                        </div>
+                        {list.length === 0 && <p className="text-center text-slate-400 mt-10">لا توجد معاملات جارية حالياً.</p>}
+                        
+                        <div className="space-y-4">
+                            {list.map(tx => {
+                                const lastTime = tx.steps.length > 0 ? tx.steps[tx.steps.length-1].time : tx.createdAt;
+                                const isDelayed = (new Date() - new Date(lastTime)) / (1000 * 60 * 60) > 24;
+
+                                return (
+                                    <div key={tx.id} className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
+                                        <h3 className="font-bold text-slate-800 leading-tight mb-1">{tx.company}</h3>
+                                        <p className="text-xs text-slate-500 mb-3">{lawyers.find(l=>l.id == tx.lawyerId)?.name} • {tx.department}</p>
+                                        
+                                        <div className="border-r-2 border-slate-100 pe-3 mr-1 mb-4 space-y-2">
+                                            {tx.steps.map((s, i) => (
+                                                <div key={i} className="relative">
+                                                    <div className="absolute -right-[17px] top-1.5 w-2 h-2 bg-darkTeal rounded-full"></div>
+                                                    <p className="text-sm text-slate-700">{s.title}</p>
+                                                    <p className="text-[10px] text-slate-400">{new Date(s.time).toLocaleString('ar-IQ')}</p>
+                                                </div>
+                                            ))}
+                                            {isDelayed && <p className="text-xs text-red-500 font-bold mt-2">مرت 24 ساعة بدون تحديث!</p>}
                                         </div>
-                                        <p className="text-purple-600 font-bold mt-2">{t.fee} د.ع</p>
+
+                                        <div className="flex gap-2">
+                                            <button onClick={() => { const step = prompt('أدخل اسم المحطة الجديدة (مثال: قسم التدقيق):'); addStep(tx.id, step); }} className="flex-1 bg-lightOrange text-accentOrange font-bold py-2 rounded-xl text-xs">إضافة محطة</button>
+                                            <button onClick={() => { const err = prompt('سبب التلكؤ:'); if(err) updateTxStatus(tx.id, 'delayed', err); }} className="flex-1 bg-slate-100 text-slate-600 font-bold py-2 rounded-xl text-xs">نقل للمتلكئة</button>
+                                            <button onClick={() => updateTxStatus(tx.id, 'completed')} className="flex-1 bg-green-100 text-green-700 font-bold py-2 rounded-xl text-xs">إنجاز</button>
+                                        </div>
                                     </div>
-                                ))}
-                            </div>
-                        )}
+                                )
+                            })}
+                        </div>
+                    </div>
+                );
+            };
 
-                        {activeTab === 'finance' && (
-                            <div className="gradient-bg p-8 rounded-[32px] text-white shadow-xl shadow-purple-200">
-                                <p className="opacity-80">إجمالي المستحقات</p>
-                                <h2 className="text-4xl font-black mt-2">
-                                    {transactions.reduce((acc, curr) => acc + parseInt(curr.fee || 0), 0).toLocaleString()} د.ع
-                                </h2>
-                            </div>
-                        )}
-                    </main>
+            // ================= 2. واجهة المعاملات المتلكئة =================
+            const DelayedView = () => {
+                const list = transactions.filter(t => t.status === 'delayed');
+                
+                return (
+                    <div className="p-5 pb-28">
+                        <div className="bg-red-50 text-red-800 border border-red-200 rounded-[2rem] p-6 mb-6">
+                            <h1 className="text-xl font-bold mb-1">المعاملات المتلكئة</h1>
+                            <p className="text-sm">معاملات تتطلب تدخلاً أو بها نواقص ({list.length})</p>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            {list.map(tx => {
+                                const lawyer = lawyers.find(l => l.id == tx.lawyerId);
+                                const days = Math.floor((new Date() - new Date(tx.createdAt)) / (1000 * 60 * 60 * 24));
+                                const waMsg = encodeURIComponent(`مرحباً أستاذ بخصوص شركة (${tx.company})، المعاملة متوقفة بسبب: ${tx.errorMsg}`);
 
-                    {/* Add Modal */}
-                    {showModal && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/20 backdrop-blur-sm">
-                            <form onSubmit={addTransaction} className="bg-white p-6 rounded-3xl w-full shadow-2xl">
-                                <h2 className="text-xl font-bold mb-4">معاملة جديدة</h2>
-                                <input name="company" placeholder="اسم الشركة" required className="w-full p-4 bg-slate-50 rounded-2xl mb-3 border" />
-                                <input name="fee" type="number" placeholder="المبلغ (د.ع)" required className="w-full p-4 bg-slate-50 rounded-2xl mb-6 border" />
-                                <div className="flex gap-3">
-                                    <button type="submit" className="flex-1 bg-purple-600 text-white p-4 rounded-2xl font-bold">حفظ</button>
-                                    <button type="button" onClick={() => setShowModal(false)} className="px-6 py-4 bg-slate-100 rounded-2xl font-bold">إلغاء</button>
+                                return (
+                                    <div key={tx.id} className="bg-white rounded-3xl p-5 shadow-sm border border-red-100 relative">
+                                        <div className="absolute top-4 left-4 bg-red-100 text-red-700 text-xs font-bold px-2 py-1 rounded-lg">متوقفة منذ {days} يوم</div>
+                                        <h3 className="font-bold text-slate-800 w-3/4">{tx.company}</h3>
+                                        <p className="text-xs text-slate-500 mb-3">{lawyer?.name}</p>
+                                        
+                                        <div className="bg-slate-50 p-3 rounded-xl text-sm text-slate-700 mb-4 border border-slate-100">
+                                            <strong>سبب التلكؤ:</strong> {tx.errorMsg}
+                                        </div>
+
+                                        <div className="flex gap-2">
+                                            <button onClick={() => updateTxStatus(tx.id, 'ongoing')} className="flex-1 bg-slate-800 text-white font-bold py-2 rounded-xl text-xs">إعادة للعمل</button>
+                                            <a href={`https://wa.me/${lawyer?.phone}?text=${waMsg}`} target="_blank" className="flex-1 text-center bg-green-500 text-white font-bold py-2 rounded-xl text-xs">إبلاغ واتساب</a>
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </div>
+                );
+            };
+
+            // ================= 3. واجهة إضافة معاملة =================
+            const AddView = () => {
+                const [lawyerId, setLawyerId] = useState('');
+                const [company, setCompany] = useState('');
+                const [dept, setDept] = useState('دائرة مسجل الشركات');
+                const [type, setType] = useState('');
+                const [fee, setFee] = useState('');
+
+                const selectedLawyer = lawyers.find(l => l.id == lawyerId);
+
+                const handleSubmit = (e) => {
+                    e.preventDefault();
+                    if(!lawyerId || !company || !type || !fee) return alert('يرجى تعبئة جميع الحقول');
+                    
+                    const newTx = {
+                        id: Date.now(), lawyerId, company, department: dept, type, fee: Number(fee), 
+                        status: 'ongoing', steps: [], createdAt: new Date().toISOString()
+                    };
+                    setTransactions([...transactions, newTx]);
+                    setActiveTab('ongoing');
+                };
+
+                return (
+                    <div className="p-5 pb-28">
+                        <h2 className="text-2xl font-bold text-darkTeal mb-6">بدء معاملة جديدة</h2>
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 mb-1">المحامي</label>
+                                <select className="w-full p-3 rounded-xl bg-white border border-slate-200" value={lawyerId} onChange={e => {setLawyerId(e.target.value); setCompany('');}}>
+                                    <option value="">اختر المحامي...</option>
+                                    {lawyers.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+                                </select>
+                            </div>
+
+                            {selectedLawyer && (
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-1">الشركة (التابعة للمحامي)</label>
+                                    <select className="w-full p-3 rounded-xl bg-white border border-slate-200" value={company} onChange={e => setCompany(e.target.value)}>
+                                        <option value="">اختر الشركة...</option>
+                                        {selectedLawyer.companies.map((c, i) => <option key={i} value={c}>{c}</option>)}
+                                    </select>
                                 </div>
-                            </form>
+                            )}
+
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 mb-1">الدائرة</label>
+                                <select className="w-full p-3 rounded-xl bg-white border border-slate-200" value={dept} onChange={e => setDept(e.target.value)}>
+                                    <option value="دائرة مسجل الشركات">دائرة مسجل الشركات</option>
+                                    <option value="دائرة الاستيراد والتصدير">دائرة الاستيراد والتصدير</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 mb-1">نوع المعاملة (مثل: تأسيس، محضر)</label>
+                                <input type="text" className="w-full p-3 rounded-xl bg-white border border-slate-200" value={type} onChange={e => setType(e.target.value)} placeholder="اكتب نوع المعاملة..." />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 mb-1">الأتعاب (بالدينار العراقي)</label>
+                                <input type="number" className="w-full p-3 rounded-xl bg-white border border-slate-200" value={fee} onChange={e => setFee(e.target.value)} placeholder="مثال: 150000" />
+                            </div>
+
+                            <button type="submit" className="w-full bg-accentOrange text-white font-bold py-4 rounded-2xl shadow-lg mt-4">حفظ وبدء المعاملة</button>
+                        </form>
+                    </div>
+                );
+            };
+
+            // ================= 4. واجهة التحاسب المالي (الخميس) =================
+            const FinanceView = () => {
+                // تجميع المعاملات المنجزة حسب المحامي
+                const completed = transactions.filter(t => t.status === 'completed');
+                
+                return (
+                    <div className="p-5 pb-28">
+                        <div className="bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-[2rem] p-6 mb-6 shadow-lg shadow-purple-500/30">
+                            <h1 className="text-xl font-bold mb-1">التحاسب المالي</h1>
+                            <p className="text-sm opacity-90">دورة تسليم المستحقات والأتعاب</p>
+                        </div>
+
+                        {lawyers.map(lawyer => {
+                            const lawyerTxs = completed.filter(t => t.lawyerId == lawyer.id);
+                            if (lawyerTxs.length === 0) return null;
+                            const total = lawyerTxs.reduce((sum, tx) => sum + tx.fee, 0);
+
+                            return (
+                                <div key={lawyer.id} className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 mb-4">
+                                    <h3 className="font-bold text-lg text-slate-800 mb-2">{lawyer.name}</h3>
+                                    <div className="text-sm text-slate-500 mb-4">عدد المعاملات المنجزة: {lawyerTxs.length}</div>
+                                    <div className="text-2xl font-black text-darkTeal mb-4">{total.toLocaleString()} <span className="text-sm font-normal">د.ع</span></div>
+                                    
+                                    <div className="flex gap-2">
+                                        <button onClick={() => setPrintData({ lawyerName: lawyer.name, txs: lawyerTxs, total })} className="flex-1 bg-purple-100 text-purple-700 font-bold py-2.5 rounded-xl text-xs">توليد تقرير (سند) PDF</button>
+                                        <button onClick={() => { if(confirm('هل تم التسديد فعلاً؟ سيتم أرشفة هذه المعاملات.')) {
+                                            setTransactions(transactions.map(t => t.lawyerId == lawyer.id && t.status === 'completed' ? {...t, status: 'archived'} : t));
+                                        }}} className="flex-1 bg-slate-800 text-white font-bold py-2.5 rounded-xl text-xs">تصفير الحساب</button>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                        {completed.length === 0 && <p className="text-center text-slate-400 mt-10">لا توجد معاملات منجزة للتحاسب.</p>}
+                    </div>
+                );
+            };
+
+            // ================= 5. الإعدادات والأرشيف =================
+            const SettingsView = () => {
+                const exportData = () => {
+                    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ lawyers, transactions }));
+                    const dlAnchorElem = document.createElement('a');
+                    dlAnchorElem.setAttribute("href", dataStr);
+                    dlAnchorElem.setAttribute("download", "moamela_backup.json");
+                    dlAnchorElem.click();
+                };
+
+                return (
+                    <div className="p-5 pb-28 space-y-6">
+                        <h2 className="text-2xl font-bold text-darkTeal">الإعدادات</h2>
+                        
+                        <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
+                            <h3 className="font-bold mb-3 flex items-center gap-2"><IconArchive /> الأرشيف</h3>
+                            <p className="text-sm text-slate-500 mb-3">يحتوي الأرشيف على {transactions.filter(t=>t.status === 'archived').length} معاملة مقفلة.</p>
+                        </div>
+
+                        <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-3">
+                            <h3 className="font-bold mb-2">إدارة البيانات</h3>
+                            <button onClick={exportData} className="w-full bg-slate-100 text-slate-700 font-bold py-3 rounded-xl text-sm text-right px-4">تصدير نسخة احتياطية (JSON)</button>
+                            <button onClick={() => { if(confirm('تحذير: سيتم مسح جميع بيانات التطبيق!')) { setTransactions([]); setLawyers(initialLawyers); } }} className="w-full bg-red-50 text-red-600 font-bold py-3 rounded-xl text-sm text-right px-4">تصفير النظام بالكامل</button>
+                        </div>
+                    </div>
+                );
+            };
+
+            // ================= الواجهة الأساسية (Layout) =================
+            return (
+                <div className="max-w-md mx-auto min-h-screen relative shadow-2xl bg-bgGray">
+                    
+                    {/* منطقة عرض واجهة الطباعة (مخفية إلا عند الطباعة) */}
+                    {printData && (
+                        <div id="print-section" className="fixed inset-0 z-50 bg-white" style={{ minHeight: '100vh' }}>
+                            <div className="text-center border-b-2 border-slate-800 pb-4 mb-6">
+                                <h1 className="text-2xl font-black mb-1">سند قبض وتقرير تحاسب</h1>
+                                <p className="text-sm text-slate-600">تخليص المعاملات الحكومية للشركات - بغداد</p>
+                            </div>
+                            
+                            <div className="mb-6">
+                                <p className="mb-2"><strong>السيد المحامي:</strong> {printData.lawyerName}</p>
+                                <p className="mb-2"><strong>التاريخ:</strong> {new Date().toLocaleDateString('ar-IQ')}</p>
+                            </div>
+
+                            <table className="w-full border-collapse border border-slate-400 mb-6 text-sm">
+                                <thead>
+                                    <tr className="bg-slate-100">
+                                        <th className="border border-slate-400 p-2 text-right">الشركة</th>
+                                        <th className="border border-slate-400 p-2 text-right">المعاملة</th>
+                                        <th className="border border-slate-400 p-2 text-center">المبلغ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {printData.txs.map((t, i) => (
+                                        <tr key={i}>
+                                            <td className="border border-slate-400 p-2">{t.company}</td>
+                                            <td className="border border-slate-400 p-2">{t.type}</td>
+                                            <td className="border border-slate-400 p-2 text-center">{t.fee.toLocaleString()}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+
+                            <div className="text-left mb-10">
+                                <h2 className="text-xl font-bold">المجموع الكلي: {printData.total.toLocaleString()} دينار عراقي</h2>
+                            </div>
+
+                            <div className="flex justify-between items-end mt-12">
+                                <div><p className="font-bold border-t-2 border-slate-400 pt-2 w-32 text-center">توقيع المستلم</p></div>
+                                <div ref={qrRef} className="p-2 border border-slate-200 rounded-lg"></div>
+                            </div>
+                            
+                            {/* زر الإغلاق يظهر فقط على الشاشة ولا يطبع */}
+                            <button onClick={() => setPrintData(null)} className="no-print fixed bottom-10 left-10 right-10 bg-red-500 text-white font-bold py-3 rounded-2xl">إغلاق التقرير والعودة</button>
                         </div>
                     )}
 
-                    {/* Bottom Nav */}
-                    <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-slate-100 p-4 flex justify-between items-center rounded-t-3xl shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
-                        <button onClick={() => setActiveTab('home')} className={`p-2 ${activeTab === 'home' ? 'text-purple-600' : 'text-slate-400'}`}>الرئيسية</button>
-                        <button onClick={() => setShowModal(true)} className="gradient-bg text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center font-bold text-3xl">+</button>
-                        <button onClick={() => setActiveTab('finance')} className={`p-2 ${activeTab === 'finance' ? 'text-purple-600' : 'text-slate-400'}`}>المالية</button>
-                    </nav>
+                    {/* منطقة عرض المحتوى المتغير (التبويبات) */}
+                    <div className={`h-full overflow-y-auto ${printData ? 'hidden' : 'block'}`}>
+                        {activeTab === 'ongoing' && <OngoingView />}
+                        {activeTab === 'delayed' && <DelayedView />}
+                        {activeTab === 'add' && <AddView />}
+                        {activeTab === 'finance' && <FinanceView />}
+                        {activeTab === 'settings' && <SettingsView />}
+                    </div>
+
+                    {/* شريط التنقل السفلي */}
+                    <div className={`fixed bottom-0 w-full max-w-md bg-transparent px-4 pb-4 pt-8 pointer-events-none ${printData ? 'hidden' : 'block'}`}>
+                        <div className="bg-white rounded-[2rem] shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] p-2 flex justify-between items-center pointer-events-auto border border-slate-50 relative">
+                            
+                            <button onClick={() => setActiveTab('ongoing')} className={`p-3 rounded-2xl transition-all duration-300 flex-1 flex justify-center ${activeTab === 'ongoing' ? 'text-darkTeal bg-slate-50' : 'text-slate-400'}`}>
+                                <IconClock />
+                            </button>
+                            
+                            <button onClick={() => setActiveTab('delayed')} className={`p-3 rounded-2xl transition-all duration-300 flex-1 flex justify-center ${activeTab === 'delayed' ? 'text-darkTeal bg-slate-50' : 'text-slate-400'}`}>
+                                <IconAlert />
+                            </button>
+
+                            <div className="relative -top-6 flex-1 flex justify-center">
+                                <button onClick={() => setActiveTab('add')} className="bg-accentOrange text-white p-4 rounded-full shadow-lg shadow-orange-500/40 hover:scale-105 transition-transform">
+                                    <IconPlus />
+                                </button>
+                            </div>
+
+                            <button onClick={() => setActiveTab('finance')} className={`p-3 rounded-2xl transition-all duration-300 flex-1 flex justify-center ${activeTab === 'finance' ? 'text-darkTeal bg-slate-50' : 'text-slate-400'}`}>
+                                <IconWallet />
+                            </button>
+
+                            <button onClick={() => setActiveTab('settings')} className={`p-3 rounded-2xl transition-all duration-300 flex-1 flex justify-center ${activeTab === 'settings' ? 'text-darkTeal bg-slate-50' : 'text-slate-400'}`}>
+                                <IconSettings />
+                            </button>
+                        </div>
+                    </div>
                 </div>
             );
-        }
+        };
+
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
