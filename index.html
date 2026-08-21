@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>نظام إدارة المعاملات المتقدم</title>
+    <title>نظام إدارة المعاملات</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -16,26 +16,25 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- PDF & QR Code Libraries -->
+    <!-- PDF & QR Code -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
-        body { font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; background-color: white; }
+        body { font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; background-color: #f8fafc; overflow-x: hidden; }
         .app-bg { background-color: #f8fafc; }
         .dark .app-bg { background-color: #0f172a; }
         
         .card-gradient { background: linear-gradient(135deg, #4f46e5, #9333ea); }
         .card-stagnant { background: linear-gradient(135deg, #e11d48, #be123c); }
         
-        /* Bottom Nav */
         .bottom-nav { box-shadow: 0 -4px 20px rgba(0,0,0,0.05); padding-bottom: env(safe-area-inset-bottom, 12px); }
         .dark .bottom-nav { box-shadow: 0 -4px 20px rgba(0,0,0,0.5); }
         .nav-item { color: #94a3b8; transition: all 0.3s; flex: 1; }
         .nav-item.active { color: #6366f1; font-weight: 700; transform: translateY(-2px); }
         .dark .nav-item.active { color: #818cf8; }
 
-        .glass-modal { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .glass-modal { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
         .dark .glass-modal { background: rgba(15, 23, 42, 0.85); }
 
         ::-webkit-scrollbar { display: none; }
@@ -53,130 +52,48 @@
         .view-section.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Smooth UI Modals */
         .modal-overlay { transition: opacity 0.3s ease; opacity: 0; pointer-events: none; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .modal-box { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); transform: scale(0.9); }
         .modal-overlay.active .modal-box { transform: scale(1); }
 
-        /* FIX: PDF Wrapper strictly placed behind the main app view */
-        #pdf-export-wrapper {
-            position: absolute; top: 0; right: 0; width: 800px; z-index: -100;
+        /* Pulse Animation for Active Station */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); }
+            100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
         }
-        #main-app-container {
-            position: relative; z-index: 10; min-height: 100vh;
-        }
+        .animate-pulse-ring { animation: pulse-ring 2s infinite cubic-bezier(0.66, 0, 0, 1); }
     </style>
 </head>
-<body>
+<body class="app-bg text-slate-800 dark:text-slate-100 transition-colors duration-300 relative">
 
-    <!-- Hidden Printable Area for Luxury PDF -->
-    <!-- It remains in the DOM fully rendered, but hidden behind the main UI container -->
-    <div id="pdf-export-wrapper">
-        <div id="pdf-content" style="background: white; color: #1e293b; font-family: 'Cairo', sans-serif; padding: 40px; width: 100%; min-height: 1000px; direction: rtl; box-sizing: border-box;">
-            <!-- Outer Border with luxury feel -->
-            <div style="border: 2px solid #4f46e5; border-radius: 24px; padding: 40px; height: 100%; position: relative; background: #fafafa;">
-                
-                <!-- Watermark Logo -->
-                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.03; font-size: 200px; color: #4f46e5;">
-                    <i class="fa-solid fa-scale-balanced"></i>
-                </div>
+    <!-- Custom Alerts -->
+    <div id="uiAlert" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm modal-overlay">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 w-10/12 max-w-sm text-center shadow-2xl modal-box">
+            <div id="uiAlertIcon" class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl"></div>
+            <h3 id="uiAlertTitle" class="text-xl font-bold mb-2 text-slate-800 dark:text-white"></h3>
+            <p id="uiAlertMsg" class="text-sm text-slate-500 dark:text-slate-400 mb-6"></p>
+            <button onclick="closeUiAlert()" class="w-full bg-primary text-white py-3 rounded-xl font-bold hover:opacity-90 active:scale-95 transition-all shadow-md shadow-indigo-500/30">حسناً</button>
+        </div>
+    </div>
 
-                <!-- Header -->
-                <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 30px; position: relative; z-index: 2;">
-                    <div>
-                        <h2 style="color: #4f46e5; font-size: 28px; font-weight: 900; margin: 0; margin-bottom: 5px;" id="pdf-title">سند مالي</h2>
-                        <p style="margin: 0; font-size: 14px; color: #64748b; font-weight: 600;">التاريخ: <span id="pdf-date"></span></p>
-                        <p style="margin: 0; font-size: 12px; color: #94a3b8; margin-top: 4px;">رقم الإيصال: <span id="pdf-ref"></span></p>
-                    </div>
-                    <div style="text-align: left;">
-                        <h3 style="margin: 0; font-size: 20px; font-weight: 800; color: #0f172a;" id="pdf-issuer-name">اسم المعقب</h3>
-                        <p style="margin: 0; font-size: 14px; color: #64748b; margin-top: 4px;" id="pdf-issuer-address">العنوان</p>
-                    </div>
-                </div>
-
-                <!-- Body / Details -->
-                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 30px; margin-bottom: 40px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); position: relative; z-index: 2;">
-                    <div style="display: flex; margin-bottom: 20px;">
-                        <div style="width: 150px; font-weight: 800; color: #64748b; font-size: 16px;">الجهة المستفيدة:</div>
-                        <div style="font-weight: 900; font-size: 18px; color: #0f172a;" id="pdf-lawyer-name"></div>
-                    </div>
-                    
-                    <div style="display: flex; margin-bottom: 20px;">
-                        <div style="width: 150px; font-weight: 800; color: #64748b; font-size: 16px;">نوع المستند:</div>
-                        <div style="font-weight: 800; font-size: 16px; color: #0f172a;" id="pdf-doc-type"></div>
-                    </div>
-
-                    <div style="background: #f8fafc; border-radius: 12px; padding: 20px; margin-top: 30px; display: flex; justify-content: space-between; align-items: center; border: 1px dashed #cbd5e1;">
-                        <div style="font-size: 20px; font-weight: 900; color: #334155;">الإجمالي الكلي:</div>
-                        <div style="font-size: 28px; font-weight: 900; color: #4f46e5; direction: ltr;" id="pdf-amount">0 د.ع</div>
-                    </div>
-                    
-                    <div id="pdf-tx-list-container" style="display: none; margin-top: 30px;">
-                        <h4 style="font-weight: 800; color: #4f46e5; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;">تفاصيل المعاملات:</h4>
-                        <div id="pdf-tx-list" style="font-size: 14px; font-weight: 600;"></div>
-                    </div>
-                </div>
-
-                <!-- Footer / Signatures -->
-                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto; padding-top: 40px; position: relative; z-index: 2;">
-                    <div style="text-align: center; background: white; padding: 10px; border-radius: 12px; border: 1px solid #e2e8f0;">
-                        <div id="qr-target"></div>
-                        <p style="font-size: 10px; color: #94a3b8; margin-top: 8px; font-weight: 700;">موثق إلكترونياً</p>
-                    </div>
-                    
-                    <div style="text-align: center; width: 200px;">
-                        <p style="font-weight: 800; color: #64748b; margin-bottom: 10px;">التوقيع / المصادقة</p>
-                        <div style="height: 100px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
-                            <img id="pdf-signature-img" src="" style="max-width: 180px; max-height: 90px; display: none;">
-                        </div>
-                        <div style="border-top: 2px solid #0f172a; padding-top: 10px; font-weight: 900; font-size: 16px;" id="pdf-sig-name"></div>
-                    </div>
-                </div>
+    <div id="uiConfirm" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm modal-overlay">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 w-10/12 max-w-sm text-center shadow-2xl modal-box">
+            <div class="w-16 h-16 bg-red-50 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 id="uiConfirmTitle" class="text-xl font-bold mb-2 text-slate-800 dark:text-white"></h3>
+            <p id="uiConfirmMsg" class="text-sm text-slate-500 dark:text-slate-400 mb-6"></p>
+            <div class="flex gap-3">
+                <button onclick="closeUiConfirm()" class="flex-1 bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200 py-3 rounded-xl font-bold active:scale-95 transition-transform">إلغاء</button>
+                <button id="uiConfirmBtn" class="flex-1 bg-red-500 text-white py-3 rounded-xl font-bold active:scale-95 transition-transform shadow-lg shadow-red-500/30">تأكيد</button>
             </div>
         </div>
     </div>
 
-    <!-- MAIN APP CONTAINER (Covers the PDF completely) -->
-    <div id="main-app-container" class="app-bg text-slate-800 dark:text-slate-100 transition-colors duration-300">
-        
-        <!-- Custom Elegant Alert -->
-        <div id="uiAlert" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm modal-overlay">
-            <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 w-10/12 max-w-sm text-center shadow-2xl modal-box">
-                <div id="uiAlertIcon" class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl"></div>
-                <h3 id="uiAlertTitle" class="text-xl font-bold mb-2 text-slate-800 dark:text-white"></h3>
-                <p id="uiAlertMsg" class="text-sm text-slate-500 dark:text-slate-400 mb-6"></p>
-                <button onclick="closeUiAlert()" class="w-full bg-primary text-white py-3 rounded-xl font-bold hover:opacity-90 active:scale-95 transition-all">حسناً</button>
-            </div>
-        </div>
-
-        <!-- Custom Elegant Confirm -->
-        <div id="uiConfirm" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm modal-overlay">
-            <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 w-10/12 max-w-sm text-center shadow-2xl modal-box">
-                <div class="w-16 h-16 bg-red-50 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                </div>
-                <h3 id="uiConfirmTitle" class="text-xl font-bold mb-2 text-slate-800 dark:text-white"></h3>
-                <p id="uiConfirmMsg" class="text-sm text-slate-500 dark:text-slate-400 mb-6"></p>
-                <div class="flex gap-3">
-                    <button onclick="closeUiConfirm()" class="flex-1 bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200 py-3 rounded-xl font-bold active:scale-95 transition-transform">إلغاء</button>
-                    <button id="uiConfirmBtn" class="flex-1 bg-red-500 text-white py-3 rounded-xl font-bold active:scale-95 transition-transform shadow-lg shadow-red-500/30">تأكيد</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Thursday Mandatory Modal -->
-        <div id="thursdayModal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 backdrop-blur-sm">
-            <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 w-11/12 max-w-sm text-center shadow-2xl">
-                <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
-                    <i class="fa-solid fa-file-invoice-dollar"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-2">تنبيه ليلة الخميس!</h3>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">يجب تصفية الحسابات وتصدير تقارير المحامين الأسبوعية.</p>
-                <button onclick="switchTab('accounting'); document.getElementById('thursdayModal').style.display='none';" class="w-full bg-primary text-white py-3 rounded-xl font-bold">الذهاب للتحاسب</button>
-            </div>
-        </div>
-
+    <!-- MAIN CONTAINER -->
+    <div class="min-h-screen">
         <!-- 1. HOME VIEW -->
         <div id="view-home" class="view-section active p-4">
             <div class="flex justify-between items-center mb-6 pt-2">
@@ -186,12 +103,12 @@
                     </h1>
                     <p class="text-sm text-slate-500">نظرة عامة على نشاطك</p>
                 </div>
-                <button onclick="toggleTheme()" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow flex items-center justify-center active:scale-90 transition-transform">
+                <button onclick="toggleTheme()" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-md flex items-center justify-center active:scale-90 transition-transform border border-slate-100 dark:border-slate-700">
                     <i id="themeIcon" class="fa-solid fa-moon text-slate-600 dark:text-yellow-400"></i>
                 </button>
             </div>
 
-            <div class="card-gradient rounded-3xl p-5 text-white mb-6 shadow-xl shadow-indigo-200 dark:shadow-none relative overflow-hidden">
+            <div class="card-gradient rounded-3xl p-5 text-white mb-6 shadow-[0_10px_30px_rgb(79,70,229,0.3)] dark:shadow-none relative overflow-hidden">
                 <div class="absolute -right-10 -top-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
                 <h3 class="text-white/80 text-sm mb-1 font-semibold flex justify-between">إجمالي مستحقاتك <i class="fa-solid fa-arrow-trend-up"></i></h3>
                 <div class="text-3xl font-extrabold mb-1"><span id="home-weekly-profit">0</span> <span class="text-lg font-normal">د.ع</span></div>
@@ -199,22 +116,22 @@
             </div>
 
             <div class="grid grid-cols-2 gap-4 mb-6">
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm text-center border border-slate-100 dark:border-slate-700/50">
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm text-center border border-slate-100/80 dark:border-slate-700/50">
                     <i class="fa-solid fa-users text-blue-500 text-2xl mb-2 bg-blue-50 dark:bg-slate-700/50 w-12 h-12 flex items-center justify-center rounded-xl mx-auto"></i>
                     <div class="text-2xl font-bold" id="home-lawyers-count">0</div>
                     <div class="text-xs text-slate-500">محامون مسجلون</div>
                 </div>
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm text-center border border-slate-100 dark:border-slate-700/50">
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm text-center border border-slate-100/80 dark:border-slate-700/50">
                     <i class="fa-regular fa-building text-purple-500 text-2xl mb-2 bg-purple-50 dark:bg-slate-700/50 w-12 h-12 flex items-center justify-center rounded-xl mx-auto"></i>
                     <div class="text-2xl font-bold" id="home-companies-count">0</div>
                     <div class="text-xs text-slate-500">الشركات</div>
                 </div>
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm text-center border border-slate-100 dark:border-slate-700/50">
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm text-center border border-slate-100/80 dark:border-slate-700/50">
                     <i class="fa-solid fa-triangle-exclamation text-red-500 text-2xl mb-2 bg-red-50 dark:bg-slate-700/50 w-12 h-12 flex items-center justify-center rounded-xl mx-auto"></i>
                     <div class="text-2xl font-bold text-red-500" id="home-stalled-count">0</div>
                     <div class="text-xs text-slate-500">معاملات متلكئة</div>
                 </div>
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm text-center border border-slate-100 dark:border-slate-700/50">
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm text-center border border-slate-100/80 dark:border-slate-700/50">
                     <i class="fa-solid fa-spinner text-primary text-2xl mb-2 bg-indigo-50 dark:bg-slate-700/50 w-12 h-12 flex items-center justify-center rounded-xl mx-auto"></i>
                     <div class="text-2xl font-bold" id="home-active-count">0</div>
                     <div class="text-xs text-slate-500">معاملات جارية</div>
@@ -222,8 +139,8 @@
             </div>
             
             <div class="space-y-3">
-                <button onclick="switchTab('newTx')" class="w-full bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm flex items-center justify-between font-bold active:scale-95 transition-transform border border-transparent hover:border-primary/20">
-                    <div class="flex items-center gap-3"><i class="fa-solid fa-plus-circle text-primary text-xl"></i> بدء معاملة جديدة</div>
+                <button onclick="switchTab('newTx')" class="w-full bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm flex items-center justify-between font-bold active:scale-95 transition-transform border border-transparent hover:border-primary/20 text-primary dark:text-white">
+                    <div class="flex items-center gap-3"><i class="fa-solid fa-plus-circle text-xl"></i> بدء معاملة جديدة</div>
                     <i class="fa-solid fa-chevron-left text-slate-400 text-sm"></i>
                 </button>
             </div>
@@ -236,7 +153,7 @@
                 <p class="text-sm text-slate-500">تأسيس قيد مسار جديد</p>
             </div>
 
-            <div class="space-y-5 bg-white dark:bg-slate-800 p-5 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700/50">
+            <div class="space-y-5 bg-white dark:bg-slate-800 p-5 rounded-[2rem] shadow-sm border border-slate-100/80 dark:border-slate-700/50">
                 <div>
                     <label class="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">اختيار المحامي</label>
                     <div class="flex gap-2">
@@ -277,7 +194,7 @@
                     </div>
                 </div>
 
-                <button onclick="createNewTransaction()" class="w-full card-gradient text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-indigo-300 dark:shadow-none mt-2 active:scale-95 transition-transform">إنشاء المعاملة</button>
+                <button onclick="createNewTransaction()" class="w-full card-gradient text-white py-4 rounded-xl font-bold text-lg shadow-[0_8px_20px_rgb(79,70,229,0.25)] mt-2 active:scale-95 transition-transform">إنشاء المعاملة</button>
             </div>
         </div>
 
@@ -305,12 +222,6 @@
                 <h1 class="text-2xl font-extrabold flex items-center gap-2"><i class="fa-solid fa-wallet text-primary"></i> التحاسب المالي</h1>
                 <p class="text-sm text-slate-500">الطباعة، الكشوفات واستلام الأتعاب</p>
             </div>
-
-            <div class="card-gradient rounded-3xl p-6 text-white mb-6 shadow-xl relative text-center">
-                <p class="text-white/80 text-sm mb-2">إجمالي الأتعاب المعلقة</p>
-                <div class="text-4xl font-extrabold mb-4"><span id="acc-total-dues">0</span> <span class="text-xl font-normal text-white/70">د.ع</span></div>
-            </div>
-
             <div id="accounting-list" class="space-y-4"></div>
         </div>
 
@@ -320,19 +231,16 @@
                 <h1 class="text-2xl font-extrabold flex items-center gap-2"><i class="fa-solid fa-box-archive text-primary"></i> الأرشيف والخزنة</h1>
                 <p class="text-sm text-slate-500">السجل التاريخي ومستندات الشركات</p>
             </div>
-
             <div class="flex gap-2 p-1 bg-white dark:bg-slate-800 rounded-xl mb-6 shadow-sm border border-slate-100 dark:border-slate-700">
                 <button onclick="toggleArchiveTab('tx')" id="tab-arch-tx" class="flex-1 py-2 rounded-lg text-sm font-bold bg-primary text-white shadow">الأرشيف (المنجزة)</button>
                 <button onclick="toggleArchiveTab('vault')" id="tab-arch-vault" class="flex-1 py-2 rounded-lg text-sm font-bold text-slate-500 dark:text-slate-400">خزنة الشركات</button>
             </div>
-
             <div id="archive-tx-content" class="space-y-4">
                 <input type="text" id="archive-search" onkeyup="renderArchive()" placeholder="ابحث باسم الشركة أو المعاملة..." class="input-field mb-4 font-bold">
                 <div id="archive-list" class="space-y-4"></div>
             </div>
-
             <div id="archive-vault-content" class="hidden space-y-4">
-                 <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm text-center border border-slate-100 dark:border-slate-700/50 mt-4">
+                 <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-sm text-center border border-slate-100 dark:border-slate-700/50 mt-4">
                     <i class="fa-regular fa-folder-open text-5xl text-slate-300 dark:text-slate-600 mb-4"></i>
                     <h3 class="font-extrabold text-lg text-primary">خزنة المستندات الرقمية</h3>
                     <p class="text-sm text-slate-500 mt-2 font-bold leading-relaxed">مساحة مخصصة لكل شركة لرفع صور المستندات والاحتفاظ بها سحابياً (قريباً).</p>
@@ -348,7 +256,7 @@
             </div>
 
             <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl shadow-sm space-y-4 border border-slate-100 dark:border-slate-700/50 mb-6">
-                <h3 class="font-bold border-b pb-2 dark:border-slate-700 text-primary"><i class="fa-solid fa-file-signature"></i> بيانات طباعة المستندات (السندات والكشوفات)</h3>
+                <h3 class="font-bold border-b pb-2 dark:border-slate-700 text-primary"><i class="fa-solid fa-file-signature"></i> بيانات طباعة المستندات</h3>
                 <div>
                     <label class="block text-xs font-bold mb-2 text-slate-500">اسم المعقب / مكتب التخليص</label>
                     <input type="text" id="set-name" class="input-field font-bold" placeholder="مثال: مصطفى فيصل عبود" oninput="saveSettingsRealtime()">
@@ -359,9 +267,8 @@
                 </div>
                 
                 <div class="border-t dark:border-slate-700 pt-4 mt-2">
-                    <label class="block text-xs font-bold mb-2 text-slate-500">التوقيع الإلكتروني (يظهر أسفل الـ PDF)</label>
+                    <label class="block text-xs font-bold mb-2 text-slate-500">التوقيع الإلكتروني</label>
                     <input type="file" id="sig-upload" accept="image/png, image/jpeg" class="hidden" onchange="handleSignatureUpload(event)">
-                    
                     <div class="flex items-center gap-3">
                         <button onclick="document.getElementById('sig-upload').click()" class="flex-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform border border-slate-200 dark:border-slate-600">
                             <i class="fa-solid fa-signature"></i> رفع صورة توقيع
@@ -386,10 +293,9 @@
             
             <button onclick="reqClearData()" class="w-full bg-red-50 text-red-600 dark:bg-red-900/20 py-4 rounded-xl font-bold border border-red-200 dark:border-red-800 active:scale-95 transition-transform"><i class="fa-solid fa-trash-can"></i> مسح كافة البيانات من المتصفح</button>
         </div>
-
     </div>
 
-    <!-- BOTTOM NAVIGATION (Fixed 7 items) -->
+    <!-- BOTTOM NAVIGATION -->
     <nav class="fixed bottom-0 w-full bg-white dark:bg-slate-900 flex justify-between px-1 pt-3 pb-safe bottom-nav z-40 border-t border-slate-100 dark:border-slate-800">
         <button onclick="switchTab('home')" class="nav-item active flex flex-col items-center gap-1 pb-2" id="nav-home"><i class="fa-solid fa-border-all text-xl"></i><span class="text-[9px]">الرئيسية</span></button>
         <button onclick="switchTab('newTx')" class="nav-item flex flex-col items-center gap-1 pb-2" id="nav-newTx"><i class="fa-solid fa-circle-plus text-xl"></i><span class="text-[9px]">معاملة</span></button>
@@ -428,60 +334,66 @@
         </div>
     </div>
 
-    <!-- Transaction Details Popup (FIXED UI HIERARCHY) -->
-    <div id="txDetailsModal" class="fixed inset-0 z-50 hidden flex items-end justify-center bg-black/50 backdrop-blur-sm">
-        <div class="glass-modal w-full h-[90vh] rounded-t-3xl p-6 shadow-2xl flex flex-col transform transition-transform translate-y-full" id="txDetailsContent">
+    <!-- FIXED: Transaction Details Popup (Elegant "Living" Card) -->
+    <div id="txDetailsModal" class="fixed inset-0 z-50 hidden flex items-end justify-center bg-black/50 backdrop-blur-md">
+        <div class="glass-modal w-full h-[92vh] rounded-t-[2.5rem] p-6 shadow-2xl flex flex-col transform transition-transform translate-y-full border-t border-white/20" id="txDetailsContent">
             <div class="flex justify-between items-start mb-4">
-                <button onclick="closeModal('txDetailsModal')" class="bg-slate-200/50 dark:bg-slate-700/50 text-slate-800 dark:text-white w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md active:scale-90"><i class="fa-solid fa-chevron-down"></i></button>
+                <button onclick="closeModal('txDetailsModal')" class="bg-white/80 dark:bg-slate-700/80 text-slate-800 dark:text-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm active:scale-90 transition-transform"><i class="fa-solid fa-chevron-down"></i></button>
                 <div class="text-left" dir="ltr">
-                    <div class="text-2xl font-extrabold text-primary" id="det-fee">0 د.ع</div>
+                    <div class="text-2xl font-black text-primary drop-shadow-sm" id="det-fee">0 د.ع</div>
                 </div>
             </div>
             
-            <!-- FIXED: Elegant Card with Hierarchy (Large Title, Medium Company, Small Sub-info) -->
-            <div class="mb-5 bg-white dark:bg-slate-800 p-5 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700/50">
-                <h2 class="text-2xl font-extrabold mb-3 text-slate-800 dark:text-white" id="det-type">نوع المعاملة</h2>
-                <div class="space-y-2">
-                    <p class="text-sm font-bold text-slate-600 dark:text-slate-300 flex items-center gap-2">
-                        <i class="fa-regular fa-building text-slate-400"></i> 
+            <!-- THE LIVING CARD: Hierarchy & Shadows -->
+            <div class="mb-5 bg-gradient-to-b from-white to-slate-50 dark:from-slate-800 dark:to-slate-800/95 p-6 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-white dark:border-slate-700/50 relative overflow-hidden">
+                <!-- Decorative subtle glow -->
+                <div class="absolute -left-10 -top-10 w-32 h-32 bg-primary/5 rounded-full blur-2xl"></div>
+                
+                <h2 class="text-3xl font-black mb-3 text-slate-800 dark:text-white tracking-tight" id="det-type">نوع المعاملة</h2>
+                
+                <div class="space-y-3 relative z-10">
+                    <p class="text-base font-bold text-slate-700 dark:text-slate-200 flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-full bg-indigo-50 dark:bg-slate-700 flex items-center justify-center text-primary"><i class="fa-regular fa-building"></i></span> 
                         <span id="det-comp">الشركة</span>
                     </p>
-                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                        <i class="fa-solid fa-scale-balanced text-slate-400"></i> 
+                    <p class="text-sm font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-700/50 flex items-center justify-center text-slate-400"><i class="fa-solid fa-scale-balanced"></i></span> 
                         <span id="det-lawyer">المحامي</span>
-                        <span class="mx-1 text-slate-300 dark:text-slate-600">•</span>
-                        <i class="fa-solid fa-building-columns text-slate-400 ml-0.5"></i>
+                    </p>
+                    <p class="text-sm font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-700/50 flex items-center justify-center text-slate-400"><i class="fa-solid fa-building-columns"></i></span> 
                         <span id="det-dept">الدائرة</span>
                     </p>
                 </div>
             </div>
 
-            <div class="flex-1 overflow-y-auto mb-4 bg-white/60 dark:bg-slate-800/60 p-4 rounded-3xl border border-white/40 shadow-inner">
-                <div class="flex justify-between items-center mb-4 border-b dark:border-slate-700/50 pb-2">
-                    <h4 class="font-extrabold text-sm">خط سير المعاملة</h4>
-                    <span class="text-[11px] px-3 py-1 rounded-full font-bold shadow-sm" id="det-status-badge">جارية</span>
+            <!-- TIMELINE -->
+            <div class="flex-1 overflow-y-auto mb-4 bg-white/70 dark:bg-slate-800/70 p-5 rounded-[2rem] border border-white/60 dark:border-slate-700/30 shadow-[inset_0_2px_15px_rgb(0,0,0,0.03)] backdrop-blur-md">
+                <div class="flex justify-between items-center mb-5 border-b dark:border-slate-700/50 pb-3">
+                    <h4 class="font-extrabold text-sm text-slate-800 dark:text-white">خط سير المعاملة</h4>
+                    <span class="text-[11px] px-3 py-1.5 rounded-full font-bold shadow-sm" id="det-status-badge">جارية</span>
                 </div>
-                <div class="relative border-r-2 border-primary/30 pr-4 space-y-6" id="det-stations"></div>
+                <div class="relative border-r-2 border-primary/20 pr-5 space-y-6" id="det-stations"></div>
             </div>
 
+            <!-- BUTTONS -->
             <div class="grid grid-cols-2 gap-3 mt-auto pb-safe">
-                <button onclick="openModal('addStationModal')" class="card-gradient text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-95"><i class="fa-solid fa-plus"></i> إضافة محطة</button>
-                <button onclick="reqMarkTxCompleted()" class="bg-emerald-500 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/30 active:scale-95"><i class="fa-solid fa-check-double"></i> إنجاز وتخزين</button>
-                <button id="btn-toggle-stall" onclick="toggleStallTx()" class="bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400 py-3 rounded-xl font-bold flex items-center justify-center gap-2 col-span-2 border border-red-200 dark:border-red-800 active:scale-95"><i class="fa-solid fa-circle-exclamation"></i> إيقاف مؤقت (تلكؤ)</button>
-                <button onclick="reqDeleteTx()" class="text-slate-400 dark:text-slate-500 py-2 text-sm font-bold col-span-2 flex justify-center gap-1 active:text-red-500 transition-colors"><i class="fa-regular fa-trash-can"></i> حذف السجل نهائياً</button>
+                <button onclick="openModal('addStationModal')" class="card-gradient text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-[0_5px_15px_rgb(79,70,229,0.3)] active:scale-95 transition-transform"><i class="fa-solid fa-plus"></i> تحديث المسار</button>
+                <button onclick="reqMarkTxCompleted()" class="bg-emerald-500 text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-[0_5px_15px_rgb(16,185,129,0.3)] active:scale-95 transition-transform"><i class="fa-solid fa-check-double"></i> إنجاز وتخزين</button>
+                <button id="btn-toggle-stall" onclick="toggleStallTx()" class="bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400 py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 col-span-2 border border-red-200 dark:border-red-800 active:scale-95 transition-transform"><i class="fa-solid fa-circle-exclamation"></i> إيقاف مؤقت (تلكؤ)</button>
             </div>
         </div>
     </div>
 
-    <!-- Add Station -->
+    <!-- Add Station Modal -->
     <div id="addStationModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/50 backdrop-blur-sm">
-        <div class="bg-white dark:bg-slate-800 w-11/12 max-w-sm rounded-3xl p-6 shadow-2xl">
-            <h3 class="text-lg font-bold mb-4 text-center border-b pb-2 dark:border-slate-700">تحديث مسار المعاملة</h3>
-            <input type="text" id="stat-name" placeholder="اسم القسم أو الغرفة" class="input-field mb-4 font-bold">
-            <input type="text" id="stat-user" placeholder="اسم الموظف المستلم أو الملاحظة" class="input-field mb-6 text-sm">
-            <div class="flex gap-2">
-                <button onclick="closeModal('addStationModal')" class="flex-1 bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200 py-3 rounded-xl font-bold">إلغاء</button>
-                <button onclick="saveStation()" class="flex-1 bg-primary text-white py-3 rounded-xl font-bold shadow-lg">حفظ المحطة</button>
+        <div class="bg-white dark:bg-slate-800 w-11/12 max-w-sm rounded-[2rem] p-6 shadow-2xl border border-slate-100 dark:border-slate-700">
+            <h3 class="text-lg font-extrabold mb-5 text-center text-primary">تحديث مسار المعاملة</h3>
+            <input type="text" id="stat-name" placeholder="اسم القسم أو الغرفة" class="input-field mb-4 font-bold bg-slate-50">
+            <input type="text" id="stat-user" placeholder="اسم الموظف أو ملاحظة" class="input-field mb-6 text-sm bg-slate-50">
+            <div class="flex gap-3">
+                <button onclick="closeModal('addStationModal')" class="flex-1 bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200 py-3 rounded-xl font-bold active:scale-95">إلغاء</button>
+                <button onclick="saveStation()" class="flex-1 bg-primary text-white py-3 rounded-xl font-bold shadow-md active:scale-95">حفظ المسار</button>
             </div>
         </div>
     </div>
@@ -496,7 +408,7 @@
         const formatDate = (ts) => { let d = new Date(ts); return d.toLocaleDateString('ar-IQ', {month: 'short', day: 'numeric'}) + ' ' + d.toLocaleTimeString('ar-IQ', {hour: '2-digit', minute:'2-digit'}); };
 
         function init() {
-            const saved = localStorage.getItem('moaqib_db_v4');
+            const saved = localStorage.getItem('moaqib_db_v5');
             if(saved) db = JSON.parse(saved);
             
             if(!db.settings) db.settings = { name: '', address: '', theme: 'light', signature: null };
@@ -509,22 +421,19 @@
                 document.getElementById('sig-preview').src = db.settings.signature;
             }
 
-            checkThursdayAlert();
             renderAll();
         }
 
-        function saveData() { localStorage.setItem('moaqib_db_v4', JSON.stringify(db)); renderAll(); }
+        function saveData() { localStorage.setItem('moaqib_db_v5', JSON.stringify(db)); renderAll(); }
 
-        // Custom UI Modals
+        // --- Custom UI Alerts ---
         function customAlert(title, message, type = 'info') {
             document.getElementById('uiAlertTitle').innerText = title;
             document.getElementById('uiAlertMsg').innerText = message;
-            
             const icon = document.getElementById('uiAlertIcon');
             if(type === 'error') { icon.className = "w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl"; icon.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>'; }
             else if (type === 'success') { icon.className = "w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl"; icon.innerHTML = '<i class="fa-solid fa-circle-check"></i>'; }
             else { icon.className = "w-16 h-16 bg-primary/20 text-primary rounded-full flex items-center justify-center mx-auto mb-4 text-3xl"; icon.innerHTML = '<i class="fa-solid fa-circle-info"></i>'; }
-
             document.getElementById('uiAlert').classList.add('active');
         }
         function closeUiAlert() { document.getElementById('uiAlert').classList.remove('active'); }
@@ -536,13 +445,9 @@
             document.getElementById('uiConfirm').classList.add('active');
         }
         function closeUiConfirm() { document.getElementById('uiConfirm').classList.remove('active'); confirmAction = null; }
-        
-        document.getElementById('uiConfirmBtn').addEventListener('click', () => {
-            if(confirmAction) confirmAction();
-            closeUiConfirm();
-        });
+        document.getElementById('uiConfirmBtn').addEventListener('click', () => { if(confirmAction) confirmAction(); closeUiConfirm(); });
 
-        // Navigation
+        // --- Navigation ---
         function switchTab(tabId) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.getElementById(`view-${tabId}`).classList.add('active');
@@ -550,74 +455,47 @@
             document.getElementById(`nav-${tabId}`).classList.add('active');
             window.scrollTo(0, 0);
         }
-
         function toggleArchiveTab(type) {
             document.getElementById('tab-arch-tx').className = type==='tx' ? 'flex-1 py-2 rounded-lg text-sm font-bold bg-primary text-white shadow' : 'flex-1 py-2 rounded-lg text-sm font-bold text-slate-500 dark:text-slate-400';
             document.getElementById('tab-arch-vault').className = type==='vault' ? 'flex-1 py-2 rounded-lg text-sm font-bold bg-primary text-white shadow' : 'flex-1 py-2 rounded-lg text-sm font-bold text-slate-500 dark:text-slate-400';
-            
             document.getElementById('archive-tx-content').style.display = type === 'tx' ? 'block' : 'none';
             document.getElementById('archive-vault-content').style.display = type === 'vault' ? 'block' : 'none';
         }
-
         function toggleTheme() {
             const isDark = document.documentElement.classList.toggle('dark');
-            db.settings.theme = isDark ? 'dark' : 'light';
-            saveData();
+            db.settings.theme = isDark ? 'dark' : 'light'; saveData();
         }
-
         function openModal(id) {
-            const modal = document.getElementById(id);
-            modal.style.display = 'flex';
+            const modal = document.getElementById(id); modal.style.display = 'flex';
             setTimeout(() => modal.children[0].classList.remove('translate-y-full'), 10);
         }
-
         function closeModal(id) {
-            const modal = document.getElementById(id);
-            modal.children[0].classList.add('translate-y-full');
+            const modal = document.getElementById(id); modal.children[0].classList.add('translate-y-full');
             setTimeout(() => modal.style.display = 'none', 300);
         }
 
-        // Settings
+        // --- Settings ---
         function saveSettingsRealtime() {
             db.settings.name = document.getElementById('set-name').value;
             db.settings.address = document.getElementById('set-address').value;
             saveData();
         }
-
         function handleSignatureUpload(event) {
-            const file = event.target.files[0];
-            if(!file) return;
+            const file = event.target.files[0]; if(!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
                 db.settings.signature = e.target.result;
                 document.getElementById('sig-preview-container').classList.remove('hidden');
-                document.getElementById('sig-preview').src = db.settings.signature;
-                saveData();
-            };
-            reader.readAsDataURL(file);
+                document.getElementById('sig-preview').src = db.settings.signature; saveData();
+            }; reader.readAsDataURL(file);
         }
-
         function removeSignature() {
             db.settings.signature = null;
             document.getElementById('sig-preview-container').classList.add('hidden');
-            document.getElementById('sig-preview').src = '';
-            document.getElementById('sig-upload').value = '';
-            saveData();
+            document.getElementById('sig-upload').value = ''; saveData();
         }
 
-        function checkThursdayAlert() {
-            const now = new Date();
-            if(now.getDay() === 4 && now.getHours() >= 18) {
-                const lastCheck = localStorage.getItem('thursday_checked_v4');
-                const weekStr = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
-                if(lastCheck !== weekStr) {
-                    document.getElementById('thursdayModal').style.display = 'flex';
-                    localStorage.setItem('thursday_checked_v4', weekStr);
-                }
-            }
-        }
-
-        // Entities
+        // --- Data Logic ---
         function saveLawyer() {
             const name = document.getElementById('in-lawyer-name').value;
             if(!name) return customAlert('نقص', 'أدخل اسم المحامي', 'error');
@@ -625,16 +503,6 @@
             closeModal('addLawyerModal'); document.getElementById('in-lawyer-name').value = '';
             saveData(); customAlert('نجاح', 'تم الحفظ', 'success');
         }
-
-        function reqDeleteLawyer(id) {
-            if(db.transactions.some(t => t.lawyerId === id)) return customAlert('تنبيه', 'يجب حذف معاملاته أولاً.', 'error');
-            customConfirm('تأكيد', 'سيتم الحذف نهائياً.', () => {
-                db.lawyers = db.lawyers.filter(l => l.id !== id);
-                db.companies = db.companies.filter(c => c.lawyerId !== id); 
-                saveData(); customAlert('نجاح', 'تم الحذف', 'success');
-            });
-        }
-
         function saveCompany() {
             const name = document.getElementById('in-comp-name').value;
             const lawyerId = document.getElementById('in-comp-lawyer').value;
@@ -643,37 +511,25 @@
             closeModal('addCompanyModal'); document.getElementById('in-comp-name').value = '';
             saveData(); customAlert('نجاح', 'تم الحفظ', 'success');
         }
-
-        function reqDeleteCompany(id) {
-            if(db.transactions.some(t => t.companyId === id)) return customAlert('تنبيه', 'يجب حذف معاملاتها أولاً.', 'error');
-            customConfirm('تأكيد', 'سيتم الحذف نهائياً.', () => {
-                db.companies = db.companies.filter(c => c.id !== id);
-                saveData(); customAlert('نجاح', 'تم الحذف', 'success');
-            });
-        }
-
         function updateCompanyDropdown() {
             const lIdStr = document.getElementById('new-tx-lawyer').value;
             if(!lIdStr) { document.getElementById('new-tx-company').innerHTML = '<option value="">- أختر محامي أولاً -</option>'; return; }
             const comps = db.companies.filter(c => c.lawyerId === parseInt(lIdStr));
-            document.getElementById('new-tx-company').innerHTML = comps.map(c => `<option value="${c.id}">${c.name}</option>`).join('') || '<option value="">- أضف شركة لهذا المحامي -</option>';
+            document.getElementById('new-tx-company').innerHTML = comps.map(c => `<option value="${c.id}">${c.name}</option>`).join('') || '<option value="">- أضف شركة -</option>';
         }
-
         function createNewTransaction() {
             const compId = document.getElementById('new-tx-company').value;
             const lawyerId = document.getElementById('new-tx-lawyer').value;
             const type = document.getElementById('new-tx-type').value;
             const fee = document.getElementById('new-tx-fee').value;
             const dept = document.querySelector('input[name="new-tx-dept"]:checked').value;
-
             if(!compId || !lawyerId || !type || !fee) return customAlert('نقص', 'أكمل بيانات المعاملة', 'error');
-
             db.transactions.push({ id: Date.now(), companyId: parseInt(compId), lawyerId: parseInt(lawyerId), type, dept, fee: parseInt(fee), status: 'active', stations: [], lastUpdate: Date.now() });
-
             document.getElementById('new-tx-type').value = ''; document.getElementById('new-tx-fee').value = '';
             saveData(); switchTab('active');
         }
 
+        // --- Render UI ---
         function renderAll() {
             const lOpts = db.lawyers.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
             document.getElementById('new-tx-lawyer').innerHTML = lOpts || '<option value="">- لا يوجد -</option>';
@@ -688,26 +544,8 @@
             document.getElementById('home-companies-count').innerText = db.companies.length;
             document.getElementById('home-active-count').innerText = activeTxs.length;
             document.getElementById('home-stalled-count').innerText = stalledTxs.length;
-            
             document.getElementById('badge-active').innerText = activeTxs.length;
             document.getElementById('badge-active').style.display = activeTxs.length > 0 ? 'flex' : 'none';
-
-            document.getElementById('settings-lawyers-list').innerHTML = db.lawyers.map(l => `
-                <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border dark:border-slate-700">
-                    <span class="font-bold text-sm">${l.name}</span>
-                    <button onclick="reqDeleteLawyer(${l.id})" class="text-red-500 hover:bg-red-100 p-2 rounded-lg transition-colors"><i class="fa-solid fa-trash-can"></i></button>
-                </div>
-            `).join('') || '<p class="text-xs text-slate-400 text-center py-2">لا يوجد محامين</p>';
-
-            document.getElementById('settings-companies-list').innerHTML = db.companies.map(c => `
-                <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border dark:border-slate-700">
-                    <div>
-                        <span class="font-bold text-sm block">${c.name}</span>
-                        <span class="text-[10px] text-slate-500">محامي: ${db.lawyers.find(l=>l.id==c.lawyerId)?.name || 'غير معروف'}</span>
-                    </div>
-                    <button onclick="reqDeleteCompany(${c.id})" class="text-red-500 hover:bg-red-100 p-2 rounded-lg transition-colors"><i class="fa-solid fa-trash-can"></i></button>
-                </div>
-            `).join('') || '<p class="text-xs text-slate-400 text-center py-2">لا توجد شركات</p>';
 
             renderTxList('active-list', activeTxs, 'صندوق المعاملات الجارية فارغ');
             renderTxList('stalled-list', stalledTxs, 'ممتاز، لا توجد معاملات متلكئة');
@@ -721,12 +559,11 @@
                 container.innerHTML = `<div class="text-center py-12 opacity-50"><i class="fa-regular fa-folder-open text-5xl mb-4 text-slate-300"></i><p class="font-bold">${emptyMsg}</p></div>`;
                 return;
             }
-
             container.innerHTML = txs.sort((a,b)=> b.lastUpdate - a.lastUpdate).map(tx => {
                 const comp = db.companies.find(c => c.id === tx.companyId)?.name || 'غير معروف';
                 const lawyer = db.lawyers.find(l => l.id === tx.lawyerId)?.name || '';
                 const isStagnant = (Date.now() - tx.lastUpdate) > (24 * 60 * 60 * 1000) && tx.status === 'active';
-                const bgClass = isStagnant ? 'card-stagnant text-white' : 'card-gradient text-white shadow-lg shadow-indigo-200 dark:shadow-none';
+                const bgClass = isStagnant ? 'card-stagnant text-white' : 'card-gradient text-white shadow-[0_8px_20px_rgb(79,70,229,0.3)] dark:shadow-none';
                 const iconStagnant = isStagnant ? `<i class="fa-solid fa-clock text-yellow-300 fa-beat absolute top-5 left-5"></i>` : '';
 
                 return `
@@ -734,7 +571,7 @@
                     <div class="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
                     ${iconStagnant}
                     <h3 class="text-lg font-black mb-1">${tx.type}</h3>
-                    <p class="text-xs font-bold opacity-90 flex items-center gap-2 mb-4"><i class="fa-regular fa-building"></i> ${comp} | ${lawyer}</p>
+                    <p class="text-[11px] font-bold opacity-90 flex items-center gap-2 mb-4"><i class="fa-regular fa-building"></i> ${comp} | ${lawyer}</p>
                     <div class="flex justify-between items-end border-t border-white/20 pt-3">
                         <div class="text-[11px] font-bold bg-black/20 px-2 py-1.5 rounded-lg backdrop-blur-sm"><i class="fa-solid fa-location-dot"></i> ${tx.stations.length > 0 ? tx.stations[tx.stations.length-1].name : 'المحطة الأولى'}</div>
                         <div class="font-extrabold text-xl" dir="ltr">${numFormat.format(tx.fee)}</div>
@@ -743,7 +580,7 @@
             }).join('');
         }
 
-        // Transactions logic
+        // --- Transaction Details (The Living Card) ---
         function openTxDetails(id) {
             currentTxId = id;
             const tx = db.transactions.find(t => t.id === id);
@@ -756,15 +593,15 @@
 
             const badge = document.getElementById('det-status-badge');
             badge.innerText = tx.status === 'active' ? 'قيد العمل' : (tx.status === 'stalled' ? 'متلكئة' : 'منجزة');
-            badge.className = `text-[11px] px-3 py-1.5 rounded-full font-bold shadow-sm ${tx.status === 'active' ? 'bg-primary text-white' : (tx.status === 'stalled' ? 'bg-red-500 text-white' : 'bg-emerald-500 text-white')}`;
+            badge.className = `text-[11px] px-3 py-1.5 rounded-full font-bold shadow-sm ${tx.status === 'active' ? 'bg-primary text-white shadow-primary/30' : (tx.status === 'stalled' ? 'bg-red-500 text-white shadow-red-500/30' : 'bg-emerald-500 text-white')}`;
             
             const btnStall = document.getElementById('btn-toggle-stall');
             if(tx.status === 'stalled') {
                 btnStall.innerHTML = `<i class="fa-solid fa-rotate-left"></i> تفعيل المعاملة`;
-                btnStall.className = "bg-primary text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 col-span-2 shadow-lg";
+                btnStall.className = "bg-primary text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 col-span-2 shadow-lg active:scale-95 transition-transform";
             } else {
                 btnStall.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> إيقاف مؤقت (تلكؤ)`;
-                btnStall.className = "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400 py-3 rounded-xl font-bold flex items-center justify-center gap-2 col-span-2 border border-red-200 dark:border-red-800";
+                btnStall.className = "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400 py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 col-span-2 border border-red-200 dark:border-red-800 active:scale-95 transition-transform";
             }
 
             const statContainer = document.getElementById('det-stations');
@@ -772,8 +609,8 @@
             else {
                 statContainer.innerHTML = [...tx.stations].reverse().map((s, i) => `
                     <div class="relative">
-                        <div class="absolute -right-[22px] top-1 w-3.5 h-3.5 ${i===0 ? 'bg-primary ring-4 ring-primary/20' : 'bg-slate-300 border-2 border-white dark:border-slate-800'} rounded-full"></div>
-                        <div class="${i===0 ? 'opacity-100 bg-white/40 dark:bg-slate-900/40 p-3 rounded-xl' : 'opacity-60'}">
+                        <div class="absolute -right-[24px] top-1 w-3.5 h-3.5 ${i===0 ? 'bg-primary ring-4 ring-primary/20 animate-pulse-ring' : 'bg-slate-300 border-2 border-white dark:border-slate-800'} rounded-full"></div>
+                        <div class="${i===0 ? 'opacity-100 bg-white dark:bg-slate-900/60 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50' : 'opacity-60'}">
                             <h5 class="font-extrabold text-sm text-primary mb-1">${s.name}</h5>
                             <p class="text-xs font-bold text-slate-700 dark:text-slate-300">${s.user}</p>
                             <p class="text-[10px] text-slate-400 mt-2 font-bold"><i class="fa-regular fa-clock"></i> ${formatDate(s.date)}</p>
@@ -787,44 +624,30 @@
         function saveStation() {
             const name = document.getElementById('stat-name').value;
             const user = document.getElementById('stat-user').value;
-            if(!name) return customAlert('خطأ', 'يرجى كتابة اسم القسم', 'error');
-            
+            if(!name) return customAlert('خطأ', 'الرجاء كتابة اسم القسم', 'error');
             const tx = db.transactions.find(t => t.id === currentTxId);
             tx.stations.push({ name, user, date: Date.now() });
             tx.lastUpdate = Date.now();
-            
             document.getElementById('stat-name').value = ''; document.getElementById('stat-user').value = '';
             closeModal('addStationModal'); saveData(); openTxDetails(currentTxId);
         }
-
         function toggleStallTx() {
             const tx = db.transactions.find(t => t.id === currentTxId);
             tx.status = tx.status === 'stalled' ? 'active' : 'stalled';
-            tx.lastUpdate = Date.now();
-            saveData(); closeModal('txDetailsModal');
+            tx.lastUpdate = Date.now(); saveData(); closeModal('txDetailsModal');
         }
-
         function reqMarkTxCompleted() {
-            customConfirm('إنجاز', 'هل تنقلها للأرشيف؟', () => {
+            customConfirm('إنجاز', 'هل تنقلها للأرشيف المنجز؟', () => {
                 const tx = db.transactions.find(t => t.id === currentTxId);
                 tx.status = 'completed'; tx.lastUpdate = Date.now();
                 saveData(); closeModal('txDetailsModal'); customAlert('نجاح', 'نُقلت للأرشيف', 'success');
             });
         }
-
-        function reqDeleteTx() {
-            customConfirm('حذف', 'سيتم مسح المعاملة نهائياً.', () => {
-                db.transactions = db.transactions.filter(t => t.id !== currentTxId);
-                saveData(); closeModal('txDetailsModal');
-            });
-        }
-
+        
         function renderArchive() {
             const q = document.getElementById('archive-search').value.toLowerCase();
             let compTxs = db.transactions.filter(t => t.status === 'completed');
-            
             if(q) compTxs = compTxs.filter(t => t.type.toLowerCase().includes(q) || (db.companies.find(c => c.id === t.companyId)?.name || '').toLowerCase().includes(q));
-
             document.getElementById('archive-list').innerHTML = compTxs.map(tx => `
                 <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border-r-4 border-emerald-500 shadow-sm flex justify-between items-center font-bold">
                     <div><h4 class="text-sm text-slate-800 dark:text-white">${tx.type}</h4><p class="text-[11px] text-slate-500 mt-1">${db.companies.find(c => c.id === tx.companyId)?.name}</p></div>
@@ -832,106 +655,132 @@
                 </div>`).join('') || `<p class="text-center font-bold text-slate-400 py-10">لا توجد نتائج</p>`;
         }
 
-        // PDF & Accounting (FIXED FOR MOBILE HTML2PDF)
+        // --- ACCOUNTING & PDF (VIRTUAL DOM FIX) ---
         function renderAccounting() {
             const activeTxs = db.transactions.filter(t => t.status === 'active' || t.status === 'completed'); 
             let lawyerDues = {};
             activeTxs.forEach(tx => { if(!lawyerDues[tx.lawyerId]) lawyerDues[tx.lawyerId] = []; lawyerDues[tx.lawyerId].push(tx); });
-
             document.getElementById('acc-total-dues').innerText = numFormat.format(activeTxs.reduce((a,b)=>a+b.fee,0));
-
             document.getElementById('accounting-list').innerHTML = Object.keys(lawyerDues).map(lId => {
                 const lawyer = db.lawyers.find(l => l.id == lId);
                 const txs = lawyerDues[lId];
                 const sum = txs.reduce((a,b) => a+b.fee, 0);
-                
                 return `
-                <div class="bg-white dark:bg-slate-800 rounded-3xl p-5 shadow-sm border border-slate-100 dark:border-slate-700/50">
-                    <div class="flex justify-between items-center border-b dark:border-slate-700 pb-3 mb-3">
+                <div class="bg-white dark:bg-slate-800 rounded-[2rem] p-5 shadow-sm border border-slate-100 dark:border-slate-700/50">
+                    <div class="flex justify-between items-center border-b dark:border-slate-700 pb-3 mb-4">
                         <div><h3 class="font-extrabold text-lg text-primary">${lawyer?.name}</h3><p class="text-xs font-bold text-slate-500">${txs.length} معاملات</p></div>
                         <div class="text-xl font-extrabold" dir="ltr">${numFormat.format(sum)}</div>
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="triggerPDF(${lId}, 'receipt', ${sum})" class="flex-1 bg-slate-800 text-white dark:bg-slate-700 py-3 rounded-xl text-sm font-bold active:scale-95 transition-transform shadow-md"><i class="fa-solid fa-receipt"></i> طباعة إيصال</button>
-                        <button onclick="triggerPDF(${lId}, 'report', ${sum})" class="flex-1 bg-primary text-white py-3 rounded-xl text-sm font-bold active:scale-95 transition-transform shadow-md"><i class="fa-solid fa-file-pdf"></i> كشف تفصيلي</button>
+                        <button onclick="generateDynamicPDF(${lId}, 'receipt', ${sum})" class="flex-1 bg-slate-800 text-white dark:bg-slate-700 py-3 rounded-xl text-sm font-bold active:scale-95 transition-transform shadow-md"><i class="fa-solid fa-receipt"></i> طباعة إيصال</button>
+                        <button onclick="generateDynamicPDF(${lId}, 'report', ${sum})" class="flex-1 bg-primary text-white py-3 rounded-xl text-sm font-bold active:scale-95 transition-transform shadow-md"><i class="fa-solid fa-file-pdf"></i> كشف تفصيلي</button>
                     </div>
                 </div>`;
             }).join('');
         }
 
-        function triggerPDF(lawyerId, type, amount) {
+        // --- THE PDF MAGIC FIX (No DOM overlapping) ---
+        function generateDynamicPDF(lawyerId, type, amount) {
             const lawyer = db.lawyers.find(l => l.id == lawyerId);
             const dateStr = new Date().toLocaleDateString('ar-IQ');
             const refNo = 'REF-' + Date.now().toString().slice(-6);
-            
-            // Populate PDF Data
-            document.getElementById('pdf-title').innerText = type === 'receipt' ? 'سند استلام مالي' : 'كشف حساب معاملات';
-            document.getElementById('pdf-date').innerText = dateStr;
-            document.getElementById('pdf-ref').innerText = refNo;
-            document.getElementById('pdf-issuer-name').innerText = db.settings.name || 'بدون اسم';
-            document.getElementById('pdf-issuer-address').innerText = db.settings.address || 'بدون عنوان';
-            document.getElementById('pdf-sig-name').innerText = db.settings.name || 'الختم / التوقيع';
-            document.getElementById('pdf-lawyer-name').innerText = lawyer.name;
-            document.getElementById('pdf-doc-type').innerText = type === 'receipt' ? 'تصفية أتعاب' : 'تقرير أسبوعي للمسارات';
-            document.getElementById('pdf-amount').innerText = numFormat.format(amount) + ' د.ع';
+            const issuerName = db.settings.name || 'بدون اسم';
+            const issuerAddress = db.settings.address || 'بدون عنوان';
+            const docTitle = type === 'receipt' ? 'سند استلام مالي' : 'كشف حساب معاملات';
+            const docType = type === 'receipt' ? 'تصفية أتعاب' : 'تقرير أسبوعي للمسارات';
+            const sigImg = db.settings.signature ? `<img src="${db.settings.signature}" style="max-width: 180px; max-height: 90px;">` : '';
 
-            const sigImg = document.getElementById('pdf-signature-img');
-            if(db.settings.signature) { sigImg.src = db.settings.signature; sigImg.style.display = 'block'; } else { sigImg.style.display = 'none'; }
-
-            const listContainer = document.getElementById('pdf-tx-list-container');
-            if(type === 'report') {
+            let txListHTML = '';
+            if (type === 'report') {
                 const txs = db.transactions.filter(t => t.lawyerId == lawyerId);
-                document.getElementById('pdf-tx-list').innerHTML = txs.map(t => `
+                const listItems = txs.map(t => `
                     <div style="display:flex; justify-content:space-between; padding: 12px 0; border-bottom: 1px dashed #e2e8f0;">
                         <div><span style="color:#4f46e5;">•</span> ${t.type} <span style="color:#94a3b8; font-size:12px;">(${db.companies.find(c=>c.id==t.companyId)?.name})</span></div>
                         <div style="direction:ltr; font-weight:800;">${numFormat.format(t.fee)} IQD</div>
                     </div>`).join('');
-                listContainer.style.display = 'block';
-            } else {
-                listContainer.style.display = 'none';
+                txListHTML = `
+                    <div style="margin-top: 30px;">
+                        <h4 style="font-weight: 800; color: #4f46e5; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;">تفاصيل المعاملات:</h4>
+                        <div style="font-size: 14px; font-weight: 600;">${listItems}</div>
+                    </div>`;
             }
 
-            const qrTarget = document.getElementById("qr-target");
-            qrTarget.innerHTML = "";
-            new QRCode(qrTarget, { text: `Ref: ${refNo}\nLawyer: ${lawyer.name}\nTotal: ${amount} IQD`, width: 100, height: 100, colorDark : "#0f172a", colorLight : "#ffffff" });
+            // Create HTML purely in JavaScript
+            const template = `
+                <div style="background: white; color: #1e293b; font-family: 'Cairo', sans-serif; padding: 40px; width: 800px; min-height: 1000px; direction: rtl; box-sizing: border-box;">
+                    <div style="border: 2px solid #4f46e5; border-radius: 24px; padding: 40px; height: 100%; position: relative; background: #fafafa;">
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.03; font-size: 200px; color: #4f46e5;">⚖️</div>
+                        <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 30px; position: relative; z-index: 2;">
+                            <div>
+                                <h2 style="color: #4f46e5; font-size: 28px; font-weight: 900; margin: 0; margin-bottom: 5px;">${docTitle}</h2>
+                                <p style="margin: 0; font-size: 14px; color: #64748b; font-weight: 600;">التاريخ: ${dateStr}</p>
+                                <p style="margin: 0; font-size: 12px; color: #94a3b8; margin-top: 4px;">رقم الإيصال: ${refNo}</p>
+                            </div>
+                            <div style="text-align: left;">
+                                <h3 style="margin: 0; font-size: 20px; font-weight: 800; color: #0f172a;">${issuerName}</h3>
+                                <p style="margin: 0; font-size: 14px; color: #64748b; margin-top: 4px;">${issuerAddress}</p>
+                            </div>
+                        </div>
+                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 30px; margin-bottom: 40px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); position: relative; z-index: 2;">
+                            <div style="display: flex; margin-bottom: 20px;">
+                                <div style="width: 150px; font-weight: 800; color: #64748b; font-size: 16px;">الجهة المستفيدة:</div>
+                                <div style="font-weight: 900; font-size: 18px; color: #0f172a;">${lawyer.name}</div>
+                            </div>
+                            <div style="display: flex; margin-bottom: 20px;">
+                                <div style="width: 150px; font-weight: 800; color: #64748b; font-size: 16px;">نوع المستند:</div>
+                                <div style="font-weight: 800; font-size: 16px; color: #0f172a;">${docType}</div>
+                            </div>
+                            <div style="background: #f8fafc; border-radius: 12px; padding: 20px; margin-top: 30px; display: flex; justify-content: space-between; align-items: center; border: 1px dashed #cbd5e1;">
+                                <div style="font-size: 20px; font-weight: 900; color: #334155;">الإجمالي الكلي:</div>
+                                <div style="font-size: 28px; font-weight: 900; color: #4f46e5; direction: ltr;">${numFormat.format(amount)} د.ع</div>
+                            </div>
+                            ${txListHTML}
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto; padding-top: 40px; position: relative; z-index: 2;">
+                            <div style="text-align: center; background: white; padding: 10px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                                <div id="qr-target-${refNo}"></div>
+                                <p style="font-size: 10px; color: #94a3b8; margin-top: 8px; font-weight: 700;">موثق إلكترونياً</p>
+                            </div>
+                            <div style="text-align: center; width: 200px;">
+                                <p style="font-weight: 800; color: #64748b; margin-bottom: 10px;">التوقيع / المصادقة</p>
+                                <div style="height: 100px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">${sigImg}</div>
+                                <div style="border-top: 2px solid #0f172a; padding-top: 10px; font-weight: 900; font-size: 16px;">${issuerName}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+
+            // Create a temporary hidden div far outside the screen
+            const printContainer = document.createElement('div');
+            printContainer.style.position = 'fixed';
+            printContainer.style.left = '-9999px';
+            printContainer.style.top = '0';
+            printContainer.innerHTML = template;
+            document.body.appendChild(printContainer); // Must append to DOM for html2canvas to read it
+
+            // Generate QR
+            new QRCode(printContainer.querySelector(`#qr-target-${refNo}`), {
+                text: `Ref: ${refNo}\nLawyer: ${lawyer.name}\nTotal: ${amount} IQD`, width: 100, height: 100
+            });
 
             customAlert('تجهيز الملف', 'جاري إنشاء الملف الفخم، يرجى الانتظار...', 'info');
 
-            // Timeout ensures QR renders and DOM updates before taking the canvas screenshot
             setTimeout(() => {
-                try {
-                    const element = document.getElementById('pdf-content');
-                    const opt = {
-                        margin: 0, 
-                        filename: `${type}_${lawyer.name}.pdf`,
-                        image: { type: 'jpeg', quality: 1 },
-                        html2canvas: { 
-                            scale: 2, // Scale 2 is highly safe for mobile memory limits, preventing crashes
-                            useCORS: true, 
-                            letterRendering: true,
-                            scrollY: 0, // CRITICAL FIX: prevents blank pages when scrolled down
-                            windowWidth: 800 // Forces the canvas to render the fixed 800px width correctly
-                        },
-                        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-                    };
-                    
-                    html2pdf().set(opt).from(element).save().then(() => {
-                        closeUiAlert(); 
-                    }).catch(err => {
-                        console.error(err);
-                        closeUiAlert(); customAlert('خطأ فني', 'حدث خطأ أثناء الطباعة.', 'error');
-                    });
-                } catch(err) {
-                    console.error(err);
-                    closeUiAlert(); customAlert('خطأ فني', 'تعذر تهيئة الطباعة.', 'error');
-                }
-            }, 1000); // 1-second buffer for rendering on mobile
-        }
-
-        function reqClearData() {
-            customConfirm('تصفير قاعدة البيانات', 'هل أنت متأكد من مسح جميع البيانات؟', () => {
-                localStorage.removeItem('moaqib_db_v4'); location.reload();
-            });
+                const opt = {
+                    margin: 0, filename: `${type}_${lawyer.name}.pdf`,
+                    image: { type: 'jpeg', quality: 1 },
+                    html2canvas: { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 },
+                    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+                };
+                
+                html2pdf().set(opt).from(printContainer).save().then(() => {
+                    document.body.removeChild(printContainer); // Cleanup
+                    closeUiAlert(); 
+                }).catch(err => {
+                    document.body.removeChild(printContainer); // Cleanup
+                    closeUiAlert(); customAlert('خطأ', 'فشل في الطباعة', 'error');
+                });
+            }, 800);
         }
 
         init();
