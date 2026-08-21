@@ -3,642 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- إجبار المتصفح على عدم استخدام الوضع الليلي للمحافظة على الإشراق -->
-    <meta name="color-scheme" content="light">
-    <title>إنجاز - لإدارة المعاملات</title>
+    <title>إدارة المعاملات</title>
     
-    <!-- مكتبات التصميم والأيقونات -->
+    <!-- ربط التطبيق بملفات PWA الخاصة بك ليتم تثبيته على الهاتف -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#f8fafc">
+
+    <!-- استدعاء مكتبة التصميم Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <!-- مكتبة توليد الـ PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <!-- استدعاء مكتبة React ليعمل التطبيق -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
-        body { 
-            font-family: 'Cairo', sans-serif; 
-            background-color: #f1f5f9 !important; /* خلفية بيضاء مشرفة ومريحة */
-            color: #0f172a !important;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        /* بطاقات بيضاء نقية وعالية الفخامة */
-        .glass-card {
-            background-color: #ffffff !important;
-            border-radius: 1.75rem;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
-        }
-        
-        /* التدرج اللوني البنفسجي والأزرق الفاخر */
-        .bg-gradient-finance {
-            background: linear-gradient(135deg, #4f46e5 0%, #9333ea 50%, #db2777 100%);
-        }
-        
-        .text-gradient {
-            background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        /* تنسيق مستطيلات الإدخال والقوائم لتكون فخمة وبيضاء بالكامل */
-        input, select, textarea {
-            background-color: #ffffff !important;
-            color: #0f172a !important;
-            border: 1px solid #cbd5e1 !important;
-            transition: all 0.2s ease;
-        }
-        input:focus, select:focus, textarea:focus {
-            border-color: #6366f1 !important;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
-            outline: none !important;
-        }
-
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        
-        .modal-overlay {
-            background: rgba(15, 23, 42, 0.4);
-            backdrop-filter: blur(6px);
-        }
+        body { font-family: system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
     </style>
 </head>
-<body class="pb-28">
+<body class="bg-slate-50">
 
-    <main id="app-content" class="p-4 max-w-md mx-auto min-h-screen"></main>
+    <div id="root"></div>
 
-    <!-- شريط التنقل السفلي الفاتح والمشرق -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 pb-safe z-40 shadow-[0_-5px_25px_rgba(0,0,0,0.04)]">
-        <div class="max-w-md mx-auto flex justify-around items-center h-20 px-2" id="bottom-nav"></div>
-    </nav>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
 
-    <!-- حاوية النافذة المنبثقة -->
-    <div id="modal-container" class="fixed inset-0 z-50 hidden items-center justify-center modal-overlay p-4 opacity-0 transition-opacity duration-300">
-        <div id="modal-content" class="bg-white border border-slate-100 w-full max-w-sm rounded-3xl p-6 shadow-2xl transform scale-95 transition-transform duration-300 max-h-[90vh] overflow-y-auto"></div>
-    </div>
+        // الأيقونات 
+        const IconHome = ({className}) => <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
+        const IconAlert = ({className}) => <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>;
+        const IconPlus = ({className}) => <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
+        const IconWallet = ({className}) => <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>;
+        const IconSettings = ({className}) => <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
+        const IconBuilding = ({className}) => <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>;
+        const IconUser = ({className}) => <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
+        const IconClock = ({className}) => <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
+        const IconCheck = ({className}) => <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>;
 
-    <div id="pdf-container" class="hidden"></div>
-
-    <script>
-        let appData = JSON.parse(localStorage.getItem('enjaz_data')) || {
-            lawyers: ['أ. محمد العبيدي', 'أ. أحمد الجبوري'],
-            companies: [
-                { name: 'شركة إبهار المستقبل', lawyer: 'أ. محمد العبيدي' },
-                { name: 'شركة أرض البيطرة', lawyer: 'أ. أحمد الجبوري' }
-            ],
-            transactions: [
-                { id: 1, company: 'شركة إبهار المستقبل', lawyer: 'أ. محمد العبيدي', type: 'تصديق وثائق', department: 'مسجل الشركات', fee: 25000, status: 'active', station: 'قسم التدقيق - أ. ياسر', timestamp: Date.now(), notes: '' }
-            ]
-        };
-
-        function saveData() {
-            localStorage.setItem('enjaz_data', JSON.stringify(appData));
-            renderContent();
-        }
-
-        const tabs = [
-            { id: 'dashboard', label: 'الرئيسية', icon: 'layout-grid' },
-            { id: 'new', label: 'معاملة', icon: 'plus-circle' },
-            { id: 'active', label: 'جارية', icon: 'loader' },
-            { id: 'stuck', label: 'متلكئة', icon: 'alert-triangle' },
-            { id: 'finance', label: 'تحاسب', icon: 'wallet' },
-            { id: 'archive', label: 'الأرشيف', icon: 'archive' },
-            { id: 'settings', label: 'إعدادات', icon: 'settings' }
+        const initialTransactions = [
+          {
+            id: 1, lawyer: 'أحمد محمود', company: 'إبهار المستقبل للتجارة والتسويق العقاري', 
+            department: 'مسجل الشركات - بغداد', type: 'تعديل عقد التأسيس', 
+            fee: 150000, status: 'active', 
+            lastUpdate: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+            timeline: ['استلام المعاملة', 'قسم التدقيق (الموظف ياسر)']
+          },
+          {
+            id: 2, lawyer: 'سعد علي', company: 'شركة الأفق اللوجستية', 
+            department: 'دائرة الاستيراد والتصدير', type: 'تجديد هوية استيراد', 
+            fee: 75000, status: 'active', 
+            lastUpdate: new Date(Date.now() - 1000 * 60 * 60 * 26).toISOString(),
+            timeline: ['استلام المعاملة', 'دفع الرسوم']
+          }
         ];
 
-        let currentTab = 'dashboard';
+        function App() {
+          const [activeTab, setActiveTab] = useState('active');
+          const [transactions, setTransactions] = useState([]);
 
-        function renderNav() {
-            const navContainer = document.getElementById('bottom-nav');
-            navContainer.innerHTML = tabs.map(tab => `
-                <button onclick="switchTab('${tab.id}')" class="flex flex-col items-center justify-center w-full space-y-1 transition-all duration-300 ${currentTab === tab.id ? 'text-indigo-600 scale-105' : 'text-slate-400 hover:text-slate-600'}">
-                    <i data-lucide="${tab.icon}" class="w-6 h-6 ${currentTab === tab.id ? 'fill-indigo-50' : ''}"></i>
-                    <span class="text-[10px] font-bold">${tab.label}</span>
-                </button>
-            `).join('');
-            lucide.createIcons();
-        }
-
-        function switchTab(tabId) {
-            currentTab = tabId;
-            renderNav();
-            renderContent();
-            window.scrollTo(0,0);
-        }
-
-        function renderContent() {
-            const content = document.getElementById('app-content');
-            
-            if (currentTab === 'dashboard') {
-                const activeCount = appData.transactions.filter(t => t.status === 'active').length;
-                const stuckCount = appData.transactions.filter(t => t.status === 'stuck').length;
-                const completedTxs = appData.transactions.filter(t => t.status === 'completed');
-                const totalEarnings = completedTxs.reduce((sum, t) => sum + Number(t.fee), 0);
-                
-                content.innerHTML = `
-                    <div class="mb-6 flex items-center gap-3">
-                        <div class="bg-indigo-50 p-2.5 rounded-2xl border border-indigo-100 shadow-sm">
-                            <i data-lucide="layout-grid" class="text-indigo-600 w-7 h-7"></i>
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-extrabold text-slate-900">الرئيسية</h1>
-                            <p class="text-xs text-slate-500 font-bold">نظرة عامة على نشاطك المكتبي</p>
-                        </div>
-                    </div>
-
-                    <div class="bg-gradient-finance rounded-3xl p-6 text-white mb-5 shadow-[0_10px_30px_rgba(79,70,229,0.3)]">
-                        <div class="flex justify-between items-start mb-4">
-                            <h2 class="text-sm font-semibold opacity-90">أرباح هذا الأسبوع (لحد الآن)</h2>
-                            <i data-lucide="trending-up" class="w-5 h-5 opacity-90"></i>
-                        </div>
-                        <div class="text-4xl font-extrabold mb-1">${totalEarnings.toLocaleString()} <span class="text-lg opacity-80">د.ع</span></div>
-                        <p class="text-xs opacity-80 mt-2">الدورة الحالية: من الأحد إلى الخميس</p>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div onclick="manageLawyers()" class="glass-card p-5 flex flex-col justify-center active:scale-95 transition-transform cursor-pointer hover:border-indigo-200">
-                            <div class="bg-blue-50 w-11 h-11 rounded-2xl flex items-center justify-center mb-3 shadow-sm">
-                                <i data-lucide="users" class="text-blue-600 w-5 h-5"></i>
-                            </div>
-                            <div class="text-2xl font-extrabold text-slate-900">${appData.lawyers.length}</div>
-                            <div class="text-xs text-slate-500 font-bold mt-1">محامون مسجلون</div>
-                        </div>
-
-                        <div onclick="manageCompanies()" class="glass-card p-5 flex flex-col justify-center active:scale-95 transition-transform cursor-pointer hover:border-purple-200">
-                            <div class="bg-purple-50 w-11 h-11 rounded-2xl flex items-center justify-center mb-3 shadow-sm">
-                                <i data-lucide="building-2" class="text-purple-600 w-5 h-5"></i>
-                            </div>
-                            <div class="text-2xl font-extrabold text-slate-900">${appData.companies.length}</div>
-                            <div class="text-xs text-slate-500 font-bold mt-1">الشركات</div>
-                        </div>
-
-                        <div class="glass-card p-5 flex flex-col justify-center border-r-4 border-r-indigo-500">
-                            <div class="bg-indigo-50 w-11 h-11 rounded-2xl flex items-center justify-center mb-3 shadow-sm">
-                                <i data-lucide="loader" class="text-indigo-600 w-5 h-5"></i>
-                            </div>
-                            <div class="text-2xl font-extrabold text-slate-900">${activeCount}</div>
-                            <div class="text-xs text-slate-500 font-bold mt-1">معاملات جارية</div>
-                        </div>
-
-                        <div class="glass-card p-5 flex flex-col justify-center border-r-4 border-r-rose-500">
-                            <div class="bg-rose-50 w-11 h-11 rounded-2xl flex items-center justify-center mb-3 shadow-sm">
-                                <i data-lucide="alert-triangle" class="text-rose-600 w-5 h-5"></i>
-                            </div>
-                            <div class="text-2xl font-extrabold text-slate-900">${stuckCount}</div>
-                            <div class="text-xs text-slate-500 font-bold mt-1">معاملات متلكئة</div>
-                        </div>
-                    </div>
-                `;
-            } 
-            else if (currentTab === 'new') {
-                content.innerHTML = `
-                    <div class="mb-6">
-                        <h1 class="text-2xl font-extrabold text-slate-900">إضافة معاملة</h1>
-                        <p class="text-xs text-slate-500 font-bold">بدء مسار جديد لشركة</p>
-                    </div>
-                    <div class="glass-card p-6 space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-2">اسم المحامي</label>
-                            <select id="new-lawyer" onchange="updateCompaniesList()" class="w-full rounded-xl p-3 text-sm font-semibold">
-                                <option value="">- اختر المحامي -</option>
-                                ${appData.lawyers.map(l => `<option value="${l}">${l}</option>`).join('')}
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-2">الشركة</label>
-                            <select id="new-company" class="w-full rounded-xl p-3 text-sm font-semibold">
-                                <option value="">- اختر المحامي أولاً -</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-2">الدائرة</label>
-                            <select id="new-dept" class="w-full rounded-xl p-3 text-sm font-semibold">
-                                <option value="مسجل الشركات">مسجل الشركات</option>
-                                <option value="الاستيراد والتصدير">الاستيراد والتصدير</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-2">نوع المعاملة</label>
-                            <input type="text" id="new-type" placeholder="مثال: تصديق وثائق" class="w-full rounded-xl p-3 text-sm font-semibold">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-2">الأتعاب (د.ع)</label>
-                            <input type="number" id="new-fee" placeholder="0" class="w-full rounded-xl p-3 text-sm font-semibold">
-                        </div>
-                        <button onclick="addTransaction()" class="w-full bg-gradient-finance text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-200 active:scale-95 transition-transform mt-6">
-                            بدء المعاملة
-                        </button>
-                    </div>
-                `;
-            }
-            else if (currentTab === 'active') {
-                const activeTx = appData.transactions.filter(t => t.status === 'active');
-                content.innerHTML = `
-                    <div class="mb-6">
-                        <h1 class="text-2xl font-extrabold text-slate-900">المعاملات الجارية</h1>
-                        <p class="text-xs text-slate-500 font-bold">تتبع مسار معاملاتك الميدانية</p>
-                    </div>
-                    <div class="space-y-4">
-                        ${activeTx.length === 0 ? '<div class="text-center text-slate-400 mt-10 font-bold">لا توجد معاملات جارية حالياً</div>' : 
-                        activeTx.map(t => `
-                            <div onclick="openModal(${t.id})" class="glass-card p-5 active:scale-95 transition-transform duration-200 cursor-pointer border-r-4 border-r-indigo-600 relative">
-                                <div class="flex justify-between items-start mb-2">
-                                    <h3 class="font-extrabold text-lg text-slate-900">${t.company}</h3>
-                                    <span class="bg-indigo-50 text-indigo-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-indigo-100">${t.department}</span>
-                                </div>
-                                <div class="text-sm mb-4 font-bold text-gradient">${t.type}</div>
-                                
-                                <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 flex items-center gap-3">
-                                    <div class="bg-white shadow-sm p-2 rounded-xl">
-                                        <i data-lucide="map-pin" class="w-4 h-4 text-indigo-600"></i>
-                                    </div>
-                                    <div>
-                                        <div class="text-[10px] text-slate-400 font-bold">المحطة الحالية</div>
-                                        <div class="text-sm font-bold text-slate-800">${t.station}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            }
-            else if (currentTab === 'stuck') {
-                const stuckTx = appData.transactions.filter(t => t.status === 'stuck');
-                content.innerHTML = `
-                    <div class="mb-6">
-                        <h1 class="text-2xl font-extrabold text-slate-900">المعاملات المتلكئة</h1>
-                        <p class="text-xs text-slate-500 font-bold">المعاملات المتوقفة لوجود أخطاء</p>
-                    </div>
-                    <div class="space-y-4">
-                        ${stuckTx.length === 0 ? '<div class="text-center text-slate-400 mt-10 font-bold">الحمدلله، لا يوجد تلكؤ!</div>' : 
-                        stuckTx.map(t => `
-                            <div class="glass-card p-5 border-r-4 border-r-rose-600">
-                                <h3 class="font-extrabold text-lg text-slate-900">${t.company}</h3>
-                                <div class="text-sm font-bold text-rose-600 mb-3">${t.type}</div>
-                                <div class="bg-rose-50 p-3.5 rounded-2xl border border-rose-100 mb-4">
-                                    <div class="text-[10px] text-rose-500 font-bold">سبب التلكؤ:</div>
-                                    <div class="text-sm font-semibold text-slate-800">${t.notes || 'لم يكتب سبب'}</div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button onclick="changeStatus(${t.id}, 'active')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-3 rounded-xl transition-colors">
-                                        إعادة للعمل
-                                    </button>
-                                    <button onclick="notifyLawyer('${t.lawyer}', '${t.company}', '${t.notes}')" class="flex-1 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 text-xs font-bold py-3 rounded-xl flex items-center justify-center gap-1.5 transition-colors">
-                                        <i data-lucide="message-circle" class="w-4 h-4"></i> إبلاغ واتساب
-                                    </button>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            }
-            else if (currentTab === 'finance') {
-                const completed = appData.transactions.filter(t => t.status === 'completed');
-                const lawyerTotals = {};
-                completed.forEach(t => {
-                    if (!lawyerTotals[t.lawyer]) lawyerTotals[t.lawyer] = { total: 0, txs: [] };
-                    lawyerTotals[t.lawyer].total += Number(t.fee);
-                    lawyerTotals[t.lawyer].txs.push(t);
-                });
-
-                content.innerHTML = `
-                    <div class="mb-6">
-                        <h1 class="text-2xl font-extrabold text-slate-900">التحاسب المالي</h1>
-                        <p class="text-xs text-slate-500 font-bold">إغلاق دورة الخميس</p>
-                    </div>
-                    <div class="space-y-4">
-                        ${Object.keys(lawyerTotals).length === 0 ? '<div class="text-center text-slate-400 mt-10 font-bold">لا توجد معاملات منجزة للتحاسب</div>' : 
-                        Object.keys(lawyerTotals).map(lawyer => `
-                            <div class="glass-card p-5">
-                                <div class="flex justify-between items-center mb-3">
-                                    <h3 class="font-extrabold text-lg text-slate-900">${lawyer}</h3>
-                                    <div class="text-lg font-extrabold text-indigo-600">${lawyerTotals[lawyer].total.toLocaleString()} <span class="text-xs">د.ع</span></div>
-                                </div>
-                                <p class="text-xs text-slate-500 font-bold mb-4">${lawyerTotals[lawyer].txs.length} معاملات منجزة</p>
-                                
-                                <button onclick="generatePDF('${lawyer}')" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-md">
-                                    <i data-lucide="file-down" class="w-4 h-4"></i>
-                                    تنزيل تقرير PDF
-                                </button>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            }
-            else if (currentTab === 'archive') {
-                const archived = appData.transactions.filter(t => t.status === 'completed');
-                content.innerHTML = `
-                    <div class="mb-6">
-                        <h1 class="text-2xl font-extrabold text-slate-900">الأرشيف</h1>
-                        <p class="text-xs text-slate-500 font-bold">سجل المعاملات المنجزة</p>
-                    </div>
-                    <div class="space-y-3">
-                        ${archived.length === 0 ? '<div class="text-center text-slate-400 mt-10 font-bold">الأرشيف فارغ</div>' : 
-                        archived.map(t => `
-                            <div class="glass-card p-4 flex justify-between items-center">
-                                <div>
-                                    <h3 class="font-bold text-slate-900 text-sm">${t.company}</h3>
-                                    <p class="text-xs text-indigo-600 font-bold">${t.type}</p>
-                                </div>
-                                <div class="text-[10px] text-emerald-700 font-extrabold bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-                                    منجزة
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            }
-            else if (currentTab === 'settings') {
-                content.innerHTML = `
-                    <div class="mb-6">
-                        <h1 class="text-2xl font-extrabold text-slate-900">الإعدادات</h1>
-                    </div>
-                    <div class="glass-card p-5 space-y-4">
-                        <h3 class="text-slate-600 font-bold text-sm mb-2">إدارة النظام</h3>
-                        <button onclick="factoryReset()" class="w-full bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm">
-                            <i data-lucide="trash-2" class="w-5 h-5"></i>
-                            تصفير أرباح الأسبوع
-                        </button>
-                    </div>
-                `;
-            }
-            
-            lucide.createIcons();
-        }
-
-        function manageLawyers() {
-            let html = `
-                <div class="flex justify-between items-center mb-5">
-                    <h2 class="text-xl font-extrabold text-slate-900">إدارة المحامين</h2>
-                    <button onclick="closeModal()" class="bg-slate-100 p-2 rounded-full text-slate-500 hover:bg-slate-200"><i data-lucide="x" class="w-5 h-5"></i></button>
-                </div>
-                
-                <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 mb-4 flex gap-2">
-                    <input type="text" id="new-lawyer-name" placeholder="اسم المحامي الجديد..." class="w-full rounded-xl p-2.5 text-sm font-semibold">
-                    <button onclick="addNewLawyer()" class="bg-indigo-600 text-white px-4 rounded-xl font-bold text-sm shadow-md">إضافة</button>
-                </div>
-
-                <div class="max-h-60 overflow-y-auto space-y-2 pr-1">
-                    ${appData.lawyers.map(l => `
-                        <div class="flex justify-between items-center bg-white border border-slate-200/80 p-3.5 rounded-2xl shadow-sm">
-                            <div class="font-bold text-sm text-slate-800">${l}</div>
-                            <button onclick="deleteLawyer('${l}')" class="text-rose-600 bg-rose-50 hover:bg-rose-100 p-2 rounded-xl transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-            showModalHTML(html);
-        }
-
-        function addNewLawyer() {
-            const val = document.getElementById('new-lawyer-name').value.trim();
-            if(val && !appData.lawyers.includes(val)) {
-                appData.lawyers.push(val);
-                saveData();
-                manageLawyers();
-            }
-        }
-
-        function deleteLawyer(name) {
-            if(confirm(`هل أنت متأكد من حذف ${name}؟`)) {
-                appData.lawyers = appData.lawyers.filter(l => l !== name);
-                saveData();
-                manageLawyers();
-            }
-        }
-
-        function manageCompanies() {
-            let html = `
-                <div class="flex justify-between items-center mb-5">
-                    <h2 class="text-xl font-extrabold text-slate-900">إدارة الشركات</h2>
-                    <button onclick="closeModal()" class="bg-slate-100 p-2 rounded-full text-slate-500 hover:bg-slate-200"><i data-lucide="x" class="w-5 h-5"></i></button>
-                </div>
-                
-                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 mb-4 space-y-3">
-                    <select id="new-comp-lawyer" class="w-full rounded-xl p-3 text-sm font-semibold">
-                        <option value="">- اختر المحامي -</option>
-                        ${appData.lawyers.map(l => `<option value="${l}">${l}</option>`).join('')}
-                    </select>
-                    <div class="flex gap-2">
-                        <input type="text" id="new-comp-name" placeholder="اسم الشركة..." class="w-full rounded-xl p-3 text-sm font-semibold">
-                        <button onclick="addNewCompany()" class="bg-indigo-600 text-white px-4 rounded-xl font-bold text-sm shadow-md">إضافة</button>
-                    </div>
-                </div>
-
-                <div class="max-h-60 overflow-y-auto space-y-2 pr-1">
-                    ${appData.companies.map(c => `
-                        <div class="flex justify-between items-center bg-white border border-slate-200/80 p-3.5 rounded-2xl shadow-sm">
-                            <div>
-                                <div class="font-bold text-sm text-slate-800">${c.name}</div>
-                                <div class="text-[10px] text-slate-400 font-bold">${c.lawyer}</div>
-                            </div>
-                            <button onclick="deleteCompany('${c.name}')" class="text-rose-600 bg-rose-50 hover:bg-rose-100 p-2 rounded-xl transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-            showModalHTML(html);
-        }
-
-        function addNewCompany() {
-            const lawyer = document.getElementById('new-comp-lawyer').value;
-            const name = document.getElementById('new-comp-name').value.trim();
-            if(lawyer && name) {
-                appData.companies.push({ name, lawyer });
-                saveData();
-                manageCompanies();
+          useEffect(() => {
+            const saved = localStorage.getItem('transactions_data');
+            if (saved) {
+              setTransactions(JSON.parse(saved));
             } else {
-                alert("يرجى اختيار المحامي وكتابة اسم الشركة");
+              setTransactions(initialTransactions);
+              localStorage.setItem('transactions_data', JSON.stringify(initialTransactions));
             }
-        }
+          }, []);
 
-        function deleteCompany(name) {
-            if(confirm(`هل أنت متأكد من حذف ${name}؟`)) {
-                appData.companies = appData.companies.filter(c => c.name !== name);
-                saveData();
-                manageCompanies();
-            }
-        }
+          const isDelayed = (dateString) => {
+            const lastUpdate = new Date(dateString);
+            return ((new Date() - lastUpdate) / (1000 * 60 * 60)) > 24;
+          };
 
-        function updateCompaniesList() {
-            const lawyer = document.getElementById('new-lawyer').value;
-            const companySelect = document.getElementById('new-company');
-            const comps = appData.companies.filter(c => c.lawyer === lawyer);
-            companySelect.innerHTML = comps.length > 0 
-                ? comps.map(c => `<option value="${c.name}">${c.name}</option>`).join('')
-                : '<option value="">لا توجد شركات لهذا المحامي</option>';
-        }
-
-        function addTransaction() {
-            const lawyer = document.getElementById('new-lawyer').value;
-            const company = document.getElementById('new-company').value;
-            const dept = document.getElementById('new-dept').value;
-            const type = document.getElementById('new-type').value;
-            const fee = document.getElementById('new-fee').value;
-
-            if(!lawyer || !company || !type || !fee) {
-                alert('يرجى تعبئة جميع الحقول'); return;
-            }
-
-            appData.transactions.push({
-                id: Date.now(), company, lawyer, department: dept, type, fee, status: 'active', station: 'قيد الاستلام', timestamp: Date.now(), notes: ''
-            });
-            saveData();
-            switchTab('active');
-        }
-
-        function openModal(id) {
-            const tx = appData.transactions.find(t => t.id === id);
-            let html = `
-                <div class="flex justify-between items-center mb-5">
-                    <h2 class="text-xl font-extrabold text-slate-900">إدارة المعاملة</h2>
-                    <button onclick="closeModal()" class="bg-slate-100 p-2 rounded-full text-slate-500 hover:bg-slate-200"><i data-lucide="x" class="w-5 h-5"></i></button>
-                </div>
-                
-                <div class="mb-5">
-                    <div class="text-xs text-slate-400 font-bold mb-1">الشركة</div>
-                    <div class="font-extrabold text-lg text-indigo-600">${tx.company}</div>
-                </div>
-
-                <div class="space-y-4">
-                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                        <label class="block text-xs font-bold text-slate-600 mb-2">تحديث المحطة:</label>
-                        <div class="flex gap-2">
-                            <input type="text" id="update-station-val" value="${tx.station}" class="w-full rounded-xl p-3 text-sm font-semibold">
-                            <button onclick="updateStation(${tx.id})" class="bg-indigo-600 text-white px-4 rounded-xl font-bold text-sm shadow-md">حفظ</button>
-                        </div>
+          return (
+            <div className="max-w-md mx-auto relative min-h-screen bg-slate-50 text-slate-800 pb-24 overflow-hidden shadow-2xl">
+              
+              <div className="p-6">
+                {/* البطاقة العلوية المستوحاة من الصورة */}
+                <div className="bg-gradient-to-r from-pink-500 to-purple-600 rounded-[32px] p-6 text-white shadow-lg shadow-purple-200 mb-8 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-10 -mt-10 blur-xl"></div>
+                  <div className="flex justify-between items-center relative z-10">
+                    <div>
+                      <h2 className="text-sm font-medium text-purple-100 mb-1">إجمالي المستحقات (قيد العمل)</h2>
+                      <p className="text-3xl font-bold">225,000 <span className="text-lg font-normal">د.ع</span></p>
                     </div>
-                    
-                    <div class="bg-rose-50 p-4 rounded-2xl border border-rose-200">
-                        <label class="block text-xs font-bold text-rose-600 mb-2">نقل للمتلكئة (اكتب السبب):</label>
-                        <div class="flex gap-2">
-                            <input type="text" id="stuck-reason-val" placeholder="المشكلة..." class="w-full rounded-xl p-3 text-sm font-semibold border-rose-200 focus:border-rose-500">
-                            <button onclick="moveToStuck(${tx.id})" class="bg-rose-600 text-white px-4 rounded-xl font-bold text-sm shadow-md">نقل</button>
-                        </div>
+                    <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm border border-white/30">
+                      <span className="font-bold text-lg">2</span>
                     </div>
-
-                    <button onclick="changeStatus(${tx.id}, 'completed')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 mt-2 shadow-[0_4px_20px_rgba(16,185,129,0.3)] transition-colors">
-                        <i data-lucide="check-circle-2" class="w-5 h-5"></i>
-                        <span>إنجاز المعاملة نهائياً</span>
+                  </div>
+                  <div className="mt-6 flex gap-3">
+                    <button className="bg-white/20 hover:bg-white/30 transition-colors py-2 px-4 rounded-2xl text-sm font-medium backdrop-blur-sm border border-white/20 flex-1">
+                      عرض التفاصيل
                     </button>
+                  </div>
                 </div>
-            `;
-            showModalHTML(html);
-        }
 
-        function showModalHTML(html) {
-            const modalContainer = document.getElementById('modal-container');
-            const modalContent = document.getElementById('modal-content');
-            modalContent.innerHTML = html;
-            
-            modalContainer.classList.remove('hidden');
-            modalContainer.classList.add('flex');
-            setTimeout(() => {
-                modalContainer.classList.remove('opacity-0');
-                modalContent.classList.remove('scale-95');
-            }, 10);
-            lucide.createIcons();
-        }
-
-        function closeModal() {
-            const modalContainer = document.getElementById('modal-container');
-            const modalContent = document.getElementById('modal-content');
-            
-            modalContainer.classList.add('opacity-0');
-            modalContent.classList.add('scale-95');
-            setTimeout(() => {
-                modalContainer.classList.add('hidden');
-                modalContainer.classList.remove('flex');
-            }, 300);
-        }
-
-        function updateStation(id) {
-            const val = document.getElementById('update-station-val').value;
-            const tx = appData.transactions.find(t => t.id === id);
-            tx.station = val;
-            tx.timestamp = Date.now();
-            saveData();
-            closeModal();
-        }
-
-        function moveToStuck(id) {
-            const val = document.getElementById('stuck-reason-val').value;
-            const tx = appData.transactions.find(t => t.id === id);
-            tx.status = 'stuck';
-            tx.notes = val;
-            saveData();
-            closeModal();
-        }
-
-        function changeStatus(id, newStatus) {
-            const tx = appData.transactions.find(t => t.id === id);
-            tx.status = newStatus;
-            if(newStatus === 'active') tx.notes = ''; 
-            saveData();
-            closeModal();
-        }
-
-        function notifyLawyer(lawyer, company, note) {
-            const text = encodeURIComponent(`مرحباً ${lawyer}،\nتوجد مشكلة في معاملة شركة (${company}).\nالسبب: ${note || 'يرجى التواصل'}.`);
-            window.open(`https://wa.me/?text=${text}`, '_blank');
-        }
-
-        function generatePDF(lawyerName) {
-            const txs = appData.transactions.filter(t => t.status === 'completed' && t.lawyer === lawyerName);
-            const total = txs.reduce((sum, t) => sum + Number(t.fee), 0);
-            
-            const pdfHTML = `
-                <div style="padding: 40px; font-family: 'Cairo', sans-serif; direction: rtl; text-align: right; background: white; color: #0f172a;">
-                    <h1 style="color: #4f46e5; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">كشف حساب - إنجاز</h1>
-                    <h3 style="margin-top: 20px;">المحامي: <strong>${lawyerName}</strong></h3>
-                    <p>التاريخ: ${new Date().toLocaleDateString('ar-IQ')}</p>
-                    
-                    <table style="width: 100%; margin-top: 30px; border-collapse: collapse;">
-                        <tr style="background: #f8fafc;">
-                            <th style="padding: 12px; border: 1px solid #cbd5e1;">الشركة</th>
-                            <th style="padding: 12px; border: 1px solid #cbd5e1;">المعاملة</th>
-                            <th style="padding: 12px; border: 1px solid #cbd5e1;">الأتعاب</th>
-                        </tr>
-                        ${txs.map(t => `
-                            <tr>
-                                <td style="padding: 12px; border: 1px solid #cbd5e1;">${t.company}</td>
-                                <td style="padding: 12px; border: 1px solid #cbd5e1;">${t.type}</td>
-                                <td style="padding: 12px; border: 1px solid #cbd5e1;">${t.fee} د.ع</td>
-                            </tr>
-                        `).join('')}
-                    </table>
-                    
-                    <h2 style="margin-top: 30px; background: linear-gradient(135deg, #4f46e5, #9333ea); color: white; padding: 15px; text-align: center; border-radius: 12px;">
-                        الإجمالي: ${total.toLocaleString()} دينار عراقي
-                    </h2>
+                <div className="flex justify-between items-end mb-6">
+                  <div>
+                    <h1 className="text-2xl font-extrabold text-slate-800">المعاملات الجارية</h1>
+                    <p className="text-sm text-slate-500 font-medium mt-1">لديك {transactions.filter(t => t.status === 'active').length} معاملة نشطة للشركات</p>
+                  </div>
                 </div>
-            `;
-            
-            const container = document.getElementById('pdf-container');
-            container.innerHTML = pdfHTML;
-            container.classList.remove('hidden');
-            
-            html2pdf().from(container).set({
-                margin: 1,
-                filename: `كشف_حساب_${lawyerName}.pdf`,
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-            }).save().then(() => {
-                container.classList.add('hidden');
-            });
+
+                {/* بطاقات المعاملات */}
+                <div className="space-y-5">
+                  {transactions.filter(t => t.status === 'active').map((tx) => {
+                    const delayed = isDelayed(tx.lastUpdate);
+                    return (
+                      <div key={tx.id} className="bg-white rounded-[28px] p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 relative">
+                        
+                        {delayed && (
+                          <div className="absolute top-5 left-5 flex items-center gap-1 text-red-500 bg-red-50 px-3 py-1.5 rounded-full text-xs font-bold animate-pulse">
+                            <IconClock />
+                            <span>تجاوز 24 ساعة</span>
+                          </div>
+                        )}
+
+                        <div className="flex items-start gap-3 mb-4">
+                          <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-purple-600 shrink-0">
+                            <IconBuilding />
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-slate-800 text-lg leading-tight">{tx.company}</h3>
+                            <div className="flex items-center gap-1 text-slate-500 text-sm mt-1">
+                              <IconUser />
+                              <span>{tx.lawyer}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-slate-50 rounded-2xl p-4 mb-4">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-xs font-bold text-slate-400">الدائرة</span>
+                            <span className="text-xs font-bold text-slate-700">{tx.department}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs font-bold text-slate-400">نوع المعاملة</span>
+                            <span className="text-xs font-bold text-purple-600">{tx.type}</span>
+                          </div>
+                        </div>
+
+                        <div className="mb-5 pl-2 border-r-2 border-purple-100 mr-2 pr-4 relative">
+                          <div className="absolute w-2 h-2 bg-purple-500 rounded-full -right-[5px] top-1"></div>
+                          <p className="text-sm font-semibold text-slate-700">المحطة الحالية:</p>
+                          <p className="text-sm text-slate-500 mt-1">{tx.timeline[tx.timeline.length - 1]}</p>
+                        </div>
+
+                        <div className="flex gap-3 mt-2">
+                          <button className="flex-1 bg-slate-900 text-white py-3 rounded-2xl font-bold text-sm hover:bg-slate-800 transition-colors flex items-center justify-center gap-2">
+                            <IconCheck />
+                            إنجاز المعاملة
+                          </button>
+                          <button className="w-14 bg-red-50 text-red-600 flex items-center justify-center rounded-2xl hover:bg-red-100 transition-colors">
+                            <IconAlert />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* شريط التنقل السفلي */}
+              <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto">
+                <div className="absolute inset-0 bg-gradient-to-t from-white via-white to-transparent -top-10 -z-10 pointer-events-none"></div>
+                
+                <div className="bg-white mx-6 mb-6 rounded-3xl shadow-[0_20px_40px_rgb(0,0,0,0.1)] px-6 py-4 flex justify-between items-center relative border border-slate-100">
+                  
+                  <button onClick={() => setActiveTab('active')} className={`flex flex-col items-center gap-1 ${activeTab === 'active' ? 'text-purple-600' : 'text-slate-400'}`}>
+                    <IconHome className={activeTab === 'active' ? 'text-purple-600' : ''} />
+                  </button>
+                  
+                  <button onClick={() => setActiveTab('stuck')} className={`flex flex-col items-center gap-1 ${activeTab === 'stuck' ? 'text-red-500' : 'text-slate-400'}`}>
+                    <IconAlert className={activeTab === 'stuck' ? 'text-red-500' : ''} />
+                  </button>
+
+                  <div className="relative -top-8">
+                    <button className="bg-gradient-to-br from-pink-500 to-purple-600 text-white w-16 h-16 rounded-full flex items-center justify-center shadow-lg shadow-purple-300 hover:scale-105 transition-transform">
+                      <IconPlus />
+                    </button>
+                  </div>
+
+                  <button onClick={() => setActiveTab('finance')} className={`flex flex-col items-center gap-1 ${activeTab === 'finance' ? 'text-purple-600' : 'text-slate-400'}`}>
+                    <IconWallet className={activeTab === 'finance' ? 'text-purple-600' : ''} />
+                  </button>
+
+                  <button onClick={() => setActiveTab('settings')} className={`flex flex-col items-center gap-1 ${activeTab === 'settings' ? 'text-purple-600' : 'text-slate-400'}`}>
+                    <IconSettings className={activeTab === 'settings' ? 'text-purple-600' : ''} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
         }
 
-        function factoryReset() {
-            if(confirm('هل أنت متأكد من مسح جميع المعاملات وتصفير الأرباح؟ (هذا لن يمسح المحامين والشركات)')) {
-                appData.transactions = [];
-                saveData();
-                alert('تم التصفير بنجاح!');
-            }
-        }
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
 
-        renderNav();
-        renderContent();
+    <!-- كود تشغيل ملفات PWA الخاصة بك -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW setup failed: ', err));
+        });
+      }
     </script>
 </body>
 </html>
