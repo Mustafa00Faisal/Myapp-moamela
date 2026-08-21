@@ -1,1383 +1,286 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>نظام إدارة المعاملات المؤسسية | PRO</title>
-  
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#070A12">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="المعقب برو">
-
-  <!-- المكتبات السحابية -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800;900&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
-  
-  <style>
-    /* الثيم الفخم (Premium Dark Mode) */
-    :root {
-      --bg-color: #05070D;
-      --surface-color: #0B0F19;
-      --surface-elevated: #131A2A;
-      --border-subtle: #1E293B;
-      --border-focus: #F59E0B;
-      
-      --gold: #F59E0B;
-      --gold-gradient: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
-      --emerald: #10B981;
-      --danger: #EF4444;
-      --blue: #3B82F6;
-      
-      --text-main: #F9FAFB;
-      --text-muted: #9CA3AF;
-      
-      --radius-card: 20px;
-      --radius-btn: 14px;
-      --radius-sm: 10px;
-      
-      --glow-gold: 0 4px 20px rgba(245, 158, 11, 0.15);
-      --glow-surface: 0 8px 30px rgba(0, 0, 0, 0.4);
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>إنجاز - لإدارة المعاملات</title>
     
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      font-family: 'Tajawal', sans-serif;
-      min-height: 100vh;
-      padding-bottom: 130px;
-      overflow-x: hidden;
-    }
+    <!-- مكتبات التصميم والأيقونات -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- مكتبة توليد الـ PDF الداعمة للعربية -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-    .num-font { font-family: 'Plus Jakarta Sans', sans-serif; }
-
-    .modern-input {
-      background: var(--surface-elevated);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-btn);
-      color: var(--text-main);
-      padding: 16px 18px;
-      font-size: 14px;
-      font-weight: 500;
-      width: 100%;
-      outline: none;
-      transition: all 0.3s ease;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
-    }
-    .modern-input:focus {
-      border-color: var(--gold);
-      background: #172033;
-      box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1), inset 0 2px 4px rgba(0,0,0,0.2);
-    }
-
-    /* إصلاح تداخل العدسة مع النص في شريط البحث */
-    .search-wrapper {
-      background: var(--surface-elevated);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-btn);
-      display: flex;
-      align-items: center;
-      padding: 4px 16px;
-      position: relative;
-      margin-bottom: 16px;
-      box-shadow: var(--glow-surface);
-      transition: border-color 0.3s;
-    }
-    .search-wrapper:focus-within { border-color: var(--gold); }
-    .search-wrapper input {
-      background: transparent; border: none; color: var(--text-main);
-      padding: 14px 40px 14px 12px; width: 100%; font-size: 14px; font-weight: 500; outline: none;
-    }
-    .search-wrapper svg { position: absolute; right: 16px; color: var(--gold); width: 18px; height: 18px; }
-
-    .exec-card {
-      background: linear-gradient(145deg, var(--surface-color) 0%, #0A0D16 100%);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-card);
-      padding: 22px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      box-shadow: var(--glow-surface);
-      transition: transform 0.2s ease, border-color 0.3s;
-    }
-    .exec-card:hover { border-color: rgba(245, 158, 11, 0.3); }
-
-    .btn-action-gold {
-      background: var(--gold-gradient);
-      color: #000;
-      border: none;
-      border-radius: var(--radius-btn);
-      font-weight: 900;
-      font-size: 14px;
-      padding: 16px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      box-shadow: var(--glow-gold);
-      transition: all 0.2s ease;
-    }
-    .btn-action-gold:active { transform: scale(0.96); filter: brightness(1.1); }
-
-    .btn-action-outline {
-      background: var(--surface-elevated);
-      color: var(--text-main);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-btn);
-      font-weight: 800;
-      font-size: 14px;
-      padding: 16px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .btn-action-outline:active { background: #1E293B; transform: scale(0.96); }
-
-    .btn-subtle {
-      background: var(--surface-color);
-      color: var(--text-main);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
-      font-weight: 700;
-      font-size: 13px;
-      padding: 12px 16px;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-align: center;
-    }
-    .btn-subtle:active { filter: brightness(1.2); }
-
-    .filter-chips {
-      display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; margin-bottom: 16px;
-    }
-    .chip {
-      background: var(--surface-color); border: 1px solid var(--border-subtle); color: var(--text-muted);
-      padding: 10px 18px; border-radius: 24px; font-size: 12px; font-weight: 800; white-space: nowrap; cursor: pointer; transition: all 0.2s;
-    }
-    .chip.active { background: rgba(245, 158, 11, 0.15); color: var(--gold); border-color: var(--gold); }
-
-    header {
-      position: sticky; top: 0; z-index: 50;
-      background: rgba(5, 7, 13, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      padding: 16px 20px;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .user-avatar {
-      width: 44px; height: 44px; border-radius: 14px;
-      background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); 
-      border: 1px solid var(--border-subtle);
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 900; font-size: 18px; color: var(--gold);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
-
-    .smart-clipboard {
-      background: var(--surface-color);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
-      padding: 10px 14px;
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 16px;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .smart-clipboard select {
-      background: transparent; border: none; color: var(--gold); font-weight: 700; font-size: 12px; outline: none; width: 70%;
-    }
-
-    .dock-bar-wrapper {
-      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-      width: 92%; max-width: 480px; z-index: 100;
-    }
-    .dock-bar {
-      background: rgba(11, 15, 25, 0.85);
-      backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 40px;
-      display: flex; align-items: center; justify-content: space-around;
-      padding: 8px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.8);
-    }
-    .dock-tab {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 4px; padding: 10px 14px;
-      border-radius: 30px; border: none; background: transparent;
-      color: var(--text-muted); cursor: pointer; transition: all 0.3s ease;
-    }
-    .dock-tab svg { width: 22px; height: 22px; stroke-width: 1.5; transition: all 0.3s; }
-    .dock-tab span { font-size: 10px; font-weight: 800; }
-    .dock-tab.active { background: rgba(245, 158, 11, 0.1); color: var(--gold); }
-    .dock-tab.active svg { stroke-width: 2.5; }
-
-    .sheet-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
-      z-index: 1000; display: none; align-items: flex-end; justify-content: center;
-    }
-    .sheet-panel {
-      background: var(--bg-color);
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 32px 32px 0 0;
-      width: 100%; max-width: 500px;
-      padding: 24px 24px 40px; max-height: 90vh; overflow-y: auto;
-      animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: 0 -20px 50px rgba(0,0,0,0.8);
-    }
-    .sheet-handle { width: 40px; height: 5px; background: var(--border-subtle); border-radius: 100px; margin: 0 auto 24px; }
-    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
-    .tab-section { display: none; flex-direction: column; gap: 20px; animation: fadeIn 0.3s ease; }
-    .tab-section.active { display: flex; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-    #toast {
-      position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
-      background: rgba(19, 26, 42, 0.95); backdrop-filter: blur(10px);
-      border: 1px solid var(--border-focus);
-      padding: 14px 24px; border-radius: 30px; color: #FFF; font-weight: 800; font-size: 13px;
-      z-index: 9999; display: flex; align-items: center; gap: 10px;
-      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0; box-shadow: var(--glow-gold);
-    }
-    #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-
-    main { max-width: 520px; margin: 0 auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
-  </style>
+    <style>
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            background-color: #f8fafc; /* أبيض/رمادي فاتح جداً */
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* التدرج اللوني الفخم (أزرق إلى بنفسجي) */
+        .bg-gradient-primary { background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%); }
+        .text-gradient { background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        /* البطاقات الزجاجية البيضاء */
+        .glass-card {
+            background: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        
+        /* إخفاء شريط التمرير لجمالية التطبيق */
+        ::-webkit-scrollbar { display: none; }
+        
+        /* تصميم النافذة المنبثقة (Modal) */
+        .modal-overlay {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+        }
+    </style>
 </head>
-<body>
+<body class="pb-24 text-slate-800">
 
-  <!-- شاشة الدخول -->
-  <div id="authOverlay" style="position: fixed; inset: 0; background: var(--bg-color); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 24px;">
-    <div style="width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 28px;">
-      <div style="text-align: center;">
-        <div style="width: 70px; height: 70px; border-radius: 20px; background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); border: 1px solid rgba(245,158,11,0.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; box-shadow: var(--glow-gold);">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+    <!-- الحاوية الرئيسية للمحتوى المتغير -->
+    <main id="app-content" class="p-4 max-w-md mx-auto min-h-screen"></main>
+
+    <!-- شريط التنقل السفلي الفخم -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-200 pb-safe z-40 shadow-[0_-10px_40px_rgba(0,0,0,0.03)]">
+        <div class="max-w-md mx-auto flex justify-around items-center h-20 px-2" id="bottom-nav">
+            <!-- سيتم توليد الأزرار عبر الجافاسكربت -->
         </div>
-        <h2 style="font-size: 24px; font-weight: 900; color: #FFF; letter-spacing: -0.5px;">نظام إدارة العمليات</h2>
-        <p style="font-size: 13px; color: var(--gold); margin-top: 6px; font-weight: 700;">البوابة المؤسسية الآمنة - PRO</p>
-      </div>
-      <div style="display: flex; flex-direction: column; gap: 14px;">
-        <input id="loginEmail" type="email" placeholder="البريد الإلكتروني" class="modern-input" dir="ltr">
-        <input id="loginPassword" type="password" placeholder="كلمة المرور" class="modern-input" dir="ltr">
-        <button onclick="handleLogin()" id="btnLogin" class="btn-action-gold" style="margin-top: 10px; font-size: 15px;">تسجيل الدخول</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="toast">
-    <span id="toastIcon">✨</span>
-    <span id="toastMsg">تم الإجراء</span>
-  </div>
-
-  <header>
-    <div style="display: flex; align-items: center; gap: 14px;">
-      <div class="user-avatar">م</div>
-      <div>
-        <h1 style="font-size: 16px; font-weight: 900; color: #FFF;">الإدارة التنفيذية</h1>
-        <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px;">
-          <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--emerald); box-shadow: 0 0 8px var(--emerald);"></span>
-          <span style="font-size: 11px; color: var(--text-muted); font-weight: 800;">متصل بالسحابة المشفرة</span>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <main>
-    <!-- قسم التتبع والعمليات -->
-    <div id="tab-tracking" class="tab-section active">
-      
-      <!-- حافظة النصوص الذكية -->
-      <div class="smart-clipboard">
-        <span style="font-size: 11px; font-weight: 800; color: var(--text-muted);">حافظة النصوص السريعة:</span>
-        <select id="snippetSelector" onchange="copySnippet(this.value)">
-          <option value="">-- اختر نصاً لنسخه --</option>
-          <option value="ابهار المستقبل للتجارة والتسويق العقاري والخدمات العامة والدعاية والاعلان وتنظيم المؤتمرات محدودة المسؤولية">شركة إبهار المستقبل الطويل</option>
-          <option value="يرجى تزويدنا بالمستمسكات الأصولية المصدقة (هويات، بطاقة سكن) لإكمال الإجراءات الرسمية.">طلب مستمسكات للعميل</option>
-        </select>
-        <button onclick="document.getElementById('snippetSelector').value=''" style="background:none; border:none; color:var(--text-muted); cursor:pointer;">✕</button>
-      </div>
-
-      <!-- لوحة القيادة -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
-        <div class="exec-card" style="padding: 18px; gap: 8px; align-items: center;">
-          <span style="font-size: 11px; font-weight: 800; color: var(--text-muted);">المعاملات النشطة</span>
-          <h2 id="dashActiveCount" class="num-font" style="font-size: 32px; font-weight: 900; color: var(--blue); text-shadow: 0 0 15px rgba(59,130,246,0.4);">0</h2>
-        </div>
-        <div class="exec-card" style="padding: 18px; gap: 8px; align-items: center;">
-          <span style="font-size: 11px; font-weight: 800; color: var(--text-muted);">المنجزة (الأرشيف)</span>
-          <h2 id="dashCompletedCount" class="num-font" style="font-size: 32px; font-weight: 900; color: var(--emerald); text-shadow: 0 0 15px rgba(16,185,129,0.4);">0</h2>
-        </div>
-      </div>
-
-      <div class="search-wrapper" style="margin-top: 4px;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
-        <input id="globalSearchInput" type="text" placeholder="بحث شامل باسم الشركة أو المعاملة..." oninput="handleGlobalSearch(this.value)">
-      </div>
-
-      <!-- فلاتر سريعة ذكية -->
-      <div class="filter-chips">
-        <div onclick="setFilter('all', this)" class="chip active">الكل</div>
-        <div onclick="setFilter('active', this)" class="chip">مستمرة</div>
-        <div onclick="setFilter('pending', this)" class="chip">بانتظار نقص</div>
-        <div onclick="setFilter('ready', this)" class="chip">جاهزة للإصدار</div>
-      </div>
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-        <button onclick="openSheet('newTxModal')" class="btn-action-gold">+ استلام معاملة</button>
-        <button onclick="openSheet('newCompanyModal')" class="btn-action-outline">+ تسجيل شركة</button>
-      </div>
-
-      <section style="margin-top: 8px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <span style="font-size: 13px; font-weight: 800; color: var(--text-muted);">الشركات المسجلة</span>
-          <span id="companiesCount" class="num-font" style="font-size: 12px; font-weight: 700; color: var(--gold);">0</span>
-        </div>
-        <div id="companiesList" style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none;"></div>
-      </section>
-
-      <section style="margin-top: 8px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-          <span style="font-size: 13px; font-weight: 800; color: var(--text-muted);">سجل التتبع الميداني</span>
-        </div>
-        <div id="activeTransactionsList" style="display: flex; flex-direction: column; gap: 16px;"></div>
-      </section>
-    </div>
-
-    <!-- قسم الرادار والتنبيهات -->
-    <div id="tab-alerts" class="tab-section">
-      <div class="exec-card" style="border-color: rgba(239, 68, 68, 0.3);">
-        <h3 style="font-size: 18px; font-weight: 900; margin-bottom: 4px; color: var(--danger);">رادار متابعة الركود</h3>
-        <p style="font-size: 12px; color: var(--text-muted);">تنبيهات تلقائية للمعاملات المتوقفة لأكثر من 3 أيام.</p>
-      </div>
-      <div id="notificationsList" style="display: flex; flex-direction: column; gap: 12px;"></div>
-    </div>
-
-    <!-- قسم الحسابات والمالية -->
-    <div id="tab-finance" class="tab-section">
-      <div class="exec-card" style="border: 1px solid var(--gold); box-shadow: var(--glow-gold);">
-        <span style="font-size: 10px; font-weight: 900; color: #000; background: var(--gold); padding: 4px 12px; border-radius: 20px; width: fit-content; margin-bottom: 10px;">نظام الأتعاب الصافية</span>
-        <h3 style="font-size: 14px; font-weight: 800; color: var(--text-muted);">إجمالي الديون والأتعاب المعلقة</h3>
-        <h2 id="weeklyTotalSumBadge" class="num-font" style="font-size: 36px; font-weight: 900; color: var(--gold); margin: 6px 0 16px; letter-spacing: -1px;">0 د.ع</h2>
-        <div style="display: flex; gap: 10px;">
-          <button onclick="exportAccountsToCSV()" class="btn-action-outline" style="flex: 1; padding: 14px;">تصدير CSV 📊</button>
-          <button onclick="openPDFPreviewModal()" class="btn-action-gold" style="flex: 1; padding: 14px;">إنشاء تقرير PDF 📄</button>
-        </div>
-      </div>
-      <div id="accountsList" style="display: flex; flex-direction: column; gap: 12px;"></div>
-    </div>
-
-    <!-- قسم الأرشيف والمكتبة (تم إصلاح الخزنة) -->
-    <div id="tab-archive" class="tab-section">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-        <h3 style="font-size: 18px; font-weight: 900;">أرشيف المعاملات المنجزة</h3>
-      </div>
-      <div id="completedTransactionsList" style="display: flex; flex-direction: column; gap: 14px; margin-top: 6px;"></div>
-
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px; margin-bottom: 4px;">
-        <h3 style="font-size: 18px; font-weight: 900;">خزنة المستندات (Vault)</h3>
-        <span id="allDocsTotalBadge" class="num-font" style="font-size: 13px; font-weight: 900; color: var(--gold);">0 ملفات</span>
-      </div>
-      <div class="search-wrapper" style="margin-top: 8px;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
-        <input type="text" placeholder="ابحث عن شركة لفتح أرشيفها..." oninput="renderArchiveLibrary(this.value)">
-      </div>
-      <div id="libraryCompaniesList" style="display: flex; flex-direction: column; gap: 12px;"></div>
-    </div>
-
-    <!-- قسم الإعدادات والنظام -->
-    <div id="tab-system" class="tab-section">
-      <div class="exec-card">
-        <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 16px; color: var(--gold);">إعدادات المكتب والمراسلة</h3>
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-          <input id="setOfficeName" type="text" class="modern-input" placeholder="اسم المكتب (يظهر للعملاء)">
-          <button onclick="saveSettings()" class="btn-action-outline">حفظ الإعدادات</button>
-        </div>
-      </div>
-      <div class="exec-card">
-        <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 16px;">الرقابة والبيانات</h3>
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-          <button onclick="exportJSONBackup()" class="btn-action-outline">تنزيل نسخة احتياطية كاملة</button>
-          <button onclick="openSheet('auditLogModal'); renderAuditLogs();" class="btn-action-outline">سجل الحركات السحابي (Audit Log)</button>
-        </div>
-      </div>
-      <div class="exec-card" style="border-color: rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.05);">
-        <button onclick="handleLogout()" class="btn-action-outline" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.3);">تسجيل الخروج من النظام المكتبي</button>
-      </div>
-    </div>
-  </main>
-
-  <!-- شريط التنقل السفلي الفخم -->
-  <div class="dock-bar-wrapper">
-    <nav class="dock-bar">
-      <button onclick="switchTab('tracking')" id="nav-tracking" class="dock-tab active">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
-        <span>المهام</span>
-      </button>
-      <button onclick="switchTab('alerts')" id="nav-alerts" class="dock-tab">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path></svg>
-        <span>الرادار</span>
-      </button>
-      <button onclick="switchTab('finance')" id="nav-finance" class="dock-tab">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-        <span>الأتعاب</span>
-      </button>
-      <button onclick="switchTab('archive')" id="nav-archive" class="dock-tab">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-        <span>الخزنة</span>
-      </button>
-      <button onclick="switchTab('system')" id="nav-system" class="dock-tab">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"></circle></svg>
-        <span>النظام</span>
-      </button>
     </nav>
-  </div>
 
-  <!-- ================= النوافذ المنبثقة (Modals) ================= -->
-
-  <!-- تفاصيل المعاملة (مع ميزة الاستنساخ 📑) -->
-  <div id="transactionDetailsModal" class="sheet-overlay">
-    <div class="sheet-panel" style="max-width: 520px;">
-      <div class="sheet-handle"></div>
-      
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
-        <div>
-          <span id="dtCompNameBadge" style="font-size: 12px; font-weight: 800; color: var(--gold); display: block; margin-bottom: 4px;">الشركة</span>
-          <h3 id="dtTxTitle" style="font-size: 22px; font-weight: 900; color: #FFF;">المعاملة</h3>
+    <!-- حاوية النافذة المنبثقة -->
+    <div id="modal-container" class="fixed inset-0 z-50 hidden items-center justify-center modal-overlay p-4 opacity-0 transition-opacity duration-300">
+        <div id="modal-content" class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl transform scale-95 transition-transform duration-300">
+            <!-- محتوى النافذة المنبثقة -->
         </div>
-        <button id="btnCloneTx" class="btn-subtle" style="padding: 8px 12px; border-color: var(--gold); color: var(--gold); background: rgba(245,158,11,0.1);">استنساخ 📑</button>
-      </div>
-
-      <div class="exec-card" style="padding: 16px; margin-bottom: 16px;">
-        <span style="font-size: 12px; font-weight: 800; color: var(--text-muted);">الأتعاب الإجمالية (د.ع)</span>
-        <h4 id="dtFinancialSummary" class="num-font" style="font-size: 20px; font-weight: 900; color: #FFF; margin-top: 4px;">0</h4>
-      </div>
-
-      <div class="exec-card" style="padding: 16px; margin-bottom: 16px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-          <span style="font-size: 13px; font-weight: 900; color: var(--gold);">تحديث المسار الميداني</span>
-          <button onclick="openAdvancedStepModal(currentDetailTxId)" class="btn-subtle" style="padding: 6px 12px; font-size: 11px;">+ تحديث المحطة</button>
-        </div>
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
-          <span id="dtStatusIndicator" style="width: 10px; height: 10px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 10px var(--blue);"></span>
-          <p id="dtCurrentLocText" style="font-size: 15px; font-weight: 900; color: #FFF;">المحطة الحالية...</p>
-        </div>
-        <h5 style="font-size: 11px; font-weight: 800; color: var(--text-muted); margin-bottom: 8px;">السجل السحابي للمحطات:</h5>
-        <div id="dtTimelineList" style="display: flex; flex-direction: column; gap: 8px; max-height: 160px; overflow-y: auto;"></div>
-      </div>
-
-      <div class="exec-card" style="padding: 16px; margin-bottom: 16px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-          <span style="font-size: 13px; font-weight: 900; color: var(--gold);">المستمسكات والنواقص (To-Do)</span>
-        </div>
-        <div id="dtChecklistsContainer" style="display: flex; flex-direction: column; gap: 8px; max-height: 140px; overflow-y: auto; margin-bottom: 12px;"></div>
-        <button onclick="openAddChecklistModal(currentDetailTxId); closeSheet('transactionDetailsModal');" class="btn-action-outline" style="width: 100%; font-size: 12px; padding: 12px;">+ إضافة متطلب / مهمة</button>
-      </div>
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-        <button onclick="openWhatsAppQuickModal(currentDetailTxId); closeSheet('transactionDetailsModal');" class="btn-action-outline" style="background: rgba(16,185,129,0.1); border-color: var(--emerald); color: var(--emerald);">مراسلة واتساب 💬</button>
-        <button onclick="completeTx(currentDetailTxId); closeSheet('transactionDetailsModal');" class="btn-action-gold">إنجاز العمل كلياً ✅</button>
-      </div>
-      <button onclick="deleteTx(currentDetailTxId); closeSheet('transactionDetailsModal');" class="btn-subtle" style="width: 100%; margin-bottom: 12px; color: var(--danger); border-color: rgba(239,68,68,0.3);">حذف المعاملة 🗑️</button>
-      <button onclick="closeSheet('transactionDetailsModal')" class="btn-subtle" style="width: 100%;">إغلاق النافذة</button>
     </div>
-  </div>
 
-  <!-- محرك تحديث المسار -->
-  <div id="advancedStepModal" class="sheet-overlay">
-    <div class="sheet-panel">
-      <div class="sheet-handle"></div>
-      <h3 style="font-size: 20px; font-weight: 900; margin-bottom: 20px; color: var(--gold);">تحديث محطة المعاملة</h3>
-      <div style="display: flex; flex-direction: column; gap: 16px;">
-        <div>
-          <label style="font-size: 12px; font-weight: 800; color: var(--text-muted); display: block; margin-bottom: 8px;">الدائرة الرسمية</label>
-          <input id="advDeptSelect" type="text" class="modern-input" placeholder="مثال: دائرة مسجل الشركات">
-        </div>
-        <div>
-          <label style="font-size: 12px; font-weight: 800; color: var(--text-muted); display: block; margin-bottom: 8px;">المحطة الفرعية / الشعبة</label>
-          <input id="advStageInput" type="text" placeholder="مثال: التدقيق القانوني، الحسابات..." class="modern-input">
-        </div>
-        <div>
-          <label style="font-size: 12px; font-weight: 800; color: var(--text-muted); display: block; margin-bottom: 8px;">حالة المعاملة الحالية</label>
-          <select id="advStatusSelect" class="modern-input">
-            <option value="active">مستمرة (تحت الإجراء)</option>
-            <option value="pending">معلقة (نقص مستمسكات)</option>
-            <option value="ready">جاهزة للإصدار</option>
-          </select>
-        </div>
-        <div>
-          <label style="font-size: 12px; font-weight: 800; color: var(--text-muted); display: block; margin-bottom: 8px;">ملاحظات (اختياري)</label>
-          <textarea id="advNoteInput" rows="3" placeholder="سجل تفاصيل المراجعة..." class="modern-input"></textarea>
-        </div>
-        <div style="display: flex; gap: 12px; margin-top: 10px;">
-          <button onclick="confirmAdvancedStepUpdate()" class="btn-action-gold" style="flex: 1;">اعتماد التحديث سحابياً</button>
-          <button onclick="closeSheet('advancedStepModal')" class="btn-action-outline" style="flex: 1;">إلغاء</button>
-        </div>
-      </div>
-    </div>
-  </div>
+    <script>
+        // --- 1. إدارة البيانات (Local Storage) ---
+        let appData = JSON.parse(localStorage.getItem('enjaz_data')) || {
+            lawyers: ['أ. محمد العبيدي', 'أ. أحمد الجبوري'],
+            companies: [
+                { name: 'شركة إبهار المستقبل', lawyer: 'أ. محمد العبيدي' },
+                { name: 'شركة أرض البيطرة', lawyer: 'أ. أحمد الجبوري' }
+            ],
+            transactions: [
+                { id: 1, company: 'شركة إبهار المستقبل', lawyer: 'أ. محمد العبيدي', type: 'تصديق وثائق', department: 'مسجل الشركات', fee: 25000, status: 'active', station: 'قسم التدقيق - أ. ياسر', timestamp: Date.now() }
+            ]
+        };
 
-  <!-- استلام معاملة -->
-  <div id="newTxModal" class="sheet-overlay">
-    <div class="sheet-panel">
-      <div class="sheet-handle"></div>
-      <h3 style="font-size: 20px; font-weight: 900; margin-bottom: 20px;">استلام معاملة جديدة</h3>
-      <div style="display: flex; flex-direction: column; gap: 16px;">
-        <select id="txCompanySelect" class="modern-input"></select>
-        <input id="txType" type="text" placeholder="نوع المعاملة الرسمي" class="modern-input">
-        <input id="txFee" type="number" placeholder="الأتعاب الصافية (د.ع)" class="modern-input num-font">
-        <div style="display: flex; gap: 12px; margin-top: 10px;">
-          <button onclick="saveTransaction()" class="btn-action-gold" style="flex: 1;">حفظ في النظام</button>
-          <button onclick="closeSheet('newTxModal')" class="btn-action-outline" style="flex: 1;">إلغاء</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- تسجيل شركة -->
-  <div id="newCompanyModal" class="sheet-overlay">
-    <div class="sheet-panel">
-      <div class="sheet-handle"></div>
-      <h3 style="font-size: 20px; font-weight: 900; margin-bottom: 20px;">تسجيل شركة جديدة</h3>
-      <div style="display: flex; flex-direction: column; gap: 16px;">
-        <input id="compName" type="text" placeholder="الاسم الرسمي للشركة" class="modern-input">
-        <input id="compPhone" type="tel" placeholder="رقم هاتف المراجع (اختياري)" class="modern-input num-font">
-        <div style="display: flex; gap: 12px; margin-top: 10px;">
-          <button onclick="saveCompany()" class="btn-action-gold" style="flex: 1;">حفظ البيانات</button>
-          <button onclick="closeSheet('newCompanyModal')" class="btn-action-outline" style="flex: 1;">إلغاء</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- إدارة الشركة -->
-  <div id="companyManagementModal" class="sheet-overlay">
-    <div class="sheet-panel">
-      <div class="sheet-handle"></div>
-      <h3 id="mgmtCompTitle" style="font-size: 22px; font-weight: 900; margin-bottom: 16px; color: var(--gold);">إدارة الشركة</h3>
-      <div style="display: flex; flex-direction: column; gap: 14px;">
-        <button onclick="openDocVaultFromMgmt()" class="btn-action-outline" style="border-color: var(--gold);">📁 فتح الخزنة السحابية للمستندات</button>
-        <button onclick="deleteCompany(selectedCompanyId)" class="btn-subtle" style="color: var(--danger); border-color: rgba(239,68,68,0.3);">🗑️ حذف الشركة نهائياً</button>
-        <button onclick="closeSheet('companyManagementModal')" class="btn-subtle" style="margin-top: 10px;">إغلاق</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- محرك الواتساب الذكي -->
-  <div id="whatsappQuickModal" class="sheet-overlay">
-    <div class="sheet-panel">
-      <div class="sheet-handle"></div>
-      <h3 style="font-size: 20px; font-weight: 900; margin-bottom: 8px;">محرك المراسلة للعملاء</h3>
-      <p id="waModalTxInfo" style="font-size: 13px; font-weight: 800; color: var(--gold); margin-bottom: 24px;"></p>
-      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
-        <button onclick="generateWAMessage('status')" class="btn-action-outline" style="justify-content: flex-start; padding: 14px;">📍 إشعار بموقع المعاملة الحالي</button>
-        <button onclick="generateWAMessage('missing')" class="btn-action-outline" style="justify-content: flex-start; padding: 14px;">⏳ طلب جلب مستمسكات ناقصة</button>
-        <button onclick="generateWAMessage('completed')" class="btn-action-outline" style="justify-content: flex-start; padding: 14px; border-color: var(--emerald); color: var(--emerald);">🎉 إشعار بإنجاز المعاملة كلياً</button>
-      </div>
-      <textarea id="waPreviewText" rows="5" class="modern-input" style="margin-bottom: 16px; font-size: 13px; line-height: 1.6;"></textarea>
-      <button onclick="copyAndSendWA()" class="btn-action-gold" style="width: 100%; margin-bottom: 12px;">فتح الواتساب والإرسال 💬</button>
-      <button onclick="closeSheet('whatsappQuickModal')" class="btn-subtle" style="width: 100%;">إغلاق</button>
-    </div>
-  </div>
-
-  <!-- الخزنة السحابية (المرفقات) -->
-  <div id="docVaultModal" class="sheet-overlay">
-    <div class="sheet-panel">
-      <div class="sheet-handle"></div>
-      <h3 id="vaultCompTitle" style="font-size: 20px; font-weight: 900; margin-bottom: 20px; color: var(--gold);">خزنة الشركة</h3>
-      <div class="exec-card" style="padding: 16px; margin-bottom: 24px;">
-        <input id="docCustomName" type="text" placeholder="اسم المستند (مثال: وصل رسم)" class="modern-input" style="margin-bottom: 12px;">
-        <!-- تم تصحيح حقل الملف لإعطائك حرية اختيار PDF أو التقاط صورة -->
-        <input type="file" id="docFileInput" accept="image/*,application/pdf" style="display: none;" onchange="handleFileSelection(this)">
-        <button onclick="document.getElementById('docFileInput').click()" class="btn-action-outline" style="border-style: dashed; margin-bottom: 12px; width: 100%;">
-          <span id="selectedFileNameLabel">اختيار ملف أو التقاط صورة 📸</span>
-        </button>
-        <button id="btnUploadDoc" onclick="uploadCompanyDocument()" class="btn-action-gold" style="width: 100%;">رفع وحفظ في السحابة ☁️</button>
-      </div>
-      <span style="font-size: 14px; font-weight: 900; display: block; margin-bottom: 12px;">الملفات المؤرشفة (<span id="vaultDocsCount" class="num-font" style="color:var(--gold);">0</span>)</span>
-      <div id="companyDocsList" style="display: flex; flex-direction: column; gap: 10px; max-height: 200px; overflow-y: auto; margin-bottom: 16px;"></div>
-      <button onclick="closeSheet('docVaultModal')" class="btn-subtle" style="width: 100%;">إغلاق الخزنة</button>
-    </div>
-  </div>
-
-  <!-- إضافة متطلب / To-Do -->
-  <div id="addChecklistModal" class="sheet-overlay">
-    <div class="sheet-panel">
-      <div class="sheet-handle"></div>
-      <h3 style="font-size: 20px; font-weight: 900; margin-bottom: 20px;">إضافة متطلب أو مهمة</h3>
-      <input id="newChecklistInput" type="text" placeholder="مثال: مراجعة القسم المالي..." class="modern-input" style="margin-bottom: 20px;">
-      <div style="display: flex; gap: 12px;">
-        <button onclick="confirmAddChecklistItem()" class="btn-action-gold" style="flex: 1;">إضافة للمهام</button>
-        <button onclick="closeSheet('addChecklistModal')" class="btn-action-outline" style="flex: 1;">إلغاء</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- سند التسوية (مضاف له QR Code) -->
-  <div id="weeklyReceiptModal" class="sheet-overlay">
-    <div class="sheet-panel" style="max-width: 480px;">
-      <div class="sheet-handle"></div>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h3 style="font-size: 20px; font-weight: 900; color: var(--gold);">سند تسوية أتعاب</h3>
-        <button onclick="printWeeklyReceiptVoucher()" class="btn-action-outline" style="padding: 10px 16px; font-size: 12px; border-color: var(--gold); color: var(--gold);">طباعة السند 🖨️</button>
-      </div>
-      <div id="printableWeeklyArea" style="background: #FFF; color: #111827; padding: 30px; border-radius: 16px; font-size: 14px; line-height: 1.8; position: relative;">
-        <h2 style="font-size: 20px; font-weight: 900; margin-bottom: 8px; color: #000; text-align: center; border-bottom: 2px solid #EEE; padding-bottom: 10px;">إدارة العمليات - سند قبض</h2>
-        <div style="margin-top: 20px;">
-          <p><b>الجهة المطابقة:</b> <span id="weeklyRecCompanyName"></span></p>
-          <p><b>قيمة الأتعاب المسددة:</b> <b id="weeklyRecAmountNum" style="font-size: 18px; color: var(--danger);"></b> د.ع</p>
-          <p><b>التاريخ:</b> <span id="weeklyRecDateRange"></span></p>
-        </div>
-        <div style="display: flex; justify-content: center; margin-top: 30px;">
-          <div id="receiptQRCodeArea"></div>
-        </div>
-        <p style="text-align: center; font-size: 10px; color: #666; margin-top: 16px;">وثيقة تسوية إلكترونية مصدقة بالباركود</p>
-      </div>
-      <button onclick="settleAllWeeklyDuesForCompany()" class="btn-action-gold" style="width: 100%; margin-top: 24px;">تأكيد قبض الأتعاب وتصفير الدين سحابياً ✅</button>
-      <button onclick="closeSheet('weeklyReceiptModal')" class="btn-subtle" style="width: 100%; margin-top: 12px;">إغلاق</button>
-    </div>
-  </div>
-
-  <!-- سجل الحركات السحابي (Audit Logs) -->
-  <div id="auditLogModal" class="sheet-overlay">
-    <div class="sheet-panel">
-      <div class="sheet-handle"></div>
-      <h3 style="font-size: 20px; font-weight: 900; margin-bottom: 20px;">سجل الحركات السحابي (Audit)</h3>
-      <div id="auditLogsContainer" style="display: flex; flex-direction: column; gap: 12px; max-height: 400px; overflow-y: auto;"></div>
-      <button onclick="closeSheet('auditLogModal')" class="btn-subtle" style="width: 100%; margin-top: 20px;">إغلاق السجل</button>
-    </div>
-  </div>
-
-  <!-- تقرير PDF احترافي (مع html2pdf و QR) -->
-  <div id="pdfModal" class="sheet-overlay">
-    <div class="sheet-panel" style="max-width: 600px;">
-      <div class="sheet-handle"></div>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-        <h3 style="font-size: 20px; font-weight: 900; color: var(--gold);">التقرير المالي العام</h3>
-        <button onclick="executePDFGenerate()" class="btn-action-gold" style="padding: 10px 16px; font-size: 12px;">تحميل كملف PDF 📥</button>
-      </div>
-      <div id="pdfPrintableArea" style="background: #FFF; color: #000; padding: 40px 30px; font-size: 14px; border-radius: 8px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #222; padding-bottom: 16px;">
-          <div>
-            <h2 style="font-size: 24px; font-weight: 900; color: #111;">كشف حساب الأتعاب المعلقة</h2>
-            <p id="pdfReportDate" style="color: #555; margin-top: 6px; font-weight: bold;"></p>
-          </div>
-          <div id="pdfQRCodeArea"></div>
-        </div>
-        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px;">
-          <thead>
-            <tr style="background: #F3F4F6;">
-              <th style="text-align:right; padding:12px; border: 1px solid #CCC;">اسم الجهة (الشركة)</th>
-              <th style="text-align:right; padding:12px; border: 1px solid #CCC;">نوع المعاملة</th>
-              <th style="text-align:left; padding:12px; border: 1px solid #CCC;">الأتعاب المتبقية</th>
-            </tr>
-          </thead>
-          <tbody id="pdfTableBody"></tbody>
-        </table>
-        <div style="margin-top: 30px; padding-top: 20px; border-top: 2px dashed #999; text-align: left;">
-          <span style="font-size: 16px; font-weight: 900;">إجمالي الأتعاب المستحقة للمكتب: </span>
-          <span id="pdfTotalDebt" class="num-font" style="font-size: 20px; font-weight: 900; color: #D90429;"></span>
-        </div>
-      </div>
-      <button onclick="closeSheet('pdfModal')" class="btn-subtle" style="width: 100%; margin-top: 20px;">رجوع للوحة</button>
-    </div>
-  </div>
-
-  <script>
-    /* =====================================================================
-       محرك قاعدة البيانات والمزامنة (Supabase)
-    ===================================================================== */
-    const SUPABASE_URL = "https://giidtugteyiobaagqohy.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpaWR0dWd0ZXlpb2JhYWdxb2h5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxMTgyMjYsImV4cCI6MjEwMjY5NDIyNn0.v7Nwag2BTrCWG6zzeYo1kTG4w2xAuzSmiZpCLJtvBow";
-    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    let currentUser = null;
-    let selectedCompanyId = null;
-    let selectedCompanyName = "";
-    let currentDetailTxId = null;
-    let targetTxForWA = null;
-    let currentWeeklyData = null;
-    let searchQuery = "";
-    let currentFilter = "all";
-
-    let companies = [];
-    let allTransactionsGlobal = [];
-    let allDocumentsGlobal = [];
-    let toastTimeout = null;
-
-    const companyIconSVG = `<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 21h18M5 21V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14M9 9h6M9 13h6M9 17h6"/></svg>`;
-
-    /* =====================================================================
-       وظائف الواجهة (UI) والـ Snippets
-    ===================================================================== */
-    function showToast(msg, icon = "✨") {
-      const t = document.getElementById('toast');
-      document.getElementById('toastMsg').innerText = msg;
-      document.getElementById('toastIcon').innerText = icon;
-      t.classList.add('show');
-      if (toastTimeout) clearTimeout(toastTimeout);
-      toastTimeout = setTimeout(() => t.classList.remove('show'), 3000);
-    }
-
-    function switchTab(t) {
-      document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.dock-tab').forEach(el => el.classList.remove('active'));
-      document.getElementById(`tab-${t}`).classList.add('active');
-      document.getElementById(`nav-${t}`).classList.add('active');
-
-      if (t === 'alerts') updateSmartRadarAlerts();
-      if (t === 'archive') { renderArchiveLibrary(''); renderCompletedArchive(); }
-      if (t === 'finance') renderAccounts(allTransactionsGlobal);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function openSheet(id) { document.getElementById(id).style.display = 'flex'; }
-    function closeSheet(id) { document.getElementById(id).style.display = 'none'; }
-
-    function copySnippet(val) {
-      if(!val) return;
-      navigator.clipboard.writeText(val);
-      showToast("تم النسخ للحافظة 📋");
-      document.getElementById('snippetSelector').value = "";
-    }
-
-    /* =====================================================================
-       المصادقة (Auth)
-    ===================================================================== */
-    async function checkAuthSession() {
-      const { data: { session } } = await db.auth.getSession();
-      if (session) {
-        currentUser = session.user;
-        document.getElementById('authOverlay').style.display = 'none';
-        loadData();
-      }
-    }
-
-    async function handleLogin() {
-      const email = document.getElementById('loginEmail').value.trim();
-      const password = document.getElementById('loginPassword').value.trim();
-      const btn = document.getElementById('btnLogin');
-
-      if (!email || !password) return showToast("البيانات ناقصة", "⚠️");
-      btn.innerText = "جاري الاتصال بالسحابة..."; 
-      
-      const { data, error } = await db.auth.signInWithPassword({ email, password });
-      if (error) {
-        showToast("فشل الدخول", "❌");
-        btn.innerText = "تسجيل الدخول";
-      } else {
-        currentUser = data.user;
-        document.getElementById('authOverlay').style.display = 'none';
-        logAudit("دخول النظام", "تسجيل دخول مكتبي آمن");
-        showToast("مرحباً بك في النظام");
-        loadData();
-      }
-    }
-
-    async function handleLogout() {
-      if (confirm("تأكيد تسجيل الخروج؟")) {
-        await db.auth.signOut();
-        currentUser = null;
-        document.getElementById('authOverlay').style.display = 'flex';
-        showToast("تم الخروج بنجاح");
-      }
-    }
-
-    /* =====================================================================
-       تحميل البيانات من Supabase
-    ===================================================================== */
-    async function loadData() {
-      try {
-        const { data: compData } = await db.from('companies').select('*').order('created_at', { ascending: false });
-        companies = compData || [];
-        document.getElementById('companiesCount').innerText = companies.length;
-        renderCompanies();
-
-        const { data: txData } = await db.from('transactions')
-          .select(`*, companies(name), transaction_checklists(*), transaction_steps(*)`)
-          .order('created_at', { ascending: false });
-        allTransactionsGlobal = txData || [];
-        
-        const { data: docs } = await db.from('company_documents').select('*, companies(name)').order('created_at', { ascending: false });
-        allDocumentsGlobal = docs || [];
-
-        renderActive();
-        renderCompletedArchive();
-        renderAccounts(allTransactionsGlobal);
-        updateSmartRadarAlerts();
-      } catch (err) { console.error("Error loading data:", err); }
-    }
-
-    /* =====================================================================
-       قسم الشركات واستلام المعاملات
-    ===================================================================== */
-    function renderCompanies() {
-      const list = document.getElementById('companiesList');
-      const select = document.getElementById('txCompanySelect');
-      list.innerHTML = ''; select.innerHTML = '';
-      const filtered = companies.filter(c => !searchQuery || c.name.toLowerCase().includes(searchQuery));
-
-      filtered.forEach(c => {
-        list.innerHTML += `
-          <div onclick="openCompanyManagement('${c.id}', '${c.name}')" class="exec-card" style="padding: 14px 18px; min-width: 170px; display: flex; flex-direction: row; align-items: center; gap: 14px; cursor: pointer;">
-            <div style="color: var(--gold);">${companyIconSVG}</div>
-            <div style="overflow: hidden;">
-              <p style="font-size: 14px; font-weight: 900; color: #FFF; white-space: nowrap; text-overflow: ellipsis; overflow:hidden;">${c.name}</p>
-              <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">إدارة وحذف</p>
-            </div>
-          </div>`;
-        select.innerHTML += `<option value="${c.id}">${c.name}</option>`;
-      });
-    }
-
-    async function saveCompany() {
-      const name = document.getElementById('compName').value.trim();
-      const phone = document.getElementById('compPhone').value.trim();
-      if (!name) return;
-      await db.from('companies').insert([{ name, phone }]);
-      logAudit("تسجيل شركة", `اسم الشركة: ${name}`);
-      document.getElementById('compName').value = '';
-      closeSheet('newCompanyModal'); showToast("تم الحفظ بنجاح"); loadData();
-    }
-
-    async function saveTransaction() {
-      const company_id = document.getElementById('txCompanySelect').value;
-      const transaction_type = document.getElementById('txType').value.trim();
-      const fee_iqd = parseFloat(document.getElementById('txFee').value) || 0;
-
-      if (!transaction_type) return showToast("أدخل نوع المعاملة", "⚠️");
-
-      const { data: tx } = await db.from('transactions').insert([{ 
-        company_id, transaction_type, fee_iqd, status: 'in_progress', paid_amount: 0
-      }]).select().single();
-
-      if (tx) {
-        await db.from('transaction_steps').insert([{ 
-          transaction_id: tx.id, dept: 'دائرة مسجل الشركات', stage: 'الاستلام المبدئي', status: 'active', note: 'بدء دورة المعاملة' 
-        }]);
-      }
-
-      logAudit("استلام معاملة", `نوع المعاملة: ${transaction_type}`);
-      document.getElementById('txType').value = ''; document.getElementById('txFee').value = '';
-      closeSheet('newTxModal'); showToast("تم استلام المعاملة"); loadData();
-    }
-
-    /* =====================================================================
-       واجهة عرض وتتبع المعاملات
-    ===================================================================== */
-    function handleGlobalSearch(val) {
-      searchQuery = val.trim().toLowerCase();
-      renderCompanies(); renderActive(); renderAccounts(allTransactionsGlobal);
-    }
-
-    function setFilter(filterType, element) {
-      currentFilter = filterType;
-      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-      element.classList.add('active');
-      renderActive();
-    }
-
-    function renderActive() {
-      const container = document.getElementById('activeTransactionsList');
-      const activeTxs = allTransactionsGlobal.filter(t => t.status === 'in_progress');
-      
-      document.getElementById('dashActiveCount').innerText = activeTxs.length;
-
-      const filtered = activeTxs.filter(tx => {
-        const steps = tx.transaction_steps || [];
-        steps.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
-        const latestStep = steps.length > 0 ? steps[steps.length - 1] : { status: 'active' };
-        
-        if (currentFilter !== 'all' && latestStep.status !== currentFilter) return false;
-        if (!searchQuery) return true;
-        return (tx.companies?.name || '').toLowerCase().includes(searchQuery) || (tx.transaction_type || '').toLowerCase().includes(searchQuery);
-      });
-
-      if (filtered.length === 0) {
-        container.innerHTML = `<p style="text-align: center; color: var(--text-muted); font-size: 13px;">لا توجد معاملات مطابقة</p>`;
-        return;
-      }
-
-      container.innerHTML = filtered.map(tx => {
-        const checklists = tx.transaction_checklists || [];
-        const completedCount = checklists.filter(c => c.is_completed).length;
-        const progressPercent = checklists.length > 0 ? Math.round((completedCount / checklists.length) * 100) : 0;
-        
-        const steps = tx.transaction_steps || [];
-        steps.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
-        const latestStep = steps.length > 0 ? steps[steps.length - 1] : { dept: 'غير محدد', stage: 'متابعة' };
-
-        let statusColor = "var(--blue)";
-        if (latestStep.status === 'pending') statusColor = "var(--gold)";
-        else if (latestStep.status === 'ready') statusColor = "var(--emerald)";
-
-        return `
-          <div class="exec-card">
-            <div onclick="openTransactionFullDetails('${tx.id}')" style="cursor: pointer;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <span style="font-size: 13px; font-weight: 800; color: var(--text-muted);">${tx.companies?.name || 'شركة'}</span>
-                <span style="width: 10px; height: 10px; border-radius: 50%; background: ${statusColor}; box-shadow: 0 0 10px ${statusColor};"></span>
-              </div>
-              <h3 style="font-size: 18px; font-weight: 900; color: #FFF; margin-bottom: 12px;">${tx.transaction_type}</h3>
-              <div style="background: rgba(255,255,255,0.03); border-radius: var(--radius-sm); padding: 12px; border: 1px solid rgba(255,255,255,0.05);">
-                <p style="font-size: 13px; font-weight: 900; color: var(--gold); margin-bottom: 4px;">📍 ${latestStep.dept}</p>
-                <p style="font-size: 11px; color: var(--text-muted);">${latestStep.stage || 'تحت الإجراء'}</p>
-              </div>
-            </div>
-            <div style="margin-top: 14px;">
-              <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 800; color: var(--text-muted); margin-bottom: 6px;">
-                <span>المهام والمستمسكات (${completedCount}/${checklists.length})</span>
-                <span class="num-font">${progressPercent}%</span>
-              </div>
-              <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden;">
-                <div style="width: ${progressPercent}%; height: 100%; background: var(--gold-gradient); border-radius: 10px;"></div>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    /* =====================================================================
-       تفاصيل المعاملة، الاستنساخ، والمحطات
-    ===================================================================== */
-    window.openTransactionFullDetails = function(txId) {
-      const tx = allTransactionsGlobal.find(t => t.id == txId); // تم التصحيح لتعمل الأزرار
-      if (!tx) return;
-
-      currentDetailTxId = txId;
-      document.getElementById('dtCompNameBadge').innerText = tx.companies?.name || 'شركة';
-      document.getElementById('dtTxTitle').innerText = tx.transaction_type;
-      document.getElementById('dtFinancialSummary').innerText = `${(Number(tx.fee_iqd) || 0).toLocaleString('ar-IQ')} د.ع`;
-
-      document.getElementById('btnCloneTx').onclick = () => {
-        closeSheet('transactionDetailsModal');
-        document.getElementById('txType').value = tx.transaction_type;
-        document.getElementById('txFee').value = tx.fee_iqd || 0;
-        openSheet('newTxModal');
-        showToast("تم نسخ التفاصيل، اختر الشركة الجديدة 📑");
-      };
-
-      const steps = tx.transaction_steps || [];
-      steps.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
-      const latest = steps.length > 0 ? steps[steps.length - 1] : { dept: 'مسجل الشركات', stage: 'مراجعة', status: 'active' };
-
-      document.getElementById('dtCurrentLocText').innerText = `${latest.dept} ‹ ${latest.stage || 'متابعة'}`;
-
-      const checklists = tx.transaction_checklists || [];
-      document.getElementById('dtChecklistsContainer').innerHTML = checklists.length > 0 ? checklists.map(c => `
-        <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.02); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
-          <label style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: ${c.is_completed ? 'var(--text-muted)' : '#FFF'}; cursor: pointer; flex: 1;">
-            <input type="checkbox" ${c.is_completed ? 'checked' : ''} onchange="toggleCheck('${c.id}', ${!c.is_completed}); setTimeout(() => openTransactionFullDetails('${txId}'), 200);" style="width: 16px; height: 16px; accent-color: var(--gold);">
-            <span style="${c.is_completed ? 'text-decoration: line-through;' : ''}">${c.item_text}</span>
-          </label>
-          <button onclick="deleteChecklistItem('${c.id}'); setTimeout(() => openTransactionFullDetails('${txId}'), 200);" style="background: none; border: none; color: var(--danger); cursor: pointer; font-size: 14px;">✕</button>
-        </div>
-      `).join('') : '<p style="font-size:12px; color:var(--text-muted);">لا توجد مهام مسجلة</p>';
-
-      document.getElementById('dtTimelineList').innerHTML = steps.slice().reverse().map((h, i) => `
-        <div style="padding: 10px; border-right: 2px solid ${i === 0 ? 'var(--gold)' : 'var(--border-subtle)'}; display: flex; flex-direction: column; gap: 4px; margin-right: 4px;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 13px; font-weight: 900; color: ${i === 0 ? 'var(--gold)' : '#FFF'};">${h.dept} (${h.stage || ''})</span>
-            <span class="num-font" style="font-size: 10px; color: var(--text-muted);">${new Date(h.created_at).toLocaleDateString('ar-IQ')}</span>
-          </div>
-          <p style="font-size: 11px; color: var(--text-muted);">${h.note || ''}</p>
-        </div>
-      `).join('') || '<p style="font-size:12px; color:var(--text-muted);">لا يوجد سجل</p>';
-
-      openSheet('transactionDetailsModal');
-    };
-
-    function openAdvancedStepModal(txId) {
-      currentDetailTxId = txId;
-      const tx = allTransactionsGlobal.find(t => t.id == txId);
-      if (tx) {
-        const steps = tx.transaction_steps || [];
-        steps.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
-        const latest = steps.length > 0 ? steps[steps.length - 1] : {};
-        document.getElementById('advDeptSelect').value = latest.dept || '';
-        document.getElementById('advStageInput').value = latest.stage || '';
-        document.getElementById('advStatusSelect').value = latest.status || 'active';
-        document.getElementById('advNoteInput').value = '';
-      }
-      openSheet('advancedStepModal');
-    }
-
-    async function confirmAdvancedStepUpdate() {
-      const dept = document.getElementById('advDeptSelect').value.trim();
-      const stage = document.getElementById('advStageInput').value.trim();
-      const status = document.getElementById('advStatusSelect').value;
-      const note = document.getElementById('advNoteInput').value.trim();
-
-      if (!currentDetailTxId || !dept) return;
-
-      await db.from('transaction_steps').insert([{ transaction_id: currentDetailTxId, dept, stage, status, note }]);
-
-      closeSheet('advancedStepModal');
-      showToast("تم تحديث المسار السحابي بنجاح 🚀");
-      await loadData();
-      openTransactionFullDetails(currentDetailTxId);
-    }
-
-    /* =====================================================================
-       إنجاز، وتحديد المهام
-    ===================================================================== */
-    async function completeTx(id) { 
-      await db.from('transactions').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', id); 
-      await db.from('transaction_steps').insert([{ transaction_id: id, dept: 'إنجاز كلي', stage: 'تسليم', status: 'ready', note: 'المعاملة منجزة' }]);
-      logAudit("إنجاز معاملة", "تم نقلها للأرشيف");
-      showToast("تم الإنجاز ✅"); loadData(); 
-    }
-
-    async function deleteTx(id) {
-      if (!confirm("حذف هذه المعاملة نهائياً من السحابة؟")) return;
-      await db.from('transactions').delete().eq('id', id); 
-      showToast("تم حذف المعاملة 🗑️"); loadData();
-    }
-
-    function openAddChecklistModal(txId) { currentDetailTxId = txId; openSheet('addChecklistModal'); }
-    
-    async function confirmAddChecklistItem() {
-      const text = document.getElementById('newChecklistInput').value.trim();
-      if (text && currentDetailTxId) {
-        await db.from('transaction_checklists').insert([{ transaction_id: currentDetailTxId, item_text: text, is_completed: false }]);
-        document.getElementById('newChecklistInput').value = '';
-        closeSheet('addChecklistModal'); showToast("تمت الإضافة للمهام"); 
-        await loadData(); openTransactionFullDetails(currentDetailTxId);
-      }
-    }
-    
-    async function toggleCheck(id, val) { await db.from('transaction_checklists').update({ is_completed: val }).eq('id', id); loadData(); }
-    async function deleteChecklistItem(id) { await db.from('transaction_checklists').delete().eq('id', id); loadData(); }
-
-    /* =====================================================================
-       الحسابات المالية (تحديث سحابي) والـ QR والـ PDF
-    ===================================================================== */
-    function renderAccounts(all) {
-      const list = document.getElementById('accountsList');
-      let grandTotalDebt = 0;
-      let html = '';
-
-      companies.forEach(c => {
-        const cTxs = all.filter(t => t.company_id == c.id);
-        const debt = cTxs.reduce((s, t) => s + (Number(t.fee_iqd) || 0) - (Number(t.paid_amount) || 0), 0);
-        
-        if (debt > 0) {
-          grandTotalDebt += debt;
-          html += `
-            <div class="exec-card" style="padding: 16px 20px; flex-direction: row; justify-content: space-between; align-items: center;">
-              <div>
-                <p style="font-size: 15px; font-weight: 900; color: #FFF;">${c.name}</p>
-                <p style="font-size: 12px; color: var(--danger); font-weight: 800; margin-top: 4px;">ديون معلقة: ${debt.toLocaleString('ar-IQ')} د.ع</p>
-              </div>
-              <button onclick="openWeeklyReceiptForCompany('${c.id}')" class="btn-subtle" style="background: rgba(245, 158, 11, 0.1); color: var(--gold); border-color: rgba(245,158,11,0.3); padding: 10px 16px;">تسوية 💰</button>
-            </div>
-          `;
+        function saveData() {
+            localStorage.setItem('enjaz_data', JSON.stringify(appData));
         }
-      });
-      document.getElementById('weeklyTotalSumBadge').innerText = `${grandTotalDebt.toLocaleString('ar-IQ')} د.ع`;
-      list.innerHTML = html || '<div class="exec-card" style="text-align:center; color:var(--text-muted);">لا توجد ديون معلقة</div>';
-    }
 
-    function openWeeklyReceiptForCompany(compId) {
-      const comp = companies.find(c => c.id == compId); // تم التصحيح
-      const txs = allTransactionsGlobal.filter(t => t.company_id == compId && (Number(t.fee_iqd) || 0) > (Number(t.paid_amount) || 0));
-      const totalDebt = txs.reduce((s, t) => s + ((Number(t.fee_iqd) || 0) - (Number(t.paid_amount) || 0)), 0);
-      
-      currentWeeklyData = { compId, txList: txs, total: totalDebt };
-      document.getElementById('weeklyRecCompanyName').innerText = comp ? comp.name : 'شركة';
-      document.getElementById('weeklyRecAmountNum').innerText = totalDebt.toLocaleString('ar-IQ');
-      document.getElementById('weeklyRecDateRange').innerText = new Date().toLocaleDateString('ar-IQ');
-      
-      document.getElementById("receiptQRCodeArea").innerHTML = "";
-      new QRCode(document.getElementById("receiptQRCodeArea"), {
-        text: `سند تسوية | الجهة: ${comp.name} | مبلغ: ${totalDebt} دينار | التاريخ: ${new Date().toLocaleDateString()}`,
-        width: 110, height: 110, colorDark : "#111827", colorLight : "#ffffff"
-      });
-      
-      openSheet('weeklyReceiptModal');
-    }
+        // --- 2. إدارة التنقل والواجهات ---
+        const tabs = [
+            { id: 'settings', label: 'إعدادات', icon: 'settings' },
+            { id: 'archive', label: 'الأرشيف', icon: 'archive' },
+            { id: 'finance', label: 'تحاسب', icon: 'wallet' },
+            { id: 'stuck', label: 'متلكئة', icon: 'alert-triangle' },
+            { id: 'active', label: 'جارية', icon: 'loader' },
+            { id: 'new', label: 'معاملة', icon: 'plus-circle' },
+            { id: 'dashboard', label: 'الرئيسية', icon: 'layout-grid' }
+        ];
 
-    async function settleAllWeeklyDuesForCompany() {
-      if (!currentWeeklyData || currentWeeklyData.txList.length === 0) return;
-      if (!confirm("تأكيد استلام الأتعاب وتصفير ديون هذه الجهة سحابياً؟")) return;
-      
-      for(let t of currentWeeklyData.txList) {
-        await db.from('transactions').update({ paid_amount: t.fee_iqd }).eq('id', t.id);
-      }
-      
-      logAudit("تسوية مالية", `تم تسديد أتعاب شركة ${document.getElementById('weeklyRecCompanyName').innerText}`);
-      closeSheet('weeklyReceiptModal'); showToast("تم تصفير الديون بنجاح ✅"); loadData();
-    }
+        let currentTab = 'dashboard';
 
-    function printWeeklyReceiptVoucher() {
-      const prtContent = document.getElementById("printableWeeklyArea");
-      const WinPrint = window.open('', '', 'left=0,top=0,width=500,height=600,toolbar=0,scrollbars=0,status=0');
-      WinPrint.document.write(`<html dir="rtl"><body style="font-family: Tajawal, sans-serif; padding:20px;">${prtContent.innerHTML}</body></html>`);
-      WinPrint.document.close();
-      WinPrint.focus();
-      setTimeout(() => { WinPrint.print(); WinPrint.close(); }, 500);
-    }
+        function renderNav() {
+            const navContainer = document.getElementById('bottom-nav');
+            navContainer.innerHTML = tabs.map(tab => `
+                <button onclick="switchTab('${tab.id}')" class="flex flex-col items-center justify-center w-full space-y-1 transition-all duration-300 ${currentTab === tab.id ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}">
+                    <i data-lucide="${tab.icon}" class="w-6 h-6 ${currentTab === tab.id ? 'fill-indigo-100' : ''}"></i>
+                    <span class="text-[10px] font-bold">${tab.label}</span>
+                </button>
+            `).join('');
+            lucide.createIcons();
+        }
 
-    function openPDFPreviewModal() {
-      const tbody = document.getElementById('pdfTableBody');
-      tbody.innerHTML = '';
-      let totalDebtAll = 0;
+        function switchTab(tabId) {
+            currentTab = tabId;
+            renderNav();
+            renderContent();
+        }
 
-      companies.forEach(c => {
-        const cTxs = allTransactionsGlobal.filter(t => t.company_id == c.id);
-        cTxs.forEach(t => {
-          const debt = (Number(t.fee_iqd) || 0) - (Number(t.paid_amount) || 0);
-          if (debt > 0) {
-            totalDebtAll += debt;
-            tbody.innerHTML += `
-              <tr style="border-bottom: 1px solid #EEE;">
-                <td style="padding: 12px; border: 1px solid #CCC; font-weight: bold;">${c.name}</td>
-                <td style="padding: 12px; border: 1px solid #CCC;">${t.transaction_type}</td>
-                <td style="padding: 12px; border: 1px solid #CCC; color: #D90429; font-weight:bold;">${debt.toLocaleString('ar-IQ')} د.ع</td>
-              </tr>
+        // --- 3. بناء الواجهات (الصفحات) ---
+        function renderContent() {
+            const content = document.getElementById('app-content');
+            
+            if (currentTab === 'dashboard') {
+                // حساب إحصائيات الأسبوع
+                const activeCount = appData.transactions.filter(t => t.status === 'active').length;
+                const stuckCount = appData.transactions.filter(t => t.status === 'stuck').length;
+                
+                content.innerHTML = `
+                    <div class="mb-6 flex items-center gap-3">
+                        <div class="bg-indigo-100 p-2.5 rounded-2xl">
+                            <i data-lucide="layout-grid" class="text-indigo-600 w-7 h-7"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold text-slate-800">الرئيسية</h1>
+                            <p class="text-sm text-slate-500 font-semibold">نظرة عامة على نشاطك</p>
+                        </div>
+                    </div>
+
+                    <!-- بطاقة الأرباح (Bento Box Design) -->
+                    <div class="bg-gradient-primary rounded-3xl p-6 text-white mb-4 shadow-lg shadow-indigo-200">
+                        <div class="flex justify-between items-start mb-4">
+                            <h2 class="text-sm font-semibold opacity-90">أرباح هذا الأسبوع</h2>
+                            <i data-lucide="trending-up" class="w-5 h-5 opacity-80"></i>
+                        </div>
+                        <div class="text-4xl font-bold mb-1">0 <span class="text-lg opacity-80">د.ع</span></div>
+                        <p class="text-xs opacity-75 mt-2">الدورة الحالية: من الأحد إلى الخميس</p>
+                    </div>
+
+                    <!-- شبكة الإحصائيات -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="glass-card p-5 flex flex-col justify-center">
+                            <div class="bg-blue-50 w-10 h-10 rounded-full flex items-center justify-center mb-3">
+                                <i data-lucide="users" class="text-blue-600 w-5 h-5"></i>
+                            </div>
+                            <div class="text-2xl font-bold text-slate-800">${appData.lawyers.length}</div>
+                            <div class="text-xs text-slate-500 font-bold mt-1">محامون مسجلون</div>
+                        </div>
+                        <div class="glass-card p-5 flex flex-col justify-center">
+                            <div class="bg-purple-50 w-10 h-10 rounded-full flex items-center justify-center mb-3">
+                                <i data-lucide="building-2" class="text-purple-600 w-5 h-5"></i>
+                            </div>
+                            <div class="text-2xl font-bold text-slate-800">${appData.companies.length}</div>
+                            <div class="text-xs text-slate-500 font-bold mt-1">الشركات</div>
+                        </div>
+                        <div class="glass-card p-5 flex flex-col justify-center border-l-4 border-l-indigo-500">
+                            <div class="bg-indigo-50 w-10 h-10 rounded-full flex items-center justify-center mb-3">
+                                <i data-lucide="loader" class="text-indigo-600 w-5 h-5"></i>
+                            </div>
+                            <div class="text-2xl font-bold text-slate-800">${activeCount}</div>
+                            <div class="text-xs text-slate-500 font-bold mt-1">معاملات جارية</div>
+                        </div>
+                        <div class="glass-card p-5 flex flex-col justify-center border-l-4 border-l-rose-500">
+                            <div class="bg-rose-50 w-10 h-10 rounded-full flex items-center justify-center mb-3">
+                                <i data-lucide="alert-triangle" class="text-rose-600 w-5 h-5"></i>
+                            </div>
+                            <div class="text-2xl font-bold text-slate-800">${stuckCount}</div>
+                            <div class="text-xs text-slate-500 font-bold mt-1">معاملات متلكئة</div>
+                        </div>
+                    </div>
+                `;
+            } 
+            else if (currentTab === 'active') {
+                const activeTx = appData.transactions.filter(t => t.status === 'active');
+                
+                content.innerHTML = `
+                    <div class="mb-6">
+                        <h1 class="text-2xl font-bold text-slate-800">المعاملات الجارية</h1>
+                        <p class="text-sm text-slate-500 font-semibold">تتبع مسار معاملاتك الميدانية</p>
+                    </div>
+                    <div class="space-y-4">
+                        ${activeTx.length === 0 ? '<div class="text-center text-slate-400 mt-10">لا توجد معاملات جارية حالياً</div>' : 
+                        activeTx.map(t => `
+                            <!-- كرت مستطيل تفاعلي قابل للضغط -->
+                            <div onclick="openTransactionModal(${t.id})" class="glass-card p-4 active:scale-95 transition-transform duration-200 cursor-pointer border-r-4 border-r-indigo-500 relative overflow-hidden">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="font-bold text-lg text-slate-800">${t.company}</h3>
+                                    <span class="bg-indigo-50 text-indigo-700 text-[10px] font-bold px-2 py-1 rounded-full">${t.department}</span>
+                                </div>
+                                <div class="text-sm text-slate-600 mb-3 font-semibold text-gradient">${t.type}</div>
+                                
+                                <!-- المحطة الحالية -->
+                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center gap-3">
+                                    <div class="bg-white p-1.5 rounded-lg shadow-sm">
+                                        <i data-lucide="map-pin" class="w-4 h-4 text-indigo-500"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-[10px] text-slate-400 font-bold">المحطة الحالية</div>
+                                        <div class="text-xs font-bold text-slate-700">${t.station}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            else {
+                content.innerHTML = `
+                    <div class="flex flex-col items-center justify-center min-h-[60vh] text-center">
+                        <i data-lucide="settings" class="w-16 h-16 text-slate-300 mb-4 animate-spin-slow"></i>
+                        <h2 class="text-xl font-bold text-slate-700 mb-2">جاري برمجة هذه الواجهة</h2>
+                        <p class="text-sm text-slate-500">سيتم إضافة صفحة (${tabs.find(t=>t.id===currentTab).label}) في التحديث القادم.</p>
+                    </div>
+                `;
+            }
+            lucide.createIcons();
+        }
+
+        // --- 4. النافذة المنبثقة (Modal) التفاعلية ---
+        function openTransactionModal(id) {
+            const tx = appData.transactions.find(t => t.id === id);
+            const modalContainer = document.getElementById('modal-container');
+            const modalContent = document.getElementById('modal-content');
+
+            modalContent.innerHTML = `
+                <div class="flex justify-between items-center mb-5">
+                    <h2 class="text-xl font-bold text-slate-800">إدارة المعاملة</h2>
+                    <button onclick="closeModal()" class="bg-slate-100 p-2 rounded-full text-slate-500 hover:bg-slate-200">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                
+                <div class="mb-5">
+                    <div class="text-sm text-slate-500 font-bold mb-1">الشركة</div>
+                    <div class="font-bold text-lg text-indigo-700">${tx.company}</div>
+                    <div class="text-xs text-slate-500 mt-1">المحامي: ${tx.lawyer}</div>
+                </div>
+
+                <div class="space-y-3">
+                    <button class="w-full bg-slate-50 border border-slate-200 text-slate-700 font-bold py-3 px-4 rounded-xl flex items-center justify-between hover:bg-slate-100 transition-colors">
+                        <span>تحديث المحطة (الموقع)</span>
+                        <i data-lucide="map-pin" class="w-5 h-5 text-blue-500"></i>
+                    </button>
+                    
+                    <button class="w-full bg-slate-50 border border-slate-200 text-slate-700 font-bold py-3 px-4 rounded-xl flex items-center justify-between hover:bg-slate-100 transition-colors">
+                        <span>نقل إلى المتلكئة (إبلاغ المحامي)</span>
+                        <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-500"></i>
+                    </button>
+
+                    <button class="w-full bg-gradient-primary text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 active:scale-95 transition-transform">
+                        <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                        <span>إنجاز المعاملة</span>
+                    </button>
+                </div>
             `;
-          }
-        });
-      });
 
-      document.getElementById('pdfTotalDebt').innerText = `${totalDebtAll.toLocaleString('ar-IQ')} د.ع`;
-      document.getElementById('pdfReportDate').innerText = new Date().toLocaleDateString('ar-IQ', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-      
-      document.getElementById("pdfQRCodeArea").innerHTML = "";
-      new QRCode(document.getElementById("pdfQRCodeArea"), {
-        text: `كشف مالي إجمالي | الأتعاب الكلية: ${totalDebtAll} | تاريخ إصدار التقرير: ${new Date().toLocaleDateString()}`,
-        width: 90, height: 90
-      });
-
-      openSheet('pdfModal');
-    }
-
-    function executePDFGenerate() {
-      const element = document.getElementById('pdfPrintableArea');
-      html2pdf().set({
-        margin:       0.5,
-        filename:     `التقرير_المالي_المكتبي_${Date.now()}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2 },
-        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
-      }).from(element).save();
-    }
-
-    function exportAccountsToCSV() {
-      let csvContent = "\uFEFFاسم الشركة,نوع المعاملة,الأتعاب المستحقة\n";
-      companies.forEach(c => {
-        allTransactionsGlobal.filter(t => t.company_id == c.id).forEach(t => {
-          const debt = (Number(t.fee_iqd) || 0) - (Number(t.paid_amount) || 0);
-          if (debt > 0) csvContent += `"${c.name}","${t.transaction_type}",${debt}\n`;
-        });
-      });
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a'); link.href = URL.createObjectURL(blob);
-      link.setAttribute('download', `Accounts_Export_${Date.now()}.csv`);
-      document.body.appendChild(link); link.click(); document.body.removeChild(link);
-      showToast("تم تصدير ملف الـ CSV بنجاح 📊");
-    }
-
-    /* =====================================================================
-       الأرشيف والخزنة (تم تصحيح الأخطاء المرئية والبرمجية)
-    ===================================================================== */
-    function renderCompletedArchive() {
-      const container = document.getElementById('completedTransactionsList');
-      const compTxs = allTransactionsGlobal.filter(t => t.status === 'completed');
-      
-      document.getElementById('dashCompletedCount').innerText = compTxs.length;
-
-      container.innerHTML = compTxs.map(tx => `
-        <div class="exec-card" style="opacity: 0.85;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 13px; font-weight: 900; color: var(--emerald);">✅ أُنجزت (${new Date(tx.completed_at).toLocaleDateString('ar-IQ')})</span>
-          </div>
-          <div>
-            <p style="font-size: 16px; font-weight: 900; color: #FFF;">${tx.transaction_type}</p>
-            <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">الشركة: ${tx.companies?.name || ''}</p>
-          </div>
-        </div>
-      `).join('') || '<p style="text-align:center; color:var(--text-muted); font-size: 13px;">لا توجد معاملات في الأرشيف</p>';
-    }
-
-    function renderArchiveLibrary(query = '') {
-      const container = document.getElementById('libraryCompaniesList');
-      const q = query.toLowerCase();
-      
-      container.innerHTML = companies.filter(c => c.name.toLowerCase().includes(q)).map(c => {
-        const count = allDocumentsGlobal.filter(d => d.company_id == c.id).length;
-        // تم إصلاح شكل الكرت بإضافة flex-direction: row ليكون الزر على الجانب
-        return `
-          <div class="exec-card" style="padding: 16px 20px; display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-            <div>
-              <p style="font-size: 14px; font-weight: 900; color: #FFF;">${c.name}</p>
-              <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">${count} مستندات محفوظة</p>
-            </div>
-            <button onclick="selectedCompanyId='${c.id}'; openDocVault();" class="btn-subtle">فتح الخزنة</button>
-          </div>
-        `;
-      }).join('');
-      document.getElementById('allDocsTotalBadge').innerText = `${allDocumentsGlobal.length} ملفات`;
-    }
-
-    function openCompanyManagement(id, name) {
-      selectedCompanyId = id; selectedCompanyName = name;
-      document.getElementById('mgmtCompTitle').innerText = `إدارة: ${name}`;
-      openSheet('companyManagementModal');
-    }
-    
-    async function deleteCompany(compId) {
-      if (!confirm(`هل أنت متأكد من حذف شركة (${selectedCompanyName}) وكافة سجلاتها؟`)) return;
-      await db.from('companies').delete().eq('id', compId);
-      closeSheet('companyManagementModal'); showToast("تم الحذف بنجاح"); loadData();
-    }
-
-    function openDocVaultFromMgmt() { closeSheet('companyManagementModal'); openDocVault(); }
-
-    function openDocVault() {
-      const comp = companies.find(c => c.id == selectedCompanyId); // تم الإصلاح لتعمل الضغطة
-      if (comp) {
-        document.getElementById('vaultCompTitle').innerText = `مستندات: ${comp.name}`;
-        loadCompanyDocuments(selectedCompanyId);
-        openSheet('docVaultModal');
-      }
-    }
-
-    async function uploadCompanyDocument() {
-      const customName = document.getElementById('docCustomName').value.trim();
-      const fileInput = document.getElementById('docFileInput');
-      if (!customName || !fileInput.files.length) return showToast("أدخل اسم الملف وحدده", "⚠️");
-      
-      const file = fileInput.files[0];
-      const safeName = file.name.replace(/\s+/g, '_');
-      const fileName = `${selectedCompanyId}/${Date.now()}_${safeName}`;
-      
-      document.getElementById('btnUploadDoc').innerText = "جاري الرفع للسحابة...";
-      const { error } = await db.storage.from('documents').upload(fileName, file);
-      document.getElementById('btnUploadDoc').innerText = "رفع وحفظ في السحابة ☁️";
-
-      if (!error) {
-        const { data: urlData } = db.storage.from('documents').getPublicUrl(fileName);
-        await db.from('company_documents').insert([{ company_id: selectedCompanyId, document_name: customName, file_url: urlData.publicUrl }]);
-        showToast("تمت الأرشفة السحابية بنجاح 📁");
-        document.getElementById('docCustomName').value = '';
-        document.getElementById('selectedFileNameLabel').innerText = 'اختيار ملف أو التقاط صورة 📸';
-        loadData(); openDocVault();
-      } else { showToast("فشل الرفع", "❌"); }
-    }
-
-    function handleFileSelection(input) { if (input.files && input.files[0]) document.getElementById('selectedFileNameLabel').innerText = input.files[0].name; }
-
-    async function loadCompanyDocuments(comp_id) {
-      const { data: docs } = await db.from('company_documents').select('*').eq('company_id', comp_id).order('created_at', { ascending: false });
-      document.getElementById('vaultDocsCount').innerText = docs ? docs.length : 0;
-      document.getElementById('companyDocsList').innerHTML = docs && docs.length > 0 ? docs.map(d => `
-        <div style="background: rgba(255,255,255,0.03); padding: 12px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
-          <p style="font-size: 13px; font-weight: 900; color: #FFF;">📄 ${d.document_name}</p>
-          <a href="${d.file_url}" target="_blank" class="btn-subtle" style="text-decoration: none; padding: 6px 12px; font-size:11px;">عرض الملف</a>
-        </div>
-      `).join('') : '<p style="font-size:12px; color:var(--text-muted); text-align:center;">لا توجد مستندات مرفوعة</p>';
-    }
-
-    /* =====================================================================
-       الواتساب الآلي والرادار والسجل (Audit)
-    ===================================================================== */
-    function openWhatsAppQuickModal(txId) {
-      targetTxForWA = allTransactionsGlobal.find(t => t.id == txId); 
-      if (!targetTxForWA) return;
-      document.getElementById('waModalTxInfo').innerText = `مراسلة العميل - شركة: ${targetTxForWA.companies?.name}`;
-      generateWAMessage('status'); openSheet('whatsappQuickModal');
-    }
-
-    function generateWAMessage(type) {
-      if (!targetTxForWA) return;
-      const comp = targetTxForWA.companies?.name || 'العميل';
-      const txName = targetTxForWA.transaction_type;
-      const office = localStorage.getItem('office_name') || 'إدارة العمليات';
-      
-      const steps = targetTxForWA.transaction_steps || [];
-      steps.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
-      const latest = steps.length > 0 ? steps[steps.length - 1] : { dept: 'مسجل الشركات' };
-
-      let msg = "";
-      if (type === 'status') msg = `السادة *${comp}* المحترمون،\n\nنحيطكم علماً بأن معاملتكم (*${txName}*) متواجدة حالياً في: 📍 *${latest.dept}* (${latest.stage || ''}).\n\nتحياتنا،\n_${office}_`;
-      else if (type === 'missing') msg = `السادة *${comp}* المحترمون،\n\nنرجو تزويدنا بالمستمسكات المطلوبة لمعاملة (*${txName}*).\n\nشكراً لتعاونكم،\n_${office}_`;
-      else if (type === 'completed') msg = `السادة *${comp}* المحترمون،\n\nيسرنا إبلاغكم بإنجاز معاملتكم (*${txName}*) بشكل رسمي ✅.\n\nمبروك،\n_${office}_`;
-
-      document.getElementById('waPreviewText').value = msg;
-    }
-
-    function copyAndSendWA() {
-      const text = document.getElementById('waPreviewText').value;
-      navigator.clipboard.writeText(text); showToast("تم النسخ 💬");
-      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
-    }
-
-    function updateSmartRadarAlerts() {
-      const list = document.getElementById('notificationsList');
-      list.innerHTML = ''; let alerts = [];
-      const activeTxs = allTransactionsGlobal.filter(t => t.status === 'in_progress');
-
-      activeTxs.forEach(t => {
-        const steps = t.transaction_steps || [];
-        steps.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
-        const lastTime = steps.length > 0 ? new Date(steps[steps.length - 1].created_at) : new Date(t.created_at);
-        const days = Math.floor((new Date() - lastTime) / (1000 * 60 * 60 * 24));
-        if (days >= 3) {
-          alerts.push(`المعاملة (${t.transaction_type}) لشركة (${t.companies?.name}) راكدة منذ ${days} أيام.`);
+            modalContainer.classList.remove('hidden');
+            modalContainer.classList.add('flex');
+            // تأخير بسيط لتفعيل الأنيميشن
+            setTimeout(() => {
+                modalContainer.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95', 'translate-y-4');
+            }, 10);
+            
+            lucide.createIcons();
         }
-      });
 
-      if (alerts.length > 0) {
-        list.innerHTML = alerts.map(a => `<div class="exec-card" style="border-color: rgba(239, 68, 68, 0.4); background: rgba(239,68,68,0.05); padding: 14px;"><p style="font-size: 13px; font-weight: 800; color: var(--danger);">${a}</p></div>`).join('');
-      } else {
-        list.innerHTML = '<p style="text-align:center; color:var(--emerald); font-weight:900;">الرادار يعمل بكفاءة، لا توجد معاملات راكدة 🚀</p>';
-      }
-    }
+        function closeModal() {
+            const modalContainer = document.getElementById('modal-container');
+            const modalContent = document.getElementById('modal-content');
+            
+            modalContainer.classList.add('opacity-0');
+            modalContent.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modalContainer.classList.add('hidden');
+                modalContainer.classList.remove('flex');
+            }, 300);
+        }
 
-    function saveSettings() {
-      const name = document.getElementById('setOfficeName').value.trim();
-      if (name) localStorage.setItem('office_name', name);
-      showToast("تم الحفظ");
-    }
-
-    async function logAudit(action, details = "") {
-      if(!currentUser) return;
-      await db.from('audit_logs').insert([{ user_id: currentUser.id, action: action, details: details }]);
-    }
-
-    async function renderAuditLogs() {
-      const { data: logs } = await db.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(30);
-      document.getElementById('auditLogsContainer').innerHTML = logs && logs.length > 0 ? logs.map(l => `
-        <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
-          <b style="color:var(--gold); font-size:12px;">${l.action}</b>
-          <p style="font-size:11px; color:var(--text-muted); margin-top:4px;">${new Date(l.created_at).toLocaleString('ar-IQ')} | ${l.details || ''}</p>
-        </div>
-      `).join('') : '<p style="text-align:center; color:var(--text-muted); font-size:12px;">لا حركات مسجلة</p>';
-    }
-
-    function exportJSONBackup() {
-      const blob = new Blob([JSON.stringify({ companies, transactions: allTransactionsGlobal, documents: allDocumentsGlobal }, null, 2)], { type: 'application/json' });
-      const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.setAttribute('download', `Cloud_Backup_${Date.now()}.json`);
-      document.body.appendChild(link); link.click(); document.body.removeChild(link);
-      showToast("تم تنزيل النسخة الاحتياطية سحابياً");
-    }
-
-    /* Initialize */
-    const storedOfficeName = localStorage.getItem('office_name');
-    if (storedOfficeName) document.getElementById('setOfficeName').value = storedOfficeName;
-    checkAuthSession();
-  </script>
+        // التهيئة الأولية
+        renderNav();
+        renderContent();
+    </script>
 </body>
 </html>
