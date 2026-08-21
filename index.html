@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- إجبار المتصفح على عدم استخدام الوضع الليلي للمحافظة على الإشراق -->
+    <meta name="color-scheme" content="light">
     <title>إنجاز - لإدارة المعاملات</title>
     
     <!-- مكتبات التصميم والأيقونات -->
@@ -16,37 +18,49 @@
     <style>
         body { 
             font-family: 'Cairo', sans-serif; 
-            background-color: #f8fafc; /* خلفية بيضاء/رمادية فاتحة جداً مريحة للعين */
-            color: #1e293b; /* لون نص داكن وواضح */
+            background-color: #f1f5f9 !important; /* خلفية بيضاء مشرفة ومريحة */
+            color: #0f172a !important;
             -webkit-tap-highlight-color: transparent;
         }
         
-        /* البطاقات الزجاجية البيضاء الراقية */
+        /* بطاقات بيضاء نقية وعالية الفخامة */
         .glass-card {
-            background-color: #ffffff;
-            border-radius: 1.5rem;
-            border: 1px solid #f1f5f9;
-            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.04);
+            background-color: #ffffff !important;
+            border-radius: 1.75rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
         }
         
-        /* التدرج اللوني البنفسجي/الأزرق الفخم (مثل تطبيقات البنوك) */
+        /* التدرج اللوني البنفسجي والأزرق الفاخر */
         .bg-gradient-finance {
-            background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+            background: linear-gradient(135deg, #4f46e5 0%, #9333ea 50%, #db2777 100%);
         }
         
         .text-gradient {
-            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
+        /* تنسيق مستطيلات الإدخال والقوائم لتكون فخمة وبيضاء بالكامل */
+        input, select, textarea {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            border: 1px solid #cbd5e1 !important;
+            transition: all 0.2s ease;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #6366f1 !important;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
+            outline: none !important;
+        }
+
         ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
         .modal-overlay {
-            background: rgba(15, 23, 42, 0.5);
-            backdrop-filter: blur(4px);
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(6px);
         }
     </style>
 </head>
@@ -54,25 +68,19 @@
 
     <main id="app-content" class="p-4 max-w-md mx-auto min-h-screen"></main>
 
-    <!-- شريط التنقل السفلي - تم إصلاح الاتجاه ليكون من اليمين لليسار طبيعياً -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 pb-safe z-40 shadow-[0_-5px_20px_rgba(0,0,0,0.03)]">
-        <div class="max-w-md mx-auto flex justify-around items-center h-20 px-2" id="bottom-nav">
-            <!-- الأزرار -->
-        </div>
+    <!-- شريط التنقل السفلي الفاتح والمشرق -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 pb-safe z-40 shadow-[0_-5px_25px_rgba(0,0,0,0.04)]">
+        <div class="max-w-md mx-auto flex justify-around items-center h-20 px-2" id="bottom-nav"></div>
     </nav>
 
     <!-- حاوية النافذة المنبثقة -->
     <div id="modal-container" class="fixed inset-0 z-50 hidden items-center justify-center modal-overlay p-4 opacity-0 transition-opacity duration-300">
-        <div id="modal-content" class="bg-white border border-slate-100 w-full max-w-sm rounded-3xl p-6 shadow-2xl transform scale-95 transition-transform duration-300 max-h-[90vh] overflow-y-auto">
-            <!-- محتوى النافذة المنبثقة -->
-        </div>
+        <div id="modal-content" class="bg-white border border-slate-100 w-full max-w-sm rounded-3xl p-6 shadow-2xl transform scale-95 transition-transform duration-300 max-h-[90vh] overflow-y-auto"></div>
     </div>
 
-    <!-- عنصر مخفي لتوليد الـ PDF -->
     <div id="pdf-container" class="hidden"></div>
 
     <script>
-        // --- 1. إدارة البيانات ---
         let appData = JSON.parse(localStorage.getItem('enjaz_data')) || {
             lawyers: ['أ. محمد العبيدي', 'أ. أحمد الجبوري'],
             companies: [
@@ -89,7 +97,6 @@
             renderContent();
         }
 
-        // --- 2. التنقل والواجهات ---
         const tabs = [
             { id: 'dashboard', label: 'الرئيسية', icon: 'layout-grid' },
             { id: 'new', label: 'معاملة', icon: 'plus-circle' },
@@ -104,10 +111,9 @@
 
         function renderNav() {
             const navContainer = document.getElementById('bottom-nav');
-            // بمجرد إزالة الـ reverse، سيعمل الـ RTL بشكل طبيعي ويضع الرئيسية في اليمين
             navContainer.innerHTML = tabs.map(tab => `
-                <button onclick="switchTab('${tab.id}')" class="flex flex-col items-center justify-center w-full space-y-1 transition-all duration-300 ${currentTab === tab.id ? 'text-violet-600' : 'text-slate-400 hover:text-slate-600'}">
-                    <i data-lucide="${tab.icon}" class="w-6 h-6 ${currentTab === tab.id ? 'fill-violet-100' : ''}"></i>
+                <button onclick="switchTab('${tab.id}')" class="flex flex-col items-center justify-center w-full space-y-1 transition-all duration-300 ${currentTab === tab.id ? 'text-indigo-600 scale-105' : 'text-slate-400 hover:text-slate-600'}">
+                    <i data-lucide="${tab.icon}" class="w-6 h-6 ${currentTab === tab.id ? 'fill-indigo-50' : ''}"></i>
                     <span class="text-[10px] font-bold">${tab.label}</span>
                 </button>
             `).join('');
@@ -121,11 +127,9 @@
             window.scrollTo(0,0);
         }
 
-        // --- 3. بناء الواجهات ---
         function renderContent() {
             const content = document.getElementById('app-content');
             
-            // 1. الرئيسية
             if (currentTab === 'dashboard') {
                 const activeCount = appData.transactions.filter(t => t.status === 'active').length;
                 const stuckCount = appData.transactions.filter(t => t.status === 'stuck').length;
@@ -134,132 +138,124 @@
                 
                 content.innerHTML = `
                     <div class="mb-6 flex items-center gap-3">
-                        <div class="bg-violet-100 p-2.5 rounded-2xl border border-violet-200">
-                            <i data-lucide="layout-grid" class="text-violet-600 w-7 h-7"></i>
+                        <div class="bg-indigo-50 p-2.5 rounded-2xl border border-indigo-100 shadow-sm">
+                            <i data-lucide="layout-grid" class="text-indigo-600 w-7 h-7"></i>
                         </div>
                         <div>
-                            <h1 class="text-2xl font-bold text-slate-800">الرئيسية</h1>
-                            <p class="text-sm text-slate-500 font-semibold">نظرة عامة على نشاطك</p>
+                            <h1 class="text-2xl font-extrabold text-slate-900">الرئيسية</h1>
+                            <p class="text-xs text-slate-500 font-bold">نظرة عامة على نشاطك المكتبي</p>
                         </div>
                     </div>
 
-                    <!-- بطاقة الأرباح المشرقة -->
-                    <div class="bg-gradient-finance rounded-3xl p-6 text-white mb-5 shadow-[0_10px_30px_rgba(168,85,247,0.3)]">
+                    <div class="bg-gradient-finance rounded-3xl p-6 text-white mb-5 shadow-[0_10px_30px_rgba(79,70,229,0.3)]">
                         <div class="flex justify-between items-start mb-4">
                             <h2 class="text-sm font-semibold opacity-90">أرباح هذا الأسبوع (لحد الآن)</h2>
                             <i data-lucide="trending-up" class="w-5 h-5 opacity-90"></i>
                         </div>
-                        <div class="text-4xl font-bold mb-1">${totalEarnings.toLocaleString()} <span class="text-lg opacity-80">د.ع</span></div>
+                        <div class="text-4xl font-extrabold mb-1">${totalEarnings.toLocaleString()} <span class="text-lg opacity-80">د.ع</span></div>
                         <p class="text-xs opacity-80 mt-2">الدورة الحالية: من الأحد إلى الخميس</p>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
-                        <!-- بطاقة المحامين تفاعلية -->
-                        <div onclick="manageLawyers()" class="glass-card p-5 flex flex-col justify-center active:scale-95 transition-transform cursor-pointer">
-                            <div class="bg-blue-50 w-10 h-10 rounded-full flex items-center justify-center mb-3">
-                                <i data-lucide="users" class="text-blue-500 w-5 h-5"></i>
+                        <div onclick="manageLawyers()" class="glass-card p-5 flex flex-col justify-center active:scale-95 transition-transform cursor-pointer hover:border-indigo-200">
+                            <div class="bg-blue-50 w-11 h-11 rounded-2xl flex items-center justify-center mb-3 shadow-sm">
+                                <i data-lucide="users" class="text-blue-600 w-5 h-5"></i>
                             </div>
-                            <div class="text-2xl font-bold text-slate-800">${appData.lawyers.length}</div>
+                            <div class="text-2xl font-extrabold text-slate-900">${appData.lawyers.length}</div>
                             <div class="text-xs text-slate-500 font-bold mt-1">محامون مسجلون</div>
                         </div>
 
-                        <!-- بطاقة الشركات تفاعلية -->
-                        <div onclick="manageCompanies()" class="glass-card p-5 flex flex-col justify-center active:scale-95 transition-transform cursor-pointer">
-                            <div class="bg-purple-50 w-10 h-10 rounded-full flex items-center justify-center mb-3">
-                                <i data-lucide="building-2" class="text-purple-500 w-5 h-5"></i>
+                        <div onclick="manageCompanies()" class="glass-card p-5 flex flex-col justify-center active:scale-95 transition-transform cursor-pointer hover:border-purple-200">
+                            <div class="bg-purple-50 w-11 h-11 rounded-2xl flex items-center justify-center mb-3 shadow-sm">
+                                <i data-lucide="building-2" class="text-purple-600 w-5 h-5"></i>
                             </div>
-                            <div class="text-2xl font-bold text-slate-800">${appData.companies.length}</div>
+                            <div class="text-2xl font-extrabold text-slate-900">${appData.companies.length}</div>
                             <div class="text-xs text-slate-500 font-bold mt-1">الشركات</div>
                         </div>
 
-                        <div class="glass-card p-5 flex flex-col justify-center border-r-4 border-r-violet-500">
-                            <div class="bg-violet-50 w-10 h-10 rounded-full flex items-center justify-center mb-3">
-                                <i data-lucide="loader" class="text-violet-500 w-5 h-5"></i>
+                        <div class="glass-card p-5 flex flex-col justify-center border-r-4 border-r-indigo-500">
+                            <div class="bg-indigo-50 w-11 h-11 rounded-2xl flex items-center justify-center mb-3 shadow-sm">
+                                <i data-lucide="loader" class="text-indigo-600 w-5 h-5"></i>
                             </div>
-                            <div class="text-2xl font-bold text-slate-800">${activeCount}</div>
+                            <div class="text-2xl font-extrabold text-slate-900">${activeCount}</div>
                             <div class="text-xs text-slate-500 font-bold mt-1">معاملات جارية</div>
                         </div>
 
                         <div class="glass-card p-5 flex flex-col justify-center border-r-4 border-r-rose-500">
-                            <div class="bg-rose-50 w-10 h-10 rounded-full flex items-center justify-center mb-3">
-                                <i data-lucide="alert-triangle" class="text-rose-500 w-5 h-5"></i>
+                            <div class="bg-rose-50 w-11 h-11 rounded-2xl flex items-center justify-center mb-3 shadow-sm">
+                                <i data-lucide="alert-triangle" class="text-rose-600 w-5 h-5"></i>
                             </div>
-                            <div class="text-2xl font-bold text-slate-800">${stuckCount}</div>
+                            <div class="text-2xl font-extrabold text-slate-900">${stuckCount}</div>
                             <div class="text-xs text-slate-500 font-bold mt-1">معاملات متلكئة</div>
                         </div>
                     </div>
                 `;
             } 
-            
-            // 2. إضافة معاملة
             else if (currentTab === 'new') {
                 content.innerHTML = `
                     <div class="mb-6">
-                        <h1 class="text-2xl font-bold text-slate-800">إضافة معاملة</h1>
-                        <p class="text-sm text-slate-500 font-semibold">بدء مسار جديد لشركة</p>
+                        <h1 class="text-2xl font-extrabold text-slate-900">إضافة معاملة</h1>
+                        <p class="text-xs text-slate-500 font-bold">بدء مسار جديد لشركة</p>
                     </div>
                     <div class="glass-card p-6 space-y-4">
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-2">اسم المحامي</label>
-                            <select id="new-lawyer" onchange="updateCompaniesList()" class="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl p-3 focus:border-violet-500 outline-none transition-colors">
+                            <label class="block text-xs font-bold text-slate-600 mb-2">اسم المحامي</label>
+                            <select id="new-lawyer" onchange="updateCompaniesList()" class="w-full rounded-xl p-3 text-sm font-semibold">
                                 <option value="">- اختر المحامي -</option>
                                 ${appData.lawyers.map(l => `<option value="${l}">${l}</option>`).join('')}
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-2">الشركة</label>
-                            <select id="new-company" class="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl p-3 focus:border-violet-500 outline-none transition-colors">
+                            <label class="block text-xs font-bold text-slate-600 mb-2">الشركة</label>
+                            <select id="new-company" class="w-full rounded-xl p-3 text-sm font-semibold">
                                 <option value="">- اختر المحامي أولاً -</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-2">الدائرة</label>
-                            <select id="new-dept" class="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl p-3 focus:border-violet-500 outline-none transition-colors">
+                            <label class="block text-xs font-bold text-slate-600 mb-2">الدائرة</label>
+                            <select id="new-dept" class="w-full rounded-xl p-3 text-sm font-semibold">
                                 <option value="مسجل الشركات">مسجل الشركات</option>
                                 <option value="الاستيراد والتصدير">الاستيراد والتصدير</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-2">نوع المعاملة</label>
-                            <input type="text" id="new-type" placeholder="مثال: تصديق وثائق" class="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl p-3 focus:border-violet-500 outline-none transition-colors">
+                            <label class="block text-xs font-bold text-slate-600 mb-2">نوع المعاملة</label>
+                            <input type="text" id="new-type" placeholder="مثال: تصديق وثائق" class="w-full rounded-xl p-3 text-sm font-semibold">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-2">الأتعاب (د.ع)</label>
-                            <input type="number" id="new-fee" placeholder="0" class="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl p-3 focus:border-violet-500 outline-none transition-colors">
+                            <label class="block text-xs font-bold text-slate-600 mb-2">الأتعاب (د.ع)</label>
+                            <input type="number" id="new-fee" placeholder="0" class="w-full rounded-xl p-3 text-sm font-semibold">
                         </div>
-                        <button onclick="addTransaction()" class="w-full bg-gradient-finance text-white font-bold py-3.5 rounded-xl shadow-lg shadow-violet-200 active:scale-95 transition-transform mt-6">
+                        <button onclick="addTransaction()" class="w-full bg-gradient-finance text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-200 active:scale-95 transition-transform mt-6">
                             بدء المعاملة
                         </button>
                     </div>
                 `;
             }
-
-            // 3. المعاملات الجارية
             else if (currentTab === 'active') {
                 const activeTx = appData.transactions.filter(t => t.status === 'active');
-                
                 content.innerHTML = `
                     <div class="mb-6">
-                        <h1 class="text-2xl font-bold text-slate-800">المعاملات الجارية</h1>
-                        <p class="text-sm text-slate-500 font-semibold">تتبع مسار معاملاتك الميدانية</p>
+                        <h1 class="text-2xl font-extrabold text-slate-900">المعاملات الجارية</h1>
+                        <p class="text-xs text-slate-500 font-bold">تتبع مسار معاملاتك الميدانية</p>
                     </div>
                     <div class="space-y-4">
-                        ${activeTx.length === 0 ? '<div class="text-center text-slate-400 mt-10 font-semibold">لا توجد معاملات جارية حالياً</div>' : 
+                        ${activeTx.length === 0 ? '<div class="text-center text-slate-400 mt-10 font-bold">لا توجد معاملات جارية حالياً</div>' : 
                         activeTx.map(t => `
-                            <div onclick="openModal(${t.id})" class="glass-card p-5 active:scale-95 transition-transform duration-200 cursor-pointer border-r-4 border-r-violet-500 relative">
+                            <div onclick="openModal(${t.id})" class="glass-card p-5 active:scale-95 transition-transform duration-200 cursor-pointer border-r-4 border-r-indigo-600 relative">
                                 <div class="flex justify-between items-start mb-2">
-                                    <h3 class="font-bold text-lg text-slate-800">${t.company}</h3>
-                                    <span class="bg-violet-50 text-violet-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-violet-100">${t.department}</span>
+                                    <h3 class="font-extrabold text-lg text-slate-900">${t.company}</h3>
+                                    <span class="bg-indigo-50 text-indigo-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-indigo-100">${t.department}</span>
                                 </div>
                                 <div class="text-sm mb-4 font-bold text-gradient">${t.type}</div>
                                 
-                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center gap-3">
-                                    <div class="bg-white shadow-sm p-1.5 rounded-lg">
-                                        <i data-lucide="map-pin" class="w-4 h-4 text-violet-500"></i>
+                                <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 flex items-center gap-3">
+                                    <div class="bg-white shadow-sm p-2 rounded-xl">
+                                        <i data-lucide="map-pin" class="w-4 h-4 text-indigo-600"></i>
                                     </div>
                                     <div>
                                         <div class="text-[10px] text-slate-400 font-bold">المحطة الحالية</div>
-                                        <div class="text-sm font-bold text-slate-700">${t.station}</div>
+                                        <div class="text-sm font-bold text-slate-800">${t.station}</div>
                                     </div>
                                 </div>
                             </div>
@@ -267,30 +263,28 @@
                     </div>
                 `;
             }
-
-            // 4. المتلكئة
             else if (currentTab === 'stuck') {
                 const stuckTx = appData.transactions.filter(t => t.status === 'stuck');
                 content.innerHTML = `
                     <div class="mb-6">
-                        <h1 class="text-2xl font-bold text-slate-800">المعاملات المتلكئة</h1>
-                        <p class="text-sm text-slate-500 font-semibold">المعاملات المتوقفة لوجود أخطاء</p>
+                        <h1 class="text-2xl font-extrabold text-slate-900">المعاملات المتلكئة</h1>
+                        <p class="text-xs text-slate-500 font-bold">المعاملات المتوقفة لوجود أخطاء</p>
                     </div>
                     <div class="space-y-4">
-                        ${stuckTx.length === 0 ? '<div class="text-center text-slate-400 mt-10 font-semibold">الحمدلله، لا يوجد تلكؤ!</div>' : 
+                        ${stuckTx.length === 0 ? '<div class="text-center text-slate-400 mt-10 font-bold">الحمدلله، لا يوجد تلكؤ!</div>' : 
                         stuckTx.map(t => `
-                            <div class="glass-card p-5 border-r-4 border-r-rose-500">
-                                <h3 class="font-bold text-lg text-slate-800">${t.company}</h3>
-                                <div class="text-sm font-bold text-rose-500 mb-3">${t.type}</div>
-                                <div class="bg-rose-50 p-3 rounded-xl border border-rose-100 mb-4">
-                                    <div class="text-[10px] text-rose-400 font-bold">سبب التلكؤ:</div>
-                                    <div class="text-sm font-semibold text-slate-700">${t.notes || 'لم يكتب سبب'}</div>
+                            <div class="glass-card p-5 border-r-4 border-r-rose-600">
+                                <h3 class="font-extrabold text-lg text-slate-900">${t.company}</h3>
+                                <div class="text-sm font-bold text-rose-600 mb-3">${t.type}</div>
+                                <div class="bg-rose-50 p-3.5 rounded-2xl border border-rose-100 mb-4">
+                                    <div class="text-[10px] text-rose-500 font-bold">سبب التلكؤ:</div>
+                                    <div class="text-sm font-semibold text-slate-800">${t.notes || 'لم يكتب سبب'}</div>
                                 </div>
                                 <div class="flex gap-2">
-                                    <button onclick="changeStatus(${t.id}, 'active')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-2.5 rounded-lg transition-colors">
+                                    <button onclick="changeStatus(${t.id}, 'active')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-3 rounded-xl transition-colors">
                                         إعادة للعمل
                                     </button>
-                                    <button onclick="notifyLawyer('${t.lawyer}', '${t.company}', '${t.notes}')" class="flex-1 bg-green-50 text-green-600 border border-green-200 hover:bg-green-100 text-xs font-bold py-2.5 rounded-lg flex items-center justify-center gap-1 transition-colors">
+                                    <button onclick="notifyLawyer('${t.lawyer}', '${t.company}', '${t.notes}')" class="flex-1 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 text-xs font-bold py-3 rounded-xl flex items-center justify-center gap-1.5 transition-colors">
                                         <i data-lucide="message-circle" class="w-4 h-4"></i> إبلاغ واتساب
                                     </button>
                                 </div>
@@ -299,8 +293,6 @@
                     </div>
                 `;
             }
-
-            // 5. التحاسب
             else if (currentTab === 'finance') {
                 const completed = appData.transactions.filter(t => t.status === 'completed');
                 const lawyerTotals = {};
@@ -312,20 +304,20 @@
 
                 content.innerHTML = `
                     <div class="mb-6">
-                        <h1 class="text-2xl font-bold text-slate-800">التحاسب المالي</h1>
-                        <p class="text-sm text-slate-500 font-semibold">إغلاق دورة الخميس</p>
+                        <h1 class="text-2xl font-extrabold text-slate-900">التحاسب المالي</h1>
+                        <p class="text-xs text-slate-500 font-bold">إغلاق دورة الخميس</p>
                     </div>
                     <div class="space-y-4">
-                        ${Object.keys(lawyerTotals).length === 0 ? '<div class="text-center text-slate-400 mt-10 font-semibold">لا توجد معاملات منجزة للتحاسب</div>' : 
+                        ${Object.keys(lawyerTotals).length === 0 ? '<div class="text-center text-slate-400 mt-10 font-bold">لا توجد معاملات منجزة للتحاسب</div>' : 
                         Object.keys(lawyerTotals).map(lawyer => `
                             <div class="glass-card p-5">
                                 <div class="flex justify-between items-center mb-3">
-                                    <h3 class="font-bold text-lg text-slate-800">${lawyer}</h3>
-                                    <div class="text-lg font-bold text-violet-600">${lawyerTotals[lawyer].total.toLocaleString()} <span class="text-xs">د.ع</span></div>
+                                    <h3 class="font-extrabold text-lg text-slate-900">${lawyer}</h3>
+                                    <div class="text-lg font-extrabold text-indigo-600">${lawyerTotals[lawyer].total.toLocaleString()} <span class="text-xs">د.ع</span></div>
                                 </div>
-                                <p class="text-xs text-slate-500 font-semibold mb-4">${lawyerTotals[lawyer].txs.length} معاملات منجزة</p>
+                                <p class="text-xs text-slate-500 font-bold mb-4">${lawyerTotals[lawyer].txs.length} معاملات منجزة</p>
                                 
-                                <button onclick="generatePDF('${lawyer}')" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-md">
+                                <button onclick="generatePDF('${lawyer}')" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-md">
                                     <i data-lucide="file-down" class="w-4 h-4"></i>
                                     تنزيل تقرير PDF
                                 </button>
@@ -334,24 +326,22 @@
                     </div>
                 `;
             }
-
-            // 6. الأرشيف
             else if (currentTab === 'archive') {
                 const archived = appData.transactions.filter(t => t.status === 'completed');
                 content.innerHTML = `
                     <div class="mb-6">
-                        <h1 class="text-2xl font-bold text-slate-800">الأرشيف</h1>
-                        <p class="text-sm text-slate-500 font-semibold">سجل المعاملات المنجزة</p>
+                        <h1 class="text-2xl font-extrabold text-slate-900">الأرشيف</h1>
+                        <p class="text-xs text-slate-500 font-bold">سجل المعاملات المنجزة</p>
                     </div>
                     <div class="space-y-3">
-                        ${archived.length === 0 ? '<div class="text-center text-slate-400 mt-10 font-semibold">الأرشيف فارغ</div>' : 
+                        ${archived.length === 0 ? '<div class="text-center text-slate-400 mt-10 font-bold">الأرشيف فارغ</div>' : 
                         archived.map(t => `
                             <div class="glass-card p-4 flex justify-between items-center">
                                 <div>
-                                    <h3 class="font-bold text-slate-800 text-sm">${t.company}</h3>
-                                    <p class="text-xs text-violet-500 font-bold">${t.type}</p>
+                                    <h3 class="font-bold text-slate-900 text-sm">${t.company}</h3>
+                                    <p class="text-xs text-indigo-600 font-bold">${t.type}</p>
                                 </div>
-                                <div class="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100">
+                                <div class="text-[10px] text-emerald-700 font-extrabold bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
                                     منجزة
                                 </div>
                             </div>
@@ -359,16 +349,14 @@
                     </div>
                 `;
             }
-
-            // 7. الإعدادات
             else if (currentTab === 'settings') {
                 content.innerHTML = `
                     <div class="mb-6">
-                        <h1 class="text-2xl font-bold text-slate-800">الإعدادات</h1>
+                        <h1 class="text-2xl font-extrabold text-slate-900">الإعدادات</h1>
                     </div>
                     <div class="glass-card p-5 space-y-4">
-                        <h3 class="text-slate-500 font-bold text-sm mb-2">إدارة النظام</h3>
-                        <button onclick="factoryReset()" class="w-full bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors">
+                        <h3 class="text-slate-600 font-bold text-sm mb-2">إدارة النظام</h3>
+                        <button onclick="factoryReset()" class="w-full bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm">
                             <i data-lucide="trash-2" class="w-5 h-5"></i>
                             تصفير أرباح الأسبوع
                         </button>
@@ -379,32 +367,27 @@
             lucide.createIcons();
         }
 
-        // --- 4. إدارة المحامين والشركات (نوافذ منبثقة تفاعلية) ---
-        
         function manageLawyers() {
-            const modalContent = document.getElementById('modal-content');
-            
             let html = `
                 <div class="flex justify-between items-center mb-5">
-                    <h2 class="text-xl font-bold text-slate-800">إدارة المحامين</h2>
+                    <h2 class="text-xl font-extrabold text-slate-900">إدارة المحامين</h2>
                     <button onclick="closeModal()" class="bg-slate-100 p-2 rounded-full text-slate-500 hover:bg-slate-200"><i data-lucide="x" class="w-5 h-5"></i></button>
                 </div>
                 
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 mb-4 flex gap-2">
-                    <input type="text" id="new-lawyer-name" placeholder="اسم المحامي الجديد..." class="w-full bg-white border border-slate-200 text-slate-800 rounded-lg p-2 text-sm outline-none focus:border-violet-500">
-                    <button onclick="addNewLawyer()" class="bg-violet-600 text-white px-4 rounded-lg font-bold text-sm">إضافة</button>
+                <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 mb-4 flex gap-2">
+                    <input type="text" id="new-lawyer-name" placeholder="اسم المحامي الجديد..." class="w-full rounded-xl p-2.5 text-sm font-semibold">
+                    <button onclick="addNewLawyer()" class="bg-indigo-600 text-white px-4 rounded-xl font-bold text-sm shadow-md">إضافة</button>
                 </div>
 
                 <div class="max-h-60 overflow-y-auto space-y-2 pr-1">
                     ${appData.lawyers.map(l => `
-                        <div class="flex justify-between items-center bg-white border border-slate-100 p-3 rounded-xl shadow-sm">
-                            <div class="font-bold text-sm text-slate-700">${l}</div>
-                            <button onclick="deleteLawyer('${l}')" class="text-rose-500 bg-rose-50 hover:bg-rose-100 p-1.5 rounded-lg transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        <div class="flex justify-between items-center bg-white border border-slate-200/80 p-3.5 rounded-2xl shadow-sm">
+                            <div class="font-bold text-sm text-slate-800">${l}</div>
+                            <button onclick="deleteLawyer('${l}')" class="text-rose-600 bg-rose-50 hover:bg-rose-100 p-2 rounded-xl transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                         </div>
                     `).join('')}
                 </div>
             `;
-            
             showModalHTML(html);
         }
 
@@ -413,7 +396,7 @@
             if(val && !appData.lawyers.includes(val)) {
                 appData.lawyers.push(val);
                 saveData();
-                manageLawyers(); // تحديث النافذة
+                manageLawyers();
             }
         }
 
@@ -426,32 +409,31 @@
         }
 
         function manageCompanies() {
-            const modalContent = document.getElementById('modal-content');
             let html = `
                 <div class="flex justify-between items-center mb-5">
-                    <h2 class="text-xl font-bold text-slate-800">إدارة الشركات</h2>
+                    <h2 class="text-xl font-extrabold text-slate-900">إدارة الشركات</h2>
                     <button onclick="closeModal()" class="bg-slate-100 p-2 rounded-full text-slate-500 hover:bg-slate-200"><i data-lucide="x" class="w-5 h-5"></i></button>
                 </div>
                 
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4 space-y-3">
-                    <select id="new-comp-lawyer" class="w-full bg-white border border-slate-200 text-slate-800 rounded-lg p-2.5 text-sm outline-none focus:border-violet-500">
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 mb-4 space-y-3">
+                    <select id="new-comp-lawyer" class="w-full rounded-xl p-3 text-sm font-semibold">
                         <option value="">- اختر المحامي -</option>
                         ${appData.lawyers.map(l => `<option value="${l}">${l}</option>`).join('')}
                     </select>
                     <div class="flex gap-2">
-                        <input type="text" id="new-comp-name" placeholder="اسم الشركة..." class="w-full bg-white border border-slate-200 text-slate-800 rounded-lg p-2.5 text-sm outline-none focus:border-violet-500">
-                        <button onclick="addNewCompany()" class="bg-violet-600 text-white px-4 rounded-lg font-bold text-sm">إضافة</button>
+                        <input type="text" id="new-comp-name" placeholder="اسم الشركة..." class="w-full rounded-xl p-3 text-sm font-semibold">
+                        <button onclick="addNewCompany()" class="bg-indigo-600 text-white px-4 rounded-xl font-bold text-sm shadow-md">إضافة</button>
                     </div>
                 </div>
 
                 <div class="max-h-60 overflow-y-auto space-y-2 pr-1">
                     ${appData.companies.map(c => `
-                        <div class="flex justify-between items-center bg-white border border-slate-100 p-3 rounded-xl shadow-sm">
+                        <div class="flex justify-between items-center bg-white border border-slate-200/80 p-3.5 rounded-2xl shadow-sm">
                             <div>
-                                <div class="font-bold text-sm text-slate-700">${c.name}</div>
-                                <div class="text-[10px] text-slate-400 font-semibold">${c.lawyer}</div>
+                                <div class="font-bold text-sm text-slate-800">${c.name}</div>
+                                <div class="text-[10px] text-slate-400 font-bold">${c.lawyer}</div>
                             </div>
-                            <button onclick="deleteCompany('${c.name}')" class="text-rose-500 bg-rose-50 hover:bg-rose-100 p-1.5 rounded-lg transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                            <button onclick="deleteCompany('${c.name}')" class="text-rose-600 bg-rose-50 hover:bg-rose-100 p-2 rounded-xl transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                         </div>
                     `).join('')}
                 </div>
@@ -479,7 +461,6 @@
             }
         }
 
-        // --- 5. وظائف المعاملات ---
         function updateCompaniesList() {
             const lawyer = document.getElementById('new-lawyer').value;
             const companySelect = document.getElementById('new-company');
@@ -511,33 +492,33 @@
             const tx = appData.transactions.find(t => t.id === id);
             let html = `
                 <div class="flex justify-between items-center mb-5">
-                    <h2 class="text-xl font-bold text-slate-800">إدارة المعاملة</h2>
+                    <h2 class="text-xl font-extrabold text-slate-900">إدارة المعاملة</h2>
                     <button onclick="closeModal()" class="bg-slate-100 p-2 rounded-full text-slate-500 hover:bg-slate-200"><i data-lucide="x" class="w-5 h-5"></i></button>
                 </div>
                 
                 <div class="mb-5">
-                    <div class="text-sm text-slate-500 font-bold mb-1">الشركة</div>
-                    <div class="font-bold text-lg text-violet-600">${tx.company}</div>
+                    <div class="text-xs text-slate-400 font-bold mb-1">الشركة</div>
+                    <div class="font-extrabold text-lg text-indigo-600">${tx.company}</div>
                 </div>
 
                 <div class="space-y-4">
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
                         <label class="block text-xs font-bold text-slate-600 mb-2">تحديث المحطة:</label>
                         <div class="flex gap-2">
-                            <input type="text" id="update-station-val" value="${tx.station}" class="w-full bg-white border border-slate-200 text-slate-800 rounded-lg p-2.5 text-sm outline-none focus:border-violet-500">
-                            <button onclick="updateStation(${tx.id})" class="bg-violet-600 text-white px-4 rounded-lg font-bold text-sm shadow-md">حفظ</button>
+                            <input type="text" id="update-station-val" value="${tx.station}" class="w-full rounded-xl p-3 text-sm font-semibold">
+                            <button onclick="updateStation(${tx.id})" class="bg-indigo-600 text-white px-4 rounded-xl font-bold text-sm shadow-md">حفظ</button>
                         </div>
                     </div>
                     
-                    <div class="bg-rose-50 p-4 rounded-xl border border-rose-200">
+                    <div class="bg-rose-50 p-4 rounded-2xl border border-rose-200">
                         <label class="block text-xs font-bold text-rose-600 mb-2">نقل للمتلكئة (اكتب السبب):</label>
                         <div class="flex gap-2">
-                            <input type="text" id="stuck-reason-val" placeholder="المشكلة..." class="w-full bg-white border border-rose-200 text-slate-800 rounded-lg p-2.5 text-sm outline-none focus:border-rose-400">
-                            <button onclick="moveToStuck(${tx.id})" class="bg-rose-500 text-white px-4 rounded-lg font-bold text-sm shadow-md">نقل</button>
+                            <input type="text" id="stuck-reason-val" placeholder="المشكلة..." class="w-full rounded-xl p-3 text-sm font-semibold border-rose-200 focus:border-rose-500">
+                            <button onclick="moveToStuck(${tx.id})" class="bg-rose-600 text-white px-4 rounded-xl font-bold text-sm shadow-md">نقل</button>
                         </div>
                     </div>
 
-                    <button onclick="changeStatus(${tx.id}, 'completed')" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 mt-2 shadow-[0_4px_15px_rgba(16,185,129,0.3)] transition-colors">
+                    <button onclick="changeStatus(${tx.id}, 'completed')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 mt-2 shadow-[0_4px_20px_rgba(16,185,129,0.3)] transition-colors">
                         <i data-lucide="check-circle-2" class="w-5 h-5"></i>
                         <span>إنجاز المعاملة نهائياً</span>
                     </button>
@@ -608,27 +589,27 @@
             const total = txs.reduce((sum, t) => sum + Number(t.fee), 0);
             
             const pdfHTML = `
-                <div style="padding: 40px; font-family: 'Cairo', sans-serif; direction: rtl; text-align: right; background: white; color: #1e293b;">
-                    <h1 style="color: #6366f1; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">كشف حساب - إنجاز</h1>
+                <div style="padding: 40px; font-family: 'Cairo', sans-serif; direction: rtl; text-align: right; background: white; color: #0f172a;">
+                    <h1 style="color: #4f46e5; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">كشف حساب - إنجاز</h1>
                     <h3 style="margin-top: 20px;">المحامي: <strong>${lawyerName}</strong></h3>
                     <p>التاريخ: ${new Date().toLocaleDateString('ar-IQ')}</p>
                     
                     <table style="width: 100%; margin-top: 30px; border-collapse: collapse;">
                         <tr style="background: #f8fafc;">
-                            <th style="padding: 12px; border: 1px solid #e2e8f0;">الشركة</th>
-                            <th style="padding: 12px; border: 1px solid #e2e8f0;">المعاملة</th>
-                            <th style="padding: 12px; border: 1px solid #e2e8f0;">الأتعاب</th>
+                            <th style="padding: 12px; border: 1px solid #cbd5e1;">الشركة</th>
+                            <th style="padding: 12px; border: 1px solid #cbd5e1;">المعاملة</th>
+                            <th style="padding: 12px; border: 1px solid #cbd5e1;">الأتعاب</th>
                         </tr>
                         ${txs.map(t => `
                             <tr>
-                                <td style="padding: 12px; border: 1px solid #e2e8f0;">${t.company}</td>
-                                <td style="padding: 12px; border: 1px solid #e2e8f0;">${t.type}</td>
-                                <td style="padding: 12px; border: 1px solid #e2e8f0;">${t.fee} د.ع</td>
+                                <td style="padding: 12px; border: 1px solid #cbd5e1;">${t.company}</td>
+                                <td style="padding: 12px; border: 1px solid #cbd5e1;">${t.type}</td>
+                                <td style="padding: 12px; border: 1px solid #cbd5e1;">${t.fee} د.ع</td>
                             </tr>
                         `).join('')}
                     </table>
                     
-                    <h2 style="margin-top: 30px; background: linear-gradient(135deg, #6366f1, #a855f7); color: white; padding: 15px; text-align: center; border-radius: 12px;">
+                    <h2 style="margin-top: 30px; background: linear-gradient(135deg, #4f46e5, #9333ea); color: white; padding: 15px; text-align: center; border-radius: 12px;">
                         الإجمالي: ${total.toLocaleString()} دينار عراقي
                     </h2>
                 </div>
@@ -656,7 +637,6 @@
             }
         }
 
-        // التهيئة
         renderNav();
         renderContent();
     </script>
