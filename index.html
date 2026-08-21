@@ -3,417 +3,645 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>نظام إدارة المعاملات</title>
+    <!-- تم حذف أمر إجبار الواجهة البيضاء بالكامل -->
+    <title>إنجاز - لإدارة المعاملات</title>
     
-    <!-- الخطوط -->
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-    
-    <!-- مكتبات React و Tailwind و QRCode -->
+    <!-- مكتبات التصميم والأيقونات -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        darkTeal: '#114b5f',
-                        accentOrange: '#f59e0b',
-                        lightOrange: '#fef3c7',
-                        bgGray: '#f8fafc'
-                    },
-                    fontFamily: { sans: ['Tajawal', 'sans-serif'] }
-                }
-            }
-        }
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- مكتبة توليد الـ PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
-        body { -webkit-tap-highlight-color: transparent; background-color: #f8fafc; }
-        ::-webkit-scrollbar { display: none; }
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            background-color: #09090b; /* أسود عميق */
+            color: #f8fafc;
+            -webkit-tap-highlight-color: transparent;
+        }
         
-        /* إعدادات الطباعة وتوليد الـ PDF من المتصفح */
-        @media print {
-            body * { visibility: hidden; }
-            #print-section, #print-section * { visibility: visible; }
-            #print-section { position: absolute; left: 0; top: 0; width: 100%; background: white; padding: 20px; }
-            .no-print { display: none !important; }
+        /* الكروت الزجاجية الداكنة الراقية */
+        .glass-card {
+            background-color: #18181b; 
+            border-radius: 1.75rem;
+            border: 1px solid #27272a;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* التدرجات الفخمة */
+        .bg-gradient-finance {
+            background: linear-gradient(135deg, #4f46e5 0%, #9333ea 50%, #db2777 100%);
+        }
+        
+        .text-gradient {
+            background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* تنسيق مستطيلات الإدخال لتلائم الوضع الليلي بفخامة */
+        input, select, textarea {
+            background-color: #18181b !important;
+            color: #f8fafc !important;
+            border: 1px solid #3f3f46 !important;
+            transition: all 0.2s ease;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #818cf8 !important;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+            outline: none !important;
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
+        
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(6px);
         }
     </style>
 </head>
-<body class="text-slate-800 antialiased">
-    <div id="root"></div>
+<body class="pb-28">
 
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+    <main id="app-content" class="p-4 max-w-md mx-auto min-h-screen"></main>
 
-        // ================= الأيقونات =================
-        const IconClock = () => <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
-        const IconAlert = () => <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>;
-        const IconPlus = () => <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
-        const IconWallet = () => <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>;
-        const IconSettings = () => <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>;
-        const IconArchive = () => <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>;
+    <!-- شريط التنقل السفلي الليلي -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-[#09090b]/95 backdrop-blur-md border-t border-zinc-800 pb-safe z-40">
+        <div class="max-w-md mx-auto flex justify-around items-center h-20 px-2" id="bottom-nav"></div>
+    </nav>
 
-        // ================= التطبيق الرئيسي =================
-        const App = () => {
-            const [activeTab, setActiveTab] = useState('ongoing');
-            
-            // بيانات أولية مقترحة لتسهيل العمل (تتضمن اسم الشركة الذي تستخدمه)
-            const initialLawyers = [
-                { id: 1, name: 'المحامي الافتراضي', phone: '9647000000000', companies: ['ابهار المستقبل للتجارة والتسويق العقاري والخدمات العامة والدعاية والاعلان وتنظيم المؤتمرات محدودة المسؤولية'] }
-            ];
+    <!-- حاوية النافذة المنبثقة -->
+    <div id="modal-container" class="fixed inset-0 z-50 hidden items-center justify-center modal-overlay p-4 opacity-0 transition-opacity duration-300">
+        <div id="modal-content" class="bg-zinc-900 border border-zinc-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl transform scale-95 transition-transform duration-300 max-h-[90vh] overflow-y-auto"></div>
+    </div>
 
-            // حالة التطبيق مع الحفظ المحلي (LocalStorage)
-            const [lawyers, setLawyers] = useState(() => JSON.parse(localStorage.getItem('app_lawyers')) || initialLawyers);
-            const [transactions, setTransactions] = useState(() => JSON.parse(localStorage.getItem('app_transactions')) || []);
-            const [printData, setPrintData] = useState(null); // للطباعة
-            const qrRef = useRef(null);
+    <!-- عنصر توليد الـ PDF -->
+    <div id="pdf-container" class="hidden"></div>
 
-            // حفظ التغييرات تلقائياً
-            useEffect(() => { localStorage.setItem('app_lawyers', JSON.stringify(lawyers)); }, [lawyers]);
-            useEffect(() => { localStorage.setItem('app_transactions', JSON.stringify(transactions)); }, [transactions]);
-
-            // توليد الـ QR عند طلب الطباعة
-            useEffect(() => {
-                if (printData && qrRef.current) {
-                    qrRef.current.innerHTML = "";
-                    new QRCode(qrRef.current, {
-                        text: `تم التسديد. المحامي: ${printData.lawyerName} - الإجمالي: ${printData.total} دينار`,
-                        width: 100, height: 100
-                    });
-                    setTimeout(() => window.print(), 500); // تأخير بسيط لضمان رسم الباركود ثم استدعاء الطباعة
-                }
-            }, [printData]);
-
-            // دوال المساعدة
-            const updateTxStatus = (id, newStatus, errorMsg = '') => {
-                setTransactions(transactions.map(tx => tx.id === id ? { ...tx, status: newStatus, errorMsg } : tx));
-            };
-
-            const addStep = (id, stepTitle) => {
-                if(!stepTitle) return;
-                setTransactions(transactions.map(tx => {
-                    if (tx.id === id) {
-                        return { ...tx, steps: [...tx.steps, { title: stepTitle, time: new Date().toISOString() }] };
-                    }
-                    return tx;
-                }));
-            };
-
-            // ================= 1. واجهة المعاملات الجارية =================
-            const OngoingView = () => {
-                const list = transactions.filter(t => t.status === 'ongoing');
-                
-                return (
-                    <div className="p-5 pb-28">
-                        <div className="bg-darkTeal text-white rounded-[2rem] p-6 mb-6 shadow-lg relative overflow-hidden">
-                            <h1 className="text-xl font-bold mb-1">المعاملات الجارية</h1>
-                            <p className="text-sm text-teal-100">لديك {list.length} معاملات قيد الإنجاز</p>
-                        </div>
-                        {list.length === 0 && <p className="text-center text-slate-400 mt-10">لا توجد معاملات جارية حالياً.</p>}
-                        
-                        <div className="space-y-4">
-                            {list.map(tx => {
-                                const lastTime = tx.steps.length > 0 ? tx.steps[tx.steps.length-1].time : tx.createdAt;
-                                const isDelayed = (new Date() - new Date(lastTime)) / (1000 * 60 * 60) > 24;
-
-                                return (
-                                    <div key={tx.id} className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
-                                        <h3 className="font-bold text-slate-800 leading-tight mb-1">{tx.company}</h3>
-                                        <p className="text-xs text-slate-500 mb-3">{lawyers.find(l=>l.id == tx.lawyerId)?.name} • {tx.department}</p>
-                                        
-                                        <div className="border-r-2 border-slate-100 pe-3 mr-1 mb-4 space-y-2">
-                                            {tx.steps.map((s, i) => (
-                                                <div key={i} className="relative">
-                                                    <div className="absolute -right-[17px] top-1.5 w-2 h-2 bg-darkTeal rounded-full"></div>
-                                                    <p className="text-sm text-slate-700">{s.title}</p>
-                                                    <p className="text-[10px] text-slate-400">{new Date(s.time).toLocaleString('ar-IQ')}</p>
-                                                </div>
-                                            ))}
-                                            {isDelayed && <p className="text-xs text-red-500 font-bold mt-2">مرت 24 ساعة بدون تحديث!</p>}
-                                        </div>
-
-                                        <div className="flex gap-2">
-                                            <button onClick={() => { const step = prompt('أدخل اسم المحطة الجديدة (مثال: قسم التدقيق):'); addStep(tx.id, step); }} className="flex-1 bg-lightOrange text-accentOrange font-bold py-2 rounded-xl text-xs">إضافة محطة</button>
-                                            <button onClick={() => { const err = prompt('سبب التلكؤ:'); if(err) updateTxStatus(tx.id, 'delayed', err); }} className="flex-1 bg-slate-100 text-slate-600 font-bold py-2 rounded-xl text-xs">نقل للمتلكئة</button>
-                                            <button onClick={() => updateTxStatus(tx.id, 'completed')} className="flex-1 bg-green-100 text-green-700 font-bold py-2 rounded-xl text-xs">إنجاز</button>
-                                        </div>
-                                    </div>
-                                )
-                            })}
-                        </div>
-                    </div>
-                );
-            };
-
-            // ================= 2. واجهة المعاملات المتلكئة =================
-            const DelayedView = () => {
-                const list = transactions.filter(t => t.status === 'delayed');
-                
-                return (
-                    <div className="p-5 pb-28">
-                        <div className="bg-red-50 text-red-800 border border-red-200 rounded-[2rem] p-6 mb-6">
-                            <h1 className="text-xl font-bold mb-1">المعاملات المتلكئة</h1>
-                            <p className="text-sm">معاملات تتطلب تدخلاً أو بها نواقص ({list.length})</p>
-                        </div>
-                        
-                        <div className="space-y-4">
-                            {list.map(tx => {
-                                const lawyer = lawyers.find(l => l.id == tx.lawyerId);
-                                const days = Math.floor((new Date() - new Date(tx.createdAt)) / (1000 * 60 * 60 * 24));
-                                const waMsg = encodeURIComponent(`مرحباً أستاذ بخصوص شركة (${tx.company})، المعاملة متوقفة بسبب: ${tx.errorMsg}`);
-
-                                return (
-                                    <div key={tx.id} className="bg-white rounded-3xl p-5 shadow-sm border border-red-100 relative">
-                                        <div className="absolute top-4 left-4 bg-red-100 text-red-700 text-xs font-bold px-2 py-1 rounded-lg">متوقفة منذ {days} يوم</div>
-                                        <h3 className="font-bold text-slate-800 w-3/4">{tx.company}</h3>
-                                        <p className="text-xs text-slate-500 mb-3">{lawyer?.name}</p>
-                                        
-                                        <div className="bg-slate-50 p-3 rounded-xl text-sm text-slate-700 mb-4 border border-slate-100">
-                                            <strong>سبب التلكؤ:</strong> {tx.errorMsg}
-                                        </div>
-
-                                        <div className="flex gap-2">
-                                            <button onClick={() => updateTxStatus(tx.id, 'ongoing')} className="flex-1 bg-slate-800 text-white font-bold py-2 rounded-xl text-xs">إعادة للعمل</button>
-                                            <a href={`https://wa.me/${lawyer?.phone}?text=${waMsg}`} target="_blank" className="flex-1 text-center bg-green-500 text-white font-bold py-2 rounded-xl text-xs">إبلاغ واتساب</a>
-                                        </div>
-                                    </div>
-                                )
-                            })}
-                        </div>
-                    </div>
-                );
-            };
-
-            // ================= 3. واجهة إضافة معاملة =================
-            const AddView = () => {
-                const [lawyerId, setLawyerId] = useState('');
-                const [company, setCompany] = useState('');
-                const [dept, setDept] = useState('دائرة مسجل الشركات');
-                const [type, setType] = useState('');
-                const [fee, setFee] = useState('');
-
-                const selectedLawyer = lawyers.find(l => l.id == lawyerId);
-
-                const handleSubmit = (e) => {
-                    e.preventDefault();
-                    if(!lawyerId || !company || !type || !fee) return alert('يرجى تعبئة جميع الحقول');
-                    
-                    const newTx = {
-                        id: Date.now(), lawyerId, company, department: dept, type, fee: Number(fee), 
-                        status: 'ongoing', steps: [], createdAt: new Date().toISOString()
-                    };
-                    setTransactions([...transactions, newTx]);
-                    setActiveTab('ongoing');
-                };
-
-                return (
-                    <div className="p-5 pb-28">
-                        <h2 className="text-2xl font-bold text-darkTeal mb-6">بدء معاملة جديدة</h2>
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-1">المحامي</label>
-                                <select className="w-full p-3 rounded-xl bg-white border border-slate-200" value={lawyerId} onChange={e => {setLawyerId(e.target.value); setCompany('');}}>
-                                    <option value="">اختر المحامي...</option>
-                                    {lawyers.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
-                                </select>
-                            </div>
-
-                            {selectedLawyer && (
-                                <div>
-                                    <label className="block text-sm font-bold text-slate-700 mb-1">الشركة (التابعة للمحامي)</label>
-                                    <select className="w-full p-3 rounded-xl bg-white border border-slate-200" value={company} onChange={e => setCompany(e.target.value)}>
-                                        <option value="">اختر الشركة...</option>
-                                        {selectedLawyer.companies.map((c, i) => <option key={i} value={c}>{c}</option>)}
-                                    </select>
-                                </div>
-                            )}
-
-                            <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-1">الدائرة</label>
-                                <select className="w-full p-3 rounded-xl bg-white border border-slate-200" value={dept} onChange={e => setDept(e.target.value)}>
-                                    <option value="دائرة مسجل الشركات">دائرة مسجل الشركات</option>
-                                    <option value="دائرة الاستيراد والتصدير">دائرة الاستيراد والتصدير</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-1">نوع المعاملة (مثل: تأسيس، محضر)</label>
-                                <input type="text" className="w-full p-3 rounded-xl bg-white border border-slate-200" value={type} onChange={e => setType(e.target.value)} placeholder="اكتب نوع المعاملة..." />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-1">الأتعاب (بالدينار العراقي)</label>
-                                <input type="number" className="w-full p-3 rounded-xl bg-white border border-slate-200" value={fee} onChange={e => setFee(e.target.value)} placeholder="مثال: 150000" />
-                            </div>
-
-                            <button type="submit" className="w-full bg-accentOrange text-white font-bold py-4 rounded-2xl shadow-lg mt-4">حفظ وبدء المعاملة</button>
-                        </form>
-                    </div>
-                );
-            };
-
-            // ================= 4. واجهة التحاسب المالي (الخميس) =================
-            const FinanceView = () => {
-                // تجميع المعاملات المنجزة حسب المحامي
-                const completed = transactions.filter(t => t.status === 'completed');
-                
-                return (
-                    <div className="p-5 pb-28">
-                        <div className="bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-[2rem] p-6 mb-6 shadow-lg shadow-purple-500/30">
-                            <h1 className="text-xl font-bold mb-1">التحاسب المالي</h1>
-                            <p className="text-sm opacity-90">دورة تسليم المستحقات والأتعاب</p>
-                        </div>
-
-                        {lawyers.map(lawyer => {
-                            const lawyerTxs = completed.filter(t => t.lawyerId == lawyer.id);
-                            if (lawyerTxs.length === 0) return null;
-                            const total = lawyerTxs.reduce((sum, tx) => sum + tx.fee, 0);
-
-                            return (
-                                <div key={lawyer.id} className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 mb-4">
-                                    <h3 className="font-bold text-lg text-slate-800 mb-2">{lawyer.name}</h3>
-                                    <div className="text-sm text-slate-500 mb-4">عدد المعاملات المنجزة: {lawyerTxs.length}</div>
-                                    <div className="text-2xl font-black text-darkTeal mb-4">{total.toLocaleString()} <span className="text-sm font-normal">د.ع</span></div>
-                                    
-                                    <div className="flex gap-2">
-                                        <button onClick={() => setPrintData({ lawyerName: lawyer.name, txs: lawyerTxs, total })} className="flex-1 bg-purple-100 text-purple-700 font-bold py-2.5 rounded-xl text-xs">توليد تقرير (سند) PDF</button>
-                                        <button onClick={() => { if(confirm('هل تم التسديد فعلاً؟ سيتم أرشفة هذه المعاملات.')) {
-                                            setTransactions(transactions.map(t => t.lawyerId == lawyer.id && t.status === 'completed' ? {...t, status: 'archived'} : t));
-                                        }}} className="flex-1 bg-slate-800 text-white font-bold py-2.5 rounded-xl text-xs">تصفير الحساب</button>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                        {completed.length === 0 && <p className="text-center text-slate-400 mt-10">لا توجد معاملات منجزة للتحاسب.</p>}
-                    </div>
-                );
-            };
-
-            // ================= 5. الإعدادات والأرشيف =================
-            const SettingsView = () => {
-                const exportData = () => {
-                    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ lawyers, transactions }));
-                    const dlAnchorElem = document.createElement('a');
-                    dlAnchorElem.setAttribute("href", dataStr);
-                    dlAnchorElem.setAttribute("download", "moamela_backup.json");
-                    dlAnchorElem.click();
-                };
-
-                return (
-                    <div className="p-5 pb-28 space-y-6">
-                        <h2 className="text-2xl font-bold text-darkTeal">الإعدادات</h2>
-                        
-                        <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
-                            <h3 className="font-bold mb-3 flex items-center gap-2"><IconArchive /> الأرشيف</h3>
-                            <p className="text-sm text-slate-500 mb-3">يحتوي الأرشيف على {transactions.filter(t=>t.status === 'archived').length} معاملة مقفلة.</p>
-                        </div>
-
-                        <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-3">
-                            <h3 className="font-bold mb-2">إدارة البيانات</h3>
-                            <button onClick={exportData} className="w-full bg-slate-100 text-slate-700 font-bold py-3 rounded-xl text-sm text-right px-4">تصدير نسخة احتياطية (JSON)</button>
-                            <button onClick={() => { if(confirm('تحذير: سيتم مسح جميع بيانات التطبيق!')) { setTransactions([]); setLawyers(initialLawyers); } }} className="w-full bg-red-50 text-red-600 font-bold py-3 rounded-xl text-sm text-right px-4">تصفير النظام بالكامل</button>
-                        </div>
-                    </div>
-                );
-            };
-
-            // ================= الواجهة الأساسية (Layout) =================
-            return (
-                <div className="max-w-md mx-auto min-h-screen relative shadow-2xl bg-bgGray">
-                    
-                    {/* منطقة عرض واجهة الطباعة (مخفية إلا عند الطباعة) */}
-                    {printData && (
-                        <div id="print-section" className="fixed inset-0 z-50 bg-white" style={{ minHeight: '100vh' }}>
-                            <div className="text-center border-b-2 border-slate-800 pb-4 mb-6">
-                                <h1 className="text-2xl font-black mb-1">سند قبض وتقرير تحاسب</h1>
-                                <p className="text-sm text-slate-600">تخليص المعاملات الحكومية للشركات - بغداد</p>
-                            </div>
-                            
-                            <div className="mb-6">
-                                <p className="mb-2"><strong>السيد المحامي:</strong> {printData.lawyerName}</p>
-                                <p className="mb-2"><strong>التاريخ:</strong> {new Date().toLocaleDateString('ar-IQ')}</p>
-                            </div>
-
-                            <table className="w-full border-collapse border border-slate-400 mb-6 text-sm">
-                                <thead>
-                                    <tr className="bg-slate-100">
-                                        <th className="border border-slate-400 p-2 text-right">الشركة</th>
-                                        <th className="border border-slate-400 p-2 text-right">المعاملة</th>
-                                        <th className="border border-slate-400 p-2 text-center">المبلغ</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {printData.txs.map((t, i) => (
-                                        <tr key={i}>
-                                            <td className="border border-slate-400 p-2">{t.company}</td>
-                                            <td className="border border-slate-400 p-2">{t.type}</td>
-                                            <td className="border border-slate-400 p-2 text-center">{t.fee.toLocaleString()}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-
-                            <div className="text-left mb-10">
-                                <h2 className="text-xl font-bold">المجموع الكلي: {printData.total.toLocaleString()} دينار عراقي</h2>
-                            </div>
-
-                            <div className="flex justify-between items-end mt-12">
-                                <div><p className="font-bold border-t-2 border-slate-400 pt-2 w-32 text-center">توقيع المستلم</p></div>
-                                <div ref={qrRef} className="p-2 border border-slate-200 rounded-lg"></div>
-                            </div>
-                            
-                            {/* زر الإغلاق يظهر فقط على الشاشة ولا يطبع */}
-                            <button onClick={() => setPrintData(null)} className="no-print fixed bottom-10 left-10 right-10 bg-red-500 text-white font-bold py-3 rounded-2xl">إغلاق التقرير والعودة</button>
-                        </div>
-                    )}
-
-                    {/* منطقة عرض المحتوى المتغير (التبويبات) */}
-                    <div className={`h-full overflow-y-auto ${printData ? 'hidden' : 'block'}`}>
-                        {activeTab === 'ongoing' && <OngoingView />}
-                        {activeTab === 'delayed' && <DelayedView />}
-                        {activeTab === 'add' && <AddView />}
-                        {activeTab === 'finance' && <FinanceView />}
-                        {activeTab === 'settings' && <SettingsView />}
-                    </div>
-
-                    {/* شريط التنقل السفلي */}
-                    <div className={`fixed bottom-0 w-full max-w-md bg-transparent px-4 pb-4 pt-8 pointer-events-none ${printData ? 'hidden' : 'block'}`}>
-                        <div className="bg-white rounded-[2rem] shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] p-2 flex justify-between items-center pointer-events-auto border border-slate-50 relative">
-                            
-                            <button onClick={() => setActiveTab('ongoing')} className={`p-3 rounded-2xl transition-all duration-300 flex-1 flex justify-center ${activeTab === 'ongoing' ? 'text-darkTeal bg-slate-50' : 'text-slate-400'}`}>
-                                <IconClock />
-                            </button>
-                            
-                            <button onClick={() => setActiveTab('delayed')} className={`p-3 rounded-2xl transition-all duration-300 flex-1 flex justify-center ${activeTab === 'delayed' ? 'text-darkTeal bg-slate-50' : 'text-slate-400'}`}>
-                                <IconAlert />
-                            </button>
-
-                            <div className="relative -top-6 flex-1 flex justify-center">
-                                <button onClick={() => setActiveTab('add')} className="bg-accentOrange text-white p-4 rounded-full shadow-lg shadow-orange-500/40 hover:scale-105 transition-transform">
-                                    <IconPlus />
-                                </button>
-                            </div>
-
-                            <button onClick={() => setActiveTab('finance')} className={`p-3 rounded-2xl transition-all duration-300 flex-1 flex justify-center ${activeTab === 'finance' ? 'text-darkTeal bg-slate-50' : 'text-slate-400'}`}>
-                                <IconWallet />
-                            </button>
-
-                            <button onClick={() => setActiveTab('settings')} className={`p-3 rounded-2xl transition-all duration-300 flex-1 flex justify-center ${activeTab === 'settings' ? 'text-darkTeal bg-slate-50' : 'text-slate-400'}`}>
-                                <IconSettings />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            );
+    <script>
+        let appData = JSON.parse(localStorage.getItem('enjaz_data')) || {
+            lawyers: ['أ. محمد العبيدي', 'أ. أحمد الجبوري'],
+            companies: [
+                { name: 'شركة إبهار المستقبل', lawyer: 'أ. محمد العبيدي' },
+                { name: 'شركة أرض البيطرة', lawyer: 'أ. أحمد الجبوري' }
+            ],
+            transactions: [
+                { id: 1, company: 'شركة إبهار المستقبل', lawyer: 'أ. محمد العبيدي', type: 'تصديق وثائق', department: 'مسجل الشركات', fee: 25000, status: 'active', station: 'قسم التدقيق - أ. ياسر', timestamp: Date.now(), notes: '' }
+            ]
         };
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        function saveData() {
+            localStorage.setItem('enjaz_data', JSON.stringify(appData));
+            renderContent();
+        }
+
+        const tabs = [
+            { id: 'dashboard', label: 'الرئيسية', icon: 'layout-grid' },
+            { id: 'new', label: 'معاملة', icon: 'plus-circle' },
+            { id: 'active', label: 'جارية', icon: 'loader' },
+            { id: 'stuck', label: 'متلكئة', icon: 'alert-triangle' },
+            { id: 'finance', label: 'تحاسب', icon: 'wallet' },
+            { id: 'archive', label: 'الأرشيف', icon: 'archive' },
+            { id: 'settings', label: 'إعدادات', icon: 'settings' }
+        ];
+
+        let currentTab = 'dashboard';
+
+        function renderNav() {
+            const navContainer = document.getElementById('bottom-nav');
+            navContainer.innerHTML = tabs.map(tab => `
+                <button onclick="switchTab('${tab.id}')" class="flex flex-col items-center justify-center w-full space-y-1 transition-all duration-300 ${currentTab === tab.id ? 'text-indigo-400 scale-105' : 'text-zinc-500 hover:text-zinc-300'}">
+                    <i data-lucide="${tab.icon}" class="w-6 h-6 ${currentTab === tab.id ? 'fill-indigo-900/50' : ''}"></i>
+                    <span class="text-[10px] font-bold">${tab.label}</span>
+                </button>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function switchTab(tabId) {
+            currentTab = tabId;
+            renderNav();
+            renderContent();
+            window.scrollTo(0,0);
+        }
+
+        function renderContent() {
+            const content = document.getElementById('app-content');
+            
+            if (currentTab === 'dashboard') {
+                const activeCount = appData.transactions.filter(t => t.status === 'active').length;
+                const stuckCount = appData.transactions.filter(t => t.status === 'stuck').length;
+                const completedTxs = appData.transactions.filter(t => t.status === 'completed');
+                const totalEarnings = completedTxs.reduce((sum, t) => sum + Number(t.fee), 0);
+                
+                content.innerHTML = `
+                    <div class="mb-6 flex items-center gap-3">
+                        <div class="bg-indigo-900/40 p-2.5 rounded-2xl border border-indigo-700/50 shadow-sm">
+                            <i data-lucide="layout-grid" class="text-indigo-400 w-7 h-7"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-extrabold text-white">الرئيسية</h1>
+                            <p class="text-xs text-zinc-400 font-bold">نظرة عامة على نشاطك المكتبي</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-finance rounded-3xl p-6 text-white mb-5 shadow-lg">
+                        <div class="flex justify-between items-start mb-4">
+                            <h2 class="text-sm font-semibold opacity-90">أرباح هذا الأسبوع (لحد الآن)</h2>
+                            <i data-lucide="trending-up" class="w-5 h-5 opacity-90"></i>
+                        </div>
+                        <div class="text-4xl font-extrabold mb-1">${totalEarnings.toLocaleString()} <span class="text-lg opacity-80">د.ع</span></div>
+                        <p class="text-xs opacity-80 mt-2">الدورة الحالية: من الأحد إلى الخميس</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div onclick="manageLawyers()" class="glass-card p-5 flex flex-col justify-center active:scale-95 transition-transform cursor-pointer hover:border-indigo-500/50">
+                            <div class="bg-blue-900/30 w-11 h-11 rounded-2xl flex items-center justify-center mb-3">
+                                <i data-lucide="users" class="text-blue-400 w-5 h-5"></i>
+                            </div>
+                            <div class="text-2xl font-extrabold text-white">${appData.lawyers.length}</div>
+                            <div class="text-xs text-zinc-400 font-bold mt-1">محامون مسجلون</div>
+                        </div>
+
+                        <div onclick="manageCompanies()" class="glass-card p-5 flex flex-col justify-center active:scale-95 transition-transform cursor-pointer hover:border-purple-500/50">
+                            <div class="bg-purple-900/30 w-11 h-11 rounded-2xl flex items-center justify-center mb-3">
+                                <i data-lucide="building-2" class="text-purple-400 w-5 h-5"></i>
+                            </div>
+                            <div class="text-2xl font-extrabold text-white">${appData.companies.length}</div>
+                            <div class="text-xs text-zinc-400 font-bold mt-1">الشركات</div>
+                        </div>
+
+                        <div class="glass-card p-5 flex flex-col justify-center border-r-4 border-r-indigo-500">
+                            <div class="bg-indigo-900/30 w-11 h-11 rounded-2xl flex items-center justify-center mb-3">
+                                <i data-lucide="loader" class="text-indigo-400 w-5 h-5"></i>
+                            </div>
+                            <div class="text-2xl font-extrabold text-white">${activeCount}</div>
+                            <div class="text-xs text-zinc-400 font-bold mt-1">معاملات جارية</div>
+                        </div>
+
+                        <div class="glass-card p-5 flex flex-col justify-center border-r-4 border-r-rose-500">
+                            <div class="bg-rose-900/30 w-11 h-11 rounded-2xl flex items-center justify-center mb-3">
+                                <i data-lucide="alert-triangle" class="text-rose-400 w-5 h-5"></i>
+                            </div>
+                            <div class="text-2xl font-extrabold text-white">${stuckCount}</div>
+                            <div class="text-xs text-zinc-400 font-bold mt-1">معاملات متلكئة</div>
+                        </div>
+                    </div>
+                `;
+            } 
+            else if (currentTab === 'new') {
+                content.innerHTML = `
+                    <div class="mb-6">
+                        <h1 class="text-2xl font-extrabold text-white">إضافة معاملة</h1>
+                        <p class="text-xs text-zinc-400 font-bold">بدء مسار جديد لشركة</p>
+                    </div>
+                    <div class="glass-card p-6 space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-zinc-400 mb-2">اسم المحامي</label>
+                            <select id="new-lawyer" onchange="updateCompaniesList()" class="w-full rounded-xl p-3 text-sm font-semibold">
+                                <option value="">- اختر المحامي -</option>
+                                ${appData.lawyers.map(l => `<option value="${l}">${l}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-zinc-400 mb-2">الشركة</label>
+                            <select id="new-company" class="w-full rounded-xl p-3 text-sm font-semibold">
+                                <option value="">- اختر المحامي أولاً -</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-zinc-400 mb-2">الدائرة</label>
+                            <select id="new-dept" class="w-full rounded-xl p-3 text-sm font-semibold">
+                                <option value="مسجل الشركات">مسجل الشركات</option>
+                                <option value="الاستيراد والتصدير">الاستيراد والتصدير</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-zinc-400 mb-2">نوع المعاملة</label>
+                            <input type="text" id="new-type" placeholder="مثال: تصديق وثائق" class="w-full rounded-xl p-3 text-sm font-semibold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-zinc-400 mb-2">الأتعاب (د.ع)</label>
+                            <input type="number" id="new-fee" placeholder="0" class="w-full rounded-xl p-3 text-sm font-semibold">
+                        </div>
+                        <button onclick="addTransaction()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-900/50 active:scale-95 transition-transform mt-6">
+                            بدء المعاملة
+                        </button>
+                    </div>
+                `;
+            }
+            else if (currentTab === 'active') {
+                const activeTx = appData.transactions.filter(t => t.status === 'active');
+                content.innerHTML = `
+                    <div class="mb-6">
+                        <h1 class="text-2xl font-extrabold text-white">المعاملات الجارية</h1>
+                        <p class="text-xs text-zinc-400 font-bold">تتبع مسار معاملاتك الميدانية</p>
+                    </div>
+                    <div class="space-y-4">
+                        ${activeTx.length === 0 ? '<div class="text-center text-zinc-500 mt-10 font-bold">لا توجد معاملات جارية حالياً</div>' : 
+                        activeTx.map(t => `
+                            <div onclick="openModal(${t.id})" class="glass-card p-5 active:scale-95 transition-transform duration-200 cursor-pointer border-r-4 border-r-indigo-500 relative">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="font-extrabold text-lg text-white">${t.company}</h3>
+                                    <span class="bg-indigo-900/30 text-indigo-400 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-indigo-800">${t.department}</span>
+                                </div>
+                                <div class="text-sm mb-4 font-bold text-cyan-400">${t.type}</div>
+                                
+                                <div class="bg-zinc-900 p-3.5 rounded-2xl border border-zinc-800 flex items-center gap-3">
+                                    <div class="bg-zinc-800 shadow-sm p-2 rounded-xl border border-zinc-700">
+                                        <i data-lucide="map-pin" class="w-4 h-4 text-indigo-400"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-[10px] text-zinc-500 font-bold">المحطة الحالية</div>
+                                        <div class="text-sm font-bold text-zinc-100">${t.station}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            else if (currentTab === 'stuck') {
+                const stuckTx = appData.transactions.filter(t => t.status === 'stuck');
+                content.innerHTML = `
+                    <div class="mb-6">
+                        <h1 class="text-2xl font-extrabold text-white">المعاملات المتلكئة</h1>
+                        <p class="text-xs text-zinc-400 font-bold">المعاملات المتوقفة لوجود أخطاء</p>
+                    </div>
+                    <div class="space-y-4">
+                        ${stuckTx.length === 0 ? '<div class="text-center text-zinc-500 mt-10 font-bold">الحمدلله، لا يوجد تلكؤ!</div>' : 
+                        stuckTx.map(t => `
+                            <div class="glass-card p-5 border-r-4 border-r-rose-600">
+                                <h3 class="font-extrabold text-lg text-white">${t.company}</h3>
+                                <div class="text-sm font-bold text-rose-500 mb-3">${t.type}</div>
+                                <div class="bg-rose-950/30 p-3.5 rounded-2xl border border-rose-900/50 mb-4">
+                                    <div class="text-[10px] text-rose-400 font-bold">سبب التلكؤ:</div>
+                                    <div class="text-sm font-semibold text-white">${t.notes || 'لم يكتب سبب'}</div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="changeStatus(${t.id}, 'active')" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold py-3 rounded-xl transition-colors">
+                                        إعادة للعمل
+                                    </button>
+                                    <button onclick="notifyLawyer('${t.lawyer}', '${t.company}', '${t.notes}')" class="flex-1 bg-emerald-900/30 text-emerald-400 border border-emerald-800 hover:bg-emerald-900/50 text-xs font-bold py-3 rounded-xl flex items-center justify-center gap-1.5 transition-colors">
+                                        <i data-lucide="message-circle" class="w-4 h-4"></i> إبلاغ واتساب
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            else if (currentTab === 'finance') {
+                const completed = appData.transactions.filter(t => t.status === 'completed');
+                const lawyerTotals = {};
+                completed.forEach(t => {
+                    if (!lawyerTotals[t.lawyer]) lawyerTotals[t.lawyer] = { total: 0, txs: [] };
+                    lawyerTotals[t.lawyer].total += Number(t.fee);
+                    lawyerTotals[t.lawyer].txs.push(t);
+                });
+
+                content.innerHTML = `
+                    <div class="mb-6">
+                        <h1 class="text-2xl font-extrabold text-white">التحاسب المالي</h1>
+                        <p class="text-xs text-zinc-400 font-bold">إغلاق دورة الخميس</p>
+                    </div>
+                    <div class="space-y-4">
+                        ${Object.keys(lawyerTotals).length === 0 ? '<div class="text-center text-zinc-500 mt-10 font-bold">لا توجد معاملات منجزة للتحاسب</div>' : 
+                        Object.keys(lawyerTotals).map(lawyer => `
+                            <div class="glass-card p-5">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h3 class="font-extrabold text-lg text-white">${lawyer}</h3>
+                                    <div class="text-lg font-extrabold text-indigo-400">${lawyerTotals[lawyer].total.toLocaleString()} <span class="text-xs">د.ع</span></div>
+                                </div>
+                                <p class="text-xs text-zinc-400 font-bold mb-4">${lawyerTotals[lawyer].txs.length} معاملات منجزة</p>
+                                
+                                <button onclick="generatePDF('${lawyer}')" class="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors">
+                                    <i data-lucide="file-down" class="w-4 h-4"></i>
+                                    تنزيل تقرير PDF
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            else if (currentTab === 'archive') {
+                const archived = appData.transactions.filter(t => t.status === 'completed');
+                content.innerHTML = `
+                    <div class="mb-6">
+                        <h1 class="text-2xl font-extrabold text-white">الأرشيف</h1>
+                        <p class="text-xs text-zinc-400 font-bold">سجل المعاملات المنجزة</p>
+                    </div>
+                    <div class="space-y-3">
+                        ${archived.length === 0 ? '<div class="text-center text-zinc-500 mt-10 font-bold">الأرشيف فارغ</div>' : 
+                        archived.map(t => `
+                            <div class="glass-card p-4 flex justify-between items-center">
+                                <div>
+                                    <h3 class="font-bold text-white text-sm">${t.company}</h3>
+                                    <p class="text-xs text-indigo-400 font-bold">${t.type}</p>
+                                </div>
+                                <div class="text-[10px] text-emerald-400 font-extrabold bg-emerald-900/30 px-3 py-1 rounded-full border border-emerald-800">
+                                    منجزة
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            else if (currentTab === 'settings') {
+                content.innerHTML = `
+                    <div class="mb-6">
+                        <h1 class="text-2xl font-extrabold text-white">الإعدادات</h1>
+                    </div>
+                    <div class="glass-card p-5 space-y-4">
+                        <h3 class="text-zinc-400 font-bold text-sm mb-2">إدارة النظام</h3>
+                        <button onclick="factoryReset()" class="w-full bg-rose-900/30 text-rose-400 border border-rose-800/50 hover:bg-rose-900/50 font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors">
+                            <i data-lucide="trash-2" class="w-5 h-5"></i>
+                            تصفير أرباح الأسبوع
+                        </button>
+                    </div>
+                `;
+            }
+            
+            lucide.createIcons();
+        }
+
+        // --- النوافذ المنبثقة التفاعلية للمحامين والشركات والمعاملات ---
+        
+        function manageLawyers() {
+            let html = `
+                <div class="flex justify-between items-center mb-5">
+                    <h2 class="text-xl font-extrabold text-white">إدارة المحامين</h2>
+                    <button onclick="closeModal()" class="bg-zinc-800 p-2 rounded-full text-zinc-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+                
+                <div class="bg-zinc-800 p-3.5 rounded-2xl border border-zinc-700 mb-4 flex gap-2">
+                    <input type="text" id="new-lawyer-name" placeholder="اسم المحامي الجديد..." class="w-full rounded-xl p-2.5 text-sm font-semibold">
+                    <button onclick="addNewLawyer()" class="bg-indigo-600 text-white px-4 rounded-xl font-bold text-sm">إضافة</button>
+                </div>
+
+                <div class="max-h-60 overflow-y-auto space-y-2 pr-1">
+                    ${appData.lawyers.map(l => `
+                        <div class="flex justify-between items-center bg-zinc-800 border border-zinc-700 p-3.5 rounded-2xl shadow-sm">
+                            <div class="font-bold text-sm text-white">${l}</div>
+                            <button onclick="deleteLawyer('${l}')" class="text-rose-400 bg-rose-900/30 border border-rose-900 hover:bg-rose-900/50 p-2 rounded-xl transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            showModalHTML(html);
+        }
+
+        function addNewLawyer() {
+            const val = document.getElementById('new-lawyer-name').value.trim();
+            if(val && !appData.lawyers.includes(val)) {
+                appData.lawyers.push(val);
+                saveData();
+                manageLawyers();
+            }
+        }
+
+        function deleteLawyer(name) {
+            if(confirm(`هل أنت متأكد من حذف ${name}؟`)) {
+                appData.lawyers = appData.lawyers.filter(l => l !== name);
+                saveData();
+                manageLawyers();
+            }
+        }
+
+        function manageCompanies() {
+            let html = `
+                <div class="flex justify-between items-center mb-5">
+                    <h2 class="text-xl font-extrabold text-white">إدارة الشركات</h2>
+                    <button onclick="closeModal()" class="bg-zinc-800 p-2 rounded-full text-zinc-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+                
+                <div class="bg-zinc-800 p-4 rounded-2xl border border-zinc-700 mb-4 space-y-3">
+                    <select id="new-comp-lawyer" class="w-full rounded-xl p-3 text-sm font-semibold">
+                        <option value="">- اختر المحامي -</option>
+                        ${appData.lawyers.map(l => `<option value="${l}">${l}</option>`).join('')}
+                    </select>
+                    <div class="flex gap-2">
+                        <input type="text" id="new-comp-name" placeholder="اسم الشركة..." class="w-full rounded-xl p-3 text-sm font-semibold">
+                        <button onclick="addNewCompany()" class="bg-indigo-600 text-white px-4 rounded-xl font-bold text-sm">إضافة</button>
+                    </div>
+                </div>
+
+                <div class="max-h-60 overflow-y-auto space-y-2 pr-1">
+                    ${appData.companies.map(c => `
+                        <div class="flex justify-between items-center bg-zinc-800 border border-zinc-700 p-3.5 rounded-2xl shadow-sm">
+                            <div>
+                                <div class="font-bold text-sm text-white">${c.name}</div>
+                                <div class="text-[10px] text-zinc-400 font-bold">${c.lawyer}</div>
+                            </div>
+                            <button onclick="deleteCompany('${c.name}')" class="text-rose-400 bg-rose-900/30 border border-rose-900 hover:bg-rose-900/50 p-2 rounded-xl transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            showModalHTML(html);
+        }
+
+        function addNewCompany() {
+            const lawyer = document.getElementById('new-comp-lawyer').value;
+            const name = document.getElementById('new-comp-name').value.trim();
+            if(lawyer && name) {
+                appData.companies.push({ name, lawyer });
+                saveData();
+                manageCompanies();
+            } else {
+                alert("يرجى اختيار المحامي وكتابة اسم الشركة");
+            }
+        }
+
+        function deleteCompany(name) {
+            if(confirm(`هل أنت متأكد من حذف ${name}؟`)) {
+                appData.companies = appData.companies.filter(c => c.name !== name);
+                saveData();
+                manageCompanies();
+            }
+        }
+
+        function updateCompaniesList() {
+            const lawyer = document.getElementById('new-lawyer').value;
+            const companySelect = document.getElementById('new-company');
+            const comps = appData.companies.filter(c => c.lawyer === lawyer);
+            companySelect.innerHTML = comps.length > 0 
+                ? comps.map(c => `<option value="${c.name}">${c.name}</option>`).join('')
+                : '<option value="">لا توجد شركات لهذا المحامي</option>';
+        }
+
+        function addTransaction() {
+            const lawyer = document.getElementById('new-lawyer').value;
+            const company = document.getElementById('new-company').value;
+            const dept = document.getElementById('new-dept').value;
+            const type = document.getElementById('new-type').value;
+            const fee = document.getElementById('new-fee').value;
+
+            if(!lawyer || !company || !type || !fee) {
+                alert('يرجى تعبئة جميع الحقول'); return;
+            }
+
+            appData.transactions.push({
+                id: Date.now(), company, lawyer, department: dept, type, fee, status: 'active', station: 'قيد الاستلام', timestamp: Date.now(), notes: ''
+            });
+            saveData();
+            switchTab('active');
+        }
+
+        function openModal(id) {
+            const tx = appData.transactions.find(t => t.id === id);
+            let html = `
+                <div class="flex justify-between items-center mb-5">
+                    <h2 class="text-xl font-extrabold text-white">إدارة المعاملة</h2>
+                    <button onclick="closeModal()" class="bg-zinc-800 p-2 rounded-full text-zinc-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+                
+                <div class="mb-5">
+                    <div class="text-xs text-zinc-500 font-bold mb-1">الشركة</div>
+                    <div class="font-extrabold text-lg text-indigo-400">${tx.company}</div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="bg-zinc-800 p-4 rounded-2xl border border-zinc-700">
+                        <label class="block text-xs font-bold text-zinc-400 mb-2">تحديث المحطة:</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="update-station-val" value="${tx.station}" class="w-full rounded-xl p-3 text-sm font-semibold">
+                            <button onclick="updateStation(${tx.id})" class="bg-indigo-600 text-white px-4 rounded-xl font-bold text-sm">حفظ</button>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-rose-950/30 p-4 rounded-2xl border border-rose-900/50">
+                        <label class="block text-xs font-bold text-rose-400 mb-2">نقل للمتلكئة (اكتب السبب):</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="stuck-reason-val" placeholder="المشكلة..." class="w-full rounded-xl p-3 text-sm font-semibold border-rose-900 focus:border-rose-500">
+                            <button onclick="moveToStuck(${tx.id})" class="bg-rose-600 text-white px-4 rounded-xl font-bold text-sm">نقل</button>
+                        </div>
+                    </div>
+
+                    <button onclick="changeStatus(${tx.id}, 'completed')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 mt-2 transition-colors">
+                        <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                        <span>إنجاز المعاملة نهائياً</span>
+                    </button>
+                </div>
+            `;
+            showModalHTML(html);
+        }
+
+        function showModalHTML(html) {
+            const modalContainer = document.getElementById('modal-container');
+            const modalContent = document.getElementById('modal-content');
+            modalContent.innerHTML = html;
+            
+            modalContainer.classList.remove('hidden');
+            modalContainer.classList.add('flex');
+            setTimeout(() => {
+                modalContainer.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+            }, 10);
+            lucide.createIcons();
+        }
+
+        function closeModal() {
+            const modalContainer = document.getElementById('modal-container');
+            const modalContent = document.getElementById('modal-content');
+            
+            modalContainer.classList.add('opacity-0');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => {
+                modalContainer.classList.add('hidden');
+                modalContainer.classList.remove('flex');
+            }, 300);
+        }
+
+        function updateStation(id) {
+            const val = document.getElementById('update-station-val').value;
+            const tx = appData.transactions.find(t => t.id === id);
+            tx.station = val;
+            tx.timestamp = Date.now();
+            saveData();
+            closeModal();
+        }
+
+        function moveToStuck(id) {
+            const val = document.getElementById('stuck-reason-val').value;
+            const tx = appData.transactions.find(t => t.id === id);
+            tx.status = 'stuck';
+            tx.notes = val;
+            saveData();
+            closeModal();
+        }
+
+        function changeStatus(id, newStatus) {
+            const tx = appData.transactions.find(t => t.id === id);
+            tx.status = newStatus;
+            if(newStatus === 'active') tx.notes = ''; 
+            saveData();
+            closeModal();
+        }
+
+        function notifyLawyer(lawyer, company, note) {
+            const text = encodeURIComponent(`مرحباً ${lawyer}،\nتوجد مشكلة في معاملة شركة (${company}).\nالسبب: ${note || 'يرجى التواصل'}.`);
+            window.open(`https://wa.me/?text=${text}`, '_blank');
+        }
+
+        function generatePDF(lawyerName) {
+            const txs = appData.transactions.filter(t => t.status === 'completed' && t.lawyer === lawyerName);
+            const total = txs.reduce((sum, t) => sum + Number(t.fee), 0);
+            
+            // تصميم فاتح مخصص لطباعة الـ PDF فقط
+            const pdfHTML = `
+                <div style="padding: 40px; font-family: 'Cairo', sans-serif; direction: rtl; text-align: right; background: white; color: #0f172a;">
+                    <h1 style="color: #4f46e5; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">كشف حساب - إنجاز</h1>
+                    <h3 style="margin-top: 20px;">المحامي: <strong>${lawyerName}</strong></h3>
+                    <p>التاريخ: ${new Date().toLocaleDateString('ar-IQ')}</p>
+                    
+                    <table style="width: 100%; margin-top: 30px; border-collapse: collapse;">
+                        <tr style="background: #f8fafc;">
+                            <th style="padding: 12px; border: 1px solid #cbd5e1;">الشركة</th>
+                            <th style="padding: 12px; border: 1px solid #cbd5e1;">المعاملة</th>
+                            <th style="padding: 12px; border: 1px solid #cbd5e1;">الأتعاب</th>
+                        </tr>
+                        ${txs.map(t => `
+                            <tr>
+                                <td style="padding: 12px; border: 1px solid #cbd5e1;">${t.company}</td>
+                                <td style="padding: 12px; border: 1px solid #cbd5e1;">${t.type}</td>
+                                <td style="padding: 12px; border: 1px solid #cbd5e1;">${t.fee} د.ع</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                    
+                    <h2 style="margin-top: 30px; background: linear-gradient(135deg, #4f46e5, #9333ea); color: white; padding: 15px; text-align: center; border-radius: 12px;">
+                        الإجمالي: ${total.toLocaleString()} دينار عراقي
+                    </h2>
+                </div>
+            `;
+            
+            const container = document.getElementById('pdf-container');
+            container.innerHTML = pdfHTML;
+            container.classList.remove('hidden');
+            
+            html2pdf().from(container).set({
+                margin: 1,
+                filename: `كشف_حساب_${lawyerName}.pdf`,
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            }).save().then(() => {
+                container.classList.add('hidden');
+            });
+        }
+
+        function factoryReset() {
+            if(confirm('هل أنت متأكد من مسح جميع المعاملات وتصفير الأرباح؟ (هذا لن يمسح المحامين والشركات)')) {
+                appData.transactions = [];
+                saveData();
+                alert('تم التصفير بنجاح!');
+            }
+        }
+
+        renderNav();
+        renderContent();
     </script>
 </body>
 </html>
