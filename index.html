@@ -4,11 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>نظام إدارة المعاملات</title>
-    <style>:root { color-scheme: light; } body { font-family: sans-serif; background-color: #f8fafc; }</style>
+    <!-- ربط ملفات PWA الخاصة بك -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#f8fafc">
+
+    <!-- استدعاء Tailwind و React -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- تنسيقات CSS لضمان عدم تأثر التطبيق بوضع الظلام في الهاتف -->
+    <style>
+        :root { color-scheme: light; }
+        html, body { background-color: #f8fafc !important; color: #1e293b !important; }
+        .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); }
+        .gradient-bg { background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); }
+    </style>
 </head>
 <body>
     <div id="root"></div>
@@ -19,79 +31,83 @@
         function App() {
             const [activeTab, setActiveTab] = useState('home');
             const [transactions, setTransactions] = useState([]);
-            const [showAdd, setShowAdd] = useState(false);
+            const [showModal, setShowModal] = useState(false);
 
             useEffect(() => {
-                const saved = localStorage.getItem('txs');
-                setTransactions(saved ? JSON.parse(saved) : []);
+                const data = localStorage.getItem('my_transactions');
+                setTransactions(data ? JSON.parse(data) : []);
             }, []);
 
-            const addTx = (e) => {
+            const addTransaction = (e) => {
                 e.preventDefault();
-                const newTx = { id: Date.now(), company: e.target.comp.value, fee: parseInt(e.target.fee.value), status: 'active', date: new Date() };
+                const newTx = {
+                    id: Date.now(),
+                    company: e.target.company.value,
+                    fee: e.target.fee.value,
+                    date: new Date().toLocaleDateString('ar-EG')
+                };
                 const updated = [...transactions, newTx];
                 setTransactions(updated);
-                localStorage.setItem('txs', JSON.stringify(updated));
-                setShowAdd(false);
+                localStorage.setItem('my_transactions', JSON.stringify(updated));
+                setShowModal(false);
             };
 
             return (
-                <div className="pb-24 max-w-md mx-auto min-h-screen bg-slate-50">
+                <div className="max-w-md mx-auto min-h-screen bg-slate-50 pb-24">
                     
-                    {/* محتوى الصفحات */}
-                    <div className="p-6">
+                    {/* Header */}
+                    <header className="p-6">
+                        <h1 className="text-2xl font-black text-slate-800">إدارة المعاملات</h1>
+                    </header>
+
+                    {/* Main Content */}
+                    <main className="px-6">
                         {activeTab === 'home' && (
-                            <>
-                                <h1 className="text-2xl font-black text-slate-800 mb-6">المعاملات الجارية</h1>
+                            <div className="space-y-4">
+                                {transactions.length === 0 && <p className="text-slate-400 text-center mt-10">لا توجد معاملات حالياً</p>}
                                 {transactions.map(t => (
-                                    <div key={t.id} className="bg-white p-5 rounded-3xl shadow-sm mb-4 border border-slate-100">
-                                        <h3 className="font-bold">{t.company}</h3>
-                                        <p className="text-purple-600 font-bold">{t.fee} د.ع</p>
+                                    <div key={t.id} className="bg-white p-5 rounded-3xl card-shadow border border-slate-100">
+                                        <div className="flex justify-between items-start">
+                                            <h3 className="font-bold text-lg text-slate-800">{t.company}</h3>
+                                            <span className="text-xs bg-slate-100 px-2 py-1 rounded-lg text-slate-500">{t.date}</span>
+                                        </div>
+                                        <p className="text-purple-600 font-bold mt-2">{t.fee} د.ع</p>
                                     </div>
                                 ))}
-                            </>
+                            </div>
                         )}
 
                         {activeTab === 'finance' && (
-                            <div>
-                                <h1 className="text-2xl font-black mb-6">التحاسب المالي</h1>
-                                <div className="bg-gradient-to-r from-pink-500 to-purple-600 p-8 rounded-[32px] text-white shadow-xl shadow-purple-200">
-                                    <p className="text-sm opacity-80">إجمالي المستحقات</p>
-                                    <h2 className="text-4xl font-bold mt-2">{transactions.reduce((acc, curr) => acc + curr.fee, 0)} د.ع</h2>
-                                </div>
+                            <div className="gradient-bg p-8 rounded-[32px] text-white shadow-xl shadow-purple-200">
+                                <p className="opacity-80">إجمالي المستحقات</p>
+                                <h2 className="text-4xl font-black mt-2">
+                                    {transactions.reduce((acc, curr) => acc + parseInt(curr.fee || 0), 0).toLocaleString()} د.ع
+                                </h2>
                             </div>
                         )}
+                    </main>
 
-                        {activeTab === 'settings' && (
-                            <div>
-                                <h1 className="text-2xl font-black mb-6">الإعدادات</h1>
-                                <button onClick={() => { localStorage.clear(); window.location.reload(); }} className="w-full bg-red-50 text-red-600 p-4 rounded-2xl font-bold">تصفير النظام</button>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* نافذة الإضافة */}
-                    {showAdd && (
-                        <div className="fixed inset-0 bg-slate-50 z-50 p-6 flex flex-col justify-center">
-                            <form onSubmit={addTx} className="bg-white p-6 rounded-3xl shadow-xl">
+                    {/* Add Modal */}
+                    {showModal && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/20 backdrop-blur-sm">
+                            <form onSubmit={addTransaction} className="bg-white p-6 rounded-3xl w-full shadow-2xl">
                                 <h2 className="text-xl font-bold mb-4">معاملة جديدة</h2>
-                                <input name="comp" placeholder="اسم الشركة" required className="w-full p-4 bg-slate-100 rounded-2xl mb-3"/>
-                                <input name="fee" type="number" placeholder="الأتعاب" required className="w-full p-4 bg-slate-100 rounded-2xl mb-6"/>
+                                <input name="company" placeholder="اسم الشركة" required className="w-full p-4 bg-slate-50 rounded-2xl mb-3 border" />
+                                <input name="fee" type="number" placeholder="المبلغ (د.ع)" required className="w-full p-4 bg-slate-50 rounded-2xl mb-6 border" />
                                 <div className="flex gap-3">
                                     <button type="submit" className="flex-1 bg-purple-600 text-white p-4 rounded-2xl font-bold">حفظ</button>
-                                    <button type="button" onClick={() => setShowAdd(false)} className="p-4 rounded-2xl bg-slate-100 font-bold">إلغاء</button>
+                                    <button type="button" onClick={() => setShowModal(false)} className="px-6 py-4 bg-slate-100 rounded-2xl font-bold">إلغاء</button>
                                 </div>
                             </form>
                         </div>
                     )}
 
-                    {/* شريط التنقل السفلي */}
-                    <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-slate-100 p-4 flex justify-around items-center">
-                        <button onClick={() => setActiveTab('home')} className={activeTab === 'home' ? 'text-purple-600' : 'text-slate-400'}>الرئيسية</button>
-                        <button onClick={() => setShowAdd(true)} className="bg-purple-600 text-white w-14 h-14 rounded-full shadow-lg -mt-10 flex items-center justify-center font-bold text-2xl">+</button>
-                        <button onClick={() => setActiveTab('finance')} className={activeTab === 'finance' ? 'text-purple-600' : 'text-slate-400'}>المالية</button>
-                        <button onClick={() => setActiveTab('settings')} className={activeTab === 'settings' ? 'text-purple-600' : 'text-slate-400'}>الإعدادات</button>
-                    </div>
+                    {/* Bottom Nav */}
+                    <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-slate-100 p-4 flex justify-between items-center rounded-t-3xl shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
+                        <button onClick={() => setActiveTab('home')} className={`p-2 ${activeTab === 'home' ? 'text-purple-600' : 'text-slate-400'}`}>الرئيسية</button>
+                        <button onClick={() => setShowModal(true)} className="gradient-bg text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center font-bold text-3xl">+</button>
+                        <button onClick={() => setActiveTab('finance')} className={`p-2 ${activeTab === 'finance' ? 'text-purple-600' : 'text-slate-400'}`}>المالية</button>
+                    </nav>
                 </div>
             );
         }
