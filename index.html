@@ -5,33 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>إدارة المعاملات</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#f8fafc">
+    <!-- فرض الوضع الفاتح -->
+    <style>
+        :root { color-scheme: light; }
+        body { font-family: sans-serif; background-color: #f8fafc; color: #1e293b; }
+    </style>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <style>body { font-family: system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }</style>
 </head>
 <body class="bg-slate-50">
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useEffect } = React;
-
-        // البيانات التجريبية للمحامين وشركاتهم
         const lawyersData = {
-            "أحمد محمود": ["إبهار المستقبل", "شركة النور للخدمات", "مجموعة البناء"],
-            "سعد علي": ["الأفق اللوجستية", "تجارة العالمية"],
-            "مريم حسن": ["التقنية الحديثة", "خدمات التوصيل السريع"]
+            "أحمد محمود": ["إبهار المستقبل", "شركة النور للخدمات"],
+            "سعد علي": ["الأفق اللوجستية", "تجارة العالمية"]
         };
 
         function App() {
-            const [activeTab, setActiveTab] = useState('active');
             const [transactions, setTransactions] = useState([]);
             const [isAdding, setIsAdding] = useState(false);
-            
-            // بيانات المعاملة الجديدة
-            const [newTx, setNewTx] = useState({ lawyer: '', company: '', department: 'دائرة مسجل الشركات', type: '', fee: '' });
+            const [newTx, setNewTx] = useState({ lawyer: '', company: '', type: '', fee: '' });
 
             useEffect(() => {
                 const saved = localStorage.getItem('transactions_data');
@@ -40,88 +37,60 @@
 
             const saveTransaction = () => {
                 if(!newTx.lawyer || !newTx.company || !newTx.type) return alert("يرجى ملء البيانات");
-                
-                const tx = {
-                    ...newTx,
-                    id: Date.now(),
-                    status: 'active',
-                    lastUpdate: new Date().toISOString(),
-                    timeline: ['بدء المعاملة']
-                };
-                
+                const tx = { ...newTx, id: Date.now(), status: 'active' };
                 const updated = [tx, ...transactions];
                 setTransactions(updated);
                 localStorage.setItem('transactions_data', JSON.stringify(updated));
                 setIsAdding(false);
-                setNewTx({ lawyer: '', company: '', department: 'دائرة مسجل الشركات', type: '', fee: '' });
             };
 
             return (
-                <div className="max-w-md mx-auto relative min-h-screen bg-slate-50 text-slate-800 pb-24">
-                    
-                    {/* الشاشة الرئيسية */}
-                    {!isAdding && (
+                <div className="max-w-md mx-auto min-h-screen bg-slate-50 pb-24">
+                    {!isAdding ? (
                         <div className="p-6">
-                            <h1 className="text-2xl font-extrabold mb-6">المعاملات الجارية</h1>
+                            <h1 className="text-2xl font-black text-slate-800 mb-6">المعاملات الجارية</h1>
                             <div className="space-y-4">
                                 {transactions.map(tx => (
-                                    <div key={tx.id} className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
-                                        <h3 className="font-bold text-lg">{tx.company}</h3>
-                                        <p className="text-sm text-slate-500">{tx.lawyer} | {tx.type}</p>
-                                        <div className="mt-3 font-bold text-purple-600">{tx.fee} د.ع</div>
+                                    <div key={tx.id} className="bg-white rounded-3xl p-5 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1)] border-0">
+                                        <h3 className="font-bold text-lg text-slate-800">{tx.company}</h3>
+                                        <p className="text-sm text-slate-400 font-medium">{tx.lawyer} • {tx.type}</p>
+                                        <div className="mt-4 bg-purple-50 text-purple-700 py-2 px-3 rounded-xl inline-block font-bold text-sm">
+                                            {tx.fee} د.ع
+                                        </div>
                                     </div>
                                 ))}
                             </div>
                         </div>
-                    )}
-
-                    {/* واجهة إضافة معاملة جديدة */}
-                    {isAdding && (
-                        <div className="fixed inset-0 bg-slate-50 z-50 p-6 overflow-y-auto">
-                            <h2 className="text-2xl font-bold mb-6">معاملة جديدة</h2>
-                            
+                    ) : (
+                        <div className="p-6">
+                            <h2 className="text-2xl font-bold mb-6">إضافة معاملة جديدة</h2>
                             <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-bold mb-2">اختر المحامي</label>
-                                    <select className="w-full p-4 rounded-2xl bg-white border" onChange={(e) => setNewTx({...newTx, lawyer: e.target.value, company: ''})}>
-                                        <option value="">اختر محامياً...</option>
-                                        {Object.keys(lawyersData).map(l => <option key={l} value={l}>{l}</option>)}
-                                    </select>
-                                </div>
-
+                                <select className="w-full p-4 rounded-2xl bg-white border border-slate-200" onChange={(e) => setNewTx({...newTx, lawyer: e.target.value})}>
+                                    <option value="">اختر المحامي</option>
+                                    {Object.keys(lawyersData).map(l => <option key={l} value={l}>{l}</option>)}
+                                </select>
                                 {newTx.lawyer && (
-                                    <div>
-                                        <label className="block text-sm font-bold mb-2">الشركة</label>
-                                        <select className="w-full p-4 rounded-2xl bg-white border" onChange={(e) => setNewTx({...newTx, company: e.target.value})}>
-                                            <option value="">اختر شركة...</option>
-                                            {lawyersData[newTx.lawyer].map(c => <option key={c} value={c}>{c}</option>)}
-                                        </select>
-                                    </div>
+                                    <select className="w-full p-4 rounded-2xl bg-white border border-slate-200" onChange={(e) => setNewTx({...newTx, company: e.target.value})}>
+                                        <option value="">اختر الشركة</option>
+                                        {lawyersData[newTx.lawyer].map(c => <option key={c} value={c}>{c}</option>)}
+                                    </select>
                                 )}
-
                                 <input type="text" placeholder="نوع المعاملة" className="w-full p-4 rounded-2xl border" onChange={e => setNewTx({...newTx, type: e.target.value})}/>
                                 <input type="number" placeholder="الأتعاب (د.ع)" className="w-full p-4 rounded-2xl border" onChange={e => setNewTx({...newTx, fee: e.target.value})}/>
-
-                                <div className="flex gap-4 mt-6">
-                                    <button onClick={saveTransaction} className="flex-1 bg-purple-600 text-white py-4 rounded-2xl font-bold">حفظ المعاملة</button>
-                                    <button onClick={() => setIsAdding(false)} className="px-6 py-4 rounded-2xl bg-slate-200 font-bold">إلغاء</button>
-                                </div>
+                                <button onClick={saveTransaction} className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white py-4 rounded-2xl font-bold">حفظ المعاملة</button>
+                                <button onClick={() => setIsAdding(false)} className="w-full text-slate-400 font-bold">إلغاء</button>
                             </div>
                         </div>
                     )}
 
-                    {/* Navigation */}
-                    <div className="fixed bottom-6 left-6 right-6 flex justify-between bg-white p-4 rounded-3xl shadow-xl border border-slate-100">
-                        <div className="w-10"></div>
-                        <button onClick={() => setIsAdding(true)} className="bg-purple-600 text-white w-14 h-14 rounded-full flex items-center justify-center -mt-10 shadow-lg">
-                            <span className="text-2xl font-bold">+</span>
+                    <div className="fixed bottom-6 left-6 right-6 max-w-md mx-auto">
+                        <button onClick={() => setIsAdding(!isAdding)} className="bg-gradient-to-r from-pink-500 to-purple-600 text-white w-full h-16 rounded-3xl flex items-center justify-center shadow-lg shadow-purple-200 font-bold text-lg">
+                            {isAdding ? 'رجوع' : '+ إضافة معاملة'}
                         </button>
-                        <div className="w-10"></div>
                     </div>
                 </div>
             );
         }
-
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
