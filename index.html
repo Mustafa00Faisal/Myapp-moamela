@@ -1743,18 +1743,18 @@
         const dateStr = new Date().toLocaleDateString('ar-IQ'); 
         const refNo = 'REF-' + Date.now().toString().slice(-6);
         
-        // تعبئة البيانات الأساسية
-        document.getElementById('pdf-title').innerText = type === 'receipt' ? 'سند استلام مالي' : 'كشف حساب معاملات';
+        // 1. تعبئة البيانات الأساسية
+        document.getElementById('pdf-title').innerText = type === 'receipt' ? 'سند استلام مالي رسمي' : 'كشف حساب معاملات تفصيلي';
         document.getElementById('pdf-date').innerText = dateStr; 
         document.getElementById('pdf-ref').innerText = refNo;
-        document.getElementById('pdf-issuer-name').innerText = db.settings.name || 'مكتب تخليص معاملات'; 
-        document.getElementById('pdf-issuer-address').innerText = db.settings.address || 'العنوان / الهاتف';
-        document.getElementById('pdf-sig-name').innerText = db.settings.name || 'المصادقة / الختم';
+        document.getElementById('pdf-issuer-name').innerText = db.settings.name || 'مكتب تخليص المعاملات'; 
+        document.getElementById('pdf-issuer-address').innerText = db.settings.address || 'بغداد - العراق';
+        document.getElementById('pdf-sig-name').innerText = db.settings.name || 'التوقيع والختم المعتمد';
         document.getElementById('pdf-lawyer-name').innerText = lawyer.name; 
-        document.getElementById('pdf-doc-type').innerText = type === 'receipt' ? 'تصفية أتعاب / قبض' : 'تقرير معاملات مفصل';
+        document.getElementById('pdf-doc-type').innerText = type === 'receipt' ? 'قيد قبض أتعاب مالية' : 'تقرير مسارات المعاملات الأسبوعية';
         document.getElementById('pdf-amount').innerText = numFormat.format(amount) + ' د.ع';
 
-        // التوقيع الإلكتروني
+        // 2. معالجة التوقيع الإلكتروني
         const sigImg = document.getElementById('pdf-signature-img');
         if(db.settings.signature) { 
             sigImg.src = db.settings.signature; 
@@ -1763,23 +1763,53 @@
             sigImg.style.display = 'none'; 
         }
 
-        // تفاصيل المعاملات في الكشوفات
+        // 3. تصميم جدول تفاصيل المعاملات (احترافي ومنظم)
         const listContainer = document.getElementById('pdf-tx-list-container');
         if(type === 'report') {
             const txs = db.transactions.filter(t => t.lawyerId == lawyerId);
-            document.getElementById('pdf-tx-list').innerHTML = txs.map(t => `
-                <div style="display:flex; justify-content:space-between; padding: 12px 0; border-bottom: 1px dashed #e2e8f0;">
-                    <div><span style="color:#4f46e5;">•</span> ${t.type} <span style="color:#94a3b8; font-size:12px;">(${db.companies.find(c=>c.id==t.companyId)?.name || 'مجهول'})</span></div>
-                    <div style="direction:ltr; font-weight:800;">${numFormat.format(t.fee)} IQD</div>
-                </div>
-            `).join('');
+            document.getElementById('pdf-tx-list').innerHTML = `
+                <table style="width:100%; border-collapse: collapse; margin-top: 10px;">
+                    <thead>
+                        <tr style="background-color: #f1f5f9; color: #334155; font-size: 13px; text-align: right;">
+                            <th style="padding: 10px; border-bottom: 2px solid #cbd5e1;">نوع المعاملة</th>
+                            <th style="padding: 10px; border-bottom: 2px solid #cbd5e1;">الشركة المعنية</th>
+                            <th style="padding: 10px; border-bottom: 2px solid #cbd5e1; text-align: left;">الأتعاب</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${txs.map(t => `
+                            <tr style="border-bottom: 1px solid #e2e8f0; font-size: 13px;">
+                                <td style="padding: 10px; font-weight: 700; color: #1e293b;">${t.type}</td>
+                                <td style="padding: 10px; color: #64748b;">${db.companies.find(c=>c.id==t.companyId)?.name || 'غير مسجلة'}</td>
+                                <td style="padding: 10px; text-align: left; direction: ltr; font-weight: 800; color: #4f46e5;">${numFormat.format(t.fee)} IQD</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
             listContainer.style.display = 'block';
         } else { 
             listContainer.style.display = 'none'; 
         }
 
-        // إشعار البدء
-        customAlert('جاري التجهيز', 'يتم الآن تصدير المستند الاحترافي، يرجى الانتظار...', 'info');
+        // 4. إعادة تفعيل الباركود بشكل آمن
+        const qrTarget = document.getElementById("qr-target");
+        qrTarget.innerHTML = "";
+        if (typeof QRCode !== 'undefined') {
+            try {
+                new QRCode(qrTarget, { 
+                    text: `Ref:${refNo}|Client:${lawyer.name}|Total:${amount}`, 
+                    width: 85, 
+                    height: 85, 
+                    colorDark : "#0f172a", 
+                    colorLight : "#ffffff" 
+                });
+            } catch (e) {
+                console.log("QR skipped safely");
+            }
+        }
+
+        customAlert('جاري التجهيز', 'يتم تصدير المستند الاحترافي الآن...', 'info');
         
         // إخراج القالب لمعالجة الصورة
         const wrapper = document.getElementById('pdf-export-wrapper');
@@ -1795,13 +1825,12 @@
             jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } 
         };
 
-        // التصدير السريع والمضمون
         html2pdf().set(opt).from(document.getElementById('pdf-content')).save().then(() => {
             wrapper.style.opacity = '0.01';
             wrapper.style.top = '0';
             wrapper.style.zIndex = '-9999';
             closeUiAlert(); 
-            showToast('تم التصدير بنجاح', 'success');
+            showToast('تم تصدير المستند بنجاح', 'success');
         }).catch(err => {
             wrapper.style.opacity = '0.01';
             wrapper.style.top = '0';
