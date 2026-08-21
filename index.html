@@ -22,7 +22,7 @@
 
     <style>
         body { font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .app-bg { background-color: #f8fafc; }
+        .app-bg { background-color: #f8fafc; transition: background-color 0.4s ease; }
         .dark .app-bg { background-color: #0f172a; }
         
         .card-gradient { background: linear-gradient(135deg, #4f46e5, #9333ea); }
@@ -31,11 +31,11 @@
         /* Bottom Nav - 7 Items Distribution */
         .bottom-nav { box-shadow: 0 -4px 20px rgba(0,0,0,0.05); padding-bottom: env(safe-area-inset-bottom, 12px); }
         .dark .bottom-nav { box-shadow: 0 -4px 20px rgba(0,0,0,0.5); }
-        .nav-item { color: #94a3b8; transition: all 0.3s; flex: 1; }
-        .nav-item.active { color: #6366f1; font-weight: 700; transform: translateY(-2px); }
+        .nav-item { color: #94a3b8; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); flex: 1; }
+        .nav-item.active { color: #6366f1; font-weight: 700; transform: translateY(-4px); }
         .dark .nav-item.active { color: #818cf8; }
 
-        .glass-modal { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .glass-modal { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
         .dark .glass-modal { background: rgba(15, 23, 42, 0.85); }
 
         ::-webkit-scrollbar { display: none; }
@@ -45,13 +45,23 @@
             border: 1px solid #e2e8f0; background: #fff;
             color: #1e293b; outline: none; transition: all 0.3s;
         }
-        .input-field:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1); }
+        .input-field:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); transform: translateY(-1px); }
         .dark .input-field { background: #1e293b; border-color: #334155; color: #f8fafc; }
-        .dark .input-field:focus { border-color: #818cf8; box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1); }
+        .dark .input-field:focus { border-color: #818cf8; box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15); }
         
-        .view-section { display: none; padding-bottom: 90px; }
-        .view-section.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* Layout Fix: Increased padding-bottom so nothing hides behind navbar */
+        .view-section { display: none; padding-bottom: 120px; }
+        .view-section.active { display: block; animation: fadeInView 0.4s ease forwards; }
+        
+        /* Life/Animations */
+        @keyframes fadeInView { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse-soft { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); } 70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(79, 70, 229, 0); } 100% { transform: scale(1); } }
+        
+        .animate-item { opacity: 0; animation: fadeInUp 0.4s ease forwards; }
+        .pulse-badge { animation: pulse-soft 2s infinite; }
+        .hover-lift { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease; }
+        .hover-lift:hover { transform: translateY(-3px) scale(1.01); }
 
         /* Smooth UI Modals */
         .modal-overlay { transition: opacity 0.3s ease; opacity: 0; pointer-events: none; }
@@ -59,9 +69,10 @@
         .modal-box { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); transform: scale(0.9); }
         .modal-overlay.active .modal-box { transform: scale(1); }
 
-        /* PDF Container - FIX FOR MOBILE */
+        /* PDF Container - FIX FOR MOBILE (Moved completely off-screen but visible to the engine) */
         #pdf-export-wrapper {
-            position: fixed; top: 0; left: 0; width: 800px; z-index: -9999; opacity: 0.01; display: none; pointer-events: none;
+            position: absolute; top: -9999px; left: -9999px; width: 800px;
+            visibility: visible; opacity: 1; z-index: -9999;
         }
     </style>
 </head>
@@ -72,7 +83,7 @@
         <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 w-10/12 max-w-sm text-center shadow-2xl modal-box">
             <div id="uiAlertIcon" class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl"></div>
             <h3 id="uiAlertTitle" class="text-xl font-bold mb-2 text-slate-800 dark:text-white"></h3>
-            <p id="uiAlertMsg" class="text-sm text-slate-500 dark:text-slate-400 mb-6"></p>
+            <p id="uiAlertMsg" class="text-sm text-slate-500 dark:text-slate-400 mb-6 leading-relaxed"></p>
             <button onclick="closeUiAlert()" class="w-full bg-primary text-white py-3 rounded-xl font-bold hover:opacity-90 active:scale-95 transition-all">حسناً</button>
         </div>
     </div>
@@ -94,14 +105,20 @@
 
     <!-- Thursday Mandatory Modal -->
     <div id="thursdayModal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 backdrop-blur-sm">
-        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 w-11/12 max-w-sm text-center shadow-2xl">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 w-11/12 max-w-sm text-center shadow-2xl animate-item">
             <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
                 <i class="fa-solid fa-file-invoice-dollar"></i>
             </div>
             <h3 class="text-xl font-bold mb-2">تنبيه ليلة الخميس!</h3>
             <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">يجب تصفية الحسابات وتصدير تقارير المحامين الأسبوعية.</p>
-            <button onclick="switchTab('accounting'); document.getElementById('thursdayModal').style.display='none';" class="w-full bg-primary text-white py-3 rounded-xl font-bold">الذهاب للتحاسب</button>
+            <button onclick="switchTab('accounting'); document.getElementById('thursdayModal').style.display='none';" class="w-full bg-primary text-white py-3 rounded-xl font-bold hover-lift">الذهاب للتحاسب</button>
         </div>
+    </div>
+
+    <!-- Image Lightbox Modal for Vault -->
+    <div id="lightboxModal" class="fixed inset-0 z-[110] hidden items-center justify-center bg-black/90 backdrop-blur-md transition-opacity">
+        <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white text-3xl bg-black/50 w-12 h-12 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"><i class="fa-solid fa-xmark"></i></button>
+        <img id="lightboxImage" src="" class="max-w-[95%] max-h-[90vh] object-contain rounded-xl shadow-2xl transform transition-transform duration-300 scale-95">
     </div>
 
     <!-- MAIN CONTAINER -->
@@ -116,12 +133,12 @@
                     </h1>
                     <p class="text-sm text-slate-500">نظرة عامة على نشاطك</p>
                 </div>
-                <button onclick="toggleTheme()" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow flex items-center justify-center active:scale-90 transition-transform">
+                <button onclick="toggleTheme()" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow flex items-center justify-center hover-lift active:scale-90">
                     <i id="themeIcon" class="fa-solid fa-moon text-slate-600 dark:text-yellow-400"></i>
                 </button>
             </div>
 
-            <div class="card-gradient rounded-3xl p-5 text-white mb-6 shadow-xl shadow-indigo-200 dark:shadow-none relative overflow-hidden">
+            <div class="card-gradient rounded-3xl p-5 text-white mb-6 shadow-xl shadow-indigo-200 dark:shadow-none relative overflow-hidden hover-lift">
                 <div class="absolute -right-10 -top-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
                 <h3 class="text-white/80 text-sm mb-1 font-semibold flex justify-between">إجمالي مستحقاتك <i class="fa-solid fa-arrow-trend-up"></i></h3>
                 <div class="text-3xl font-extrabold mb-1"><span id="home-weekly-profit">0</span> <span class="text-lg font-normal">د.ع</span></div>
@@ -129,32 +146,32 @@
             </div>
 
             <div class="grid grid-cols-2 gap-4 mb-6">
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm text-center border border-slate-100 dark:border-slate-700/50">
-                    <i class="fa-solid fa-users text-blue-500 text-2xl mb-2 bg-blue-50 dark:bg-slate-700/50 w-12 h-12 flex items-center justify-center rounded-xl mx-auto"></i>
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm text-center border border-slate-100 dark:border-slate-700/50 hover-lift">
+                    <i class="fa-solid fa-users text-blue-500 text-2xl mb-2 bg-blue-50 dark:bg-slate-700/50 w-12 h-12 flex items-center justify-center rounded-xl mx-auto transition-transform hover:rotate-12"></i>
                     <div class="text-2xl font-bold" id="home-lawyers-count">0</div>
                     <div class="text-xs text-slate-500">محامون مسجلون</div>
                 </div>
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm text-center border border-slate-100 dark:border-slate-700/50">
-                    <i class="fa-regular fa-building text-purple-500 text-2xl mb-2 bg-purple-50 dark:bg-slate-700/50 w-12 h-12 flex items-center justify-center rounded-xl mx-auto"></i>
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm text-center border border-slate-100 dark:border-slate-700/50 hover-lift">
+                    <i class="fa-regular fa-building text-purple-500 text-2xl mb-2 bg-purple-50 dark:bg-slate-700/50 w-12 h-12 flex items-center justify-center rounded-xl mx-auto transition-transform hover:scale-110"></i>
                     <div class="text-2xl font-bold" id="home-companies-count">0</div>
                     <div class="text-xs text-slate-500">الشركات</div>
                 </div>
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm text-center border border-slate-100 dark:border-slate-700/50">
-                    <i class="fa-solid fa-triangle-exclamation text-red-500 text-2xl mb-2 bg-red-50 dark:bg-slate-700/50 w-12 h-12 flex items-center justify-center rounded-xl mx-auto"></i>
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm text-center border border-slate-100 dark:border-slate-700/50 hover-lift">
+                    <i class="fa-solid fa-triangle-exclamation text-red-500 text-2xl mb-2 bg-red-50 dark:bg-slate-700/50 w-12 h-12 flex items-center justify-center rounded-xl mx-auto transition-transform hover:-rotate-12"></i>
                     <div class="text-2xl font-bold text-red-500" id="home-stalled-count">0</div>
                     <div class="text-xs text-slate-500">معاملات متلكئة</div>
                 </div>
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm text-center border border-slate-100 dark:border-slate-700/50">
-                    <i class="fa-solid fa-spinner text-primary text-2xl mb-2 bg-indigo-50 dark:bg-slate-700/50 w-12 h-12 flex items-center justify-center rounded-xl mx-auto"></i>
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm text-center border border-slate-100 dark:border-slate-700/50 hover-lift">
+                    <i class="fa-solid fa-spinner text-primary text-2xl mb-2 bg-indigo-50 dark:bg-slate-700/50 w-12 h-12 flex items-center justify-center rounded-xl mx-auto transition-transform hover:rotate-180 duration-500"></i>
                     <div class="text-2xl font-bold" id="home-active-count">0</div>
                     <div class="text-xs text-slate-500">معاملات جارية</div>
                 </div>
             </div>
             
             <div class="space-y-3">
-                <button onclick="switchTab('newTx')" class="w-full bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm flex items-center justify-between font-bold active:scale-95 transition-transform border border-transparent hover:border-primary/20">
+                <button onclick="switchTab('newTx')" class="w-full bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm flex items-center justify-between font-bold hover-lift active:scale-95 transition-all border border-transparent hover:border-primary/20">
                     <div class="flex items-center gap-3"><i class="fa-solid fa-plus-circle text-primary text-xl"></i> بدء معاملة جديدة</div>
-                    <i class="fa-solid fa-chevron-left text-slate-400 text-sm"></i>
+                    <i class="fa-solid fa-chevron-left text-slate-400 text-sm bg-slate-50 dark:bg-slate-700 p-2 rounded-full"></i>
                 </button>
             </div>
         </div>
@@ -167,36 +184,36 @@
             </div>
 
             <div class="space-y-5 bg-white dark:bg-slate-800 p-5 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700/50">
-                <div>
+                <div class="animate-item" style="animation-delay: 0.1s">
                     <label class="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">اختيار المحامي</label>
                     <div class="flex gap-2">
                         <select id="new-tx-lawyer" class="input-field flex-1 font-bold" onchange="updateCompanyDropdown()"></select>
-                        <button onclick="openModal('addLawyerModal')" class="bg-primary text-white px-5 rounded-xl shadow-md"><i class="fa-solid fa-user-plus"></i></button>
+                        <button onclick="openModal('addLawyerModal')" class="bg-primary text-white px-5 rounded-xl shadow-md hover-lift"><i class="fa-solid fa-user-plus"></i></button>
                     </div>
                 </div>
-                <div>
+                <div class="animate-item" style="animation-delay: 0.2s">
                     <label class="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">اختيار الشركة</label>
                     <div class="flex gap-2">
                         <select id="new-tx-company" class="input-field flex-1 font-bold"></select>
-                        <button onclick="openModal('addCompanyModal')" class="bg-secondary text-white px-5 rounded-xl shadow-md"><i class="fa-solid fa-plus"></i></button>
+                        <button onclick="openModal('addCompanyModal')" class="bg-secondary text-white px-5 rounded-xl shadow-md hover-lift"><i class="fa-solid fa-plus"></i></button>
                     </div>
                 </div>
-                <div>
+                <div class="animate-item" style="animation-delay: 0.3s">
                     <label class="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">الدائرة المستهدفة</label>
                     <div class="grid grid-cols-2 gap-3">
-                        <label class="border-2 dark:border-slate-600 rounded-xl p-3 text-center cursor-pointer flex flex-col items-center gap-2 has-[:checked]:border-primary has-[:checked]:bg-primary/5 transition-all">
+                        <label class="border-2 dark:border-slate-600 rounded-xl p-3 text-center cursor-pointer flex flex-col items-center gap-2 has-[:checked]:border-primary has-[:checked]:bg-primary/5 transition-all hover-lift">
                             <input type="radio" name="new-tx-dept" value="دائرة مسجل الشركات" class="hidden" checked>
                             <i class="fa-solid fa-building-columns text-xl text-slate-400"></i>
                             <span class="text-xs font-bold">مسجل الشركات</span>
                         </label>
-                        <label class="border-2 dark:border-slate-600 rounded-xl p-3 text-center cursor-pointer flex flex-col items-center gap-2 has-[:checked]:border-primary has-[:checked]:bg-primary/5 transition-all">
+                        <label class="border-2 dark:border-slate-600 rounded-xl p-3 text-center cursor-pointer flex flex-col items-center gap-2 has-[:checked]:border-primary has-[:checked]:bg-primary/5 transition-all hover-lift">
                             <input type="radio" name="new-tx-dept" value="دائرة الاستيراد والتصدير" class="hidden">
                             <i class="fa-solid fa-ship text-xl text-slate-400"></i>
                             <span class="text-xs font-bold">الاستيراد والتصدير</span>
                         </label>
                     </div>
                 </div>
-                <div>
+                <div class="animate-item" style="animation-delay: 0.4s">
                     <label class="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">نوع المعاملة</label>
                     <input type="text" id="new-tx-type" placeholder="مثال: تجديد سجل تجاري" class="input-field mb-4 font-bold">
                     
@@ -207,14 +224,14 @@
                     </div>
                 </div>
 
-                <button onclick="createNewTransaction()" class="w-full card-gradient text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-indigo-300 dark:shadow-none mt-2 active:scale-95 transition-transform">إنشاء المعاملة</button>
+                <button onclick="createNewTransaction()" class="w-full card-gradient text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-indigo-300 dark:shadow-none mt-2 active:scale-95 hover-lift transition-all animate-item" style="animation-delay: 0.5s">إنشاء المعاملة</button>
             </div>
         </div>
 
         <!-- 3. ACTIVE TRANSACTIONS VIEW -->
         <div id="view-active" class="view-section p-4">
             <div class="mb-6 pt-2">
-                <h1 class="text-2xl font-extrabold flex items-center gap-2"><i class="fa-solid fa-spinner text-primary"></i> المعاملات الجارية</h1>
+                <h1 class="text-2xl font-extrabold flex items-center gap-2"><i class="fa-solid fa-spinner text-primary fa-spin-pulse"></i> المعاملات الجارية</h1>
                 <p class="text-sm text-slate-500">مراقبة وتحديث المسارات</p>
             </div>
             <div id="active-list" class="space-y-4"></div>
@@ -236,9 +253,10 @@
                 <p class="text-sm text-slate-500">الطباعة، الكشوفات واستلام الأتعاب</p>
             </div>
 
-            <div class="card-gradient rounded-3xl p-6 text-white mb-6 shadow-xl relative text-center">
-                <p class="text-white/80 text-sm mb-2">إجمالي الأتعاب المعلقة</p>
-                <div class="text-4xl font-extrabold mb-4"><span id="acc-total-dues">0</span> <span class="text-xl font-normal text-white/70">د.ع</span></div>
+            <div class="card-gradient rounded-3xl p-6 text-white mb-6 shadow-xl relative text-center hover-lift overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPgo8cmVjdCB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiPjwvcmVjdD4KPC9zdmc+')] opacity-50"></div>
+                <p class="text-white/80 text-sm mb-2 relative z-10">إجمالي الأتعاب المعلقة</p>
+                <div class="text-4xl font-extrabold mb-4 relative z-10"><span id="acc-total-dues">0</span> <span class="text-xl font-normal text-white/70">د.ع</span></div>
             </div>
 
             <div id="accounting-list" class="space-y-4"></div>
@@ -253,33 +271,42 @@
 
             <!-- TABS FOR ARCHIVE -->
             <div class="flex gap-2 p-1 bg-white dark:bg-slate-800 rounded-xl mb-6 shadow-sm border border-slate-100 dark:border-slate-700">
-                <button onclick="toggleArchiveTab('tx')" id="tab-arch-tx" class="flex-1 py-2 rounded-lg text-sm font-bold bg-primary text-white shadow">الأرشيف (المنجزة)</button>
-                <button onclick="toggleArchiveTab('vault')" id="tab-arch-vault" class="flex-1 py-2 rounded-lg text-sm font-bold text-slate-500 dark:text-slate-400">خزنة الشركات</button>
+                <button onclick="toggleArchiveTab('tx')" id="tab-arch-tx" class="flex-1 py-2 rounded-lg text-sm font-bold bg-primary text-white shadow transition-all">الأرشيف (المنجزة)</button>
+                <button onclick="toggleArchiveTab('vault')" id="tab-arch-vault" class="flex-1 py-2 rounded-lg text-sm font-bold text-slate-500 dark:text-slate-400 transition-all">خزنة الشركات</button>
             </div>
 
-            <div id="archive-tx-content" class="space-y-4">
+            <div id="archive-tx-content" class="space-y-4 animate-item">
                 <input type="text" id="archive-search" onkeyup="renderArchive()" placeholder="ابحث باسم الشركة أو المعاملة..." class="input-field mb-4 font-bold">
                 <div id="archive-list" class="space-y-4"></div>
             </div>
 
-            <div id="archive-vault-content" class="hidden space-y-4">
-                 <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm text-center border border-slate-100 dark:border-slate-700/50 mt-4">
-                    <i class="fa-regular fa-folder-open text-5xl text-slate-300 dark:text-slate-600 mb-4"></i>
-                    <h3 class="font-extrabold text-lg text-primary">خزنة المستندات الرقمية</h3>
-                    <p class="text-sm text-slate-500 mt-2 font-bold leading-relaxed">قريباً: مساحة مخصصة لكل شركة لرفع صور المستندات، الجوازات، والملفات بصيغة PDF والاحتفاظ بها سحابياً.</p>
-                 </div>
+            <!-- VAULT CONTENT ACTIVED -->
+            <div id="archive-vault-content" class="hidden space-y-4 animate-item">
+                <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700/50 mb-4">
+                    <label class="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300"><i class="fa-regular fa-building"></i> اختر الشركة لعرض أو رفع المستندات</label>
+                    <select id="vault-company-select" class="input-field font-bold mb-4" onchange="renderVault()"></select>
+                    
+                    <input type="file" id="vault-file-upload" accept="image/*" class="hidden" onchange="handleVaultUpload(event)">
+                    <button id="btn-vault-upload" onclick="document.getElementById('vault-file-upload').click()" class="w-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover-lift active:scale-95 border border-dashed border-slate-300 dark:border-slate-500 transition-colors hidden">
+                        <i class="fa-solid fa-cloud-arrow-up text-lg text-primary"></i> رفع صورة أو مستند جديد
+                    </button>
+                </div>
+
+                <div id="vault-gallery" class="grid grid-cols-2 gap-3">
+                    <!-- Images will render here -->
+                </div>
             </div>
         </div>
 
         <!-- 7. SETTINGS VIEW -->
         <div id="view-settings" class="view-section p-4">
             <div class="mb-6 pt-2">
-                <h1 class="text-2xl font-extrabold flex items-center gap-2"><i class="fa-solid fa-gear text-primary"></i> الإعدادات</h1>
+                <h1 class="text-2xl font-extrabold flex items-center gap-2"><i class="fa-solid fa-gear text-primary fa-spin" style="animation-duration: 3s;"></i> الإعدادات</h1>
                 <p class="text-sm text-slate-500">تخصيص التطبيق وقاعدة البيانات</p>
             </div>
 
             <!-- Profile Settings -->
-            <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl shadow-sm space-y-4 border border-slate-100 dark:border-slate-700/50 mb-6">
+            <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl shadow-sm space-y-4 border border-slate-100 dark:border-slate-700/50 mb-6 animate-item" style="animation-delay: 0.1s">
                 <h3 class="font-bold border-b pb-2 dark:border-slate-700 text-primary"><i class="fa-solid fa-file-signature"></i> بيانات طباعة المستندات (السندات والكشوفات)</h3>
                 <div>
                     <label class="block text-xs font-bold mb-2 text-slate-500">اسم المعقب / مكتب التخليص</label>
@@ -295,10 +322,10 @@
                     <input type="file" id="sig-upload" accept="image/png, image/jpeg" class="hidden" onchange="handleSignatureUpload(event)">
                     
                     <div class="flex items-center gap-3">
-                        <button onclick="document.getElementById('sig-upload').click()" class="flex-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform border border-slate-200 dark:border-slate-600">
+                        <button onclick="document.getElementById('sig-upload').click()" class="flex-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover-lift active:scale-95 transition-transform border border-slate-200 dark:border-slate-600">
                             <i class="fa-solid fa-signature"></i> رفع صورة توقيع
                         </button>
-                        <div id="sig-preview-container" class="hidden w-16 h-12 bg-slate-50 dark:bg-slate-900 border rounded-lg overflow-hidden relative">
+                        <div id="sig-preview-container" class="hidden w-16 h-12 bg-slate-50 dark:bg-slate-900 border rounded-lg overflow-hidden relative shadow-inner">
                             <img id="sig-preview" src="" class="w-full h-full object-contain">
                             <button onclick="removeSignature()" class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px]"><i class="fa-solid fa-xmark"></i></button>
                         </div>
@@ -307,18 +334,18 @@
             </div>
 
             <!-- Lawyer Management -->
-            <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700/50 mb-6">
+            <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700/50 mb-6 animate-item" style="animation-delay: 0.2s">
                 <h3 class="font-bold border-b pb-2 dark:border-slate-700 text-primary mb-3"><i class="fa-solid fa-users-slash"></i> حذف وإدارة المحامين</h3>
                 <div id="settings-lawyers-list" class="space-y-2 max-h-48 overflow-y-auto pr-2"></div>
             </div>
 
             <!-- Company Management -->
-            <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700/50 mb-6">
+            <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700/50 mb-6 animate-item" style="animation-delay: 0.3s">
                 <h3 class="font-bold border-b pb-2 dark:border-slate-700 text-secondary mb-3"><i class="fa-regular fa-building"></i> حذف وإدارة الشركات</h3>
                 <div id="settings-companies-list" class="space-y-2 max-h-48 overflow-y-auto pr-2"></div>
             </div>
             
-            <button onclick="reqClearData()" class="w-full bg-red-50 text-red-600 dark:bg-red-900/20 py-4 rounded-xl font-bold border border-red-200 dark:border-red-800 active:scale-95 transition-transform"><i class="fa-solid fa-trash-can"></i> مسح كافة البيانات من المتصفح</button>
+            <button onclick="reqClearData()" class="w-full bg-red-50 text-red-600 dark:bg-red-900/20 py-4 rounded-xl font-bold border border-red-200 dark:border-red-800 hover-lift active:scale-95 transition-transform animate-item" style="animation-delay: 0.4s"><i class="fa-solid fa-trash-can"></i> مسح كافة البيانات من المتصفح</button>
         </div>
 
     </div>
@@ -329,7 +356,7 @@
         <button onclick="switchTab('newTx')" class="nav-item flex flex-col items-center gap-1 pb-2" id="nav-newTx"><i class="fa-solid fa-circle-plus text-xl"></i><span class="text-[9px]">معاملة</span></button>
         <button onclick="switchTab('active')" class="nav-item flex flex-col items-center gap-1 pb-2 relative" id="nav-active">
             <i class="fa-solid fa-arrows-rotate text-xl"></i><span class="text-[9px]">جارية</span>
-            <span id="badge-active" class="absolute top-0 right-1 bg-primary text-white text-[9px] rounded-full w-4 h-4 flex items-center justify-center hidden">0</span>
+            <span id="badge-active" class="absolute top-0 right-1 bg-primary text-white text-[9px] rounded-full w-4 h-4 flex items-center justify-center hidden pulse-badge">0</span>
         </button>
         <button onclick="switchTab('stalled')" class="nav-item flex flex-col items-center gap-1 pb-2" id="nav-stalled"><i class="fa-solid fa-triangle-exclamation text-xl"></i><span class="text-[9px]">متلكئة</span></button>
         <button onclick="switchTab('accounting')" class="nav-item flex flex-col items-center gap-1 pb-2" id="nav-accounting"><i class="fa-solid fa-file-invoice-dollar text-xl"></i><span class="text-[9px]">تحاسب</span></button>
@@ -342,10 +369,10 @@
         <div class="bg-white dark:bg-slate-800 w-full rounded-t-3xl p-6 shadow-2xl transform transition-transform translate-y-full" id="addLawyerContent">
             <div class="flex justify-between items-center mb-6 border-b dark:border-slate-700 pb-3">
                 <h3 class="text-xl font-bold">إضافة محامي جديد</h3>
-                <button onclick="closeModal('addLawyerModal')" class="bg-slate-100 dark:bg-slate-700 w-8 h-8 rounded-full"><i class="fa-solid fa-xmark"></i></button>
+                <button onclick="closeModal('addLawyerModal')" class="bg-slate-100 dark:bg-slate-700 w-8 h-8 rounded-full hover:rotate-90 transition-transform"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <input type="text" id="in-lawyer-name" placeholder="الاسم الكامل" class="input-field mb-4 font-bold">
-            <button onclick="saveLawyer()" class="w-full bg-primary text-white py-3 rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-transform">إضافة وحفظ</button>
+            <button onclick="saveLawyer()" class="w-full bg-primary text-white py-3 rounded-xl font-bold text-lg shadow-lg active:scale-95 hover-lift transition-transform">إضافة وحفظ</button>
         </div>
     </div>
 
@@ -353,12 +380,12 @@
         <div class="bg-white dark:bg-slate-800 w-full rounded-t-3xl p-6 shadow-2xl transform transition-transform translate-y-full" id="addCompanyContent">
             <div class="flex justify-between items-center mb-6 border-b dark:border-slate-700 pb-3">
                 <h3 class="text-xl font-bold">إضافة شركة جديدة</h3>
-                <button onclick="closeModal('addCompanyModal')" class="bg-slate-100 dark:bg-slate-700 w-8 h-8 rounded-full"><i class="fa-solid fa-xmark"></i></button>
+                <button onclick="closeModal('addCompanyModal')" class="bg-slate-100 dark:bg-slate-700 w-8 h-8 rounded-full hover:rotate-90 transition-transform"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <input type="text" id="in-comp-name" placeholder="الاسم القانوني للشركة" class="input-field mb-4 font-bold">
             <label class="block text-xs font-bold mb-2 text-slate-500">اربط الشركة بمحاميها الخاص</label>
             <select id="in-comp-lawyer" class="input-field mb-6 font-bold"></select>
-            <button onclick="saveCompany()" class="w-full bg-secondary text-white py-3 rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-transform">إضافة وحفظ</button>
+            <button onclick="saveCompany()" class="w-full bg-secondary text-white py-3 rounded-xl font-bold text-lg shadow-lg active:scale-95 hover-lift transition-transform">إضافة وحفظ</button>
         </div>
     </div>
 
@@ -366,13 +393,13 @@
     <div id="txDetailsModal" class="fixed inset-0 z-50 hidden flex items-end justify-center bg-black/50 backdrop-blur-sm">
         <div class="glass-modal w-full h-[90vh] rounded-t-3xl p-6 shadow-2xl flex flex-col transform transition-transform translate-y-full" id="txDetailsContent">
             <div class="flex justify-between items-start mb-4">
-                <button onclick="closeModal('txDetailsModal')" class="bg-slate-200/50 dark:bg-slate-700/50 text-slate-800 dark:text-white w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md active:scale-90"><i class="fa-solid fa-chevron-down"></i></button>
+                <button onclick="closeModal('txDetailsModal')" class="bg-slate-200/50 dark:bg-slate-700/50 text-slate-800 dark:text-white w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md active:scale-90 hover:bg-slate-300 transition-colors"><i class="fa-solid fa-chevron-down"></i></button>
                 <div class="text-left" dir="ltr">
                     <div class="text-2xl font-extrabold text-primary" id="det-fee">0 د.ع</div>
                 </div>
             </div>
             
-            <div class="mb-4 bg-white/60 dark:bg-slate-800/60 p-4 rounded-2xl border border-white/40 shadow-sm">
+            <div class="mb-4 bg-white/60 dark:bg-slate-800/60 p-4 rounded-2xl border border-white/40 shadow-sm hover-lift">
                 <h2 class="text-xl font-extrabold mb-2 text-slate-800 dark:text-white" id="det-type">نوع المعاملة</h2>
                 <div class="space-y-1">
                     <p class="text-sm font-bold text-slate-600 dark:text-slate-300 flex items-center gap-2"><i class="fa-regular fa-building text-primary"></i> <span id="det-comp">الشركة</span></p>
@@ -390,23 +417,23 @@
             </div>
 
             <div class="grid grid-cols-2 gap-3 mt-auto pb-safe">
-                <button onclick="openModal('addStationModal')" class="card-gradient text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-95"><i class="fa-solid fa-plus"></i> إضافة محطة</button>
-                <button onclick="reqMarkTxCompleted()" class="bg-emerald-500 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/30 active:scale-95"><i class="fa-solid fa-check-double"></i> إنجاز وتخزين</button>
-                <button id="btn-toggle-stall" onclick="toggleStallTx()" class="bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400 py-3 rounded-xl font-bold flex items-center justify-center gap-2 col-span-2 border border-red-200 dark:border-red-800 active:scale-95"><i class="fa-solid fa-circle-exclamation"></i> إيقاف مؤقت (تلكؤ)</button>
-                <button onclick="reqDeleteTx()" class="text-slate-400 dark:text-slate-500 py-2 text-sm font-bold col-span-2 flex justify-center gap-1 active:text-red-500 transition-colors"><i class="fa-regular fa-trash-can"></i> حذف السجل نهائياً</button>
+                <button onclick="openModal('addStationModal')" class="card-gradient text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg hover-lift active:scale-95"><i class="fa-solid fa-plus"></i> إضافة محطة</button>
+                <button onclick="reqMarkTxCompleted()" class="bg-emerald-500 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/30 hover-lift active:scale-95"><i class="fa-solid fa-check-double"></i> إنجاز وتخزين</button>
+                <button id="btn-toggle-stall" onclick="toggleStallTx()" class="bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400 py-3 rounded-xl font-bold flex items-center justify-center gap-2 col-span-2 border border-red-200 dark:border-red-800 hover-lift active:scale-95 transition-colors"><i class="fa-solid fa-circle-exclamation"></i> إيقاف مؤقت (تلكؤ)</button>
+                <button onclick="reqDeleteTx()" class="text-slate-400 dark:text-slate-500 py-2 text-sm font-bold col-span-2 flex justify-center gap-1 hover:text-red-500 transition-colors"><i class="fa-regular fa-trash-can"></i> حذف السجل نهائياً</button>
             </div>
         </div>
     </div>
 
     <!-- Add Station -->
     <div id="addStationModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/50 backdrop-blur-sm">
-        <div class="bg-white dark:bg-slate-800 w-11/12 max-w-sm rounded-3xl p-6 shadow-2xl">
+        <div class="bg-white dark:bg-slate-800 w-11/12 max-w-sm rounded-3xl p-6 shadow-2xl modal-box">
             <h3 class="text-lg font-bold mb-4 text-center border-b pb-2 dark:border-slate-700">تحديث مسار المعاملة</h3>
             <input type="text" id="stat-name" placeholder="اسم القسم أو الغرفة" class="input-field mb-4 font-bold">
             <input type="text" id="stat-user" placeholder="اسم الموظف المستلم أو الملاحظة" class="input-field mb-6 text-sm">
             <div class="flex gap-2">
-                <button onclick="closeModal('addStationModal')" class="flex-1 bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200 py-3 rounded-xl font-bold">إلغاء</button>
-                <button onclick="saveStation()" class="flex-1 bg-primary text-white py-3 rounded-xl font-bold shadow-lg">حفظ المحطة</button>
+                <button onclick="closeModal('addStationModal')" class="flex-1 bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200 py-3 rounded-xl font-bold active:scale-95 transition-transform">إلغاء</button>
+                <button onclick="saveStation()" class="flex-1 bg-primary text-white py-3 rounded-xl font-bold shadow-lg active:scale-95 transition-transform">حفظ المحطة</button>
             </div>
         </div>
     </div>
@@ -480,7 +507,7 @@
 
     <script>
         // --- Data & Initialization ---
-        let db = { settings: { name: '', address: '', theme: 'light', signature: null }, lawyers: [], companies: [], transactions: [] };
+        let db = { settings: { name: '', address: '', theme: 'light', signature: null }, lawyers: [], companies: [], transactions: [], vault: [] };
         let currentTxId = null;
         let confirmAction = null; 
 
@@ -488,10 +515,15 @@
         const formatDate = (ts) => { let d = new Date(ts); return d.toLocaleDateString('ar-IQ', {month: 'short', day: 'numeric'}) + ' ' + d.toLocaleTimeString('ar-IQ', {hour: '2-digit', minute:'2-digit'}); };
 
         function init() {
-            const saved = localStorage.getItem('moaqib_db_v3'); // Updated version
-            if(saved) db = JSON.parse(saved);
+            const saved = localStorage.getItem('moaqib_db_v4'); 
+            if(saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    db = { ...db, ...parsed };
+                    if(!db.vault) db.vault = [];
+                } catch(e) { console.error("Error parsing db", e); }
+            }
             
-            if(!db.settings) db.settings = { name: '', address: '', theme: 'light', signature: null };
             if(db.settings.theme === 'dark') document.documentElement.classList.add('dark');
             
             // Populate settings
@@ -506,7 +538,16 @@
             renderAll();
         }
 
-        function saveData() { localStorage.setItem('moaqib_db_v3', JSON.stringify(db)); renderAll(); }
+        function saveData() { 
+            try {
+                localStorage.setItem('moaqib_db_v4', JSON.stringify(db)); 
+                renderAll(); 
+            } catch (error) {
+                if(error.name === 'QuotaExceededError') {
+                    customAlert('الذاكرة ممتلئة', 'مساحة التخزين المحلية ممتلئة. يرجى مسح بعض الصور القديمة من الخزنة لتوفير مساحة.', 'error');
+                }
+            }
+        }
 
         // --- Custom UI Modals ---
         function customAlert(title, message, type = 'info') {
@@ -537,19 +578,31 @@
 
         // --- Navigation ---
         function switchTab(tabId) {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.getElementById(`view-${tabId}`).classList.add('active');
+            document.querySelectorAll('.view-section').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Add a small delay for smoother transition
+            setTimeout(() => {
+                document.getElementById(`view-${tabId}`).classList.add('active');
+            }, 10);
+            
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             document.getElementById(`nav-${tabId}`).classList.add('active');
-            window.scrollTo(0, 0);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function toggleArchiveTab(type) {
-            document.getElementById('tab-arch-tx').className = type==='tx' ? 'flex-1 py-2 rounded-lg text-sm font-bold bg-primary text-white shadow' : 'flex-1 py-2 rounded-lg text-sm font-bold text-slate-500 dark:text-slate-400';
-            document.getElementById('tab-arch-vault').className = type==='vault' ? 'flex-1 py-2 rounded-lg text-sm font-bold bg-primary text-white shadow' : 'flex-1 py-2 rounded-lg text-sm font-bold text-slate-500 dark:text-slate-400';
+            document.getElementById('tab-arch-tx').className = type==='tx' ? 'flex-1 py-2 rounded-lg text-sm font-bold bg-primary text-white shadow transition-all' : 'flex-1 py-2 rounded-lg text-sm font-bold text-slate-500 dark:text-slate-400 transition-all';
+            document.getElementById('tab-arch-vault').className = type==='vault' ? 'flex-1 py-2 rounded-lg text-sm font-bold bg-primary text-white shadow transition-all' : 'flex-1 py-2 rounded-lg text-sm font-bold text-slate-500 dark:text-slate-400 transition-all';
             
             document.getElementById('archive-tx-content').style.display = type === 'tx' ? 'block' : 'none';
             document.getElementById('archive-vault-content').style.display = type === 'vault' ? 'block' : 'none';
+            
+            if(type === 'vault') {
+                updateVaultDropdown();
+                renderVault();
+            }
         }
 
         function toggleTheme() {
@@ -561,12 +614,20 @@
         function openModal(id) {
             const modal = document.getElementById(id);
             modal.style.display = 'flex';
-            setTimeout(() => modal.children[0].classList.remove('translate-y-full'), 10);
+            setTimeout(() => {
+                modal.classList.add('active');
+                if(modal.children[0].classList.contains('translate-y-full')) {
+                    modal.children[0].classList.remove('translate-y-full');
+                }
+            }, 10);
         }
 
         function closeModal(id) {
             const modal = document.getElementById(id);
-            modal.children[0].classList.add('translate-y-full');
+            if(modal.children[0].classList.contains('translate-y-full') === false) {
+                modal.children[0].classList.add('translate-y-full');
+            }
+            modal.classList.remove('active');
             setTimeout(() => modal.style.display = 'none', 300);
         }
 
@@ -601,11 +662,11 @@
         function checkThursdayAlert() {
             const now = new Date();
             if(now.getDay() === 4 && now.getHours() >= 18) {
-                const lastCheck = localStorage.getItem('thursday_checked_v3');
+                const lastCheck = localStorage.getItem('thursday_checked_v4');
                 const weekStr = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
                 if(lastCheck !== weekStr) {
                     document.getElementById('thursdayModal').style.display = 'flex';
-                    localStorage.setItem('thursday_checked_v3', weekStr);
+                    localStorage.setItem('thursday_checked_v4', weekStr);
                 }
             }
         }
@@ -643,9 +704,10 @@
         function reqDeleteCompany(id) {
             const hasTx = db.transactions.some(t => t.companyId === id);
             if(hasTx) return customAlert('تنبيه أمان', 'لا يمكن حذف الشركة لوجود معاملات لها. احذف معاملاتها أولاً.', 'error');
-            customConfirm('حذف الشركة', 'هل أنت متأكد من حذف هذه الشركة نهائياً؟', () => {
+            customConfirm('حذف الشركة', 'سيتم حذف الشركة ومستنداتها من الخزنة. هل أنت متأكد؟', () => {
                 db.companies = db.companies.filter(c => c.id !== id);
-                saveData(); customAlert('تم الحذف', 'تم حذف الشركة بنجاح.', 'success');
+                db.vault = db.vault.filter(v => v.companyId !== id); // clear vault for this company
+                saveData(); customAlert('تم الحذف', 'تم حذف الشركة ومستنداتها بنجاح.', 'success');
             });
         }
 
@@ -677,6 +739,7 @@
             document.getElementById('new-tx-lawyer').innerHTML = lOpts || '<option value="">- لا يوجد -</option>';
             document.getElementById('in-comp-lawyer').innerHTML = lOpts || '<option value="">- لا يوجد -</option>';
             updateCompanyDropdown();
+            updateVaultDropdown();
 
             const activeTxs = db.transactions.filter(t => t.status === 'active');
             const stalledTxs = db.transactions.filter(t => t.status === 'stalled');
@@ -692,20 +755,20 @@
             document.getElementById('badge-active').style.display = activeTxs.length > 0 ? 'flex' : 'none';
 
             // Settings Lists (Lawyers & Companies)
-            document.getElementById('settings-lawyers-list').innerHTML = db.lawyers.map(l => `
-                <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border dark:border-slate-700">
+            document.getElementById('settings-lawyers-list').innerHTML = db.lawyers.map((l, index) => `
+                <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border dark:border-slate-700 animate-item hover-lift" style="animation-delay: ${index * 0.05}s">
                     <span class="font-bold text-sm">${l.name}</span>
-                    <button onclick="reqDeleteLawyer(${l.id})" class="text-red-500 hover:bg-red-100 p-2 rounded-lg transition-colors"><i class="fa-solid fa-trash-can"></i></button>
+                    <button onclick="reqDeleteLawyer(${l.id})" class="text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 p-2 rounded-lg transition-colors"><i class="fa-solid fa-trash-can"></i></button>
                 </div>
             `).join('') || '<p class="text-xs text-slate-400 text-center py-2">لا يوجد محامين</p>';
 
-            document.getElementById('settings-companies-list').innerHTML = db.companies.map(c => `
-                <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border dark:border-slate-700">
+            document.getElementById('settings-companies-list').innerHTML = db.companies.map((c, index) => `
+                <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border dark:border-slate-700 animate-item hover-lift" style="animation-delay: ${index * 0.05}s">
                     <div>
                         <span class="font-bold text-sm block">${c.name}</span>
                         <span class="text-[10px] text-slate-500">محامي: ${db.lawyers.find(l=>l.id==c.lawyerId)?.name || 'غير معروف'}</span>
                     </div>
-                    <button onclick="reqDeleteCompany(${c.id})" class="text-red-500 hover:bg-red-100 p-2 rounded-lg transition-colors"><i class="fa-solid fa-trash-can"></i></button>
+                    <button onclick="reqDeleteCompany(${c.id})" class="text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 p-2 rounded-lg transition-colors"><i class="fa-solid fa-trash-can"></i></button>
                 </div>
             `).join('') || '<p class="text-xs text-slate-400 text-center py-2">لا توجد شركات</p>';
 
@@ -713,16 +776,20 @@
             renderTxList('stalled-list', stalledTxs, 'ممتاز، لا توجد معاملات متلكئة');
             renderArchive();
             renderAccounting();
+            
+            if(document.getElementById('archive-vault-content').style.display === 'block') {
+                renderVault();
+            }
         }
 
         function renderTxList(containerId, txs, emptyMsg) {
             const container = document.getElementById(containerId);
             if(txs.length === 0) {
-                container.innerHTML = `<div class="text-center py-12 opacity-50"><i class="fa-regular fa-folder-open text-5xl mb-4 text-slate-300"></i><p class="font-bold">${emptyMsg}</p></div>`;
+                container.innerHTML = `<div class="text-center py-12 opacity-50 animate-item"><i class="fa-regular fa-folder-open text-5xl mb-4 text-slate-300"></i><p class="font-bold">${emptyMsg}</p></div>`;
                 return;
             }
 
-            container.innerHTML = txs.sort((a,b)=> b.lastUpdate - a.lastUpdate).map(tx => {
+            container.innerHTML = txs.sort((a,b)=> b.lastUpdate - a.lastUpdate).map((tx, index) => {
                 const comp = db.companies.find(c => c.id === tx.companyId)?.name || 'غير معروف';
                 const lawyer = db.lawyers.find(l => l.id === tx.lawyerId)?.name || '';
                 
@@ -731,7 +798,7 @@
                 const iconStagnant = isStagnant ? `<i class="fa-solid fa-clock text-yellow-300 fa-beat absolute top-5 left-5"></i>` : '';
 
                 return `
-                <div onclick="openTxDetails(${tx.id})" class="${bgClass} p-5 rounded-2xl relative cursor-pointer active:scale-95 transition-transform overflow-hidden border border-white/10">
+                <div onclick="openTxDetails(${tx.id})" class="${bgClass} p-5 rounded-2xl relative cursor-pointer active:scale-95 hover-lift transition-all overflow-hidden border border-white/10 animate-item" style="animation-delay: ${index * 0.08}s">
                     <div class="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
                     ${iconStagnant}
                     <h3 class="text-lg font-black mb-1">${tx.type}</h3>
@@ -743,6 +810,112 @@
                 </div>`;
             }).join('');
         }
+
+        // --- Vault (الخزنة) Logic ---
+        function updateVaultDropdown() {
+            const select = document.getElementById('vault-company-select');
+            select.innerHTML = `<option value="">- اختر الشركة -</option>` + db.companies.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        }
+
+        function renderVault() {
+            const compId = document.getElementById('vault-company-select').value;
+            const btnUpload = document.getElementById('btn-vault-upload');
+            const gallery = document.getElementById('vault-gallery');
+
+            if(!compId) {
+                btnUpload.classList.add('hidden');
+                gallery.innerHTML = `<div class="col-span-2 text-center py-10 opacity-50"><i class="fa-solid fa-building-lock text-4xl mb-3 text-slate-300"></i><p class="font-bold text-sm">يرجى اختيار شركة لفتح خزينتها</p></div>`;
+                return;
+            }
+
+            btnUpload.classList.remove('hidden');
+            const companyDocs = db.vault.filter(v => v.companyId === parseInt(compId)).sort((a,b) => b.date - a.date);
+
+            if(companyDocs.length === 0) {
+                gallery.innerHTML = `<div class="col-span-2 text-center py-8 opacity-50"><i class="fa-regular fa-image text-3xl mb-2 text-slate-300"></i><p class="font-bold text-xs">لا توجد مستندات مرفوعة لهذه الشركة</p></div>`;
+                return;
+            }
+
+            gallery.innerHTML = companyDocs.map((doc, index) => `
+                <div class="relative bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-700 hover-lift animate-item group" style="animation-delay: ${index * 0.05}s">
+                    <div class="h-28 w-full bg-slate-100 dark:bg-slate-900 cursor-pointer" onclick="openLightbox('${doc.data}')">
+                        <img src="${doc.data}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-2 flex justify-between items-center bg-white dark:bg-slate-800">
+                        <span class="text-[9px] font-bold text-slate-500 truncate w-2/3">${formatDate(doc.date).split(' ')[0]}</span>
+                        <button onclick="reqDeleteVaultItem(${doc.id})" class="text-red-500 bg-red-50 dark:bg-red-900/30 w-6 h-6 rounded-md flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors"><i class="fa-solid fa-trash-can text-[10px]"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function handleVaultUpload(event) {
+            const compId = document.getElementById('vault-company-select').value;
+            const file = event.target.files[0];
+            if(!file || !compId) return;
+
+            // Compress image using canvas before saving to base64 to save local storage
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800; // max width
+                    const MAX_HEIGHT = 800;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                    } else {
+                        if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                    }
+                    
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Compress to JPEG with 0.7 quality
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.7); 
+                    
+                    db.vault.push({ id: Date.now(), companyId: parseInt(compId), data: dataUrl, date: Date.now() });
+                    saveData();
+                    document.getElementById('vault-file-upload').value = ''; // reset
+                    renderVault();
+                    customAlert('نجاح', 'تم رفع المستند وضغطه وحفظه في الخزنة بنجاح.', 'success');
+                }
+                img.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function reqDeleteVaultItem(id) {
+            customConfirm('حذف المستند', 'هل أنت متأكد من حذف هذه الصورة نهائياً من الخزنة؟', () => {
+                db.vault = db.vault.filter(v => v.id !== id);
+                saveData();
+                renderVault();
+            });
+        }
+
+        function openLightbox(src) {
+            document.getElementById('lightboxImage').src = src;
+            const modal = document.getElementById('lightboxModal');
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('opacity-100');
+                document.getElementById('lightboxImage').classList.remove('scale-95');
+                document.getElementById('lightboxImage').classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeLightbox() {
+            const modal = document.getElementById('lightboxModal');
+            document.getElementById('lightboxImage').classList.remove('scale-100');
+            document.getElementById('lightboxImage').classList.add('scale-95');
+            modal.classList.remove('opacity-100');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+
 
         // --- Transaction Processing ---
         function openTxDetails(id) {
@@ -757,24 +930,24 @@
 
             const badge = document.getElementById('det-status-badge');
             badge.innerText = tx.status === 'active' ? 'قيد العمل' : (tx.status === 'stalled' ? 'متلكئة' : 'منجزة');
-            badge.className = `text-xs px-3 py-1 rounded-full font-bold shadow-sm ${tx.status === 'active' ? 'bg-primary text-white' : (tx.status === 'stalled' ? 'bg-red-500 text-white' : 'bg-emerald-500 text-white')}`;
+            badge.className = `text-xs px-3 py-1 rounded-full font-bold shadow-sm ${tx.status === 'active' ? 'bg-primary text-white pulse-badge' : (tx.status === 'stalled' ? 'bg-red-500 text-white' : 'bg-emerald-500 text-white')}`;
             
             const btnStall = document.getElementById('btn-toggle-stall');
             if(tx.status === 'stalled') {
                 btnStall.innerHTML = `<i class="fa-solid fa-rotate-left"></i> تفعيل المعاملة (إلغاء التلكؤ)`;
-                btnStall.className = "bg-primary text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 col-span-2 shadow-lg";
+                btnStall.className = "bg-primary text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 col-span-2 shadow-lg hover-lift active:scale-95 transition-all";
             } else {
                 btnStall.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> إيقاف مؤقت (تلكؤ)`;
-                btnStall.className = "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400 py-3 rounded-xl font-bold flex items-center justify-center gap-2 col-span-2 border border-red-200 dark:border-red-800";
+                btnStall.className = "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400 py-3 rounded-xl font-bold flex items-center justify-center gap-2 col-span-2 border border-red-200 dark:border-red-800 hover-lift active:scale-95 transition-colors";
             }
 
             const statContainer = document.getElementById('det-stations');
             if(tx.stations.length === 0) { statContainer.innerHTML = `<p class="text-xs font-bold text-slate-400 text-center py-6">لم يتم تحديث المسار بعد</p>`; } 
             else {
                 statContainer.innerHTML = [...tx.stations].reverse().map((s, i) => `
-                    <div class="relative">
-                        <div class="absolute -right-[22px] top-1 w-3.5 h-3.5 ${i===0 ? 'bg-primary ring-4 ring-primary/20' : 'bg-slate-300 border-2 border-white dark:border-slate-800'} rounded-full"></div>
-                        <div class="${i===0 ? 'opacity-100 bg-white/40 dark:bg-slate-900/40 p-3 rounded-xl' : 'opacity-60'}">
+                    <div class="relative animate-item" style="animation-delay: ${i * 0.1}s">
+                        <div class="absolute -right-[22px] top-1 w-3.5 h-3.5 ${i===0 ? 'bg-primary ring-4 ring-primary/20 pulse-badge' : 'bg-slate-300 border-2 border-white dark:border-slate-800'} rounded-full"></div>
+                        <div class="${i===0 ? 'opacity-100 bg-white/40 dark:bg-slate-900/40 p-3 rounded-xl shadow-sm border border-white/50 dark:border-slate-700/50' : 'opacity-60'}">
                             <h5 class="font-extrabold text-sm text-primary mb-1">${s.name}</h5>
                             <p class="text-xs font-bold text-slate-700 dark:text-slate-300">${s.user}</p>
                             <p class="text-[10px] text-slate-400 mt-2 font-bold"><i class="fa-regular fa-clock"></i> ${formatDate(s.date)}</p>
@@ -827,8 +1000,8 @@
             
             if(q) compTxs = compTxs.filter(t => t.type.toLowerCase().includes(q) || (db.companies.find(c => c.id === t.companyId)?.name || '').toLowerCase().includes(q));
 
-            document.getElementById('archive-list').innerHTML = compTxs.map(tx => `
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border-r-4 border-emerald-500 shadow-sm flex justify-between items-center font-bold">
+            document.getElementById('archive-list').innerHTML = compTxs.map((tx, index) => `
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border-r-4 border-emerald-500 shadow-sm flex justify-between items-center font-bold hover-lift animate-item" style="animation-delay: ${index * 0.05}s">
                     <div><h4 class="text-sm text-slate-800 dark:text-white">${tx.type}</h4><p class="text-xs text-slate-500 mt-1">${db.companies.find(c => c.id === tx.companyId)?.name}</p></div>
                     <span class="text-[10px] bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded text-slate-500">${formatDate(tx.lastUpdate).split(' ')[0]}</span>
                 </div>`).join('') || `<p class="text-center font-bold text-slate-400 py-10">لا توجد نتائج</p>`;
@@ -842,26 +1015,26 @@
 
             document.getElementById('acc-total-dues').innerText = numFormat.format(activeTxs.reduce((a,b)=>a+b.fee,0));
 
-            document.getElementById('accounting-list').innerHTML = Object.keys(lawyerDues).map(lId => {
+            document.getElementById('accounting-list').innerHTML = Object.keys(lawyerDues).map((lId, index) => {
                 const lawyer = db.lawyers.find(l => l.id == lId);
                 const txs = lawyerDues[lId];
                 const sum = txs.reduce((a,b) => a+b.fee, 0);
                 
                 return `
-                <div class="bg-white dark:bg-slate-800 rounded-3xl p-5 shadow-sm border border-slate-100 dark:border-slate-700/50">
+                <div class="bg-white dark:bg-slate-800 rounded-3xl p-5 shadow-sm border border-slate-100 dark:border-slate-700/50 hover-lift animate-item" style="animation-delay: ${index * 0.1}s">
                     <div class="flex justify-between items-center border-b dark:border-slate-700 pb-3 mb-3">
                         <div><h3 class="font-extrabold text-lg text-primary">${lawyer?.name}</h3><p class="text-xs font-bold text-slate-500">${txs.length} معاملات</p></div>
                         <div class="text-xl font-extrabold" dir="ltr">${numFormat.format(sum)}</div>
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="triggerPDF(${lId}, 'receipt', ${sum})" class="flex-1 bg-slate-800 text-white dark:bg-slate-700 py-3 rounded-xl text-sm font-bold active:scale-95 transition-transform shadow-md"><i class="fa-solid fa-receipt"></i> طباعة إيصال</button>
-                        <button onclick="triggerPDF(${lId}, 'report', ${sum})" class="flex-1 bg-primary text-white py-3 rounded-xl text-sm font-bold active:scale-95 transition-transform shadow-md"><i class="fa-solid fa-file-pdf"></i> كشف تفصيلي</button>
+                        <button onclick="triggerPDF(${lId}, 'receipt', ${sum})" class="flex-1 bg-slate-800 text-white dark:bg-slate-700 py-3 rounded-xl text-sm font-bold active:scale-95 hover-lift transition-transform shadow-md"><i class="fa-solid fa-receipt"></i> طباعة إيصال</button>
+                        <button onclick="triggerPDF(${lId}, 'report', ${sum})" class="flex-1 bg-primary text-white py-3 rounded-xl text-sm font-bold active:scale-95 hover-lift transition-transform shadow-md"><i class="fa-solid fa-file-pdf"></i> كشف تفصيلي</button>
                     </div>
                 </div>`;
             }).join('');
         }
 
-        function triggerPDF(lawyerId, type, amount) {
+        async function triggerPDF(lawyerId, type, amount) {
             const lawyer = db.lawyers.find(l => l.id == lawyerId);
             const dateStr = new Date().toLocaleDateString('ar-IQ');
             const refNo = 'REF-' + Date.now().toString().slice(-6);
@@ -899,35 +1072,33 @@
             qrTarget.innerHTML = "";
             new QRCode(qrTarget, { text: `Ref: ${refNo}\nLawyer: ${lawyer.name}\nTotal: ${amount} IQD`, width: 100, height: 100, colorDark : "#0f172a", colorLight : "#ffffff" });
 
-            customAlert('تجهيز الملف', 'جاري إنشاء الملف الفخم، يرجى الانتظار...', 'info');
+            customAlert('تجهيز الملف', 'جاري إنشاء المستند الفخم، يرجى الانتظار...', 'info');
 
-            // CRITICAL PDF FIX FOR MOBILE: Render it temporarily in viewport but invisible
-            const wrapper = document.getElementById('pdf-export-wrapper');
-            wrapper.style.display = 'block';
+            // Wait a moment for QR code and images to render in the DOM
+            await new Promise(resolve => setTimeout(resolve, 800));
 
-            setTimeout(() => {
-                const element = document.getElementById('pdf-content');
-                const opt = {
-                    margin: 0, filename: `${type}_${lawyer.name}.pdf`,
-                    image: { type: 'jpeg', quality: 1 },
-                    html2canvas: { scale: 3, useCORS: true, letterRendering: true, logging: false },
-                    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-                };
-                
-                html2pdf().set(opt).from(element).save().then(() => {
-                    wrapper.style.display = 'none'; // Hide again
-                    closeUiAlert(); 
-                }).catch(err => {
-                    wrapper.style.display = 'none';
-                    closeUiAlert();
-                    customAlert('خطأ فني', 'حدث خطأ أثناء الطباعة.', 'error');
-                });
-            }, 800);
+            const element = document.getElementById('pdf-content');
+            const opt = {
+                margin: 0, 
+                filename: `${type}_${lawyer.name}.pdf`,
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: { scale: 2, useCORS: true, letterRendering: true, logging: false },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+            
+            html2pdf().set(opt).from(element).save().then(() => {
+                closeUiAlert(); 
+                customAlert('نجاح', 'تم تصدير وحفظ ملف الـ PDF بنجاح.', 'success');
+            }).catch(err => {
+                closeUiAlert();
+                customAlert('خطأ فني', 'حدث خطأ أثناء إعداد الطباعة.', 'error');
+            });
         }
 
         function reqClearData() {
-            customConfirm('تصفير قاعدة البيانات', 'هل أنت متأكد من مسح جميع البيانات؟ هذا الإجراء لا يمكن التراجع عنه.', () => {
-                localStorage.removeItem('moaqib_db_v3'); location.reload();
+            customConfirm('تصفير قاعدة البيانات', 'هل أنت متأكد من مسح جميع البيانات؟ هذا الإجراء لا يمكن التراجع عنه وسيحذف المعاملات، الشركات، ومستندات الخزنة.', () => {
+                localStorage.removeItem('moaqib_db_v4'); 
+                location.reload();
             });
         }
 
