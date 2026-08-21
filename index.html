@@ -51,11 +51,11 @@
         
         /* Layout Fix: Increased padding-bottom so nothing hides behind navbar */
         .view-section { display: none; padding-bottom: 120px; }
-        .view-section.active { display: block; animation: fadeInView 0.4s ease forwards; }
+        .view-section.active { display: block; animation: fadeInView 0.3s ease forwards; }
         
         /* Life/Animations */
-        @keyframes fadeInView { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInView { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes pulse-soft { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); } 70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(79, 70, 229, 0); } 100% { transform: scale(1); } }
         
         .animate-item { opacity: 0; animation: fadeInUp 0.4s ease forwards; }
@@ -69,10 +69,10 @@
         .modal-box { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); transform: scale(0.9); }
         .modal-overlay.active .modal-box { transform: scale(1); }
 
-        /* PDF Container - FIX FOR MOBILE (Moved completely off-screen but visible to the engine) */
+        /* PDF Container - SAFE FIX FOR MOBILE */
         #pdf-export-wrapper {
-            position: absolute; top: -9999px; left: -9999px; width: 800px;
-            visibility: visible; opacity: 1; z-index: -9999;
+            position: fixed; top: 0; right: 0; width: 800px;
+            z-index: -9999; opacity: 0.001; pointer-events: none; display: block;
         }
     </style>
 </head>
@@ -117,7 +117,7 @@
 
     <!-- Image Lightbox Modal for Vault -->
     <div id="lightboxModal" class="fixed inset-0 z-[110] hidden items-center justify-center bg-black/90 backdrop-blur-md transition-opacity">
-        <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white text-3xl bg-black/50 w-12 h-12 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"><i class="fa-solid fa-xmark"></i></button>
+        <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white text-3xl bg-black/50 w-12 h-12 rounded-full flex items-center justify-center active:scale-90 transition-all"><i class="fa-solid fa-xmark"></i></button>
         <img id="lightboxImage" src="" class="max-w-[95%] max-h-[90vh] object-contain rounded-xl shadow-2xl transform transition-transform duration-300 scale-95">
     </div>
 
@@ -515,12 +515,22 @@
         const formatDate = (ts) => { let d = new Date(ts); return d.toLocaleDateString('ar-IQ', {month: 'short', day: 'numeric'}) + ' ' + d.toLocaleTimeString('ar-IQ', {hour: '2-digit', minute:'2-digit'}); };
 
         function init() {
-            const saved = localStorage.getItem('moaqib_db_v4'); 
+            // Data Migration Logic (CRITICAL FIX)
+            let saved = localStorage.getItem('moaqib_db_v4'); 
+            
+            if(!saved) {
+                const oldDataV3 = localStorage.getItem('moaqib_db_v3');
+                if(oldDataV3) {
+                    saved = oldDataV3;
+                    localStorage.setItem('moaqib_db_v4', oldDataV3); // Migrate safely
+                }
+            }
+
             if(saved) {
                 try {
                     const parsed = JSON.parse(saved);
                     db = { ...db, ...parsed };
-                    if(!db.vault) db.vault = [];
+                    if(!db.vault) db.vault = []; // Ensure vault array exists for older data
                 } catch(e) { console.error("Error parsing db", e); }
             }
             
@@ -1098,6 +1108,7 @@
         function reqClearData() {
             customConfirm('تصفير قاعدة البيانات', 'هل أنت متأكد من مسح جميع البيانات؟ هذا الإجراء لا يمكن التراجع عنه وسيحذف المعاملات، الشركات، ومستندات الخزنة.', () => {
                 localStorage.removeItem('moaqib_db_v4'); 
+                localStorage.removeItem('moaqib_db_v3'); // Clear old data too
                 location.reload();
             });
         }
