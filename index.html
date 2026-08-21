@@ -1739,12 +1739,11 @@
 
         function triggerPDF(lawyerId, type, amount) {
     try {
-        // 1. حماية الكود ضد خطأ (المحامي المحذوف) من البيانات القديمة
         const lawyer = db.lawyers.find(l => l.id == lawyerId) || { name: 'عميل غير معروف' };
         const dateStr = new Date().toLocaleDateString('ar-IQ'); 
         const refNo = 'REF-' + Date.now().toString().slice(-6);
         
-        // 2. تعبئة البيانات
+        // تعبئة البيانات الأساسية
         document.getElementById('pdf-title').innerText = type === 'receipt' ? 'سند استلام مالي' : 'كشف حساب معاملات';
         document.getElementById('pdf-date').innerText = dateStr; 
         document.getElementById('pdf-ref').innerText = refNo;
@@ -1755,12 +1754,16 @@
         document.getElementById('pdf-doc-type').innerText = type === 'receipt' ? 'تصفية أتعاب / قبض' : 'تقرير معاملات مفصل';
         document.getElementById('pdf-amount').innerText = numFormat.format(amount) + ' د.ع';
 
-        // التوقيع
+        // التوقيع الإلكتروني
         const sigImg = document.getElementById('pdf-signature-img');
-        if(db.settings.signature) { sigImg.src = db.settings.signature; sigImg.style.display = 'block'; } 
-        else { sigImg.style.display = 'none'; }
+        if(db.settings.signature) { 
+            sigImg.src = db.settings.signature; 
+            sigImg.style.display = 'block'; 
+        } else { 
+            sigImg.style.display = 'none'; 
+        }
 
-        // قائمة المعاملات للكشوفات
+        // تفاصيل المعاملات في الكشوفات
         const listContainer = document.getElementById('pdf-tx-list-container');
         if(type === 'report') {
             const txs = db.transactions.filter(t => t.lawyerId == lawyerId);
@@ -1771,21 +1774,14 @@
                 </div>
             `).join('');
             listContainer.style.display = 'block';
-        } else { listContainer.style.display = 'none'; }
-
-        // تأمين مكتبة الباركود 
-        document.getElementById("qr-target").innerHTML = "";
-        if (typeof QRCode !== 'undefined') {
-            new QRCode(document.getElementById("qr-target"), { 
-                text: `Ref: ${refNo}\nClient: ${lawyer.name}\nTotal: ${amount} IQD`, 
-                width: 100, height: 100, colorDark : "#0f172a", colorLight : "#ffffff" 
-            });
+        } else { 
+            listContainer.style.display = 'none'; 
         }
 
-        // إذا وصل الكود إلى هنا دون أخطاء، ستظهر رسالة التجهيز
+        // إشعار البدء
         customAlert('جاري التجهيز', 'يتم الآن تصدير المستند الاحترافي، يرجى الانتظار...', 'info');
         
-        // سحب القالب خارج الشاشة (حل جذري للهواتف)
+        // إخراج القالب لمعالجة الصورة
         const wrapper = document.getElementById('pdf-export-wrapper');
         wrapper.style.opacity = '1';
         wrapper.style.top = '-10000px'; 
@@ -1799,7 +1795,7 @@
             jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } 
         };
 
-        // التصدير المباشر والأكثر استقراراً
+        // التصدير السريع والمضمون
         html2pdf().set(opt).from(document.getElementById('pdf-content')).save().then(() => {
             wrapper.style.opacity = '0.01';
             wrapper.style.top = '0';
@@ -1810,15 +1806,13 @@
             wrapper.style.opacity = '0.01';
             wrapper.style.top = '0';
             closeUiAlert();
-            alert('حدث خطأ أثناء رسم الـ PDF: ' + err);
+            alert('خطأ في التصدير: ' + err.message);
         });
 
     } catch (error) {
-        // هذا السطر سيكشف لنا فوراً أين الخلل إذا حدث!
-        alert('تم اصطياد خطأ صامت: ' + error.message);
+        alert('حدث خطأ في النظام: ' + error.message);
     }
 }
-
 
 
         // Initialize App
