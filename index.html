@@ -49,8 +49,8 @@
         .dark .input-field { background: #1e293b; border-color: #334155; color: #f8fafc; }
         .dark .input-field:focus { border-color: #818cf8; box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15); }
         
-        /* Layout Fix: Increased padding-bottom so nothing hides behind navbar */
-        .view-section { display: none; padding-bottom: 120px; }
+        /* Layout Fix: Increased padding-bottom to ENSURE nothing hides behind navbar */
+        .view-section { display: none; padding-bottom: 160px !important; }
         .view-section.active { display: block; animation: fadeInView 0.3s ease forwards; }
         
         /* Life/Animations */
@@ -71,12 +71,34 @@
 
         /* PDF Container - SAFE FIX FOR MOBILE */
         #pdf-export-wrapper {
-            position: fixed; top: 0; right: 0; width: 800px;
-            z-index: -9999; opacity: 0.001; pointer-events: none; display: block;
+            position: fixed; top: 0; right: 0; width: 800px; height: 1000px;
+            z-index: -9999; opacity: 0.01; pointer-events: none; overflow: hidden;
         }
+
+        /* Custom Select Option Styling */
+        .custom-option {
+            padding: 1rem; border-radius: 0.75rem; transition: all 0.2s; cursor: pointer;
+            border: 1px solid transparent; font-weight: 700;
+        }
+        .custom-option:active { transform: scale(0.98); }
+        .custom-option.selected { background-color: rgba(79, 70, 229, 0.1); border-color: #4f46e5; color: #4f46e5; }
+        .dark .custom-option.selected { background-color: rgba(129, 140, 248, 0.1); border-color: #818cf8; color: #818cf8; }
     </style>
 </head>
 <body class="app-bg text-slate-800 dark:text-slate-100 transition-colors duration-300">
+
+    <!-- Custom Select Modal (The Elegant Alternative to OS Dropdowns) -->
+    <div id="customSelectModal" class="fixed inset-0 z-[120] hidden flex items-end justify-center bg-black/60 backdrop-blur-sm transition-opacity">
+        <div class="bg-white dark:bg-slate-800 w-full rounded-t-3xl p-6 shadow-2xl transform transition-transform translate-y-full flex flex-col max-h-[75vh]" id="customSelectContent">
+            <div class="flex justify-between items-center mb-4 border-b dark:border-slate-700 pb-3">
+                <h3 id="customSelectTitle" class="text-xl font-extrabold text-primary">اختر</h3>
+                <button onclick="closeCustomSelect()" class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 w-8 h-8 rounded-full flex items-center justify-center hover:rotate-90 transition-transform active:scale-90"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="customSelectList" class="overflow-y-auto flex-1 space-y-2 pb-safe pr-2">
+                <!-- Options injected via JS -->
+            </div>
+        </div>
+    </div>
 
     <!-- Custom Elegant Alert -->
     <div id="uiAlert" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm modal-overlay">
@@ -187,14 +209,23 @@
                 <div class="animate-item" style="animation-delay: 0.1s">
                     <label class="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">اختيار المحامي</label>
                     <div class="flex gap-2">
-                        <select id="new-tx-lawyer" class="input-field flex-1 font-bold" onchange="updateCompanyDropdown()"></select>
+                        <!-- Hidden native select, visible custom button -->
+                        <select id="new-tx-lawyer" class="hidden" onchange="updateCompanyDropdown()"></select>
+                        <button id="btn-new-tx-lawyer" onclick="openCustomSelect('new-tx-lawyer', 'اختيار المحامي')" class="input-field flex-1 font-bold text-right flex justify-between items-center active:scale-[0.98] transition-transform">
+                            <span id="text-new-tx-lawyer" class="text-slate-400">- اختر المحامي -</span>
+                            <i class="fa-solid fa-chevron-down text-sm text-slate-400"></i>
+                        </button>
                         <button onclick="openModal('addLawyerModal')" class="bg-primary text-white px-5 rounded-xl shadow-md hover-lift"><i class="fa-solid fa-user-plus"></i></button>
                     </div>
                 </div>
                 <div class="animate-item" style="animation-delay: 0.2s">
                     <label class="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">اختيار الشركة</label>
                     <div class="flex gap-2">
-                        <select id="new-tx-company" class="input-field flex-1 font-bold"></select>
+                        <select id="new-tx-company" class="hidden"></select>
+                        <button id="btn-new-tx-company" onclick="openCustomSelect('new-tx-company', 'اختيار الشركة')" class="input-field flex-1 font-bold text-right flex justify-between items-center active:scale-[0.98] transition-transform">
+                            <span id="text-new-tx-company" class="text-slate-400">- اختر المحامي أولاً -</span>
+                            <i class="fa-solid fa-chevron-down text-sm text-slate-400"></i>
+                        </button>
                         <button onclick="openModal('addCompanyModal')" class="bg-secondary text-white px-5 rounded-xl shadow-md hover-lift"><i class="fa-solid fa-plus"></i></button>
                     </div>
                 </div>
@@ -284,7 +315,11 @@
             <div id="archive-vault-content" class="hidden space-y-4 animate-item">
                 <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700/50 mb-4">
                     <label class="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300"><i class="fa-regular fa-building"></i> اختر الشركة لعرض أو رفع المستندات</label>
-                    <select id="vault-company-select" class="input-field font-bold mb-4" onchange="renderVault()"></select>
+                    <select id="vault-company-select" class="hidden" onchange="renderVault()"></select>
+                    <button id="btn-vault-company-select" onclick="openCustomSelect('vault-company-select', 'اختر الشركة')" class="input-field font-bold mb-4 text-right flex justify-between items-center active:scale-[0.98] transition-transform">
+                        <span id="text-vault-company-select" class="text-slate-400">- اختر الشركة -</span>
+                        <i class="fa-solid fa-chevron-down text-sm text-slate-400"></i>
+                    </button>
                     
                     <input type="file" id="vault-file-upload" accept="image/*" class="hidden" onchange="handleVaultUpload(event)">
                     <button id="btn-vault-upload" onclick="document.getElementById('vault-file-upload').click()" class="w-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover-lift active:scale-95 border border-dashed border-slate-300 dark:border-slate-500 transition-colors hidden">
@@ -384,7 +419,12 @@
             </div>
             <input type="text" id="in-comp-name" placeholder="الاسم القانوني للشركة" class="input-field mb-4 font-bold">
             <label class="block text-xs font-bold mb-2 text-slate-500">اربط الشركة بمحاميها الخاص</label>
-            <select id="in-comp-lawyer" class="input-field mb-6 font-bold"></select>
+            <!-- Hidden native select for company-lawyer -->
+            <select id="in-comp-lawyer" class="hidden"></select>
+            <button id="btn-in-comp-lawyer" onclick="openCustomSelect('in-comp-lawyer', 'اختر المحامي')" class="input-field mb-6 font-bold text-right flex justify-between items-center active:scale-[0.98] transition-transform">
+                <span id="text-in-comp-lawyer" class="text-slate-400">- اختر المحامي -</span>
+                <i class="fa-solid fa-chevron-down text-sm text-slate-400"></i>
+            </button>
             <button onclick="saveCompany()" class="w-full bg-secondary text-white py-3 rounded-xl font-bold text-lg shadow-lg active:scale-95 hover-lift transition-transform">إضافة وحفظ</button>
         </div>
     </div>
@@ -399,12 +439,14 @@
                 </div>
             </div>
             
-            <div class="mb-4 bg-white/60 dark:bg-slate-800/60 p-4 rounded-2xl border border-white/40 shadow-sm hover-lift">
-                <h2 class="text-xl font-extrabold mb-2 text-slate-800 dark:text-white" id="det-type">نوع المعاملة</h2>
-                <div class="space-y-1">
-                    <p class="text-sm font-bold text-slate-600 dark:text-slate-300 flex items-center gap-2"><i class="fa-regular fa-building text-primary"></i> <span id="det-comp">الشركة</span></p>
-                    <p class="text-sm font-bold text-slate-600 dark:text-slate-300 flex items-center gap-2"><i class="fa-solid fa-scale-balanced text-primary"></i> <span id="det-lawyer">المحامي</span></p>
-                    <p class="text-sm font-bold text-slate-600 dark:text-slate-300 flex items-center gap-2"><i class="fa-solid fa-building-columns text-primary"></i> <span id="det-dept">الدائرة</span></p>
+            <!-- UPDATE: Purple Gradient Card for Details as requested -->
+            <div class="mb-4 card-gradient text-white p-5 rounded-2xl shadow-xl shadow-indigo-200 dark:shadow-none hover-lift relative overflow-hidden border border-white/20">
+                <div class="absolute -left-10 -bottom-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                <h2 class="text-xl font-extrabold mb-3 relative z-10" id="det-type">نوع المعاملة</h2>
+                <div class="space-y-2 relative z-10">
+                    <p class="text-sm font-bold text-white/90 flex items-center gap-2"><i class="fa-regular fa-building opacity-75"></i> <span id="det-comp">الشركة</span></p>
+                    <p class="text-sm font-bold text-white/90 flex items-center gap-2"><i class="fa-solid fa-scale-balanced opacity-75"></i> <span id="det-lawyer">المحامي</span></p>
+                    <p class="text-sm font-bold text-white/90 flex items-center gap-2"><i class="fa-solid fa-building-columns opacity-75"></i> <span id="det-dept">الدائرة</span></p>
                 </div>
             </div>
 
@@ -515,22 +557,18 @@
         const formatDate = (ts) => { let d = new Date(ts); return d.toLocaleDateString('ar-IQ', {month: 'short', day: 'numeric'}) + ' ' + d.toLocaleTimeString('ar-IQ', {hour: '2-digit', minute:'2-digit'}); };
 
         function init() {
-            // Data Migration Logic (CRITICAL FIX)
+            // Data Migration Logic
             let saved = localStorage.getItem('moaqib_db_v4'); 
-            
             if(!saved) {
                 const oldDataV3 = localStorage.getItem('moaqib_db_v3');
-                if(oldDataV3) {
-                    saved = oldDataV3;
-                    localStorage.setItem('moaqib_db_v4', oldDataV3); // Migrate safely
-                }
+                if(oldDataV3) { saved = oldDataV3; localStorage.setItem('moaqib_db_v4', oldDataV3); }
             }
 
             if(saved) {
                 try {
                     const parsed = JSON.parse(saved);
                     db = { ...db, ...parsed };
-                    if(!db.vault) db.vault = []; // Ensure vault array exists for older data
+                    if(!db.vault) db.vault = []; 
                 } catch(e) { console.error("Error parsing db", e); }
             }
             
@@ -559,7 +597,7 @@
             }
         }
 
-        // --- Custom UI Modals ---
+        // --- Custom UI Modals (Alert, Confirm, Custom Select) ---
         function customAlert(title, message, type = 'info') {
             document.getElementById('uiAlertTitle').innerText = title;
             document.getElementById('uiAlertMsg').innerText = message;
@@ -586,16 +624,68 @@
             closeUiConfirm();
         });
 
+        /* --- CUSTOM SELECT SYSTEM (Replaces Native Dropdowns) --- */
+        function openCustomSelect(selectId, title) {
+            const selectEl = document.getElementById(selectId);
+            if(!selectEl) return;
+
+            document.getElementById('customSelectTitle').innerText = title;
+            const listContainer = document.getElementById('customSelectList');
+            listContainer.innerHTML = '';
+
+            if(selectEl.options.length === 0 || (selectEl.options.length === 1 && selectEl.options[0].value === "")) {
+                listContainer.innerHTML = `<div class="text-center p-4 text-slate-400 font-bold text-sm">القائمة فارغة</div>`;
+            } else {
+                Array.from(selectEl.options).forEach((opt, index) => {
+                    if(opt.value === "") return; // Skip empty default options
+                    const isSelected = selectEl.value === opt.value;
+                    const div = document.createElement('div');
+                    div.className = `custom-option ${isSelected ? 'selected' : 'text-slate-700 dark:text-slate-300'}`;
+                    div.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <span>${opt.text}</span>
+                            ${isSelected ? '<i class="fa-solid fa-check"></i>' : ''}
+                        </div>
+                    `;
+                    div.onclick = () => {
+                        selectEl.value = opt.value;
+                        // Trigger change event manually
+                        const event = new Event('change');
+                        selectEl.dispatchEvent(event);
+                        updateCustomSelectText(selectId);
+                        closeCustomSelect();
+                    };
+                    listContainer.appendChild(div);
+                });
+            }
+
+            openModal('customSelectModal');
+        }
+
+        function closeCustomSelect() { closeModal('customSelectModal'); }
+
+        function updateCustomSelectText(selectId, defaultText = '- اختر -') {
+            const selectEl = document.getElementById(selectId);
+            const textSpan = document.getElementById(`text-${selectId}`);
+            if(selectEl && textSpan) {
+                const selected = selectEl.options[selectEl.selectedIndex];
+                if(selected && selected.value) {
+                    textSpan.innerText = selected.text;
+                    textSpan.classList.remove('text-slate-400');
+                    textSpan.classList.add('text-slate-800', 'dark:text-white');
+                } else {
+                    textSpan.innerText = defaultText;
+                    textSpan.classList.add('text-slate-400');
+                    textSpan.classList.remove('text-slate-800', 'dark:text-white');
+                }
+            }
+        }
+
+
         // --- Navigation ---
         function switchTab(tabId) {
-            document.querySelectorAll('.view-section').forEach(el => {
-                el.classList.remove('active');
-            });
-            
-            // Add a small delay for smoother transition
-            setTimeout(() => {
-                document.getElementById(`view-${tabId}`).classList.add('active');
-            }, 10);
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            setTimeout(() => document.getElementById(`view-${tabId}`).classList.add('active'), 10);
             
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             document.getElementById(`nav-${tabId}`).classList.add('active');
@@ -626,16 +716,19 @@
             modal.style.display = 'flex';
             setTimeout(() => {
                 modal.classList.add('active');
-                if(modal.children[0].classList.contains('translate-y-full')) {
-                    modal.children[0].classList.remove('translate-y-full');
+                // Ensure bottom sheets slide up properly
+                const content = modal.children[0];
+                if(content && content.classList.contains('translate-y-full')) {
+                    content.classList.remove('translate-y-full');
                 }
             }, 10);
         }
 
         function closeModal(id) {
             const modal = document.getElementById(id);
-            if(modal.children[0].classList.contains('translate-y-full') === false) {
-                modal.children[0].classList.add('translate-y-full');
+            const content = modal.children[0];
+            if(content && content.classList.contains('translate-y-full') === false) {
+                content.classList.add('translate-y-full');
             }
             modal.classList.remove('active');
             setTimeout(() => modal.style.display = 'none', 300);
@@ -704,10 +797,11 @@
         function saveCompany() {
             const name = document.getElementById('in-comp-name').value;
             const lawyerId = document.getElementById('in-comp-lawyer').value;
-            if(!name || !lawyerId) return customAlert('نقص البيانات', 'يرجى إدخال اسم الشركة واختيار محامٍ.', 'error');
+            if(!name || !lawyerId) return customAlert('نقص البيانات', 'يرجى إدخال اسم الشركة واختيار محامٍ من القائمة.', 'error');
             db.companies.push({ id: Date.now(), name, lawyerId: parseInt(lawyerId) });
             closeModal('addCompanyModal');
             document.getElementById('in-comp-name').value = '';
+            document.getElementById('in-comp-lawyer').value = ''; // reset
             saveData(); customAlert('نجاح', 'تمت إضافة الشركة بنجاح.', 'success');
         }
 
@@ -716,16 +810,25 @@
             if(hasTx) return customAlert('تنبيه أمان', 'لا يمكن حذف الشركة لوجود معاملات لها. احذف معاملاتها أولاً.', 'error');
             customConfirm('حذف الشركة', 'سيتم حذف الشركة ومستنداتها من الخزنة. هل أنت متأكد؟', () => {
                 db.companies = db.companies.filter(c => c.id !== id);
-                db.vault = db.vault.filter(v => v.companyId !== id); // clear vault for this company
+                db.vault = db.vault.filter(v => v.companyId !== id);
                 saveData(); customAlert('تم الحذف', 'تم حذف الشركة ومستنداتها بنجاح.', 'success');
             });
         }
 
         function updateCompanyDropdown() {
             const lIdStr = document.getElementById('new-tx-lawyer').value;
-            if(!lIdStr) { document.getElementById('new-tx-company').innerHTML = '<option value="">- أختر محامي أولاً -</option>'; return; }
-            const comps = db.companies.filter(c => c.lawyerId === parseInt(lIdStr));
-            document.getElementById('new-tx-company').innerHTML = comps.map(c => `<option value="${c.id}">${c.name}</option>`).join('') || '<option value="">- أضف شركة لهذا المحامي -</option>';
+            const compSelect = document.getElementById('new-tx-company');
+            
+            if(!lIdStr) { 
+                compSelect.innerHTML = '<option value="">- أختر محامي أولاً -</option>'; 
+            } else {
+                const comps = db.companies.filter(c => c.lawyerId === parseInt(lIdStr));
+                compSelect.innerHTML = '<option value="">- اختر الشركة -</option>' + comps.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            }
+            
+            // Reset company selection when lawyer changes
+            compSelect.value = "";
+            updateCustomSelectText('new-tx-company', '- اختر الشركة -');
         }
 
         function createNewTransaction() {
@@ -739,15 +842,37 @@
 
             db.transactions.push({ id: Date.now(), companyId: parseInt(compId), lawyerId: parseInt(lawyerId), type, dept, fee: parseInt(fee), status: 'active', stations: [], lastUpdate: Date.now() });
 
-            document.getElementById('new-tx-type').value = ''; document.getElementById('new-tx-fee').value = '';
-            saveData(); switchTab('active');
+            // Reset Form
+            document.getElementById('new-tx-type').value = ''; 
+            document.getElementById('new-tx-fee').value = '';
+            document.getElementById('new-tx-company').value = '';
+            document.getElementById('new-tx-lawyer').value = '';
+            
+            saveData(); 
+            switchTab('active');
         }
 
         // --- Rendering ---
         function renderAll() {
-            const lOpts = db.lawyers.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
-            document.getElementById('new-tx-lawyer').innerHTML = lOpts || '<option value="">- لا يوجد -</option>';
-            document.getElementById('in-comp-lawyer').innerHTML = lOpts || '<option value="">- لا يوجد -</option>';
+            // Update hidden selects for lawyers
+            const lOpts = '<option value="">- اختر المحامي -</option>' + db.lawyers.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
+            
+            const newTxLawyer = document.getElementById('new-tx-lawyer');
+            const inCompLawyer = document.getElementById('in-comp-lawyer');
+            
+            // Retain values if possible
+            const prevLawyerTx = newTxLawyer.value;
+            const prevLawyerComp = inCompLawyer.value;
+            
+            newTxLawyer.innerHTML = lOpts;
+            inCompLawyer.innerHTML = lOpts;
+            
+            newTxLawyer.value = prevLawyerTx;
+            inCompLawyer.value = prevLawyerComp;
+            
+            updateCustomSelectText('new-tx-lawyer', '- اختر المحامي -');
+            updateCustomSelectText('in-comp-lawyer', '- اختر المحامي -');
+
             updateCompanyDropdown();
             updateVaultDropdown();
 
@@ -824,7 +949,10 @@
         // --- Vault (الخزنة) Logic ---
         function updateVaultDropdown() {
             const select = document.getElementById('vault-company-select');
+            const prevVal = select.value;
             select.innerHTML = `<option value="">- اختر الشركة -</option>` + db.companies.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            select.value = prevVal;
+            updateCustomSelectText('vault-company-select', '- اختر الشركة -');
         }
 
         function renderVault() {
@@ -864,13 +992,12 @@
             const file = event.target.files[0];
             if(!file || !compId) return;
 
-            // Compress image using canvas before saving to base64 to save local storage
             const reader = new FileReader();
             reader.onload = function(e) {
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 800; // max width
+                    const MAX_WIDTH = 800; 
                     const MAX_HEIGHT = 800;
                     let width = img.width;
                     let height = img.height;
@@ -885,12 +1012,11 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
                     
-                    // Compress to JPEG with 0.7 quality
                     const dataUrl = canvas.toDataURL('image/jpeg', 0.7); 
                     
                     db.vault.push({ id: Date.now(), companyId: parseInt(compId), data: dataUrl, date: Date.now() });
                     saveData();
-                    document.getElementById('vault-file-upload').value = ''; // reset
+                    document.getElementById('vault-file-upload').value = ''; 
                     renderVault();
                     customAlert('نجاح', 'تم رفع المستند وضغطه وحفظه في الخزنة بنجاح.', 'success');
                 }
@@ -954,10 +1080,11 @@
             const statContainer = document.getElementById('det-stations');
             if(tx.stations.length === 0) { statContainer.innerHTML = `<p class="text-xs font-bold text-slate-400 text-center py-6">لم يتم تحديث المسار بعد</p>`; } 
             else {
+                // UPDATE: Stations styling with beautiful tints
                 statContainer.innerHTML = [...tx.stations].reverse().map((s, i) => `
                     <div class="relative animate-item" style="animation-delay: ${i * 0.1}s">
                         <div class="absolute -right-[22px] top-1 w-3.5 h-3.5 ${i===0 ? 'bg-primary ring-4 ring-primary/20 pulse-badge' : 'bg-slate-300 border-2 border-white dark:border-slate-800'} rounded-full"></div>
-                        <div class="${i===0 ? 'opacity-100 bg-white/40 dark:bg-slate-900/40 p-3 rounded-xl shadow-sm border border-white/50 dark:border-slate-700/50' : 'opacity-60'}">
+                        <div class="${i===0 ? 'opacity-100 bg-indigo-50 dark:bg-indigo-900/30 p-4 rounded-xl shadow-sm border border-indigo-100 dark:border-indigo-800' : 'opacity-60 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700/50'}">
                             <h5 class="font-extrabold text-sm text-primary mb-1">${s.name}</h5>
                             <p class="text-xs font-bold text-slate-700 dark:text-slate-300">${s.user}</p>
                             <p class="text-[10px] text-slate-400 mt-2 font-bold"><i class="fa-regular fa-clock"></i> ${formatDate(s.date)}</p>
@@ -1044,7 +1171,8 @@
             }).join('');
         }
 
-        async function triggerPDF(lawyerId, type, amount) {
+        // UPDATE: Fully refactored PDF Export function to be robust and cross-browser compatible
+        function triggerPDF(lawyerId, type, amount) {
             const lawyer = db.lawyers.find(l => l.id == lawyerId);
             const dateStr = new Date().toLocaleDateString('ar-IQ');
             const refNo = 'REF-' + Date.now().toString().slice(-6);
@@ -1082,33 +1210,39 @@
             qrTarget.innerHTML = "";
             new QRCode(qrTarget, { text: `Ref: ${refNo}\nLawyer: ${lawyer.name}\nTotal: ${amount} IQD`, width: 100, height: 100, colorDark : "#0f172a", colorLight : "#ffffff" });
 
-            customAlert('تجهيز الملف', 'جاري إنشاء المستند الفخم، يرجى الانتظار...', 'info');
+            customAlert('تجهيز الملف', 'جاري إنشاء المستند الفخم، يرجى الانتظار لحين تحميله...', 'info');
 
-            // Wait a moment for QR code and images to render in the DOM
-            await new Promise(resolve => setTimeout(resolve, 800));
-
-            const element = document.getElementById('pdf-content');
-            const opt = {
-                margin: 0, 
-                filename: `${type}_${lawyer.name}.pdf`,
-                image: { type: 'jpeg', quality: 1 },
-                html2canvas: { scale: 2, useCORS: true, letterRendering: true, logging: false },
-                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
-            
-            html2pdf().set(opt).from(element).save().then(() => {
-                closeUiAlert(); 
-                customAlert('نجاح', 'تم تصدير وحفظ ملف الـ PDF بنجاح.', 'success');
-            }).catch(err => {
-                closeUiAlert();
-                customAlert('خطأ فني', 'حدث خطأ أثناء إعداد الطباعة.', 'error');
-            });
+            // Set timeout ensures the UI updates and QR code is rendered before printing
+            setTimeout(() => {
+                try {
+                    const element = document.getElementById('pdf-content');
+                    const opt = {
+                        margin: 0, 
+                        filename: `${type}_${lawyer.name}.pdf`,
+                        image: { type: 'jpeg', quality: 1 },
+                        html2canvas: { scale: 2, useCORS: true },
+                        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+                    };
+                    
+                    html2pdf().set(opt).from(element).save().then(() => {
+                        closeUiAlert(); 
+                        customAlert('تم بنجاح', 'تم تصدير ملف الـ PDF وحفظه في جهازك.', 'success');
+                    }).catch(err => {
+                        closeUiAlert();
+                        customAlert('خطأ فني', 'حدث خطأ أثناء تصدير الملف.', 'error');
+                        console.error(err);
+                    });
+                } catch (error) {
+                    closeUiAlert();
+                    customAlert('خطأ', 'يبدو أن جهازك لا يدعم هذه الميزة حالياً.', 'error');
+                }
+            }, 1000);
         }
 
         function reqClearData() {
             customConfirm('تصفير قاعدة البيانات', 'هل أنت متأكد من مسح جميع البيانات؟ هذا الإجراء لا يمكن التراجع عنه وسيحذف المعاملات، الشركات، ومستندات الخزنة.', () => {
                 localStorage.removeItem('moaqib_db_v4'); 
-                localStorage.removeItem('moaqib_db_v3'); // Clear old data too
+                localStorage.removeItem('moaqib_db_v3');
                 location.reload();
             });
         }
