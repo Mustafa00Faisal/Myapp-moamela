@@ -22,8 +22,8 @@
   <style>
     /* الثيم الفخم (Premium Dark Mode) */
     :root {
-      --bg-color: #05070D; /* أسود عميق جداً */
-      --surface-color: #0B0F19; /* كحلي ليلي */
+      --bg-color: #05070D;
+      --surface-color: #0B0F19;
       --surface-elevated: #131A2A;
       --border-subtle: #1E293B;
       --border-focus: #F59E0B;
@@ -58,7 +58,6 @@
 
     .num-font { font-family: 'Plus Jakarta Sans', sans-serif; }
 
-    /* حقول الإدخال الفخمة */
     .modern-input {
       background: var(--surface-elevated);
       border: 1px solid var(--border-subtle);
@@ -78,7 +77,7 @@
       box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1), inset 0 2px 4px rgba(0,0,0,0.2);
     }
 
-    /* شريط البحث */
+    /* إصلاح تداخل العدسة مع النص في شريط البحث */
     .search-wrapper {
       background: var(--surface-elevated);
       border: 1px solid var(--border-subtle);
@@ -94,11 +93,10 @@
     .search-wrapper:focus-within { border-color: var(--gold); }
     .search-wrapper input {
       background: transparent; border: none; color: var(--text-main);
-      padding: 14px 12px 14px 36px; width: 100%; font-size: 14px; font-weight: 500; outline: none;
+      padding: 14px 40px 14px 12px; width: 100%; font-size: 14px; font-weight: 500; outline: none;
     }
     .search-wrapper svg { position: absolute; right: 16px; color: var(--gold); width: 18px; height: 18px; }
 
-    /* الكروت الزجاجية الأنيقة */
     .exec-card {
       background: linear-gradient(145deg, var(--surface-color) 0%, #0A0D16 100%);
       border: 1px solid var(--border-subtle);
@@ -112,7 +110,6 @@
     }
     .exec-card:hover { border-color: rgba(245, 158, 11, 0.3); }
 
-    /* الأزرار */
     .btn-action-gold {
       background: var(--gold-gradient);
       color: #000;
@@ -162,7 +159,6 @@
     }
     .btn-subtle:active { filter: brightness(1.2); }
 
-    /* الفلاتر */
     .filter-chips {
       display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; margin-bottom: 16px;
     }
@@ -172,7 +168,6 @@
     }
     .chip.active { background: rgba(245, 158, 11, 0.15); color: var(--gold); border-color: var(--gold); }
 
-    /* الهيدر الأنيق بدون تاريخ */
     header {
       position: sticky; top: 0; z-index: 50;
       background: rgba(5, 7, 13, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
@@ -189,7 +184,6 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
 
-    /* حافظة النصوص (Snippets Bar) - جديدة وفخمة */
     .smart-clipboard {
       background: var(--surface-color);
       border: 1px solid var(--border-subtle);
@@ -203,7 +197,6 @@
       background: transparent; border: none; color: var(--gold); font-weight: 700; font-size: 12px; outline: none; width: 70%;
     }
 
-    /* شريط النافيكيشن السفلي (الزجاجي) */
     .dock-bar-wrapper {
       position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
       width: 92%; max-width: 480px; z-index: 100;
@@ -228,7 +221,6 @@
     .dock-tab.active { background: rgba(245, 158, 11, 0.1); color: var(--gold); }
     .dock-tab.active svg { stroke-width: 2.5; }
 
-    /* النوافذ المنبثقة */
     .sheet-overlay {
       position: fixed; inset: 0;
       background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
@@ -305,7 +297,7 @@
     <!-- قسم التتبع والعمليات -->
     <div id="tab-tracking" class="tab-section active">
       
-      <!-- حافظة النصوص الذكية (الميزة الجديدة) -->
+      <!-- حافظة النصوص الذكية -->
       <div class="smart-clipboard">
         <span style="font-size: 11px; font-weight: 800; color: var(--text-muted);">حافظة النصوص السريعة:</span>
         <select id="snippetSelector" onchange="copySnippet(this.value)">
@@ -362,7 +354,7 @@
       </section>
     </div>
 
-    <!-- قسم الرادار والتنبيهات (تم الحفاظ عليه) -->
+    <!-- قسم الرادار والتنبيهات -->
     <div id="tab-alerts" class="tab-section">
       <div class="exec-card" style="border-color: rgba(239, 68, 68, 0.3);">
         <h3 style="font-size: 18px; font-weight: 900; margin-bottom: 4px; color: var(--danger);">رادار متابعة الركود</h3>
@@ -371,7 +363,7 @@
       <div id="notificationsList" style="display: flex; flex-direction: column; gap: 12px;"></div>
     </div>
 
-    <!-- قسم الحسابات والمالية (محدث بـ paid_amount) -->
+    <!-- قسم الحسابات والمالية -->
     <div id="tab-finance" class="tab-section">
       <div class="exec-card" style="border: 1px solid var(--gold); box-shadow: var(--glow-gold);">
         <span style="font-size: 10px; font-weight: 900; color: #000; background: var(--gold); padding: 4px 12px; border-radius: 20px; width: fit-content; margin-bottom: 10px;">نظام الأتعاب الصافية</span>
@@ -385,7 +377,7 @@
       <div id="accountsList" style="display: flex; flex-direction: column; gap: 12px;"></div>
     </div>
 
-    <!-- قسم الأرشيف والمكتبة (تم الحفاظ على رفع الملفات) -->
+    <!-- قسم الأرشيف والمكتبة (تم إصلاح الخزنة) -->
     <div id="tab-archive" class="tab-section">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
         <h3 style="font-size: 18px; font-weight: 900;">أرشيف المعاملات المنجزة</h3>
@@ -403,7 +395,7 @@
       <div id="libraryCompaniesList" style="display: flex; flex-direction: column; gap: 12px;"></div>
     </div>
 
-    <!-- قسم الإعدادات والنظام (تم الحفاظ عليه بالكامل وتحديث Audit logs للسحابة) -->
+    <!-- قسم الإعدادات والنظام -->
     <div id="tab-system" class="tab-section">
       <div class="exec-card">
         <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 16px; color: var(--gold);">إعدادات المكتب والمراسلة</h3>
@@ -463,7 +455,6 @@
           <span id="dtCompNameBadge" style="font-size: 12px; font-weight: 800; color: var(--gold); display: block; margin-bottom: 4px;">الشركة</span>
           <h3 id="dtTxTitle" style="font-size: 22px; font-weight: 900; color: #FFF;">المعاملة</h3>
         </div>
-        <!-- زر الاستنساخ الجديد -->
         <button id="btnCloneTx" class="btn-subtle" style="padding: 8px 12px; border-color: var(--gold); color: var(--gold); background: rgba(245,158,11,0.1);">استنساخ 📑</button>
       </div>
 
@@ -502,7 +493,7 @@
     </div>
   </div>
 
-  <!-- محرك تحديث المسار (Supabase) -->
+  <!-- محرك تحديث المسار -->
   <div id="advancedStepModal" class="sheet-overlay">
     <div class="sheet-panel">
       <div class="sheet-handle"></div>
@@ -582,7 +573,7 @@
     </div>
   </div>
 
-  <!-- محرك الواتساب الذكي (أُعيدت الميزة) -->
+  <!-- محرك الواتساب الذكي -->
   <div id="whatsappQuickModal" class="sheet-overlay">
     <div class="sheet-panel">
       <div class="sheet-handle"></div>
@@ -599,16 +590,17 @@
     </div>
   </div>
 
-  <!-- الخزنة السحابية (المرفقات - أُعيدت الميزة) -->
+  <!-- الخزنة السحابية (المرفقات) -->
   <div id="docVaultModal" class="sheet-overlay">
     <div class="sheet-panel">
       <div class="sheet-handle"></div>
       <h3 id="vaultCompTitle" style="font-size: 20px; font-weight: 900; margin-bottom: 20px; color: var(--gold);">خزنة الشركة</h3>
       <div class="exec-card" style="padding: 16px; margin-bottom: 24px;">
         <input id="docCustomName" type="text" placeholder="اسم المستند (مثال: وصل رسم)" class="modern-input" style="margin-bottom: 12px;">
-        <input type="file" id="docFileInput" accept="image/*,application/pdf" capture="environment" style="display: none;" onchange="handleFileSelection(this)">
+        <!-- تم تصحيح حقل الملف لإعطائك حرية اختيار PDF أو التقاط صورة -->
+        <input type="file" id="docFileInput" accept="image/*,application/pdf" style="display: none;" onchange="handleFileSelection(this)">
         <button onclick="document.getElementById('docFileInput').click()" class="btn-action-outline" style="border-style: dashed; margin-bottom: 12px; width: 100%;">
-          <span id="selectedFileNameLabel">التقاط بالكاميرا أو اختيار ملف 📸</span>
+          <span id="selectedFileNameLabel">اختيار ملف أو التقاط صورة 📸</span>
         </button>
         <button id="btnUploadDoc" onclick="uploadCompanyDocument()" class="btn-action-gold" style="width: 100%;">رفع وحفظ في السحابة ☁️</button>
       </div>
@@ -631,7 +623,7 @@
     </div>
   </div>
 
-  <!-- سند التسوية الفخم (المضاف له QR Code) -->
+  <!-- سند التسوية (مضاف له QR Code) -->
   <div id="weeklyReceiptModal" class="sheet-overlay">
     <div class="sheet-panel" style="max-width: 480px;">
       <div class="sheet-handle"></div>
@@ -646,13 +638,11 @@
           <p><b>قيمة الأتعاب المسددة:</b> <b id="weeklyRecAmountNum" style="font-size: 18px; color: var(--danger);"></b> د.ع</p>
           <p><b>التاريخ:</b> <span id="weeklyRecDateRange"></span></p>
         </div>
-        <!-- مساحة الـ QR Code -->
         <div style="display: flex; justify-content: center; margin-top: 30px;">
           <div id="receiptQRCodeArea"></div>
         </div>
         <p style="text-align: center; font-size: 10px; color: #666; margin-top: 16px;">وثيقة تسوية إلكترونية مصدقة بالباركود</p>
       </div>
-      <!-- تحديث لتصفير الديون سحابياً -->
       <button onclick="settleAllWeeklyDuesForCompany()" class="btn-action-gold" style="width: 100%; margin-top: 24px;">تأكيد قبض الأتعاب وتصفير الدين سحابياً ✅</button>
       <button onclick="closeSheet('weeklyReceiptModal')" class="btn-subtle" style="width: 100%; margin-top: 12px;">إغلاق</button>
     </div>
@@ -676,18 +666,14 @@
         <h3 style="font-size: 20px; font-weight: 900; color: var(--gold);">التقرير المالي العام</h3>
         <button onclick="executePDFGenerate()" class="btn-action-gold" style="padding: 10px 16px; font-size: 12px;">تحميل كملف PDF 📥</button>
       </div>
-      
-      <!-- المنطقة المراد تحويلها لـ PDF -->
       <div id="pdfPrintableArea" style="background: #FFF; color: #000; padding: 40px 30px; font-size: 14px; border-radius: 8px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #222; padding-bottom: 16px;">
           <div>
             <h2 style="font-size: 24px; font-weight: 900; color: #111;">كشف حساب الأتعاب المعلقة</h2>
             <p id="pdfReportDate" style="color: #555; margin-top: 6px; font-weight: bold;"></p>
           </div>
-          <!-- الـ QR الخاص بالكشف -->
           <div id="pdfQRCodeArea"></div>
         </div>
-        
         <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px;">
           <thead>
             <tr style="background: #F3F4F6;">
@@ -698,13 +684,11 @@
           </thead>
           <tbody id="pdfTableBody"></tbody>
         </table>
-        
         <div style="margin-top: 30px; padding-top: 20px; border-top: 2px dashed #999; text-align: left;">
           <span style="font-size: 16px; font-weight: 900;">إجمالي الأتعاب المستحقة للمكتب: </span>
           <span id="pdfTotalDebt" class="num-font" style="font-size: 20px; font-weight: 900; color: #D90429;"></span>
         </div>
       </div>
-      
       <button onclick="closeSheet('pdfModal')" class="btn-subtle" style="width: 100%; margin-top: 20px;">رجوع للوحة</button>
     </div>
   </div>
@@ -726,7 +710,6 @@
     let searchQuery = "";
     let currentFilter = "all";
 
-    // المتغيرات الشاملة للبيانات
     let companies = [];
     let allTransactionsGlobal = [];
     let allDocumentsGlobal = [];
@@ -761,12 +744,11 @@
     function openSheet(id) { document.getElementById(id).style.display = 'flex'; }
     function closeSheet(id) { document.getElementById(id).style.display = 'none'; }
 
-    // حافظة النصوص (Snippets)
     function copySnippet(val) {
       if(!val) return;
       navigator.clipboard.writeText(val);
       showToast("تم النسخ للحافظة 📋");
-      document.getElementById('snippetSelector').value = ""; // Reset
+      document.getElementById('snippetSelector').value = "";
     }
 
     /* =====================================================================
@@ -816,24 +798,19 @@
     ===================================================================== */
     async function loadData() {
       try {
-        // 1. الشركات
         const { data: compData } = await db.from('companies').select('*').order('created_at', { ascending: false });
         companies = compData || [];
         document.getElementById('companiesCount').innerText = companies.length;
         renderCompanies();
 
-        // 2. المعاملات (مع ربط المهام وسجل المحطات السحابي)
         const { data: txData } = await db.from('transactions')
           .select(`*, companies(name), transaction_checklists(*), transaction_steps(*)`)
           .order('created_at', { ascending: false });
-        
         allTransactionsGlobal = txData || [];
         
-        // 3. المستندات
         const { data: docs } = await db.from('company_documents').select('*, companies(name)').order('created_at', { ascending: false });
         allDocumentsGlobal = docs || [];
 
-        // التحديثات البصرية
         renderActive();
         renderCompletedArchive();
         renderAccounts(allTransactionsGlobal);
@@ -885,7 +862,6 @@
       }]).select().single();
 
       if (tx) {
-        // إدراج أول محطة سحابياً
         await db.from('transaction_steps').insert([{ 
           transaction_id: tx.id, dept: 'دائرة مسجل الشركات', stage: 'الاستلام المبدئي', status: 'active', note: 'بدء دورة المعاملة' 
         }]);
@@ -919,7 +895,6 @@
 
       const filtered = activeTxs.filter(tx => {
         const steps = tx.transaction_steps || [];
-        // الترتيب حسب التاريخ للتأكد
         steps.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
         const latestStep = steps.length > 0 ? steps[steps.length - 1] : { status: 'active' };
         
@@ -974,10 +949,10 @@
     }
 
     /* =====================================================================
-       تفاصيل المعاملة واستنساخها (Clone) وتحديث المحطات
+       تفاصيل المعاملة، الاستنساخ، والمحطات
     ===================================================================== */
     window.openTransactionFullDetails = function(txId) {
-      const tx = allTransactionsGlobal.find(t => t.id === txId);
+      const tx = allTransactionsGlobal.find(t => t.id == txId); // تم التصحيح لتعمل الأزرار
       if (!tx) return;
 
       currentDetailTxId = txId;
@@ -985,7 +960,6 @@
       document.getElementById('dtTxTitle').innerText = tx.transaction_type;
       document.getElementById('dtFinancialSummary').innerText = `${(Number(tx.fee_iqd) || 0).toLocaleString('ar-IQ')} د.ع`;
 
-      // برمجة زر الاستنساخ 📑
       document.getElementById('btnCloneTx').onclick = () => {
         closeSheet('transactionDetailsModal');
         document.getElementById('txType').value = tx.transaction_type;
@@ -1026,7 +1000,7 @@
 
     function openAdvancedStepModal(txId) {
       currentDetailTxId = txId;
-      const tx = allTransactionsGlobal.find(t => t.id === txId);
+      const tx = allTransactionsGlobal.find(t => t.id == txId);
       if (tx) {
         const steps = tx.transaction_steps || [];
         steps.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
@@ -1039,7 +1013,6 @@
       openSheet('advancedStepModal');
     }
 
-    // إدراج مسار المعاملة سحابياً (بدل localStorage)
     async function confirmAdvancedStepUpdate() {
       const dept = document.getElementById('advDeptSelect').value.trim();
       const stage = document.getElementById('advStageInput').value.trim();
@@ -1048,9 +1021,7 @@
 
       if (!currentDetailTxId || !dept) return;
 
-      await db.from('transaction_steps').insert([{
-        transaction_id: currentDetailTxId, dept, stage, status, note
-      }]);
+      await db.from('transaction_steps').insert([{ transaction_id: currentDetailTxId, dept, stage, status, note }]);
 
       closeSheet('advancedStepModal');
       showToast("تم تحديث المسار السحابي بنجاح 🚀");
@@ -1059,7 +1030,7 @@
     }
 
     /* =====================================================================
-       إنجاز ومهام المعاملات (To-Do)
+       إنجاز، وتحديد المهام
     ===================================================================== */
     async function completeTx(id) { 
       await db.from('transactions').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', id); 
@@ -1070,7 +1041,7 @@
 
     async function deleteTx(id) {
       if (!confirm("حذف هذه المعاملة نهائياً من السحابة؟")) return;
-      await db.from('transactions').delete().eq('id', id); // سيحذف المهام والمحطات تلقائياً بسبب CASCADE
+      await db.from('transactions').delete().eq('id', id); 
       showToast("تم حذف المعاملة 🗑️"); loadData();
     }
 
@@ -1090,7 +1061,7 @@
     async function deleteChecklistItem(id) { await db.from('transaction_checklists').delete().eq('id', id); loadData(); }
 
     /* =====================================================================
-       الحسابات المالية وتوليد הـ PDF والـ QR (محدث ليعتمد على DB)
+       الحسابات المالية (تحديث سحابي) والـ QR والـ PDF
     ===================================================================== */
     function renderAccounts(all) {
       const list = document.getElementById('accountsList');
@@ -1098,8 +1069,7 @@
       let html = '';
 
       companies.forEach(c => {
-        const cTxs = all.filter(t => t.company_id === c.id);
-        // حساب الدين بناءً على الأتعاب الكلية ناقص المبلغ المسدد (paid_amount)
+        const cTxs = all.filter(t => t.company_id == c.id);
         const debt = cTxs.reduce((s, t) => s + (Number(t.fee_iqd) || 0) - (Number(t.paid_amount) || 0), 0);
         
         if (debt > 0) {
@@ -1119,10 +1089,9 @@
       list.innerHTML = html || '<div class="exec-card" style="text-align:center; color:var(--text-muted);">لا توجد ديون معلقة</div>';
     }
 
-    // فتح سند التسوية وإنشاء الـ QR الخاص به
     function openWeeklyReceiptForCompany(compId) {
-      const comp = companies.find(c => c.id === compId);
-      const txs = allTransactionsGlobal.filter(t => t.company_id === compId && (Number(t.fee_iqd) || 0) > (Number(t.paid_amount) || 0));
+      const comp = companies.find(c => c.id == compId); // تم التصحيح
+      const txs = allTransactionsGlobal.filter(t => t.company_id == compId && (Number(t.fee_iqd) || 0) > (Number(t.paid_amount) || 0));
       const totalDebt = txs.reduce((s, t) => s + ((Number(t.fee_iqd) || 0) - (Number(t.paid_amount) || 0)), 0);
       
       currentWeeklyData = { compId, txList: txs, total: totalDebt };
@@ -1130,7 +1099,6 @@
       document.getElementById('weeklyRecAmountNum').innerText = totalDebt.toLocaleString('ar-IQ');
       document.getElementById('weeklyRecDateRange').innerText = new Date().toLocaleDateString('ar-IQ');
       
-      // إنشاء QR Code للسند
       document.getElementById("receiptQRCodeArea").innerHTML = "";
       new QRCode(document.getElementById("receiptQRCodeArea"), {
         text: `سند تسوية | الجهة: ${comp.name} | مبلغ: ${totalDebt} دينار | التاريخ: ${new Date().toLocaleDateString()}`,
@@ -1140,7 +1108,6 @@
       openSheet('weeklyReceiptModal');
     }
 
-    // تصفير الديون وتحديث قاعدة بيانات Supabase
     async function settleAllWeeklyDuesForCompany() {
       if (!currentWeeklyData || currentWeeklyData.txList.length === 0) return;
       if (!confirm("تأكيد استلام الأتعاب وتصفير ديون هذه الجهة سحابياً؟")) return;
@@ -1162,14 +1129,13 @@
       setTimeout(() => { WinPrint.print(); WinPrint.close(); }, 500);
     }
 
-    // نظام تقارير الـ PDF الاحترافي (html2pdf) المدمج معه QR Code
     function openPDFPreviewModal() {
       const tbody = document.getElementById('pdfTableBody');
       tbody.innerHTML = '';
       let totalDebtAll = 0;
 
       companies.forEach(c => {
-        const cTxs = allTransactionsGlobal.filter(t => t.company_id === c.id);
+        const cTxs = allTransactionsGlobal.filter(t => t.company_id == c.id);
         cTxs.forEach(t => {
           const debt = (Number(t.fee_iqd) || 0) - (Number(t.paid_amount) || 0);
           if (debt > 0) {
@@ -1188,7 +1154,6 @@
       document.getElementById('pdfTotalDebt').innerText = `${totalDebtAll.toLocaleString('ar-IQ')} د.ع`;
       document.getElementById('pdfReportDate').innerText = new Date().toLocaleDateString('ar-IQ', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
       
-      // QR Code للكشف المالي العام
       document.getElementById("pdfQRCodeArea").innerHTML = "";
       new QRCode(document.getElementById("pdfQRCodeArea"), {
         text: `كشف مالي إجمالي | الأتعاب الكلية: ${totalDebtAll} | تاريخ إصدار التقرير: ${new Date().toLocaleDateString()}`,
@@ -1198,7 +1163,6 @@
       openSheet('pdfModal');
     }
 
-    // تنفيذ وتصدير ملف الـ PDF
     function executePDFGenerate() {
       const element = document.getElementById('pdfPrintableArea');
       html2pdf().set({
@@ -1213,7 +1177,7 @@
     function exportAccountsToCSV() {
       let csvContent = "\uFEFFاسم الشركة,نوع المعاملة,الأتعاب المستحقة\n";
       companies.forEach(c => {
-        allTransactionsGlobal.filter(t => t.company_id === c.id).forEach(t => {
+        allTransactionsGlobal.filter(t => t.company_id == c.id).forEach(t => {
           const debt = (Number(t.fee_iqd) || 0) - (Number(t.paid_amount) || 0);
           if (debt > 0) csvContent += `"${c.name}","${t.transaction_type}",${debt}\n`;
         });
@@ -1226,7 +1190,7 @@
     }
 
     /* =====================================================================
-       الأرشيف والمرفقات (تم الحفاظ عليها)
+       الأرشيف والخزنة (تم تصحيح الأخطاء المرئية والبرمجية)
     ===================================================================== */
     function renderCompletedArchive() {
       const container = document.getElementById('completedTransactionsList');
@@ -1252,9 +1216,10 @@
       const q = query.toLowerCase();
       
       container.innerHTML = companies.filter(c => c.name.toLowerCase().includes(q)).map(c => {
-        const count = allDocumentsGlobal.filter(d => d.company_id === c.id).length;
+        const count = allDocumentsGlobal.filter(d => d.company_id == c.id).length;
+        // تم إصلاح شكل الكرت بإضافة flex-direction: row ليكون الزر على الجانب
         return `
-          <div class="exec-card" style="padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
+          <div class="exec-card" style="padding: 16px 20px; display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
             <div>
               <p style="font-size: 14px; font-weight: 900; color: #FFF;">${c.name}</p>
               <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">${count} مستندات محفوظة</p>
@@ -1281,7 +1246,7 @@
     function openDocVaultFromMgmt() { closeSheet('companyManagementModal'); openDocVault(); }
 
     function openDocVault() {
-      const comp = companies.find(c => c.id === selectedCompanyId);
+      const comp = companies.find(c => c.id == selectedCompanyId); // تم الإصلاح لتعمل الضغطة
       if (comp) {
         document.getElementById('vaultCompTitle').innerText = `مستندات: ${comp.name}`;
         loadCompanyDocuments(selectedCompanyId);
@@ -1295,7 +1260,8 @@
       if (!customName || !fileInput.files.length) return showToast("أدخل اسم الملف وحدده", "⚠️");
       
       const file = fileInput.files[0];
-      const fileName = `${selectedCompanyId}/${Date.now()}_${file.name}`;
+      const safeName = file.name.replace(/\s+/g, '_');
+      const fileName = `${selectedCompanyId}/${Date.now()}_${safeName}`;
       
       document.getElementById('btnUploadDoc').innerText = "جاري الرفع للسحابة...";
       const { error } = await db.storage.from('documents').upload(fileName, file);
@@ -1306,7 +1272,7 @@
         await db.from('company_documents').insert([{ company_id: selectedCompanyId, document_name: customName, file_url: urlData.publicUrl }]);
         showToast("تمت الأرشفة السحابية بنجاح 📁");
         document.getElementById('docCustomName').value = '';
-        document.getElementById('selectedFileNameLabel').innerText = 'التقاط بالكاميرا أو اختيار ملف 📸';
+        document.getElementById('selectedFileNameLabel').innerText = 'اختيار ملف أو التقاط صورة 📸';
         loadData(); openDocVault();
       } else { showToast("فشل الرفع", "❌"); }
     }
@@ -1328,7 +1294,7 @@
        الواتساب الآلي والرادار والسجل (Audit)
     ===================================================================== */
     function openWhatsAppQuickModal(txId) {
-      targetTxForWA = allTransactionsGlobal.find(t => t.id === txId); 
+      targetTxForWA = allTransactionsGlobal.find(t => t.id == txId); 
       if (!targetTxForWA) return;
       document.getElementById('waModalTxInfo').innerText = `مراسلة العميل - شركة: ${targetTxForWA.companies?.name}`;
       generateWAMessage('status'); openSheet('whatsappQuickModal');
