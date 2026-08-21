@@ -28,9 +28,10 @@
         .card-gradient { background: linear-gradient(135deg, #4f46e5, #9333ea); }
         .card-stagnant { background: linear-gradient(135deg, #e11d48, #be123c); }
         
+        /* Bottom Nav - 7 Items Distribution */
         .bottom-nav { box-shadow: 0 -4px 20px rgba(0,0,0,0.05); padding-bottom: env(safe-area-inset-bottom, 12px); }
         .dark .bottom-nav { box-shadow: 0 -4px 20px rgba(0,0,0,0.5); }
-        .nav-item { color: #94a3b8; transition: all 0.3s; }
+        .nav-item { color: #94a3b8; transition: all 0.3s; flex: 1; }
         .nav-item.active { color: #6366f1; font-weight: 700; transform: translateY(-2px); }
         .dark .nav-item.active { color: #818cf8; }
 
@@ -58,9 +59,9 @@
         .modal-box { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); transform: scale(0.9); }
         .modal-overlay.active .modal-box { transform: scale(1); }
 
-        /* Hidden PDF Container (Must be rendered in DOM for html2pdf to work on mobile) */
+        /* PDF Container - FIX FOR MOBILE */
         #pdf-export-wrapper {
-            position: absolute; left: -9999px; top: -9999px; width: 800px; z-index: -10;
+            position: fixed; top: 0; left: 0; width: 800px; z-index: -9999; opacity: 0.01; display: none; pointer-events: none;
         }
     </style>
 </head>
@@ -128,22 +129,22 @@
             </div>
 
             <div class="grid grid-cols-2 gap-4 mb-6">
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm text-center">
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm text-center border border-slate-100 dark:border-slate-700/50">
                     <i class="fa-solid fa-users text-blue-500 text-2xl mb-2 bg-blue-50 dark:bg-slate-700/50 w-12 h-12 flex items-center justify-center rounded-xl mx-auto"></i>
                     <div class="text-2xl font-bold" id="home-lawyers-count">0</div>
                     <div class="text-xs text-slate-500">محامون مسجلون</div>
                 </div>
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm text-center">
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm text-center border border-slate-100 dark:border-slate-700/50">
                     <i class="fa-regular fa-building text-purple-500 text-2xl mb-2 bg-purple-50 dark:bg-slate-700/50 w-12 h-12 flex items-center justify-center rounded-xl mx-auto"></i>
                     <div class="text-2xl font-bold" id="home-companies-count">0</div>
                     <div class="text-xs text-slate-500">الشركات</div>
                 </div>
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm text-center">
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm text-center border border-slate-100 dark:border-slate-700/50">
                     <i class="fa-solid fa-triangle-exclamation text-red-500 text-2xl mb-2 bg-red-50 dark:bg-slate-700/50 w-12 h-12 flex items-center justify-center rounded-xl mx-auto"></i>
                     <div class="text-2xl font-bold text-red-500" id="home-stalled-count">0</div>
                     <div class="text-xs text-slate-500">معاملات متلكئة</div>
                 </div>
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm text-center">
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm text-center border border-slate-100 dark:border-slate-700/50">
                     <i class="fa-solid fa-spinner text-primary text-2xl mb-2 bg-indigo-50 dark:bg-slate-700/50 w-12 h-12 flex items-center justify-center rounded-xl mx-auto"></i>
                     <div class="text-2xl font-bold" id="home-active-count">0</div>
                     <div class="text-xs text-slate-500">معاملات جارية</div>
@@ -246,11 +247,28 @@
         <!-- 6. ARCHIVE VIEW -->
         <div id="view-archive" class="view-section p-4">
             <div class="mb-6 pt-2">
-                <h1 class="text-2xl font-extrabold flex items-center gap-2"><i class="fa-solid fa-box-archive text-primary"></i> الأرشيف</h1>
-                <p class="text-sm text-slate-500">السجل التاريخي للمعاملات المنجزة</p>
+                <h1 class="text-2xl font-extrabold flex items-center gap-2"><i class="fa-solid fa-box-archive text-primary"></i> الأرشيف والخزنة</h1>
+                <p class="text-sm text-slate-500">السجل التاريخي ومستندات الشركات</p>
             </div>
-            <input type="text" id="archive-search" onkeyup="renderArchive()" placeholder="ابحث باسم الشركة أو المعاملة..." class="input-field mb-4 font-bold">
-            <div id="archive-list" class="space-y-4"></div>
+
+            <!-- TABS FOR ARCHIVE -->
+            <div class="flex gap-2 p-1 bg-white dark:bg-slate-800 rounded-xl mb-6 shadow-sm border border-slate-100 dark:border-slate-700">
+                <button onclick="toggleArchiveTab('tx')" id="tab-arch-tx" class="flex-1 py-2 rounded-lg text-sm font-bold bg-primary text-white shadow">الأرشيف (المنجزة)</button>
+                <button onclick="toggleArchiveTab('vault')" id="tab-arch-vault" class="flex-1 py-2 rounded-lg text-sm font-bold text-slate-500 dark:text-slate-400">خزنة الشركات</button>
+            </div>
+
+            <div id="archive-tx-content" class="space-y-4">
+                <input type="text" id="archive-search" onkeyup="renderArchive()" placeholder="ابحث باسم الشركة أو المعاملة..." class="input-field mb-4 font-bold">
+                <div id="archive-list" class="space-y-4"></div>
+            </div>
+
+            <div id="archive-vault-content" class="hidden space-y-4">
+                 <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm text-center border border-slate-100 dark:border-slate-700/50 mt-4">
+                    <i class="fa-regular fa-folder-open text-5xl text-slate-300 dark:text-slate-600 mb-4"></i>
+                    <h3 class="font-extrabold text-lg text-primary">خزنة المستندات الرقمية</h3>
+                    <p class="text-sm text-slate-500 mt-2 font-bold leading-relaxed">قريباً: مساحة مخصصة لكل شركة لرفع صور المستندات، الجوازات، والملفات بصيغة PDF والاحتفاظ بها سحابياً.</p>
+                 </div>
+            </div>
         </div>
 
         <!-- 7. SETTINGS VIEW -->
@@ -290,10 +308,14 @@
 
             <!-- Lawyer Management -->
             <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700/50 mb-6">
-                <h3 class="font-bold border-b pb-2 dark:border-slate-700 text-primary mb-3"><i class="fa-solid fa-users-gear"></i> إدارة المحامين</h3>
-                <div id="settings-lawyers-list" class="space-y-2 max-h-48 overflow-y-auto pr-2">
-                    <!-- Lawyers list injected here -->
-                </div>
+                <h3 class="font-bold border-b pb-2 dark:border-slate-700 text-primary mb-3"><i class="fa-solid fa-users-slash"></i> حذف وإدارة المحامين</h3>
+                <div id="settings-lawyers-list" class="space-y-2 max-h-48 overflow-y-auto pr-2"></div>
+            </div>
+
+            <!-- Company Management -->
+            <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700/50 mb-6">
+                <h3 class="font-bold border-b pb-2 dark:border-slate-700 text-secondary mb-3"><i class="fa-regular fa-building"></i> حذف وإدارة الشركات</h3>
+                <div id="settings-companies-list" class="space-y-2 max-h-48 overflow-y-auto pr-2"></div>
             </div>
             
             <button onclick="reqClearData()" class="w-full bg-red-50 text-red-600 dark:bg-red-900/20 py-4 rounded-xl font-bold border border-red-200 dark:border-red-800 active:scale-95 transition-transform"><i class="fa-solid fa-trash-can"></i> مسح كافة البيانات من المتصفح</button>
@@ -301,17 +323,18 @@
 
     </div>
 
-    <!-- BOTTOM NAVIGATION -->
-    <nav class="fixed bottom-0 w-full bg-white dark:bg-slate-900 flex justify-between px-2 pt-3 pb-safe bottom-nav z-40 border-t border-slate-100 dark:border-slate-800">
-        <button onclick="switchTab('home')" class="nav-item active flex flex-col items-center gap-1 w-14 pb-2" id="nav-home"><i class="fa-solid fa-border-all text-xl"></i><span class="text-[10px]">الرئيسية</span></button>
-        <button onclick="switchTab('newTx')" class="nav-item flex flex-col items-center gap-1 w-14 pb-2" id="nav-newTx"><i class="fa-solid fa-circle-plus text-xl"></i><span class="text-[10px]">معاملة</span></button>
-        <button onclick="switchTab('active')" class="nav-item flex flex-col items-center gap-1 w-14 pb-2 relative" id="nav-active">
-            <i class="fa-solid fa-arrows-rotate text-xl"></i><span class="text-[10px]">جارية</span>
+    <!-- BOTTOM NAVIGATION (Fixed 7 items) -->
+    <nav class="fixed bottom-0 w-full bg-white dark:bg-slate-900 flex justify-between px-1 pt-3 pb-safe bottom-nav z-40 border-t border-slate-100 dark:border-slate-800">
+        <button onclick="switchTab('home')" class="nav-item active flex flex-col items-center gap-1 pb-2" id="nav-home"><i class="fa-solid fa-border-all text-xl"></i><span class="text-[9px]">الرئيسية</span></button>
+        <button onclick="switchTab('newTx')" class="nav-item flex flex-col items-center gap-1 pb-2" id="nav-newTx"><i class="fa-solid fa-circle-plus text-xl"></i><span class="text-[9px]">معاملة</span></button>
+        <button onclick="switchTab('active')" class="nav-item flex flex-col items-center gap-1 pb-2 relative" id="nav-active">
+            <i class="fa-solid fa-arrows-rotate text-xl"></i><span class="text-[9px]">جارية</span>
             <span id="badge-active" class="absolute top-0 right-1 bg-primary text-white text-[9px] rounded-full w-4 h-4 flex items-center justify-center hidden">0</span>
         </button>
-        <button onclick="switchTab('stalled')" class="nav-item flex flex-col items-center gap-1 w-14 pb-2" id="nav-stalled"><i class="fa-solid fa-triangle-exclamation text-xl"></i><span class="text-[10px]">متلكئة</span></button>
-        <button onclick="switchTab('accounting')" class="nav-item flex flex-col items-center gap-1 w-14 pb-2" id="nav-accounting"><i class="fa-solid fa-file-invoice-dollar text-xl"></i><span class="text-[10px]">تحاسب</span></button>
-        <button onclick="switchTab('settings')" class="nav-item flex flex-col items-center gap-1 w-14 pb-2" id="nav-settings"><i class="fa-solid fa-gear text-xl"></i><span class="text-[10px]">إعدادات</span></button>
+        <button onclick="switchTab('stalled')" class="nav-item flex flex-col items-center gap-1 pb-2" id="nav-stalled"><i class="fa-solid fa-triangle-exclamation text-xl"></i><span class="text-[9px]">متلكئة</span></button>
+        <button onclick="switchTab('accounting')" class="nav-item flex flex-col items-center gap-1 pb-2" id="nav-accounting"><i class="fa-solid fa-file-invoice-dollar text-xl"></i><span class="text-[9px]">تحاسب</span></button>
+        <button onclick="switchTab('archive')" class="nav-item flex flex-col items-center gap-1 pb-2" id="nav-archive"><i class="fa-solid fa-box-archive text-xl"></i><span class="text-[9px]">الأرشيف</span></button>
+        <button onclick="switchTab('settings')" class="nav-item flex flex-col items-center gap-1 pb-2" id="nav-settings"><i class="fa-solid fa-gear text-xl"></i><span class="text-[9px]">إعدادات</span></button>
     </nav>
 
     <!-- MODALS (Add Lawyer / Company / Details) -->
@@ -339,6 +362,7 @@
         </div>
     </div>
 
+    <!-- Transaction Details Popup -->
     <div id="txDetailsModal" class="fixed inset-0 z-50 hidden flex items-end justify-center bg-black/50 backdrop-blur-sm">
         <div class="glass-modal w-full h-[90vh] rounded-t-3xl p-6 shadow-2xl flex flex-col transform transition-transform translate-y-full" id="txDetailsContent">
             <div class="flex justify-between items-start mb-4">
@@ -374,6 +398,7 @@
         </div>
     </div>
 
+    <!-- Add Station -->
     <div id="addStationModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/50 backdrop-blur-sm">
         <div class="bg-white dark:bg-slate-800 w-11/12 max-w-sm rounded-3xl p-6 shadow-2xl">
             <h3 class="text-lg font-bold mb-4 text-center border-b pb-2 dark:border-slate-700">تحديث مسار المعاملة</h3>
@@ -387,6 +412,7 @@
     </div>
 
     <!-- Hidden Printable Area for Luxury PDF -->
+    <!-- Fixed position on top, invisible, makes html2canvas work perfectly on mobile -->
     <div id="pdf-export-wrapper">
         <div id="pdf-content" style="background: white; color: #1e293b; font-family: 'Cairo', sans-serif; padding: 40px; width: 100%; min-height: 1000px; direction: rtl; box-sizing: border-box;">
             <!-- Outer Border with luxury feel -->
@@ -413,7 +439,7 @@
                 <!-- Body / Details -->
                 <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 30px; margin-bottom: 40px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); position: relative; z-index: 2;">
                     <div style="display: flex; margin-bottom: 20px;">
-                        <div style="width: 150px; font-weight: 800; color: #64748b; font-size: 16px;">المحامي المستلم:</div>
+                        <div style="width: 150px; font-weight: 800; color: #64748b; font-size: 16px;">الجهة المستفيدة:</div>
                         <div style="font-weight: 900; font-size: 18px; color: #0f172a;" id="pdf-lawyer-name"></div>
                     </div>
                     
@@ -456,19 +482,19 @@
         // --- Data & Initialization ---
         let db = { settings: { name: '', address: '', theme: 'light', signature: null }, lawyers: [], companies: [], transactions: [] };
         let currentTxId = null;
-        let confirmAction = null; // Holds the action for the custom confirm modal
+        let confirmAction = null; 
 
         const numFormat = new Intl.NumberFormat('en-US');
         const formatDate = (ts) => { let d = new Date(ts); return d.toLocaleDateString('ar-IQ', {month: 'short', day: 'numeric'}) + ' ' + d.toLocaleTimeString('ar-IQ', {hour: '2-digit', minute:'2-digit'}); };
 
         function init() {
-            const saved = localStorage.getItem('moaqib_db_v2');
+            const saved = localStorage.getItem('moaqib_db_v3'); // Updated version
             if(saved) db = JSON.parse(saved);
             
             if(!db.settings) db.settings = { name: '', address: '', theme: 'light', signature: null };
             if(db.settings.theme === 'dark') document.documentElement.classList.add('dark');
             
-            // Populate settings inputs
+            // Populate settings
             document.getElementById('set-name').value = db.settings.name || '';
             document.getElementById('set-address').value = db.settings.address || '';
             if(db.settings.signature) {
@@ -480,9 +506,9 @@
             renderAll();
         }
 
-        function saveData() { localStorage.setItem('moaqib_db_v2', JSON.stringify(db)); renderAll(); }
+        function saveData() { localStorage.setItem('moaqib_db_v3', JSON.stringify(db)); renderAll(); }
 
-        // --- Custom UI Modals (Replacing alert & confirm) ---
+        // --- Custom UI Modals ---
         function customAlert(title, message, type = 'info') {
             document.getElementById('uiAlertTitle').innerText = title;
             document.getElementById('uiAlertMsg').innerText = message;
@@ -509,7 +535,42 @@
             closeUiConfirm();
         });
 
-        // --- Settings / Signature Logic ---
+        // --- Navigation ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(`view-${tabId}`).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`nav-${tabId}`).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        function toggleArchiveTab(type) {
+            document.getElementById('tab-arch-tx').className = type==='tx' ? 'flex-1 py-2 rounded-lg text-sm font-bold bg-primary text-white shadow' : 'flex-1 py-2 rounded-lg text-sm font-bold text-slate-500 dark:text-slate-400';
+            document.getElementById('tab-arch-vault').className = type==='vault' ? 'flex-1 py-2 rounded-lg text-sm font-bold bg-primary text-white shadow' : 'flex-1 py-2 rounded-lg text-sm font-bold text-slate-500 dark:text-slate-400';
+            
+            document.getElementById('archive-tx-content').style.display = type === 'tx' ? 'block' : 'none';
+            document.getElementById('archive-vault-content').style.display = type === 'vault' ? 'block' : 'none';
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            db.settings.theme = isDark ? 'dark' : 'light';
+            saveData();
+        }
+
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            modal.style.display = 'flex';
+            setTimeout(() => modal.children[0].classList.remove('translate-y-full'), 10);
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            modal.children[0].classList.add('translate-y-full');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+
+        // --- Settings & Data Logic ---
         function saveSettingsRealtime() {
             db.settings.name = document.getElementById('set-name').value;
             db.settings.address = document.getElementById('set-address').value;
@@ -537,84 +598,61 @@
             saveData();
         }
 
-        // --- UI Interactions ---
-        function switchTab(tabId) {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.getElementById(`view-${tabId}`).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            document.getElementById(`nav-${tabId}`).classList.add('active');
-            window.scrollTo(0, 0);
-        }
-
-        function toggleTheme() {
-            const isDark = document.documentElement.classList.toggle('dark');
-            db.settings.theme = isDark ? 'dark' : 'light';
-            saveData();
-        }
-
-        function openModal(id) {
-            const modal = document.getElementById(id);
-            modal.style.display = 'flex';
-            setTimeout(() => modal.children[0].classList.remove('translate-y-full'), 10);
-        }
-
-        function closeModal(id) {
-            const modal = document.getElementById(id);
-            modal.children[0].classList.add('translate-y-full');
-            setTimeout(() => modal.style.display = 'none', 300);
-        }
-
         function checkThursdayAlert() {
             const now = new Date();
             if(now.getDay() === 4 && now.getHours() >= 18) {
-                const lastCheck = localStorage.getItem('thursday_checked_v2');
+                const lastCheck = localStorage.getItem('thursday_checked_v3');
                 const weekStr = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
                 if(lastCheck !== weekStr) {
                     document.getElementById('thursdayModal').style.display = 'flex';
-                    localStorage.setItem('thursday_checked_v2', weekStr);
+                    localStorage.setItem('thursday_checked_v3', weekStr);
                 }
             }
         }
 
-        // --- Logic: Lawyers & Companies ---
+        // Entities Management
         function saveLawyer() {
             const name = document.getElementById('in-lawyer-name').value;
             if(!name) return customAlert('نقص في البيانات', 'يرجى إدخال اسم المحامي.', 'error');
             db.lawyers.push({ id: Date.now(), name });
             closeModal('addLawyerModal');
             document.getElementById('in-lawyer-name').value = '';
-            saveData();
-            customAlert('نجاح', 'تمت إضافة المحامي بنجاح.', 'success');
+            saveData(); customAlert('نجاح', 'تمت إضافة المحامي بنجاح.', 'success');
         }
 
         function reqDeleteLawyer(id) {
             const hasTx = db.transactions.some(t => t.lawyerId === id);
-            if(hasTx) {
-                customAlert('تنبيه أمان', 'لا يمكن حذف هذا المحامي لارتباطه بمعاملات حالية أو سابقة. قم بحذف المعاملات أولاً.', 'error');
-                return;
-            }
-            customConfirm('حذف المحامي', 'هل أنت متأكد من حذف هذا المحامي نهائياً؟', () => {
+            if(hasTx) return customAlert('تنبيه أمان', 'لا يمكن حذف المحامي لارتباطه بمعاملات. احذف المعاملات أولاً.', 'error');
+            customConfirm('حذف المحامي', 'سيتم حذفه وحذف شركاته المرتبطة. هل تستمر؟', () => {
                 db.lawyers = db.lawyers.filter(l => l.id !== id);
-                db.companies = db.companies.filter(c => c.lawyerId !== id); // Remove associated companies
-                saveData();
-                customAlert('تم الحذف', 'تم حذف المحامي بنجاح.', 'success');
+                db.companies = db.companies.filter(c => c.lawyerId !== id); 
+                saveData(); customAlert('تم الحذف', 'تم حذف المحامي بنجاح.', 'success');
             });
         }
 
         function saveCompany() {
             const name = document.getElementById('in-comp-name').value;
             const lawyerId = document.getElementById('in-comp-lawyer').value;
-            if(!name || !lawyerId) return customAlert('نقص البيانات', 'يرجى إدخال اسم الشركة واختيار محامي.', 'error');
+            if(!name || !lawyerId) return customAlert('نقص البيانات', 'يرجى إدخال اسم الشركة واختيار محامٍ.', 'error');
             db.companies.push({ id: Date.now(), name, lawyerId: parseInt(lawyerId) });
             closeModal('addCompanyModal');
             document.getElementById('in-comp-name').value = '';
-            saveData();
-            customAlert('نجاح', 'تمت إضافة الشركة بنجاح.', 'success');
+            saveData(); customAlert('نجاح', 'تمت إضافة الشركة بنجاح.', 'success');
+        }
+
+        function reqDeleteCompany(id) {
+            const hasTx = db.transactions.some(t => t.companyId === id);
+            if(hasTx) return customAlert('تنبيه أمان', 'لا يمكن حذف الشركة لوجود معاملات لها. احذف معاملاتها أولاً.', 'error');
+            customConfirm('حذف الشركة', 'هل أنت متأكد من حذف هذه الشركة نهائياً؟', () => {
+                db.companies = db.companies.filter(c => c.id !== id);
+                saveData(); customAlert('تم الحذف', 'تم حذف الشركة بنجاح.', 'success');
+            });
         }
 
         function updateCompanyDropdown() {
-            const lId = parseInt(document.getElementById('new-tx-lawyer').value);
-            const comps = db.companies.filter(c => c.lawyerId === lId);
+            const lIdStr = document.getElementById('new-tx-lawyer').value;
+            if(!lIdStr) { document.getElementById('new-tx-company').innerHTML = '<option value="">- أختر محامي أولاً -</option>'; return; }
+            const comps = db.companies.filter(c => c.lawyerId === parseInt(lIdStr));
             document.getElementById('new-tx-company').innerHTML = comps.map(c => `<option value="${c.id}">${c.name}</option>`).join('') || '<option value="">- أضف شركة لهذا المحامي -</option>';
         }
 
@@ -627,17 +665,13 @@
 
             if(!compId || !lawyerId || !type || !fee) return customAlert('بيانات ناقصة', 'يرجى تعبئة كافة حقول المعاملة.', 'error');
 
-            db.transactions.push({
-                id: Date.now(), companyId: parseInt(compId), lawyerId: parseInt(lawyerId),
-                type, dept, fee: parseInt(fee), status: 'active', stations: [], lastUpdate: Date.now()
-            });
+            db.transactions.push({ id: Date.now(), companyId: parseInt(compId), lawyerId: parseInt(lawyerId), type, dept, fee: parseInt(fee), status: 'active', stations: [], lastUpdate: Date.now() });
 
             document.getElementById('new-tx-type').value = ''; document.getElementById('new-tx-fee').value = '';
-            saveData();
-            switchTab('active');
+            saveData(); switchTab('active');
         }
 
-        // --- Render Functions ---
+        // --- Rendering ---
         function renderAll() {
             const lOpts = db.lawyers.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
             document.getElementById('new-tx-lawyer').innerHTML = lOpts || '<option value="">- لا يوجد -</option>';
@@ -657,14 +691,23 @@
             document.getElementById('badge-active').innerText = activeTxs.length;
             document.getElementById('badge-active').style.display = activeTxs.length > 0 ? 'flex' : 'none';
 
-            // Settings Lawyers List
-            const setLawList = document.getElementById('settings-lawyers-list');
-            setLawList.innerHTML = db.lawyers.map(l => `
+            // Settings Lists (Lawyers & Companies)
+            document.getElementById('settings-lawyers-list').innerHTML = db.lawyers.map(l => `
                 <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border dark:border-slate-700">
                     <span class="font-bold text-sm">${l.name}</span>
                     <button onclick="reqDeleteLawyer(${l.id})" class="text-red-500 hover:bg-red-100 p-2 rounded-lg transition-colors"><i class="fa-solid fa-trash-can"></i></button>
                 </div>
-            `).join('') || '<p class="text-xs text-slate-400 text-center py-2">لا يوجد محامين مضافين</p>';
+            `).join('') || '<p class="text-xs text-slate-400 text-center py-2">لا يوجد محامين</p>';
+
+            document.getElementById('settings-companies-list').innerHTML = db.companies.map(c => `
+                <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border dark:border-slate-700">
+                    <div>
+                        <span class="font-bold text-sm block">${c.name}</span>
+                        <span class="text-[10px] text-slate-500">محامي: ${db.lawyers.find(l=>l.id==c.lawyerId)?.name || 'غير معروف'}</span>
+                    </div>
+                    <button onclick="reqDeleteCompany(${c.id})" class="text-red-500 hover:bg-red-100 p-2 rounded-lg transition-colors"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+            `).join('') || '<p class="text-xs text-slate-400 text-center py-2">لا توجد شركات</p>';
 
             renderTxList('active-list', activeTxs, 'صندوق المعاملات الجارية فارغ');
             renderTxList('stalled-list', stalledTxs, 'ممتاز، لا توجد معاملات متلكئة');
@@ -701,7 +744,7 @@
             }).join('');
         }
 
-        // --- Transaction Details ---
+        // --- Transaction Processing ---
         function openTxDetails(id) {
             currentTxId = id;
             const tx = db.transactions.find(t => t.id === id);
@@ -791,9 +834,9 @@
                 </div>`).join('') || `<p class="text-center font-bold text-slate-400 py-10">لا توجد نتائج</p>`;
         }
 
-        // --- Accounting & High-Quality PDF Export ---
+        // --- Accounting & PDF Export FIX ---
         function renderAccounting() {
-            const activeTxs = db.transactions.filter(t => t.status === 'active' || t.status === 'completed'); // Grouping all unpaid
+            const activeTxs = db.transactions.filter(t => t.status === 'active' || t.status === 'completed'); 
             let lawyerDues = {};
             activeTxs.forEach(tx => { if(!lawyerDues[tx.lawyerId]) lawyerDues[tx.lawyerId] = []; lawyerDues[tx.lawyerId].push(tx); });
 
@@ -819,7 +862,6 @@
         }
 
         function triggerPDF(lawyerId, type, amount) {
-            // Setup DOM elements for PDF
             const lawyer = db.lawyers.find(l => l.id == lawyerId);
             const dateStr = new Date().toLocaleDateString('ar-IQ');
             const refNo = 'REF-' + Date.now().toString().slice(-6);
@@ -833,15 +875,13 @@
             document.getElementById('pdf-sig-name').innerText = db.settings.name || 'الختم / التوقيع';
             
             document.getElementById('pdf-lawyer-name').innerText = lawyer.name;
-            document.getElementById('pdf-doc-type').innerText = type === 'receipt' ? 'تصفية أتعاب' : 'تقرير أسبوعي للمحطات';
+            document.getElementById('pdf-doc-type').innerText = type === 'receipt' ? 'تصفية أتعاب' : 'تقرير أسبوعي للمسارات';
             document.getElementById('pdf-amount').innerText = numFormat.format(amount) + ' د.ع';
 
-            // Signature Logic
             const sigImg = document.getElementById('pdf-signature-img');
             if(db.settings.signature) { sigImg.src = db.settings.signature; sigImg.style.display = 'block'; } 
             else { sigImg.style.display = 'none'; }
 
-            // Detail List if Report
             const listContainer = document.getElementById('pdf-tx-list-container');
             if(type === 'report') {
                 const txs = db.transactions.filter(t => t.lawyerId == lawyerId);
@@ -855,35 +895,39 @@
                 listContainer.style.display = 'none';
             }
 
-            // QR Code Logic
             const qrTarget = document.getElementById("qr-target");
-            qrTarget.innerHTML = ""; // clear previous
+            qrTarget.innerHTML = "";
             new QRCode(qrTarget, { text: `Ref: ${refNo}\nLawyer: ${lawyer.name}\nTotal: ${amount} IQD`, width: 100, height: 100, colorDark : "#0f172a", colorLight : "#ffffff" });
 
-            customAlert('تجهيز الملف', 'جاري إنشاء الملف الفخم، يرجى الانتظار للحظات...', 'info');
+            customAlert('تجهيز الملف', 'جاري إنشاء الملف الفخم، يرجى الانتظار...', 'info');
 
-            // Wait a moment for UI & QR to render fully
+            // CRITICAL PDF FIX FOR MOBILE: Render it temporarily in viewport but invisible
+            const wrapper = document.getElementById('pdf-export-wrapper');
+            wrapper.style.display = 'block';
+
             setTimeout(() => {
                 const element = document.getElementById('pdf-content');
                 const opt = {
                     margin: 0, filename: `${type}_${lawyer.name}.pdf`,
                     image: { type: 'jpeg', quality: 1 },
-                    html2canvas: { scale: 3, useCORS: true, letterRendering: true }, // High scale for luxury print
+                    html2canvas: { scale: 3, useCORS: true, letterRendering: true, logging: false },
                     jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
                 };
                 
                 html2pdf().set(opt).from(element).save().then(() => {
-                    closeUiAlert(); // hide the loading
+                    wrapper.style.display = 'none'; // Hide again
+                    closeUiAlert(); 
                 }).catch(err => {
+                    wrapper.style.display = 'none';
                     closeUiAlert();
-                    customAlert('خطأ فني', 'حدث خطأ أثناء الطباعة، تأكد من متصفحك.', 'error');
+                    customAlert('خطأ فني', 'حدث خطأ أثناء الطباعة.', 'error');
                 });
             }, 800);
         }
 
         function reqClearData() {
             customConfirm('تصفير قاعدة البيانات', 'هل أنت متأكد من مسح جميع البيانات؟ هذا الإجراء لا يمكن التراجع عنه.', () => {
-                localStorage.removeItem('moaqib_db_v2'); location.reload();
+                localStorage.removeItem('moaqib_db_v3'); location.reload();
             });
         }
 
