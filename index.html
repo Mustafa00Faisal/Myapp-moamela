@@ -4,210 +4,126 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>إدارة المعاملات</title>
-    
-    <!-- ربط التطبيق بملفات PWA الخاصة بك ليتم تثبيته على الهاتف -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#f8fafc">
-
-    <!-- استدعاء مكتبة التصميم Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- استدعاء مكتبة React ليعمل التطبيق -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-    <style>
-        body { font-family: system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
-    </style>
+    <style>body { font-family: system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }</style>
 </head>
 <body class="bg-slate-50">
-
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // الأيقونات 
-        const IconHome = ({className}) => <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
-        const IconAlert = ({className}) => <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>;
-        const IconPlus = ({className}) => <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
-        const IconWallet = ({className}) => <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>;
-        const IconSettings = ({className}) => <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
-        const IconBuilding = ({className}) => <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>;
-        const IconUser = ({className}) => <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
-        const IconClock = ({className}) => <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
-        const IconCheck = ({className}) => <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>;
-
-        const initialTransactions = [
-          {
-            id: 1, lawyer: 'أحمد محمود', company: 'إبهار المستقبل للتجارة والتسويق العقاري', 
-            department: 'مسجل الشركات - بغداد', type: 'تعديل عقد التأسيس', 
-            fee: 150000, status: 'active', 
-            lastUpdate: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-            timeline: ['استلام المعاملة', 'قسم التدقيق (الموظف ياسر)']
-          },
-          {
-            id: 2, lawyer: 'سعد علي', company: 'شركة الأفق اللوجستية', 
-            department: 'دائرة الاستيراد والتصدير', type: 'تجديد هوية استيراد', 
-            fee: 75000, status: 'active', 
-            lastUpdate: new Date(Date.now() - 1000 * 60 * 60 * 26).toISOString(),
-            timeline: ['استلام المعاملة', 'دفع الرسوم']
-          }
-        ];
+        // البيانات التجريبية للمحامين وشركاتهم
+        const lawyersData = {
+            "أحمد محمود": ["إبهار المستقبل", "شركة النور للخدمات", "مجموعة البناء"],
+            "سعد علي": ["الأفق اللوجستية", "تجارة العالمية"],
+            "مريم حسن": ["التقنية الحديثة", "خدمات التوصيل السريع"]
+        };
 
         function App() {
-          const [activeTab, setActiveTab] = useState('active');
-          const [transactions, setTransactions] = useState([]);
+            const [activeTab, setActiveTab] = useState('active');
+            const [transactions, setTransactions] = useState([]);
+            const [isAdding, setIsAdding] = useState(false);
+            
+            // بيانات المعاملة الجديدة
+            const [newTx, setNewTx] = useState({ lawyer: '', company: '', department: 'دائرة مسجل الشركات', type: '', fee: '' });
 
-          useEffect(() => {
-            const saved = localStorage.getItem('transactions_data');
-            if (saved) {
-              setTransactions(JSON.parse(saved));
-            } else {
-              setTransactions(initialTransactions);
-              localStorage.setItem('transactions_data', JSON.stringify(initialTransactions));
-            }
-          }, []);
+            useEffect(() => {
+                const saved = localStorage.getItem('transactions_data');
+                if (saved) setTransactions(JSON.parse(saved));
+            }, []);
 
-          const isDelayed = (dateString) => {
-            const lastUpdate = new Date(dateString);
-            return ((new Date() - lastUpdate) / (1000 * 60 * 60)) > 24;
-          };
-
-          return (
-            <div className="max-w-md mx-auto relative min-h-screen bg-slate-50 text-slate-800 pb-24 overflow-hidden shadow-2xl">
-              
-              <div className="p-6">
-                {/* البطاقة العلوية المستوحاة من الصورة */}
-                <div className="bg-gradient-to-r from-pink-500 to-purple-600 rounded-[32px] p-6 text-white shadow-lg shadow-purple-200 mb-8 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-10 -mt-10 blur-xl"></div>
-                  <div className="flex justify-between items-center relative z-10">
-                    <div>
-                      <h2 className="text-sm font-medium text-purple-100 mb-1">إجمالي المستحقات (قيد العمل)</h2>
-                      <p className="text-3xl font-bold">225,000 <span className="text-lg font-normal">د.ع</span></p>
-                    </div>
-                    <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm border border-white/30">
-                      <span className="font-bold text-lg">2</span>
-                    </div>
-                  </div>
-                  <div className="mt-6 flex gap-3">
-                    <button className="bg-white/20 hover:bg-white/30 transition-colors py-2 px-4 rounded-2xl text-sm font-medium backdrop-blur-sm border border-white/20 flex-1">
-                      عرض التفاصيل
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex justify-between items-end mb-6">
-                  <div>
-                    <h1 className="text-2xl font-extrabold text-slate-800">المعاملات الجارية</h1>
-                    <p className="text-sm text-slate-500 font-medium mt-1">لديك {transactions.filter(t => t.status === 'active').length} معاملة نشطة للشركات</p>
-                  </div>
-                </div>
-
-                {/* بطاقات المعاملات */}
-                <div className="space-y-5">
-                  {transactions.filter(t => t.status === 'active').map((tx) => {
-                    const delayed = isDelayed(tx.lastUpdate);
-                    return (
-                      <div key={tx.id} className="bg-white rounded-[28px] p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 relative">
-                        
-                        {delayed && (
-                          <div className="absolute top-5 left-5 flex items-center gap-1 text-red-500 bg-red-50 px-3 py-1.5 rounded-full text-xs font-bold animate-pulse">
-                            <IconClock />
-                            <span>تجاوز 24 ساعة</span>
-                          </div>
-                        )}
-
-                        <div className="flex items-start gap-3 mb-4">
-                          <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-purple-600 shrink-0">
-                            <IconBuilding />
-                          </div>
-                          <div>
-                            <h3 className="font-bold text-slate-800 text-lg leading-tight">{tx.company}</h3>
-                            <div className="flex items-center gap-1 text-slate-500 text-sm mt-1">
-                              <IconUser />
-                              <span>{tx.lawyer}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="bg-slate-50 rounded-2xl p-4 mb-4">
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-xs font-bold text-slate-400">الدائرة</span>
-                            <span className="text-xs font-bold text-slate-700">{tx.department}</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs font-bold text-slate-400">نوع المعاملة</span>
-                            <span className="text-xs font-bold text-purple-600">{tx.type}</span>
-                          </div>
-                        </div>
-
-                        <div className="mb-5 pl-2 border-r-2 border-purple-100 mr-2 pr-4 relative">
-                          <div className="absolute w-2 h-2 bg-purple-500 rounded-full -right-[5px] top-1"></div>
-                          <p className="text-sm font-semibold text-slate-700">المحطة الحالية:</p>
-                          <p className="text-sm text-slate-500 mt-1">{tx.timeline[tx.timeline.length - 1]}</p>
-                        </div>
-
-                        <div className="flex gap-3 mt-2">
-                          <button className="flex-1 bg-slate-900 text-white py-3 rounded-2xl font-bold text-sm hover:bg-slate-800 transition-colors flex items-center justify-center gap-2">
-                            <IconCheck />
-                            إنجاز المعاملة
-                          </button>
-                          <button className="w-14 bg-red-50 text-red-600 flex items-center justify-center rounded-2xl hover:bg-red-100 transition-colors">
-                            <IconAlert />
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* شريط التنقل السفلي */}
-              <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto">
-                <div className="absolute inset-0 bg-gradient-to-t from-white via-white to-transparent -top-10 -z-10 pointer-events-none"></div>
+            const saveTransaction = () => {
+                if(!newTx.lawyer || !newTx.company || !newTx.type) return alert("يرجى ملء البيانات");
                 
-                <div className="bg-white mx-6 mb-6 rounded-3xl shadow-[0_20px_40px_rgb(0,0,0,0.1)] px-6 py-4 flex justify-between items-center relative border border-slate-100">
-                  
-                  <button onClick={() => setActiveTab('active')} className={`flex flex-col items-center gap-1 ${activeTab === 'active' ? 'text-purple-600' : 'text-slate-400'}`}>
-                    <IconHome className={activeTab === 'active' ? 'text-purple-600' : ''} />
-                  </button>
-                  
-                  <button onClick={() => setActiveTab('stuck')} className={`flex flex-col items-center gap-1 ${activeTab === 'stuck' ? 'text-red-500' : 'text-slate-400'}`}>
-                    <IconAlert className={activeTab === 'stuck' ? 'text-red-500' : ''} />
-                  </button>
+                const tx = {
+                    ...newTx,
+                    id: Date.now(),
+                    status: 'active',
+                    lastUpdate: new Date().toISOString(),
+                    timeline: ['بدء المعاملة']
+                };
+                
+                const updated = [tx, ...transactions];
+                setTransactions(updated);
+                localStorage.setItem('transactions_data', JSON.stringify(updated));
+                setIsAdding(false);
+                setNewTx({ lawyer: '', company: '', department: 'دائرة مسجل الشركات', type: '', fee: '' });
+            };
 
-                  <div className="relative -top-8">
-                    <button className="bg-gradient-to-br from-pink-500 to-purple-600 text-white w-16 h-16 rounded-full flex items-center justify-center shadow-lg shadow-purple-300 hover:scale-105 transition-transform">
-                      <IconPlus />
-                    </button>
-                  </div>
+            return (
+                <div className="max-w-md mx-auto relative min-h-screen bg-slate-50 text-slate-800 pb-24">
+                    
+                    {/* الشاشة الرئيسية */}
+                    {!isAdding && (
+                        <div className="p-6">
+                            <h1 className="text-2xl font-extrabold mb-6">المعاملات الجارية</h1>
+                            <div className="space-y-4">
+                                {transactions.map(tx => (
+                                    <div key={tx.id} className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
+                                        <h3 className="font-bold text-lg">{tx.company}</h3>
+                                        <p className="text-sm text-slate-500">{tx.lawyer} | {tx.type}</p>
+                                        <div className="mt-3 font-bold text-purple-600">{tx.fee} د.ع</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
-                  <button onClick={() => setActiveTab('finance')} className={`flex flex-col items-center gap-1 ${activeTab === 'finance' ? 'text-purple-600' : 'text-slate-400'}`}>
-                    <IconWallet className={activeTab === 'finance' ? 'text-purple-600' : ''} />
-                  </button>
+                    {/* واجهة إضافة معاملة جديدة */}
+                    {isAdding && (
+                        <div className="fixed inset-0 bg-slate-50 z-50 p-6 overflow-y-auto">
+                            <h2 className="text-2xl font-bold mb-6">معاملة جديدة</h2>
+                            
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-bold mb-2">اختر المحامي</label>
+                                    <select className="w-full p-4 rounded-2xl bg-white border" onChange={(e) => setNewTx({...newTx, lawyer: e.target.value, company: ''})}>
+                                        <option value="">اختر محامياً...</option>
+                                        {Object.keys(lawyersData).map(l => <option key={l} value={l}>{l}</option>)}
+                                    </select>
+                                </div>
 
-                  <button onClick={() => setActiveTab('settings')} className={`flex flex-col items-center gap-1 ${activeTab === 'settings' ? 'text-purple-600' : 'text-slate-400'}`}>
-                    <IconSettings className={activeTab === 'settings' ? 'text-purple-600' : ''} />
-                  </button>
+                                {newTx.lawyer && (
+                                    <div>
+                                        <label className="block text-sm font-bold mb-2">الشركة</label>
+                                        <select className="w-full p-4 rounded-2xl bg-white border" onChange={(e) => setNewTx({...newTx, company: e.target.value})}>
+                                            <option value="">اختر شركة...</option>
+                                            {lawyersData[newTx.lawyer].map(c => <option key={c} value={c}>{c}</option>)}
+                                        </select>
+                                    </div>
+                                )}
+
+                                <input type="text" placeholder="نوع المعاملة" className="w-full p-4 rounded-2xl border" onChange={e => setNewTx({...newTx, type: e.target.value})}/>
+                                <input type="number" placeholder="الأتعاب (د.ع)" className="w-full p-4 rounded-2xl border" onChange={e => setNewTx({...newTx, fee: e.target.value})}/>
+
+                                <div className="flex gap-4 mt-6">
+                                    <button onClick={saveTransaction} className="flex-1 bg-purple-600 text-white py-4 rounded-2xl font-bold">حفظ المعاملة</button>
+                                    <button onClick={() => setIsAdding(false)} className="px-6 py-4 rounded-2xl bg-slate-200 font-bold">إلغاء</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Navigation */}
+                    <div className="fixed bottom-6 left-6 right-6 flex justify-between bg-white p-4 rounded-3xl shadow-xl border border-slate-100">
+                        <div className="w-10"></div>
+                        <button onClick={() => setIsAdding(true)} className="bg-purple-600 text-white w-14 h-14 rounded-full flex items-center justify-center -mt-10 shadow-lg">
+                            <span className="text-2xl font-bold">+</span>
+                        </button>
+                        <div className="w-10"></div>
+                    </div>
                 </div>
-              </div>
-            </div>
-          );
+            );
         }
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
-    </script>
-
-    <!-- كود تشغيل ملفات PWA الخاصة بك -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW setup failed: ', err));
-        });
-      }
     </script>
 </body>
 </html>
