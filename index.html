@@ -33,6 +33,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- مكتبة قاعدة البيانات السحابية Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         body { 
@@ -838,56 +840,137 @@
 
     <!-- Scripts Area -->
     <script>
-        // ==========================================
         // 1. CORE DATA SYSTEM & MIGRATION
+
+
         // ==========================================
+                // ==========================================
+        // 1. نظام البيانات الأساسي والربط السحابي (CORE DATA SYSTEM & SUPABASE)
+        // ==========================================
+        
+        /* 
+          1. إعداد روابط قاعدة البيانات السحابية (Supabase)
+          سنضع هنا الروابط الوهمية مؤقتاً لكي لا يتوقف التطبيق حتى تنشئ حسابك.
+        */
+        const supabaseUrl = 'https://test-project.supabase.co'; 
+        const supabaseKey = 'dummy-key-123'; 
+        
+        // بناء كائن الاتصال بالسحابة (مع حماية برمجية لمنع توقف التطبيق إذا لم يكن هناك إنترنت)
+        let supabase = null;
+        try {
+            if (window.supabase) {
+                supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+            }
+        } catch(e) { 
+            console.warn("مكتبة السحابة لم تحمل بعد"); 
+        }
+
+        /*
+          2. الذاكرة المؤقتة (Local State)
+          هذا المتغير (db) يحمل كل بياناتك ليتم عرضها في الواجهة فوراً لتسريع التطبيق.
+        */
         let db = { 
-            settings: { name: '', address: '', theme: 'light', signature: null }, 
-            lawyers: [], 
-            companies: [], 
-            transactions: [], 
-            vault: [] 
+            settings: { name: '', address: '', theme: 'light', signature: null }, // الإعدادات
+            lawyers: [],      // العملاء والمحامين
+            companies: [],    // الشركات
+            transactions: [], // المعاملات الجارية والمنجزة
+            vault: []         // خزنة الصور
         };
         
+        // متغيرات للتحكم بالواجهة (تتبع المعاملة المفتوحة، النوافذ المنبثقة، والرسم البياني)
         let currentTxId = null; 
         let confirmAction = null; 
         let chartInstance = null;
         
+        // أدوات مساعدة لتنسيق الأرقام والتواريخ
         const numFormat = new Intl.NumberFormat('en-US');
         const formatDate = (ts) => { 
             let d = new Date(ts); 
             return d.toLocaleDateString('ar-IQ', {month: 'short', day: 'numeric'}) + ' - ' + d.toLocaleTimeString('ar-IQ', {hour: '2-digit', minute:'2-digit'}); 
         };
 
-        function init() {
-            // Smart Migration logic V4 -> V5
+        /*
+          3. دالة التشغيل الذكية (Smart Initialization)
+          تعمل هذه الدالة فور فتح التطبيق. ستحاول جلب البيانات من الإنترنت أولاً.
+        */
+        async function init() {
+            try {
+                // إذا كان الرابط وهمي (كما هو الآن) أو السحابة غير جاهزة، انتقل لنظام الطوارئ فوراً
+                if (!supabase || supabaseUrl.includes('test-project')) {
+                    throw new Error("السحابة غير مفعلة بعد");
+                }
+
+                showToast('جاري الاتصال بالسحابة...', 'info');
+
+                // جلب المحامين، الشركات، والمعاملات من السحابة في نفس الوقت لتسريع التحميل
+                const [lawyersRes, companiesRes, txsRes] = await Promise.all([
+                    supabase.from('lawyers').select('*'),
+                    supabase.from('companies').select('*'),
+                    supabase.from('transactions').select('*')
+                ]);
+
+                // التحقق من عدم وجود أخطاء في الاسترجاع
+                if (lawyersRes.error) throw lawyersRes.error;
+                if (companiesRes.error) throw companiesRes.error;
+                if (txsRes.error) throw txsRes.error;
+
+                // تعبئة الذاكرة المؤقتة بالبيانات السحابية
+                db.lawyers = lawyersRes.data || [];
+                db.companies = companiesRes.data || [];
+                db.transactions = txsRes.data || [];
+                
+                // جلب الإعدادات المحفوظة محلياً (كالثيم والتوقيع)
+                let savedSettings = localStorage.getItem('moaqib_settings');
+                if(savedSettings) db.settings = JSON.parse(savedSettings);
+
+                // تطبيق الثيم المظلم إذا كان مفعلاً
+                if(db.settings.theme === 'dark') document.documentElement.classList.add('dark');
+                
+                // تعبئة حقول الإعدادات
+                document.getElementById('set-name').value = db.settings.name || '';
+                document.getElementById('set-address').value = db.settings.address || '';
+                if(db.settings.signature) {
+                    document.getElementById('sig-preview-container').classList.remove('hidden');
+                    document.getElementById('sig-preview').src = db.settings.signature;
+                }
+
+                renderAll(); // رسم الواجهة
+                showToast('تم جلب البيانات السحابية بنجاح!', 'success');
+
+            } catch (error) {
+                fallbackToLocal(); // تشغيل النسخة المحلية في حال عدم وجود إنترنت أو روابط حقيقية
+            }
+        }
+
+        /*
+          4. دالة الطوارئ (Fallback System)
+          تعمل هذه الدالة إذا انقطع الإنترنت أو السحابة غير مربوطة وتجلب بياناتك من جهازك القديمة.
+        */
+        function fallbackToLocal() {
             let saved = localStorage.getItem('moaqib_db_v5'); 
             
+            // ترقية البيانات من الإصدارات القديمة إن وجدت
             if(!saved) {
                 const oldDataV4 = localStorage.getItem('moaqib_db_v4') || localStorage.getItem('moaqib_db_v3');
                 if(oldDataV4) { 
                     saved = oldDataV4; 
                     localStorage.setItem('moaqib_db_v5', oldDataV4); 
-                    showToast('تم ترقية بياناتك للإصدار الخامس بنجاح!', 'success'); 
                 }
             }
 
+            // فك تشفير البيانات وتعبئة الذاكرة المؤقتة
             if(saved) {
                 try {
                     const parsed = JSON.parse(saved);
                     db = { ...db, ...parsed };
                     if(!db.vault) db.vault = []; 
-                } catch(e) { 
-                    console.error("Error parsing db", e); 
-                }
+                } catch(e) { console.error("Error parsing db", e); }
             }
             
-            // Set Theme
+            // تطبيق الإعدادات (الثيم والتوقيع)
             if(db.settings.theme === 'dark') {
                 document.documentElement.classList.add('dark');
             }
-            
-            // Load Settings Data
             document.getElementById('set-name').value = db.settings.name || '';
             document.getElementById('set-address').value = db.settings.address || '';
             if(db.settings.signature) {
@@ -895,9 +978,13 @@
                 document.getElementById('sig-preview').src = db.settings.signature;
             }
 
-            renderAll();
+            renderAll(); // رسم الواجهة
+            showToast('يعمل على النسخة المحلية (أوفلاين)', 'error');
         }
 
+        /*
+          5. دالة الحفظ (ستتغير لاحقاً لترفع للسحابة، حالياً تحفظ بجهازك)
+        */
         function saveData() { 
             try {
                 localStorage.setItem('moaqib_db_v5', JSON.stringify(db)); 
@@ -908,6 +995,7 @@
                 }
             }
         }
+
 
         // ==========================================
         // 2. UI / UX SYSTEMS (TOASTS, MODALS, SELECTS)
