@@ -851,95 +851,69 @@
         // 1. CORE DATA SYSTEM & MIGRATION
         // ==========================================
                 // ==========================================
+               // ==========================================
         // 1. نظام البيانات الأساسي والربط السحابي (CORE DATA SYSTEM & SUPABASE)
         // ==========================================
 
-        /* 
-          إعداد الاتصال بقاعدة البيانات السحابية (Supabase)
-          هذا الجزء هو بمثابة "جسر التواصل" بين واجهة التطبيق التي تراها، وبين السيرفر على الإنترنت.
-          ملاحظة: سنقوم لاحقاً بتبديل الروابط الوهمية أدناه بروابط مشروعك الحقيقي.
-        */
-        const supabaseUrl = 'https://test-project.supabase.co'; 
-        const supabaseKey = 'dummy-key-123'; 
+        const supabaseUrl = 'YOUR_SUPABASE_URL'; // سنضع الرابط الحقيقي لاحقاً
+        const supabaseKey = 'YOUR_SUPABASE_ANON_KEY'; // سنضع المفتاح الحقيقي لاحقاً
+        
+        // تعريف كائن السحابة بشكل آمن جداً (لكي لا يتجمد التطبيق إذا تأخر تحميل المكتبة)
+        let supabase = null;
+        try {
+            if (window.supabase) {
+                supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+            }
+        } catch(e) { console.warn("مكتبة السحابة لم تحمل بعد"); }
 
-        // بناء "عميل الاتصال" (Client) الذي سنستخدمه لإرسال واستقبال البيانات
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-
-        /*
-          الذاكرة المؤقتة (Local State):
-          تخيل أن هذا المتغير (db) هو "مسودة" داخل جهازك.
-          لجعل التطبيق سريعاً ولا يحتاج للتحميل عند كل ضغطة، سنجلب البيانات من الإنترنت مرة واحدة
-          ونضعها في هذه المسودة، ونعرضها لك منها فوراً.
-        */
         let db = { 
-            settings: { name: '', address: '', theme: 'light', signature: null }, // إعدادات النظام
-            lawyers: [],      // قائمة العملاء / المحامين
-            companies: [],    // قائمة الشركات
-            transactions: [], // قائمة المعاملات ومحطاتها
-            vault: []         // خزنة الصور
+            settings: { name: '', address: '', theme: 'light', signature: null }, 
+            lawyers: [], companies: [], transactions: [], vault: [] 
         };
         
-        /*
-          متغيرات التحكم بالواجهة (UI Control Variables):
-          نستخدمها لنعرف ماذا يفعل المستخدم حالياً داخل التطبيق.
-        */
-        let currentTxId = null;   // يخزن رقم المعاملة المفتوحة حالياً لتعديلها
-        let confirmAction = null; // يخزن "الأمر" الذي سيتم تنفيذه عند ضغط زر "تأكيد"
-        let chartInstance = null; // يخزن الرسم البياني للتمكن من تحديثه
+        let currentTxId = null; 
+        let confirmAction = null; 
+        let chartInstance = null;
         
-        /*
-          أدوات مساعدة (Helper Functions):
-          دوال صغيرة لتسهيل عرض البيانات (مثل تنسيق الأرقام والتواريخ).
-        */
-        
-        // أداة لوضع فواصل الآلاف للمبالغ المالية (مثال: 10000 تصبح 10,000)
         const numFormat = new Intl.NumberFormat('en-US');
 
-        // دالة تحول الوقت البرمجي المعقد إلى وقت عربي مقروء (بتوقيت العراق)
         const formatDate = (ts) => { 
             let d = new Date(ts); 
             return d.toLocaleDateString('ar-IQ', {month: 'short', day: 'numeric'}) + ' - ' + d.toLocaleTimeString('ar-IQ', {hour: '2-digit', minute:'2-digit'}); 
         };
 
-
-                /*
+        /*
           دالة التشغيل الأساسية (Initialization)
-          هذه الدالة تعمل تلقائياً أول ما تفتح التطبيق.
-          قمنا بتحويلها إلى (async) لأن جلب البيانات من الإنترنت يستغرق أجزاء من الثانية،
-          فيجب أن "ينتظر" التطبيق (await) حتى تصل البيانات قبل أن يعرضها.
         */
         async function init() {
             try {
-                // 1. إظهار رسالة للمستخدم أثناء محاولة الاتصال
-                showToast('جاري الاتصال بالسحابة وجلب البيانات...', 'info');
+                // إذا لم نربط السحابة بعد، أو لم تتحمل المكتبة، نذهب للنسخة المحلية مباشرة
+                if (!supabase || supabaseUrl === 'YOUR_SUPABASE_URL') {
+                    throw new Error("السحابة غير مفعلة بعد");
+                }
 
-                // 2. جلب البيانات من جداول Supabase في نفس الوقت لتسريع التطبيق (عبر Promise.all)
+                showToast('جاري الاتصال بالسحابة...', 'info');
+
                 const [lawyersRes, companiesRes, txsRes] = await Promise.all([
                     supabase.from('lawyers').select('*'),
                     supabase.from('companies').select('*'),
                     supabase.from('transactions').select('*')
                 ]);
 
-                // 3. التحقق من عدم وجود أخطاء في الاتصال
                 if (lawyersRes.error) throw lawyersRes.error;
                 if (companiesRes.error) throw companiesRes.error;
                 if (txsRes.error) throw txsRes.error;
 
-                // 4. تعبئة "الذاكرة المؤقتة" بالبيانات القادمة من الإنترنت
                 db.lawyers = lawyersRes.data || [];
                 db.companies = companiesRes.data || [];
                 db.transactions = txsRes.data || [];
                 
-                // (سنبقي الإعدادات والخزنة محلياً مؤقتاً لتسهيل مرحلة الانتقال)
+                // الإعدادات نحتفظ بها محلياً في الوقت الحالي
                 let savedSettings = localStorage.getItem('moaqib_settings');
                 if(savedSettings) db.settings = JSON.parse(savedSettings);
 
-                // 5. تطبيق الإعدادات (تفعيل الثيم المظلم إذا كان مختاراً)
-                if(db.settings.theme === 'dark') {
-                    document.documentElement.classList.add('dark');
-                }
+                if(db.settings.theme === 'dark') document.documentElement.classList.add('dark');
                 
-                // تعبئة حقول الإعدادات باسم المعقب وتوقيعه
                 document.getElementById('set-name').value = db.settings.name || '';
                 document.getElementById('set-address').value = db.settings.address || '';
                 if(db.settings.signature) {
@@ -947,43 +921,54 @@
                     document.getElementById('sig-preview').src = db.settings.signature;
                 }
 
-                // 6. أخيرًا، رسم وتحديث كل الواجهات بالبيانات السحابية الجديدة
                 renderAll();
-                showToast('تم جلب البيانات من السحابة بنجاح!', 'success');
+                showToast('تم جلب البيانات السحابية بنجاح!', 'success');
 
             } catch (error) {
-                // إذا فشل الاتصال (لأننا لم نضع روابطك الحقيقية بعد، أو انقطع الإنترنت)
-                console.error("خطأ في السحابة:", error.message);
-                fallbackToLocal(); // تشغيل النظام الاحتياطي
+                // في حال فشل الاتصال نشغل نظام الطوارئ
+                fallbackToLocal(); 
             }
         }
 
         /*
-          دالة الطوارئ (Fallback System)
-          في حال عدم وجود إنترنت، يقوم التطبيق بفتح آخر نسخة محفوظة في جهازك
-          لكي تتمكن من رؤية معاملاتك ومراجعة الدوائر بدون توقف.
+          دالة الطوارئ (Fallback System) - النسخة المصححة 100%
         */
         function fallbackToLocal() {
-            let saved = localStorage.getItem('moaqib_db_v5');
-            if(saved) {
-                try {
-                    db = { ...db, ...JSON.parse(saved) };
-                    if(db.settings.theme === 'dark') document.documentElement.classList.add('dark');
-                    
-                    document.getElementById('set-name').value = db.settings.name || '';
-                    document.getElementById('set-address').value = db.settings.address || '';
-                    if(db.settings.signature) {
-                        document.getElementById('sig-preview-container').classList.remove('hidden');
-                        document.getElementById('sig-preview').src = db.settings.signature;
-                    }
-                    
-                    renderAll();
-                    showToast('تم فتح النظام على النسخة المحلية (بدون إنترنت)', 'error');
-                } catch(e) {
-                    console.error("Error parsing local db", e);
+            // استرجاع البيانات السابقة أو ترقيتها (لكي لا تفقد بياناتك القديمة)
+            let saved = localStorage.getItem('moaqib_db_v5'); 
+            if(!saved) {
+                const oldDataV4 = localStorage.getItem('moaqib_db_v4') || localStorage.getItem('moaqib_db_v3');
+                if(oldDataV4) { 
+                    saved = oldDataV4; 
+                    localStorage.setItem('moaqib_db_v5', oldDataV4); 
                 }
             }
+
+            if(saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    db = { ...db, ...parsed };
+                    if(!db.vault) db.vault = []; 
+                } catch(e) { console.error("Error parsing db", e); }
+            }
+            
+            if(db.settings.theme === 'dark') document.documentElement.classList.add('dark');
+            
+            document.getElementById('set-name').value = db.settings.name || '';
+            document.getElementById('set-address').value = db.settings.address || '';
+            if(db.settings.signature) {
+                document.getElementById('sig-preview-container').classList.remove('hidden');
+                document.getElementById('sig-preview').src = db.settings.signature;
+            }
+
+            // هذا السطر الأهم! هو الذي يقوم ببناء الواجهة وتشغيل الأزرار
+            renderAll();
+            
+            // إشعار للمستخدم لمعرفة حالة التطبيق
+            showToast('يعمل على النسخة المحلية', 'info');
         }
+ 
+
 
 
         function saveData() { 
