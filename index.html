@@ -859,9 +859,9 @@
           هذا الجزء هو بمثابة "جسر التواصل" بين واجهة التطبيق التي تراها، وبين السيرفر على الإنترنت.
           ملاحظة: سنقوم لاحقاً بتبديل الروابط الوهمية أدناه بروابط مشروعك الحقيقي.
         */
-        const supabaseUrl = 'YOUR_SUPABASE_URL'; // رابط مشروعك السحابي
-        const supabaseKey = 'YOUR_SUPABASE_ANON_KEY'; // المفتاح السري الآمن للاتصال
-        
+        const supabaseUrl = 'https://test-project.supabase.co'; 
+        const supabaseKey = 'dummy-key-123'; 
+
         // بناء "عميل الاتصال" (Client) الذي سنستخدمه لإرسال واستقبال البيانات
         const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
