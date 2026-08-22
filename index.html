@@ -840,17 +840,21 @@
     <!-- Scripts Area -->
     <script>
         // ==========================================
-        // 1. CORE DATA SYSTEM & MIGRATION
-        // ==========================================
                 // ==========================================
         // 1. CORE DATA SYSTEM & MIGRATION (CLOUD)
         // ==========================================
         
-        // ضع الرابط والمفتاح الخاص بك هنا داخل الأقواس
         const SUPABASE_URL = 'https://giidtugteyiobaagqohy.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpaWR0dWd0ZXlpb2JhYWdxb2h5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxMTgyMjYsImV4cCI6MjEwMjY5NDIyNn0.v7Nwag2BTrCWG6zzeYo1kTG4w2xAuzSmiZpCLJtvBow';
         
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        let supabase = null;
+        try {
+            if (window.supabase) {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            }
+        } catch(e) {
+            console.error("خطأ في مكتبة السحابة:", e);
+        }
 
         let db = { 
             settings: { name: '', address: '', theme: 'light', signature: null }, 
@@ -871,35 +875,54 @@
         };
 
         async function init() {
-            showToast('جاري الاتصال بالسحابة...', 'info');
             try {
-                // جلب البيانات من السحابة
-                const { data, error } = await supabase.from('app_data').select('state').eq('id', 1).single();
-                
-                if (data && data.state && data.state.settings) {
-                    db = data.state; // نجح تحميل البيانات الأونلاين
+                // محاولة جلب البيانات من السحابة أولاً
+                if (supabase) {
+                    const { data, error } = await supabase.from('app_data').select('state').eq('id', 1).single();
+                    if (data && data.state && Object.keys(data.state).length > 0) {
+                        db = { ...db, ...data.state }; // دمج البيانات السحابية
+                    } else {
+                        loadLocalData();
+                    }
                 } else {
-                    // إذا كانت السحابة فارغة، نحاول سحب البيانات القديمة من المتصفح
-                    let saved = localStorage.getItem('moaqib_db_v5');
-                    if(saved) db = JSON.parse(saved);
+                    loadLocalData();
                 }
             } catch (err) {
-                console.error(err);
-                let saved = localStorage.getItem('moaqib_db_v5');
-                if(saved) db = JSON.parse(saved);
+                console.error("خطأ سحابي، جاري التشغيل محلياً:", err);
+                loadLocalData();
             }
-            
+
+            // 🔴 طبقة الحماية: تأكيد وجود الإعدادات لمنع انهيار وتجمد النظام
+            if (!db.settings) {
+                db.settings = { name: '', address: '', theme: 'light', signature: null };
+            }
+
             // ضبط الواجهة
             if(db.settings.theme === 'dark') document.documentElement.classList.add('dark');
             document.getElementById('set-name').value = db.settings.name || '';
             document.getElementById('set-address').value = db.settings.address || '';
+            
             if(db.settings.signature) {
-                document.getElementById('sig-preview-container').classList.remove('hidden');
-                document.getElementById('sig-preview').src = db.settings.signature;
+                const sigCont = document.getElementById('sig-preview-container');
+                const sigImg = document.getElementById('sig-preview');
+                if (sigCont && sigImg) {
+                    sigCont.classList.remove('hidden');
+                    sigImg.src = db.settings.signature;
+                }
             }
 
             renderAll();
-            showToast('تمت المزامنة أونلاين', 'success');
+            if(supabase) showToast('تم ربط النظام بالسحابة بنجاح', 'success');
+        }
+
+        function loadLocalData() {
+            let saved = localStorage.getItem('moaqib_db_v5');
+            if(saved) {
+                try {
+                    let parsed = JSON.parse(saved);
+                    db = { ...db, ...parsed }; // دمج ذكي للبيانات القديمة
+                } catch(e) { console.error(e); }
+            }
         }
 
         async function saveData() { 
@@ -908,7 +931,9 @@
                 localStorage.setItem('moaqib_db_v5', JSON.stringify(db)); 
                 
                 // 2. رفع النسخة للسحابة أونلاين
-                await supabase.from('app_data').update({ state: db }).eq('id', 1);
+                if(supabase) {
+                    await supabase.from('app_data').update({ state: db }).eq('id', 1);
+                }
                 
                 renderAll(); 
             } catch (error) {
@@ -918,6 +943,7 @@
                 }
             }
         }
+
 
 
         // ==========================================
