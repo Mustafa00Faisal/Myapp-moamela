@@ -921,21 +921,85 @@
                     document.getElementById('sig-preview').src = db.settings.signature;
                 }
 
+         <script>
+        // ==========================================
+        // 1. نظام البيانات الأساسي والربط السحابي (CORE DATA SYSTEM & SUPABASE)
+        // ==========================================
+        
+        const supabaseUrl = 'https://test-project.supabase.co'; // سنضع الرابط الحقيقي لاحقاً
+        const supabaseKey = 'dummy-key-123'; // سنضع المفتاح الحقيقي لاحقاً
+        
+        let supabase = null;
+        try {
+            if (window.supabase) {
+                supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+            }
+        } catch(e) { console.warn("مكتبة السحابة لم تحمل بعد"); }
+
+        let db = { 
+            settings: { name: '', address: '', theme: 'light', signature: null }, 
+            lawyers: [], 
+            companies: [], 
+            transactions: [], 
+            vault: [] 
+        };
+        
+        let currentTxId = null; 
+        let confirmAction = null; 
+        let chartInstance = null;
+        
+        const numFormat = new Intl.NumberFormat('en-US');
+        
+        const formatDate = (ts) => { 
+            let d = new Date(ts); 
+            return d.toLocaleDateString('ar-IQ', {month: 'short', day: 'numeric'}) + ' - ' + d.toLocaleTimeString('ar-IQ', {hour: '2-digit', minute:'2-digit'}); 
+        };
+
+        async function init() {
+            try {
+                if (!supabase || supabaseUrl.includes('test-project')) {
+                    throw new Error("السحابة غير مفعلة بعد");
+                }
+
+                showToast('جاري الاتصال بالسحابة...', 'info');
+
+                const [lawyersRes, companiesRes, txsRes] = await Promise.all([
+                    supabase.from('lawyers').select('*'),
+                    supabase.from('companies').select('*'),
+                    supabase.from('transactions').select('*')
+                ]);
+
+                if (lawyersRes.error) throw lawyersRes.error;
+                if (companiesRes.error) throw companiesRes.error;
+                if (txsRes.error) throw txsRes.error;
+
+                db.lawyers = lawyersRes.data || [];
+                db.companies = companiesRes.data || [];
+                db.transactions = txsRes.data || [];
+                
+                let savedSettings = localStorage.getItem('moaqib_settings');
+                if(savedSettings) db.settings = JSON.parse(savedSettings);
+
+                if(db.settings.theme === 'dark') document.documentElement.classList.add('dark');
+                
+                document.getElementById('set-name').value = db.settings.name || '';
+                document.getElementById('set-address').value = db.settings.address || '';
+                if(db.settings.signature) {
+                    document.getElementById('sig-preview-container').classList.remove('hidden');
+                    document.getElementById('sig-preview').src = db.settings.signature;
+                }
+
                 renderAll();
                 showToast('تم جلب البيانات السحابية بنجاح!', 'success');
 
             } catch (error) {
-                // في حال فشل الاتصال نشغل نظام الطوارئ
                 fallbackToLocal(); 
             }
         }
 
-        /*
-          دالة الطوارئ (Fallback System) - النسخة المصححة 100%
-        */
         function fallbackToLocal() {
-            // استرجاع البيانات السابقة أو ترقيتها (لكي لا تفقد بياناتك القديمة)
             let saved = localStorage.getItem('moaqib_db_v5'); 
+            
             if(!saved) {
                 const oldDataV4 = localStorage.getItem('moaqib_db_v4') || localStorage.getItem('moaqib_db_v3');
                 if(oldDataV4) { 
@@ -952,7 +1016,9 @@
                 } catch(e) { console.error("Error parsing db", e); }
             }
             
-            if(db.settings.theme === 'dark') document.documentElement.classList.add('dark');
+            if(db.settings.theme === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
             
             document.getElementById('set-name').value = db.settings.name || '';
             document.getElementById('set-address').value = db.settings.address || '';
@@ -961,15 +1027,9 @@
                 document.getElementById('sig-preview').src = db.settings.signature;
             }
 
-            // هذا السطر الأهم! هو الذي يقوم ببناء الواجهة وتشغيل الأزرار
             renderAll();
-            
-            // إشعار للمستخدم لمعرفة حالة التطبيق
-            showToast('يعمل على النسخة المحلية', 'info');
+            showToast('يعمل على النسخة المحلية', 'error');
         }
- 
-
-
 
         function saveData() { 
             try {
@@ -981,6 +1041,7 @@
                 }
             }
         }
+
 
         // ==========================================
         // 2. UI / UX SYSTEMS (TOASTS, MODALS, SELECTS)
