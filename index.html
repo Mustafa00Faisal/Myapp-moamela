@@ -841,6 +841,16 @@
         // ==========================================
         // 1. CORE DATA SYSTEM & MIGRATION
         // ==========================================
+                // ==========================================
+        // 1. CORE DATA SYSTEM & MIGRATION (CLOUD)
+        // ==========================================
+        
+        // ضع الرابط والمفتاح الخاص بك هنا داخل الأقواس
+        const SUPABASE_URL = 'ضع_الرابط_هنا';
+        const SUPABASE_KEY = 'ضع_المفتاح_هنا';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
         let db = { 
             settings: { name: '', address: '', theme: 'light', signature: null }, 
             lawyers: [], 
@@ -859,35 +869,27 @@
             return d.toLocaleDateString('ar-IQ', {month: 'short', day: 'numeric'}) + ' - ' + d.toLocaleTimeString('ar-IQ', {hour: '2-digit', minute:'2-digit'}); 
         };
 
-        function init() {
-            // Smart Migration logic V4 -> V5
-            let saved = localStorage.getItem('moaqib_db_v5'); 
-            
-            if(!saved) {
-                const oldDataV4 = localStorage.getItem('moaqib_db_v4') || localStorage.getItem('moaqib_db_v3');
-                if(oldDataV4) { 
-                    saved = oldDataV4; 
-                    localStorage.setItem('moaqib_db_v5', oldDataV4); 
-                    showToast('تم ترقية بياناتك للإصدار الخامس بنجاح!', 'success'); 
+        async function init() {
+            showToast('جاري الاتصال بالسحابة...', 'info');
+            try {
+                // جلب البيانات من السحابة
+                const { data, error } = await supabase.from('app_data').select('state').eq('id', 1).single();
+                
+                if (data && data.state && data.state.settings) {
+                    db = data.state; // نجح تحميل البيانات الأونلاين
+                } else {
+                    // إذا كانت السحابة فارغة، نحاول سحب البيانات القديمة من المتصفح
+                    let saved = localStorage.getItem('moaqib_db_v5');
+                    if(saved) db = JSON.parse(saved);
                 }
-            }
-
-            if(saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    db = { ...db, ...parsed };
-                    if(!db.vault) db.vault = []; 
-                } catch(e) { 
-                    console.error("Error parsing db", e); 
-                }
+            } catch (err) {
+                console.error(err);
+                let saved = localStorage.getItem('moaqib_db_v5');
+                if(saved) db = JSON.parse(saved);
             }
             
-            // Set Theme
-            if(db.settings.theme === 'dark') {
-                document.documentElement.classList.add('dark');
-            }
-            
-            // Load Settings Data
+            // ضبط الواجهة
+            if(db.settings.theme === 'dark') document.documentElement.classList.add('dark');
             document.getElementById('set-name').value = db.settings.name || '';
             document.getElementById('set-address').value = db.settings.address || '';
             if(db.settings.signature) {
@@ -896,18 +898,26 @@
             }
 
             renderAll();
+            showToast('تمت المزامنة أونلاين', 'success');
         }
 
-        function saveData() { 
+        async function saveData() { 
             try {
+                // 1. حفظ في المتصفح للحماية والسرعة
                 localStorage.setItem('moaqib_db_v5', JSON.stringify(db)); 
+                
+                // 2. رفع النسخة للسحابة أونلاين
+                await supabase.from('app_data').update({ state: db }).eq('id', 1);
+                
                 renderAll(); 
             } catch (error) {
+                console.error(error);
                 if(error.name === 'QuotaExceededError') { 
-                    customAlert('الذاكرة ممتلئة', 'مساحة التخزين امتلأت بسبب صور الخزنة. يرجى حذف الصور القديمة.', 'error'); 
+                    customAlert('الذاكرة ممتلئة', 'مساحة التخزين امتلأت بسبب صور الخزنة.', 'error'); 
                 }
             }
         }
+
 
         // ==========================================
         // 2. UI / UX SYSTEMS (TOASTS, MODALS, SELECTS)
