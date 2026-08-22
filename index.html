@@ -29,59 +29,235 @@
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- PDF, QR Code, Charts & Supabase -->
+    <!-- PDF, QR Code & Charts Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        body { font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .app-bg { background-color: #f8fafc; transition: background-color 0.4s ease; }
-        .dark .app-bg { background-color: #0B1121; }
-        .card-gradient { background: linear-gradient(135deg, #4f46e5, #9333ea); }
-        .card-stagnant { background: linear-gradient(135deg, #e11d48, #be123c); }
-        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.5); }
-        .dark .glass-panel { background: rgba(21, 31, 50, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
-        .bottom-nav { box-shadow: 0 -4px 20px rgba(0,0,0,0.05); padding-bottom: env(safe-area-inset-bottom, 12px); }
-        .dark .bottom-nav { box-shadow: 0 -4px 20px rgba(0,0,0,0.5); background-color: #151F32; border-color: #1e293b; }
-        .nav-item { color: #94a3b8; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); flex: 1; }
-        .nav-item.active { color: #6366f1; font-weight: 800; transform: translateY(-4px) scale(1.05); }
-        .dark .nav-item.active { color: #818cf8; }
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            -webkit-tap-highlight-color: transparent; 
+        }
+        
+        /* Backgrounds & Glassmorphism */
+        .app-bg { 
+            background-color: #f8fafc; 
+            transition: background-color 0.4s ease; 
+        }
+        .dark .app-bg { 
+            background-color: #0B1121; 
+        }
+        
+        .card-gradient { 
+            background: linear-gradient(135deg, #4f46e5, #9333ea); 
+        }
+        .card-stagnant { 
+            background: linear-gradient(135deg, #e11d48, #be123c); 
+        }
+        
+        .glass-panel { 
+            background: rgba(255, 255, 255, 0.7); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255,255,255,0.5); 
+        }
+        .dark .glass-panel { 
+            background: rgba(21, 31, 50, 0.7); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255,255,255,0.05); 
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav { 
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.05); 
+            padding-bottom: env(safe-area-inset-bottom, 12px); 
+        }
+        .dark .bottom-nav { 
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.5); 
+            background-color: #151F32; 
+            border-color: #1e293b; 
+        }
+        .nav-item { 
+            color: #94a3b8; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            flex: 1; 
+        }
+        .nav-item.active { 
+            color: #6366f1; 
+            font-weight: 800; 
+            transform: translateY(-4px) scale(1.05); 
+        }
+        .dark .nav-item.active { 
+            color: #818cf8; 
+        }
+
+        /* Scrollbar Hide */
         ::-webkit-scrollbar { display: none; }
-        .input-field { width: 100%; padding: 0.85rem; border-radius: 0.75rem; border: 1px solid #e2e8f0; background: #fff; color: #1e293b; outline: none; transition: all 0.3s; }
-        .input-field:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); transform: translateY(-1px); }
-        .dark .input-field { background: #1e293b; border-color: #334155; color: #f8fafc; }
-        .dark .input-field:focus { border-color: #818cf8; box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15); }
-        .view-section { display: none; padding-bottom: 160px !important; }
-        .view-section.active { display: block; animation: fadeInView 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes fadeInView { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideInDown { from { opacity: 0; transform: translateY(-20px) translateX(-50%); } to { opacity: 1; transform: translateY(0) translateX(-50%); } }
-        @keyframes pulse-soft { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); } 70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(79, 70, 229, 0); } 100% { transform: scale(1); } }
-        .animate-item { opacity: 0; animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        /* Inputs */
+        .input-field {
+            width: 100%; 
+            padding: 0.85rem; 
+            border-radius: 0.75rem;
+            border: 1px solid #e2e8f0; 
+            background: #fff;
+            color: #1e293b; 
+            outline: none; 
+            transition: all 0.3s;
+        }
+        .input-field:focus { 
+            border-color: #6366f1; 
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); 
+            transform: translateY(-1px); 
+        }
+        .dark .input-field { 
+            background: #1e293b; 
+            border-color: #334155; 
+            color: #f8fafc; 
+        }
+        .dark .input-field:focus { 
+            border-color: #818cf8; 
+            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15); 
+        }
+        
+        /* Layout */
+        .view-section { 
+            display: none; 
+            padding-bottom: 160px !important; 
+        }
+        .view-section.active { 
+            display: block; 
+            animation: fadeInView 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+        }
+        
+        /* Animations */
+        @keyframes fadeInView { 
+            from { opacity: 0; transform: translateY(15px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        @keyframes fadeInUp { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        @keyframes slideInDown { 
+            from { opacity: 0; transform: translateY(-20px) translateX(-50%); } 
+            to { opacity: 1; transform: translateY(0) translateX(-50%); } 
+        }
+        @keyframes pulse-soft { 
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); } 
+            70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(79, 70, 229, 0); } 
+            100% { transform: scale(1); } 
+        }
+        
+        .animate-item { 
+            opacity: 0; 
+            animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+        }
         .pulse-badge { animation: pulse-soft 2s infinite; }
-        .hover-lift { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease; }
-        .hover-lift:hover { transform: translateY(-3px) scale(1.01); }
-        .modal-overlay { transition: opacity 0.3s ease; opacity: 0; pointer-events: none; }
-        .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-box { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); transform: scale(0.9); }
-        .modal-overlay.active .modal-box { transform: scale(1); }
-        #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
-        .toast { background: rgba(15, 23, 42, 0.95); color: white; padding: 12px 20px; border-radius: 999px; font-weight: 700; font-size: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); backdrop-filter: blur(8px); animation: slideInDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; display: flex; align-items: center; gap: 10px; white-space: nowrap; }
-        .dark .toast { background: rgba(255, 255, 255, 0.95); color: #0f172a; }
-        .toast.hide { opacity: 0; transform: translateY(-20px) translateX(-50%); transition: all 0.3s ease; }
-        #pdf-export-wrapper { position: fixed; top: 0; right: 0; width: 800px; height: 1000px; z-index: -9999; opacity: 0.01; pointer-events: none; overflow: hidden; }
-        .custom-option { padding: 1rem; border-radius: 0.75rem; transition: all 0.2s; cursor: pointer; border: 1px solid transparent; font-weight: 700; }
+        
+        .hover-lift { 
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease; 
+        }
+        .hover-lift:hover { 
+            transform: translateY(-3px) scale(1.01); 
+        }
+
+        /* Modals */
+        .modal-overlay { 
+            transition: opacity 0.3s ease; 
+            opacity: 0; 
+            pointer-events: none; 
+        }
+        .modal-overlay.active { 
+            opacity: 1; 
+            pointer-events: auto; 
+        }
+        .modal-box { 
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); 
+            transform: scale(0.9); 
+        }
+        .modal-overlay.active .modal-box { 
+            transform: scale(1); 
+        }
+
+        /* Toast Notifications */
+        #toast-container { 
+            position: fixed; 
+            top: 20px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            z-index: 9999; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
+            pointer-events: none; 
+        }
+        .toast { 
+            background: rgba(15, 23, 42, 0.95); 
+            color: white; 
+            padding: 12px 20px; 
+            border-radius: 999px; 
+            font-weight: 700; 
+            font-size: 14px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
+            backdrop-filter: blur(8px); 
+            animation: slideInDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            white-space: nowrap; 
+        }
+        .dark .toast { 
+            background: rgba(255, 255, 255, 0.95); 
+            color: #0f172a; 
+        }
+        .toast.hide { 
+            opacity: 0; 
+            transform: translateY(-20px) translateX(-50%); 
+            transition: all 0.3s ease; 
+        }
+
+        /* PDF Wrapper Fix */
+        #pdf-export-wrapper { 
+            position: fixed; 
+            top: 0; 
+            right: 0; 
+            width: 800px; 
+            height: 1000px; 
+            z-index: -9999; 
+            opacity: 0.01; 
+            pointer-events: none; 
+            overflow: hidden; 
+        }
+        
+        /* Custom Select Item */
+        .custom-option { 
+            padding: 1rem; 
+            border-radius: 0.75rem; 
+            transition: all 0.2s; 
+            cursor: pointer; 
+            border: 1px solid transparent; 
+            font-weight: 700; 
+        }
         .custom-option:active { transform: scale(0.98); }
-        .custom-option.selected { background-color: rgba(79, 70, 229, 0.1); border-color: #4f46e5; color: #4f46e5; }
-        .dark .custom-option.selected { background-color: rgba(129, 140, 248, 0.1); border-color: #818cf8; color: #818cf8; }
+        .custom-option.selected { 
+            background-color: rgba(79, 70, 229, 0.1); 
+            border-color: #4f46e5; 
+            color: #4f46e5; 
+        }
+        .dark .custom-option.selected { 
+            background-color: rgba(129, 140, 248, 0.1); 
+            border-color: #818cf8; 
+            color: #818cf8; 
+        }
     </style>
 </head>
 <body class="app-bg text-slate-800 dark:text-slate-100 transition-colors duration-300">
 
+    <!-- Toast Notification Container -->
     <div id="toast-container"></div>
 
+    <!-- Custom Select Modal -->
     <div id="customSelectModal" class="fixed inset-0 z-[120] hidden flex items-end justify-center bg-black/60 backdrop-blur-sm transition-opacity">
         <div class="bg-white dark:bg-darkcard w-full rounded-t-3xl p-6 shadow-2xl transform transition-transform translate-y-full flex flex-col max-h-[75vh]" id="customSelectContent">
             <div class="flex justify-between items-center mb-4 border-b dark:border-slate-700 pb-3">
@@ -92,6 +268,7 @@
         </div>
     </div>
 
+    <!-- Confirm Modal -->
     <div id="uiConfirm" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm modal-overlay">
         <div class="bg-white dark:bg-darkcard rounded-3xl p-6 w-10/12 max-w-sm text-center shadow-2xl modal-box">
             <div class="w-16 h-16 bg-red-50 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
@@ -106,6 +283,7 @@
         </div>
     </div>
 
+    <!-- Alert Modal -->
     <div id="uiAlert" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm modal-overlay">
         <div class="bg-white dark:bg-darkcard rounded-3xl p-6 w-10/12 max-w-sm text-center shadow-2xl modal-box">
             <div id="uiAlertIcon" class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl"></div>
@@ -115,13 +293,16 @@
         </div>
     </div>
 
+    <!-- Vault Image Lightbox -->
     <div id="lightboxModal" class="fixed inset-0 z-[110] hidden items-center justify-center bg-black/90 backdrop-blur-md transition-opacity">
         <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white text-3xl bg-black/50 w-12 h-12 rounded-full flex items-center justify-center active:scale-90 transition-all"><i class="fa-solid fa-xmark"></i></button>
         <img id="lightboxImage" src="" class="max-w-[95%] max-h-[90vh] object-contain rounded-xl shadow-2xl transform transition-transform duration-300 scale-95">
     </div>
 
+    <!-- MAIN CONTAINER -->
     <div class="min-h-screen">
         
+        <!-- 1. HOME VIEW -->
         <div id="view-home" class="view-section active p-4">
             <div class="flex justify-between items-center mb-6 pt-2">
                 <div>
@@ -135,6 +316,7 @@
                 </button>
             </div>
 
+            <!-- Main Financial Widget -->
             <div class="card-gradient rounded-3xl p-6 text-white mb-6 shadow-xl shadow-indigo-200 dark:shadow-none relative overflow-hidden hover-lift">
                 <div class="absolute -right-10 -top-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
                 <div class="absolute -left-10 -bottom-10 w-32 h-32 bg-black/10 rounded-full blur-2xl"></div>
@@ -148,6 +330,7 @@
                 <p class="text-xs text-white/70 relative z-10 font-semibold">استناداً للمعاملات المفتوحة حالياً</p>
             </div>
 
+            <!-- Stats Grid -->
             <div class="grid grid-cols-2 gap-4 mb-6">
                 <div class="glass-panel p-4 rounded-2xl shadow-sm text-center hover-lift">
                     <i class="fa-solid fa-users text-blue-500 text-2xl mb-2 bg-blue-50 dark:bg-blue-900/20 w-12 h-12 flex items-center justify-center rounded-xl mx-auto transition-transform hover:rotate-12"></i>
@@ -171,6 +354,7 @@
                 </div>
             </div>
             
+            <!-- Analytics Chart -->
             <div class="glass-panel p-4 rounded-3xl shadow-sm mb-6 animate-item border border-slate-100 dark:border-slate-800">
                 <h3 class="font-extrabold mb-4 text-sm text-slate-700 dark:text-slate-300 flex items-center gap-2">
                     <i class="fa-solid fa-chart-line text-primary"></i> تحليل أداء المعاملات
@@ -190,6 +374,7 @@
             </div>
         </div>
 
+        <!-- 2. NEW TRANSACTION VIEW -->
         <div id="view-newTx" class="view-section p-4">
             <div class="mb-6 pt-2">
                 <h1 class="text-2xl font-extrabold flex items-center gap-2"><i class="fa-solid fa-plus-circle text-primary"></i> معاملة جديدة</h1>
@@ -227,28 +412,48 @@
                 
               <div class="animate-item" style="animation-delay: 0.3s">
                     <label class="block text-sm font-bold mb-1 text-slate-700 dark:text-slate-300">الدائرة المستهدفة</label>
+                    
+                    <!-- شريط سحب أفقي مع مساحات إضافية لمنع قص الظل -->
                     <div class="flex gap-4 overflow-x-auto py-4 px-2 scroll-smooth snap-x custom-scrollbar">
+                        
+                        <!-- 1. مسجل الشركات -->
                         <label class="group relative snap-start shrink-0 min-w-[130px] border-2 border-slate-200 dark:border-slate-700 rounded-xl p-4 text-center cursor-pointer flex flex-col items-center justify-center gap-3 transition-all duration-300 bg-white dark:bg-darkcard has-[:checked]:border-primary has-[:checked]:bg-indigo-50 dark:has-[:checked]:bg-indigo-900/20 has-[:checked]:scale-105 has-[:checked]:shadow-xl has-[:checked]:shadow-indigo-500/20 has-[:checked]:z-10">
                             <input type="radio" name="new-tx-dept" value="دائرة مسجل الشركات" class="hidden" checked>
                             <i class="fa-solid fa-building-columns text-2xl text-slate-400 group-has-[:checked]:text-primary transition-all duration-300"></i>
                             <span class="text-xs font-bold whitespace-nowrap text-slate-500 dark:text-slate-400 group-has-[:checked]:text-primary group-has-[:checked]:font-black transition-colors">مسجل الشركات</span>
-                            <div class="absolute -top-2 -right-2 bg-primary text-white text-[10px] w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-has-[:checked]:opacity-100 transition-all duration-300 shadow-md scale-0 group-has-[:checked]:scale-100"><i class="fa-solid fa-check"></i></div>
+                            
+                            <!-- علامة الصح المنبثقة -->
+                            <div class="absolute -top-2 -right-2 bg-primary text-white text-[10px] w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-has-[:checked]:opacity-100 transition-all duration-300 shadow-md scale-0 group-has-[:checked]:scale-100">
+                                <i class="fa-solid fa-check"></i>
+                            </div>
                         </label>
+                        
+                        <!-- 2. الاستيراد والتصدير -->
                         <label class="group relative snap-start shrink-0 min-w-[130px] border-2 border-slate-200 dark:border-slate-700 rounded-xl p-4 text-center cursor-pointer flex flex-col items-center justify-center gap-3 transition-all duration-300 bg-white dark:bg-darkcard has-[:checked]:border-primary has-[:checked]:bg-indigo-50 dark:has-[:checked]:bg-indigo-900/20 has-[:checked]:scale-105 has-[:checked]:shadow-xl has-[:checked]:shadow-indigo-500/20 has-[:checked]:z-10">
                             <input type="radio" name="new-tx-dept" value="دائرة الاستيراد والتصدير" class="hidden">
                             <i class="fa-solid fa-ship text-2xl text-slate-400 group-has-[:checked]:text-primary transition-all duration-300"></i>
                             <span class="text-xs font-bold whitespace-nowrap text-slate-500 dark:text-slate-400 group-has-[:checked]:text-primary group-has-[:checked]:font-black transition-colors">الاستيراد والتصدير</span>
-                            <div class="absolute -top-2 -right-2 bg-primary text-white text-[10px] w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-has-[:checked]:opacity-100 transition-all duration-300 shadow-md scale-0 group-has-[:checked]:scale-100"><i class="fa-solid fa-check"></i></div>
+                            
+                            <div class="absolute -top-2 -right-2 bg-primary text-white text-[10px] w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-has-[:checked]:opacity-100 transition-all duration-300 shadow-md scale-0 group-has-[:checked]:scale-100">
+                                <i class="fa-solid fa-check"></i>
+                            </div>
                         </label>
+
+                        <!-- 3. هيئة الإعلام والاتصالات -->
                         <label class="group relative snap-start shrink-0 min-w-[130px] border-2 border-slate-200 dark:border-slate-700 rounded-xl p-4 text-center cursor-pointer flex flex-col items-center justify-center gap-3 transition-all duration-300 bg-white dark:bg-darkcard has-[:checked]:border-primary has-[:checked]:bg-indigo-50 dark:has-[:checked]:bg-indigo-900/20 has-[:checked]:scale-105 has-[:checked]:shadow-xl has-[:checked]:shadow-indigo-500/20 has-[:checked]:z-10">
                             <input type="radio" name="new-tx-dept" value="هيئة الاعلام والاتصالات" class="hidden">
                             <i class="fa-solid fa-tower-broadcast text-2xl text-slate-400 group-has-[:checked]:text-primary transition-all duration-300"></i>
                             <span class="text-xs font-bold whitespace-nowrap text-slate-500 dark:text-slate-400 group-has-[:checked]:text-primary group-has-[:checked]:font-black transition-colors">الإعلام والاتصالات</span>
-                            <div class="absolute -top-2 -right-2 bg-primary text-white text-[10px] w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-has-[:checked]:opacity-100 transition-all duration-300 shadow-md scale-0 group-has-[:checked]:scale-100"><i class="fa-solid fa-check"></i></div>
+                            
+                            <div class="absolute -top-2 -right-2 bg-primary text-white text-[10px] w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-has-[:checked]:opacity-100 transition-all duration-300 shadow-md scale-0 group-has-[:checked]:scale-100">
+                                <i class="fa-solid fa-check"></i>
+                            </div>
                         </label>
+                        
                     </div>
                 </div>
 
+                
                 <div class="animate-item" style="animation-delay: 0.4s">
                     <label class="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">نوع المعاملة</label>
                     <input type="text" id="new-tx-type" placeholder="مثال: تجديد سجل تجاري، تأسيس فرع..." class="input-field mb-4 font-bold">
@@ -266,36 +471,45 @@
             </div>
         </div>
 
+        <!-- 3. ACTIVE TRANSACTIONS VIEW -->
         <div id="view-active" class="view-section p-4">
             <div class="mb-4 pt-2">
                 <h1 class="text-2xl font-extrabold flex items-center gap-2"><i class="fa-solid fa-spinner text-primary fa-spin-pulse"></i> المعاملات الجارية</h1>
                 <p class="text-sm text-slate-500">مراقبة وتحديث المسارات</p>
             </div>
             
+            <!-- Live Search -->
             <div class="relative mb-5 animate-item">
                 <input type="text" id="search-active" onkeyup="filterTransactions('active')" placeholder="ابحث عن معاملة جارية..." class="input-field font-bold pl-10">
                 <i class="fa-solid fa-search absolute left-4 top-3.5 text-slate-400"></i>
             </div>
+
             <div id="active-list" class="space-y-4"></div>
         </div>
 
+        <!-- 4. STALLED TRANSACTIONS VIEW -->
         <div id="view-stalled" class="view-section p-4">
             <div class="mb-4 pt-2">
                 <h1 class="text-2xl font-extrabold flex items-center gap-2 text-red-500"><i class="fa-solid fa-triangle-exclamation"></i> معاملات متلكئة</h1>
                 <p class="text-sm text-slate-500">معاملات تتطلب تدخلاً خاصاً</p>
             </div>
+
+            <!-- Live Search -->
             <div class="relative mb-5 animate-item">
                 <input type="text" id="search-stalled" onkeyup="filterTransactions('stalled')" placeholder="ابحث عن معاملة متلكئة..." class="input-field font-bold pl-10 border-red-200 focus:border-red-500">
                 <i class="fa-solid fa-search absolute left-4 top-3.5 text-slate-400"></i>
             </div>
+
             <div id="stalled-list" class="space-y-4"></div>
         </div>
 
+        <!-- 5. ACCOUNTING VIEW -->
         <div id="view-accounting" class="view-section p-4">
             <div class="mb-6 pt-2">
                 <h1 class="text-2xl font-extrabold flex items-center gap-2"><i class="fa-solid fa-wallet text-primary"></i> التحاسب المالي</h1>
                 <p class="text-sm text-slate-500">الطباعة، الكشوفات، وأتعاب المحامين</p>
             </div>
+
             <div class="card-gradient rounded-3xl p-6 text-white mb-6 shadow-xl relative text-center hover-lift overflow-hidden">
                 <div class="absolute top-0 left-0 w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPgo8cmVjdCB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiPjwvcmVjdD4KPC9zdmc+')] opacity-50"></div>
                 <p class="text-white/80 text-sm mb-2 relative z-10 font-bold">إجمالي الأتعاب المعلقة</p>
@@ -304,18 +518,23 @@
                     <span class="text-xl font-normal text-white/70">د.ع</span>
                 </div>
             </div>
+
             <div id="accounting-list" class="space-y-4"></div>
         </div>
 
+        <!-- 6. ARCHIVE & VAULT -->
         <div id="view-archive" class="view-section p-4">
             <div class="mb-6 pt-2">
                 <h1 class="text-2xl font-extrabold flex items-center gap-2"><i class="fa-solid fa-box-archive text-primary"></i> الأرشيف والخزنة</h1>
                 <p class="text-sm text-slate-500">سجلات الإنجاز ومستندات الشركات</p>
             </div>
+
+            <!-- Tabs -->
             <div class="flex gap-2 p-1.5 bg-slate-200/50 dark:bg-slate-800/50 rounded-xl mb-6 shadow-inner backdrop-blur-sm">
                 <button onclick="toggleArchiveTab('tx')" id="tab-arch-tx" class="flex-1 py-2.5 rounded-lg text-sm font-bold bg-white dark:bg-darkcard text-primary shadow transition-all">المنجزة (الأرشيف)</button>
                 <button onclick="toggleArchiveTab('vault')" id="tab-arch-vault" class="flex-1 py-2.5 rounded-lg text-sm font-bold text-slate-500 dark:text-slate-400 transition-all hover:text-slate-800">خزنة الصور</button>
             </div>
+
             <div id="archive-tx-content" class="space-y-4 animate-item">
                 <div class="relative">
                     <input type="text" id="archive-search" onkeyup="renderArchive()" placeholder="ابحث باسم الشركة أو المعاملة..." class="input-field mb-4 font-bold pl-10">
@@ -323,6 +542,7 @@
                 </div>
                 <div id="archive-list" class="space-y-4"></div>
             </div>
+
             <div id="archive-vault-content" class="hidden space-y-4 animate-item">
                 <div class="glass-panel p-5 rounded-3xl shadow-sm mb-4">
                     <label class="block text-sm font-bold mb-3 text-slate-700 dark:text-slate-300">
@@ -333,6 +553,7 @@
                         <span id="text-vault-company-select" class="text-slate-400">- اختر الشركة -</span>
                         <i class="fa-solid fa-chevron-down text-sm text-slate-400"></i>
                     </button>
+                    
                     <input type="file" id="vault-file-upload" accept="image/*" class="hidden" onchange="handleVaultUpload(event)">
                     <button id="btn-vault-upload" onclick="document.getElementById('vault-file-upload').click()" class="w-full bg-slate-100 dark:bg-slate-800/50 text-slate-700 dark:text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 hover-lift active:scale-95 border border-dashed border-slate-300 dark:border-slate-600 transition-colors hidden">
                         <i class="fa-solid fa-cloud-arrow-up text-lg text-primary"></i> رفع مستند جديد للخزنة
@@ -342,11 +563,14 @@
             </div>
         </div>
 
+        <!-- 7. SETTINGS VIEW -->
         <div id="view-settings" class="view-section p-4">
             <div class="mb-6 pt-2">
                 <h1 class="text-2xl font-extrabold flex items-center gap-2"><i class="fa-solid fa-gear text-primary fa-spin" style="animation-duration: 4s;"></i> الإعدادات</h1>
                 <p class="text-sm text-slate-500">النظام الذكي وإدارة البيانات (V5)</p>
             </div>
+
+            <!-- Printing Info -->
             <div class="glass-panel p-5 rounded-3xl shadow-sm space-y-4 mb-6 animate-item" style="animation-delay: 0.1s">
                 <h3 class="font-extrabold border-b pb-2 dark:border-slate-700 text-primary flex items-center gap-2">
                     <i class="fa-solid fa-file-signature"></i> بيانات التصدير (المعقب)
@@ -359,6 +583,7 @@
                     <label class="block text-xs font-bold mb-2 text-slate-500">العنوان أو الهاتف</label>
                     <input type="text" id="set-address" class="input-field font-bold" placeholder="بغداد - 077XXXXXXX" oninput="saveSettingsRealtime()">
                 </div>
+                
                 <div class="border-t dark:border-slate-700 pt-4 mt-2">
                     <label class="block text-xs font-bold mb-2 text-slate-500">التوقيع الإلكتروني للمستندات</label>
                     <input type="file" id="sig-upload" accept="image/png, image/jpeg" class="hidden" onchange="handleSignatureUpload(event)">
@@ -374,6 +599,7 @@
                 </div>
             </div>
 
+            <!-- Backup & Restore -->
             <div class="glass-panel p-5 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700/50 mb-6 animate-item" style="animation-delay: 0.15s">
                 <h3 class="font-extrabold border-b pb-2 dark:border-slate-700 text-emerald-500 flex items-center gap-2">
                     <i class="fa-solid fa-cloud-arrow-down"></i> النسخ الاحتياطي والأمان
@@ -390,6 +616,7 @@
                 </div>
             </div>
 
+            <!-- Manage Entities -->
             <div class="glass-panel p-5 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700/50 mb-6 animate-item" style="animation-delay: 0.2s">
                 <h3 class="font-extrabold border-b pb-2 dark:border-slate-700 text-primary mb-3">
                     <i class="fa-solid fa-users-slash"></i> إدارة العملاء / المحامين
@@ -411,16 +638,33 @@
 
     </div>
 
+    <!-- BOTTOM NAVIGATION -->
     <nav class="fixed bottom-0 w-full bg-white/90 dark:bg-[#0B1121]/90 backdrop-blur-xl flex justify-between px-1 pt-3 pb-safe bottom-nav z-40 border-t border-slate-200 dark:border-slate-800">
-        <button onclick="switchTab('home')" class="nav-item active flex flex-col items-center gap-1 pb-2" id="nav-home"><i class="fa-solid fa-border-all text-xl"></i><span class="text-[9px]">الرئيسية</span></button>
-        <button onclick="switchTab('newTx')" class="nav-item flex flex-col items-center gap-1 pb-2" id="nav-newTx"><i class="fa-solid fa-circle-plus text-xl"></i><span class="text-[9px]">تأسيس</span></button>
-        <button onclick="switchTab('active')" class="nav-item flex flex-col items-center gap-1 pb-2 relative" id="nav-active"><i class="fa-solid fa-arrows-rotate text-xl"></i><span class="text-[9px]">الجارية</span><span id="badge-active" class="absolute top-0 right-2 bg-primary text-white text-[9px] rounded-full w-4 h-4 flex items-center justify-center hidden pulse-badge shadow-lg shadow-indigo-500/50">0</span></button>
-        <button onclick="switchTab('stalled')" class="nav-item flex flex-col items-center gap-1 pb-2" id="nav-stalled"><i class="fa-solid fa-triangle-exclamation text-xl"></i><span class="text-[9px]">تلكؤ</span></button>
-        <button onclick="switchTab('accounting')" class="nav-item flex flex-col items-center gap-1 pb-2" id="nav-accounting"><i class="fa-solid fa-file-invoice-dollar text-xl"></i><span class="text-[9px]">تحاسب</span></button>
-        <button onclick="switchTab('archive')" class="nav-item flex flex-col items-center gap-1 pb-2" id="nav-archive"><i class="fa-solid fa-box-archive text-xl"></i><span class="text-[9px]">أرشيف</span></button>
-        <button onclick="switchTab('settings')" class="nav-item flex flex-col items-center gap-1 pb-2" id="nav-settings"><i class="fa-solid fa-gear text-xl"></i><span class="text-[9px]">إعدادات</span></button>
+        <button onclick="switchTab('home')" class="nav-item active flex flex-col items-center gap-1 pb-2" id="nav-home">
+            <i class="fa-solid fa-border-all text-xl"></i><span class="text-[9px]">الرئيسية</span>
+        </button>
+        <button onclick="switchTab('newTx')" class="nav-item flex flex-col items-center gap-1 pb-2" id="nav-newTx">
+            <i class="fa-solid fa-circle-plus text-xl"></i><span class="text-[9px]">تأسيس</span>
+        </button>
+        <button onclick="switchTab('active')" class="nav-item flex flex-col items-center gap-1 pb-2 relative" id="nav-active">
+            <i class="fa-solid fa-arrows-rotate text-xl"></i><span class="text-[9px]">الجارية</span>
+            <span id="badge-active" class="absolute top-0 right-2 bg-primary text-white text-[9px] rounded-full w-4 h-4 flex items-center justify-center hidden pulse-badge shadow-lg shadow-indigo-500/50">0</span>
+        </button>
+        <button onclick="switchTab('stalled')" class="nav-item flex flex-col items-center gap-1 pb-2" id="nav-stalled">
+            <i class="fa-solid fa-triangle-exclamation text-xl"></i><span class="text-[9px]">تلكؤ</span>
+        </button>
+        <button onclick="switchTab('accounting')" class="nav-item flex flex-col items-center gap-1 pb-2" id="nav-accounting">
+            <i class="fa-solid fa-file-invoice-dollar text-xl"></i><span class="text-[9px]">تحاسب</span>
+        </button>
+        <button onclick="switchTab('archive')" class="nav-item flex flex-col items-center gap-1 pb-2" id="nav-archive">
+            <i class="fa-solid fa-box-archive text-xl"></i><span class="text-[9px]">أرشيف</span>
+        </button>
+        <button onclick="switchTab('settings')" class="nav-item flex flex-col items-center gap-1 pb-2" id="nav-settings">
+            <i class="fa-solid fa-gear text-xl"></i><span class="text-[9px]">إعدادات</span>
+        </button>
     </nav>
 
+    <!-- Entity Add Modals -->
     <div id="addLawyerModal" class="fixed inset-0 z-50 hidden flex items-end justify-center bg-black/60 backdrop-blur-sm transition-opacity">
         <div class="bg-white dark:bg-darkcard w-full rounded-t-3xl p-6 shadow-2xl transform transition-transform translate-y-full" id="addLawyerContent">
             <div class="flex justify-between items-center mb-6 border-b dark:border-slate-700 pb-3">
@@ -440,15 +684,18 @@
             </div>
             <input type="text" id="in-comp-name" placeholder="الاسم القانوني للشركة" class="input-field mb-4 font-bold">
             <label class="block text-xs font-bold mb-2 text-slate-500">اربط الشركة بعميلها/محاميها</label>
+            
             <select id="in-comp-lawyer" class="hidden"></select>
             <button id="btn-in-comp-lawyer" onclick="openCustomSelect('in-comp-lawyer', 'اختر المحامي')" class="input-field mb-6 font-bold text-right flex justify-between items-center active:scale-[0.98]">
                 <span id="text-in-comp-lawyer" class="text-slate-400">- اختر المحامي -</span>
                 <i class="fa-solid fa-chevron-down text-sm text-slate-400"></i>
             </button>
+            
             <button onclick="saveCompany()" class="w-full bg-secondary text-white py-3.5 rounded-xl font-bold text-lg shadow-lg active:scale-95 hover-lift transition-transform">حفظ وإضافة</button>
         </div>
     </div>
 
+    <!-- Transaction Details Popup -->
     <div id="txDetailsModal" class="fixed inset-0 z-50 hidden flex items-end justify-center bg-black/60 backdrop-blur-md">
         <div class="bg-white dark:bg-darkcard w-full h-[92vh] rounded-t-3xl p-6 shadow-2xl flex flex-col transform transition-transform translate-y-full" id="txDetailsContent">
             <div class="flex justify-between items-start mb-4">
@@ -459,31 +706,58 @@
                     <div class="text-2xl font-black text-primary" id="det-fee">0 د.ع</div>
                 </div>
             </div>
+            
+            <!-- Details Header Card -->
             <div class="mb-4 card-gradient text-white p-5 rounded-2xl shadow-xl shadow-indigo-200 dark:shadow-none relative overflow-hidden border border-white/10">
                 <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
                 <h2 class="text-xl font-extrabold mb-4 relative z-10" id="det-type">نوع المعاملة</h2>
                 <div class="space-y-2.5 relative z-10">
-                    <p class="text-sm font-bold flex items-center gap-3"><i class="fa-regular fa-building opacity-75 w-4"></i> <span id="det-comp">الشركة</span></p>
-                    <p class="text-sm font-bold flex items-center gap-3"><i class="fa-solid fa-user-tie opacity-75 w-4"></i> <span id="det-lawyer">العميل/المحامي</span></p>
-                    <p class="text-sm font-bold flex items-center gap-3"><i class="fa-solid fa-building-columns opacity-75 w-4"></i> <span id="det-dept">الدائرة</span></p>
+                    <p class="text-sm font-bold flex items-center gap-3">
+                        <i class="fa-regular fa-building opacity-75 w-4"></i> 
+                        <span id="det-comp">الشركة</span>
+                    </p>
+                    <p class="text-sm font-bold flex items-center gap-3">
+                        <i class="fa-solid fa-user-tie opacity-75 w-4"></i> 
+                        <span id="det-lawyer">العميل/المحامي</span>
+                    </p>
+                    <p class="text-sm font-bold flex items-center gap-3">
+                        <i class="fa-solid fa-building-columns opacity-75 w-4"></i> 
+                        <span id="det-dept">الدائرة</span>
+                    </p>
                 </div>
             </div>
+
+            <!-- Path/Stations Scrollable Area -->
             <div class="flex-1 overflow-y-auto mb-4 bg-slate-50 dark:bg-[#0B1121] p-4 rounded-2xl border border-slate-100 dark:border-slate-800/50 shadow-inner">
                 <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
-                    <h4 class="font-extrabold flex items-center gap-2"><i class="fa-solid fa-route text-slate-400"></i> خط سير المعاملة</h4>
+                    <h4 class="font-extrabold flex items-center gap-2">
+                        <i class="fa-solid fa-route text-slate-400"></i> خط سير المعاملة
+                    </h4>
                     <span class="text-xs px-3 py-1 rounded-full font-bold shadow-sm" id="det-status-badge">جارية</span>
                 </div>
+                
                 <div class="relative border-r-2 border-primary/30 pr-4 space-y-6 mt-4" id="det-stations"></div>
             </div>
+
+            <!-- Action Buttons -->
             <div class="grid grid-cols-2 gap-3 mt-auto pb-safe">
-                <button onclick="openModal('addStationModal')" class="card-gradient text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg hover-lift active:scale-95"><i class="fa-solid fa-plus"></i> تحديث المسار</button>
-                <button onclick="reqMarkTxCompleted()" class="bg-emerald-500 text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/30 hover-lift active:scale-95"><i class="fa-solid fa-check-double"></i> إنجاز للأرشيف</button>
-                <button id="btn-toggle-stall" onclick="toggleStallTx()" class="bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400 py-3 rounded-xl font-bold flex items-center justify-center gap-2 col-span-2 border border-red-200 dark:border-red-800 hover-lift active:scale-95 transition-colors"><i class="fa-solid fa-circle-exclamation"></i> إيقاف مؤقت (تلكؤ)</button>
-                <button onclick="reqDeleteTx()" class="text-slate-400 dark:text-slate-500 py-2 text-sm font-bold col-span-2 flex justify-center gap-1 hover:text-red-500 transition-colors mt-1"><i class="fa-regular fa-trash-can"></i> حذف المعاملة نهائياً</button>
+                <button onclick="openModal('addStationModal')" class="card-gradient text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg hover-lift active:scale-95">
+                    <i class="fa-solid fa-plus"></i> تحديث المسار
+                </button>
+                <button onclick="reqMarkTxCompleted()" class="bg-emerald-500 text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/30 hover-lift active:scale-95">
+                    <i class="fa-solid fa-check-double"></i> إنجاز للأرشيف
+                </button>
+                <button id="btn-toggle-stall" onclick="toggleStallTx()" class="bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400 py-3 rounded-xl font-bold flex items-center justify-center gap-2 col-span-2 border border-red-200 dark:border-red-800 hover-lift active:scale-95 transition-colors">
+                    <i class="fa-solid fa-circle-exclamation"></i> إيقاف مؤقت (تلكؤ)
+                </button>
+                <button onclick="reqDeleteTx()" class="text-slate-400 dark:text-slate-500 py-2 text-sm font-bold col-span-2 flex justify-center gap-1 hover:text-red-500 transition-colors mt-1">
+                    <i class="fa-regular fa-trash-can"></i> حذف المعاملة نهائياً
+                </button>
             </div>
         </div>
     </div>
 
+    <!-- Add Station Modal -->
     <div id="addStationModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/60 backdrop-blur-sm">
         <div class="bg-white dark:bg-darkcard w-11/12 max-w-sm rounded-3xl p-6 shadow-2xl modal-box border border-slate-100 dark:border-slate-800">
             <h3 class="text-lg font-bold mb-4 text-center border-b pb-2 dark:border-slate-700">أين وصلت المعاملة؟</h3>
@@ -496,10 +770,18 @@
         </div>
     </div>
 
+    <!-- Hidden Printable Area for Luxury PDF -->
     <div id="pdf-export-wrapper">
         <div id="pdf-content" style="background: white; color: #1e293b; font-family: 'Cairo', sans-serif; padding: 40px; width: 100%; min-height: 1000px; direction: rtl; box-sizing: border-box;">
+            <!-- Outer Border with luxury feel -->
             <div style="border: 2px solid #4f46e5; border-radius: 24px; padding: 40px; height: 100%; position: relative; background: #fafafa;">
-                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.03; font-size: 200px; color: #4f46e5;"><i class="fa-solid fa-scale-balanced"></i></div>
+                
+                <!-- Watermark Logo / Decoration -->
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.03; font-size: 200px; color: #4f46e5;">
+                    <i class="fa-solid fa-scale-balanced"></i>
+                </div>
+
+                <!-- Header -->
                 <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 30px; position: relative; z-index: 2;">
                     <div>
                         <h2 style="color: #4f46e5; font-size: 28px; font-weight: 900; margin: 0; margin-bottom: 5px;" id="pdf-title">سند مالي</h2>
@@ -511,36 +793,54 @@
                         <p style="margin: 0; font-size: 14px; color: #64748b; margin-top: 4px;" id="pdf-issuer-address">العنوان</p>
                     </div>
                 </div>
+
+                <!-- Body / Details -->
                 <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 30px; margin-bottom: 40px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); position: relative; z-index: 2;">
-                    <div style="display: flex; margin-bottom: 20px;"><div style="width: 150px; font-weight: 800; color: #64748b; font-size: 16px;">الجهة المستفيدة:</div><div style="font-weight: 900; font-size: 18px; color: #0f172a;" id="pdf-lawyer-name"></div></div>
-                    <div style="display: flex; margin-bottom: 20px;"><div style="width: 150px; font-weight: 800; color: #64748b; font-size: 16px;">نوع المستند:</div><div style="font-weight: 800; font-size: 16px; color: #0f172a;" id="pdf-doc-type"></div></div>
-                    <div style="background: #f8fafc; border-radius: 12px; padding: 20px; margin-top: 30px; display: flex; justify-content: space-between; align-items: center; border: 1px dashed #cbd5e1;"><div style="font-size: 20px; font-weight: 900; color: #334155;">الإجمالي الكلي:</div><div style="font-size: 28px; font-weight: 900; color: #4f46e5; direction: ltr;" id="pdf-amount">0 د.ع</div></div>
-                    <div id="pdf-tx-list-container" style="display: none; margin-top: 30px;"><h4 style="font-weight: 800; color: #4f46e5; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;">تفاصيل المعاملات:</h4><div id="pdf-tx-list" style="font-size: 14px; font-weight: 600;"></div></div>
+                    <div style="display: flex; margin-bottom: 20px;">
+                        <div style="width: 150px; font-weight: 800; color: #64748b; font-size: 16px;">الجهة المستفيدة:</div>
+                        <div style="font-weight: 900; font-size: 18px; color: #0f172a;" id="pdf-lawyer-name"></div>
+                    </div>
+                    
+                    <div style="display: flex; margin-bottom: 20px;">
+                        <div style="width: 150px; font-weight: 800; color: #64748b; font-size: 16px;">نوع المستند:</div>
+                        <div style="font-weight: 800; font-size: 16px; color: #0f172a;" id="pdf-doc-type"></div>
+                    </div>
+
+                    <div style="background: #f8fafc; border-radius: 12px; padding: 20px; margin-top: 30px; display: flex; justify-content: space-between; align-items: center; border: 1px dashed #cbd5e1;">
+                        <div style="font-size: 20px; font-weight: 900; color: #334155;">الإجمالي الكلي:</div>
+                        <div style="font-size: 28px; font-weight: 900; color: #4f46e5; direction: ltr;" id="pdf-amount">0 د.ع</div>
+                    </div>
+                    
+                    <div id="pdf-tx-list-container" style="display: none; margin-top: 30px;">
+                        <h4 style="font-weight: 800; color: #4f46e5; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;">تفاصيل المعاملات:</h4>
+                        <div id="pdf-tx-list" style="font-size: 14px; font-weight: 600;"></div>
+                    </div>
                 </div>
+
+                <!-- Footer / Signatures -->
                 <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto; padding-top: 40px; position: relative; z-index: 2;">
-                    <div style="text-align: center; background: white; padding: 10px; border-radius: 12px; border: 1px solid #e2e8f0;"><div id="qr-target"></div><p style="font-size: 10px; color: #94a3b8; margin-top: 8px; font-weight: 700;">موثق إلكترونياً (نظام المعقب V5)</p></div>
-                    <div style="text-align: center; width: 200px;"><p style="font-weight: 800; color: #64748b; margin-bottom: 10px;">التوقيع / المصادقة</p><div style="height: 100px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;"><img id="pdf-signature-img" src="" style="max-width: 180px; max-height: 90px; display: none;"></div><div style="border-top: 2px solid #0f172a; padding-top: 10px; font-weight: 900; font-size: 16px;" id="pdf-sig-name"></div></div>
+                    <div style="text-align: center; background: white; padding: 10px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                        <div id="qr-target"></div>
+                        <p style="font-size: 10px; color: #94a3b8; margin-top: 8px; font-weight: 700;">موثق إلكترونياً (نظام المعقب V5)</p>
+                    </div>
+                    
+                    <div style="text-align: center; width: 200px;">
+                        <p style="font-weight: 800; color: #64748b; margin-bottom: 10px;">التوقيع / المصادقة</p>
+                        <div style="height: 100px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                            <img id="pdf-signature-img" src="" style="max-width: 180px; max-height: 90px; display: none;">
+                        </div>
+                        <div style="border-top: 2px solid #0f172a; padding-top: 10px; font-weight: 900; font-size: 16px;" id="pdf-sig-name"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Scripts Area -->
     <script>
         // ==========================================
-        // 1. CORE DATA SYSTEM & MIGRATION (CLOUD)
+        // 1. CORE DATA SYSTEM & MIGRATION
         // ==========================================
-        const SUPABASE_URL = 'https://giidtugteyiobaagqohy.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpaWR0dWd0ZXlpb2JhYWdxb2h5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxMTgyMjYsImV4cCI6MjEwMjY5NDIyNn0.v7Nwag2BTrCWG6zzeYo1kTG4w2xAuzSmiZpCLJtvBow';
-        
-        let supabase = null;
-        try {
-            if (window.supabase) {
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            }
-        } catch(e) {
-            console.error("خطأ في مكتبة السحابة:", e);
-        }
-
         let db = { 
             settings: { name: '', address: '', theme: 'light', signature: null }, 
             lawyers: [], 
@@ -559,117 +859,101 @@
             return d.toLocaleDateString('ar-IQ', {month: 'short', day: 'numeric'}) + ' - ' + d.toLocaleTimeString('ar-IQ', {hour: '2-digit', minute:'2-digit'}); 
         };
 
-        function ensureDbStructure() {
-            if (!db) db = {};
-            if (!db.settings) db.settings = { name: '', address: '', theme: 'light', signature: null };
-            if (!db.lawyers) db.lawyers = [];
-            if (!db.companies) db.companies = [];
-            if (!db.transactions) db.transactions = [];
-            if (!db.vault) db.vault = [];
-        }
-
-        function loadLocalData() {
-            let saved = localStorage.getItem('moaqib_db_v5');
-            if(saved) {
-                try {
-                    let parsed = JSON.parse(saved);
-                    db = { ...db, ...parsed }; 
-                } catch(e) { console.error(e); }
-            }
-        }
-
-        async function init() {
+        function init() {
+            // Smart Migration logic V4 -> V5
             let saved = localStorage.getItem('moaqib_db_v5'); 
+            
             if(!saved) {
                 const oldDataV4 = localStorage.getItem('moaqib_db_v4') || localStorage.getItem('moaqib_db_v3');
                 if(oldDataV4) { 
+                    saved = oldDataV4; 
                     localStorage.setItem('moaqib_db_v5', oldDataV4); 
+                    showToast('تم ترقية بياناتك للإصدار الخامس بنجاح!', 'success'); 
                 }
             }
 
-            if(supabase) {
-                showToast('جاري الاتصال بالسحابة...', 'info');
+            if(saved) {
                 try {
-                    const { data, error } = await supabase.from('app_data').select('state').eq('id', 1).single();
-                    if (data && data.state && Object.keys(data.state).length > 0) {
-                        db = data.state; 
-                    } else {
-                        loadLocalData();
-                    }
-                } catch (err) {
-                    console.error("خطأ سحابي:", err);
-                    loadLocalData();
+                    const parsed = JSON.parse(saved);
+                    db = { ...db, ...parsed };
+                    if(!db.vault) db.vault = []; 
+                } catch(e) { 
+                    console.error("Error parsing db", e); 
                 }
-            } else {
-                loadLocalData();
-            }
-
-            ensureDbStructure();
-
-            if(db.settings.theme === 'dark') {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
             }
             
+            // Set Theme
+            if(db.settings.theme === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+            
+            // Load Settings Data
             document.getElementById('set-name').value = db.settings.name || '';
             document.getElementById('set-address').value = db.settings.address || '';
             if(db.settings.signature) {
-                const sigCont = document.getElementById('sig-preview-container');
-                const sigImg = document.getElementById('sig-preview');
-                if(sigCont && sigImg) {
-                    sigCont.classList.remove('hidden');
-                    sigImg.src = db.settings.signature;
-                }
+                document.getElementById('sig-preview-container').classList.remove('hidden');
+                document.getElementById('sig-preview').src = db.settings.signature;
             }
 
             renderAll();
-            
-            if(supabase) {
-                showToast('تمت مزامنة السحابة بنجاح', 'success');
+        }
+
+        function saveData() { 
+            try {
+                localStorage.setItem('moaqib_db_v5', JSON.stringify(db)); 
+                renderAll(); 
+            } catch (error) {
+                if(error.name === 'QuotaExceededError') { 
+                    customAlert('الذاكرة ممتلئة', 'مساحة التخزين امتلأت بسبب صور الخزنة. يرجى حذف الصور القديمة.', 'error'); 
+                }
             }
         }
 
-        async function saveData() { 
-            try {
-                ensureDbStructure();
-                localStorage.setItem('moaqib_db_v5', JSON.stringify(db)); 
-                
-                if (supabase) {
-                    await supabase.from('app_data').update({ state: db }).eq('id', 1);
-                }
-                
-                renderAll(); 
-            } catch (error) {
-                console.error(error);
-                if(error.name === 'QuotaExceededError') { 
-                    customAlert('الذاكرة ممتلئة', 'مساحة التخزين امتلأت بسبب صور الخزنة.', 'error'); 
-                }
-            }
-        }
+        // ==========================================
+        // 2. UI / UX SYSTEMS (TOASTS, MODALS, SELECTS)
+        // ==========================================
 
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
+            
             let icon = '<i class="fa-solid fa-circle-info text-blue-400"></i>';
             if(type === 'success') icon = '<i class="fa-solid fa-circle-check text-emerald-400"></i>';
             if(type === 'error') icon = '<i class="fa-solid fa-triangle-exclamation text-red-400"></i>';
+            
             toast.className = 'toast';
             toast.innerHTML = `${icon} <span>${message}</span>`;
+            
             container.appendChild(toast);
-            setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 300); }, 3000);
+            
+            // Auto hide and remove
+            setTimeout(() => {
+                toast.classList.add('hide');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
 
         function customAlert(title, message, type = 'info') {
             document.getElementById('uiAlertTitle').innerText = title; 
             document.getElementById('uiAlertMsg').innerText = message;
+            
             const icon = document.getElementById('uiAlertIcon');
-            if(type === 'error') { icon.className = "w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl"; icon.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>'; } 
-            else if (type === 'success') { icon.className = "w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl"; icon.innerHTML = '<i class="fa-solid fa-circle-check"></i>'; } 
-            else { icon.className = "w-16 h-16 bg-primary/20 text-primary rounded-full flex items-center justify-center mx-auto mb-4 text-3xl"; icon.innerHTML = '<i class="fa-solid fa-circle-info"></i>'; }
+            if(type === 'error') { 
+                icon.className = "w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl"; 
+                icon.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>'; 
+            } else if (type === 'success') { 
+                icon.className = "w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl"; 
+                icon.innerHTML = '<i class="fa-solid fa-circle-check"></i>'; 
+            } else { 
+                icon.className = "w-16 h-16 bg-primary/20 text-primary rounded-full flex items-center justify-center mx-auto mb-4 text-3xl"; 
+                icon.innerHTML = '<i class="fa-solid fa-circle-info"></i>'; 
+            }
             document.getElementById('uiAlert').classList.add('active');
         }
-        function closeUiAlert() { document.getElementById('uiAlert').classList.remove('active'); }
+        
+        function closeUiAlert() { 
+            document.getElementById('uiAlert').classList.remove('active'); 
+        }
 
         function customConfirm(title, message, onConfirmCallback) {
             document.getElementById('uiConfirmTitle').innerText = title; 
@@ -677,15 +961,25 @@
             confirmAction = onConfirmCallback; 
             document.getElementById('uiConfirm').classList.add('active');
         }
-        function closeUiConfirm() { document.getElementById('uiConfirm').classList.remove('active'); confirmAction = null; }
-        document.getElementById('uiConfirmBtn').addEventListener('click', () => { if(confirmAction) confirmAction(); closeUiConfirm(); });
+        
+        function closeUiConfirm() { 
+            document.getElementById('uiConfirm').classList.remove('active'); 
+            confirmAction = null; 
+        }
+        
+        document.getElementById('uiConfirmBtn').addEventListener('click', () => { 
+            if(confirmAction) confirmAction(); 
+            closeUiConfirm(); 
+        });
 
         function openCustomSelect(selectId, title) {
             const selectEl = document.getElementById(selectId);
             if(!selectEl) return;
+            
             document.getElementById('customSelectTitle').innerText = title;
             const listContainer = document.getElementById('customSelectList');
             listContainer.innerHTML = '';
+
             if(selectEl.options.length === 0 || (selectEl.options.length === 1 && selectEl.options[0].value === "")) {
                 listContainer.innerHTML = `<div class="text-center p-4 text-slate-400 font-bold text-sm">القائمة فارغة</div>`;
             } else {
@@ -693,82 +987,152 @@
                     if(opt.value === "") return;
                     const isSelected = selectEl.value === opt.value;
                     const div = document.createElement('div');
+                    
                     div.className = `custom-option ${isSelected ? 'selected' : 'text-slate-700 dark:text-slate-300'}`;
-                    div.innerHTML = `<div class="flex justify-between items-center"><span>${opt.text}</span>${isSelected ? '<i class="fa-solid fa-check"></i>' : ''}</div>`;
-                    div.onclick = () => { selectEl.value = opt.value; selectEl.dispatchEvent(new Event('change')); updateCustomSelectText(selectId); closeCustomSelect(); };
+                    div.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <span>${opt.text}</span>
+                            ${isSelected ? '<i class="fa-solid fa-check"></i>' : ''}
+                        </div>
+                    `;
+                    
+                    div.onclick = () => { 
+                        selectEl.value = opt.value; 
+                        selectEl.dispatchEvent(new Event('change')); 
+                        updateCustomSelectText(selectId); 
+                        closeCustomSelect(); 
+                    };
+                    
                     listContainer.appendChild(div);
                 });
             }
             openModal('customSelectModal');
         }
-        function closeCustomSelect() { closeModal('customSelectModal'); }
+
+        function closeCustomSelect() { 
+            closeModal('customSelectModal'); 
+        }
         
         function updateCustomSelectText(selectId, defaultText = '- اختر -') {
             const selectEl = document.getElementById(selectId);
             const textSpan = document.getElementById(`text-${selectId}`);
+            
             if(selectEl && textSpan) {
                 const selected = selectEl.options[selectEl.selectedIndex];
-                if(selected && selected.value) { textSpan.innerText = selected.text; textSpan.classList.remove('text-slate-400'); textSpan.classList.add('text-slate-800', 'dark:text-white'); } 
-                else { textSpan.innerText = defaultText; textSpan.classList.add('text-slate-400'); textSpan.classList.remove('text-slate-800', 'dark:text-white'); }
+                if(selected && selected.value) { 
+                    textSpan.innerText = selected.text; 
+                    textSpan.classList.remove('text-slate-400'); 
+                    textSpan.classList.add('text-slate-800', 'dark:text-white'); 
+                } else { 
+                    textSpan.innerText = defaultText; 
+                    textSpan.classList.add('text-slate-400'); 
+                    textSpan.classList.remove('text-slate-800', 'dark:text-white'); 
+                }
             }
         }
+
+        // ==========================================
+        // 3. NAVIGATION & VIEW LOGIC
+        // ==========================================
 
         function switchTab(tabId) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             setTimeout(() => document.getElementById(`view-${tabId}`).classList.add('active'), 10);
+            
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             document.getElementById(`nav-${tabId}`).classList.add('active');
+            
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function toggleArchiveTab(type) {
-            document.getElementById('tab-arch-tx').className = type === 'tx' ? 'flex-1 py-2.5 rounded-lg text-sm font-bold bg-white dark:bg-darkcard text-primary shadow transition-all' : 'flex-1 py-2.5 rounded-lg text-sm font-bold text-slate-500 dark:text-slate-400 transition-all hover:text-slate-800';
-            document.getElementById('tab-arch-vault').className = type === 'vault' ? 'flex-1 py-2.5 rounded-lg text-sm font-bold bg-white dark:bg-darkcard text-primary shadow transition-all' : 'flex-1 py-2.5 rounded-lg text-sm font-bold text-slate-500 dark:text-slate-400 transition-all hover:text-slate-800';
+            document.getElementById('tab-arch-tx').className = type === 'tx' 
+                ? 'flex-1 py-2.5 rounded-lg text-sm font-bold bg-white dark:bg-darkcard text-primary shadow transition-all' 
+                : 'flex-1 py-2.5 rounded-lg text-sm font-bold text-slate-500 dark:text-slate-400 transition-all hover:text-slate-800';
+            
+            document.getElementById('tab-arch-vault').className = type === 'vault' 
+                ? 'flex-1 py-2.5 rounded-lg text-sm font-bold bg-white dark:bg-darkcard text-primary shadow transition-all' 
+                : 'flex-1 py-2.5 rounded-lg text-sm font-bold text-slate-500 dark:text-slate-400 transition-all hover:text-slate-800';
+            
             document.getElementById('archive-tx-content').style.display = type === 'tx' ? 'block' : 'none';
             document.getElementById('archive-vault-content').style.display = type === 'vault' ? 'block' : 'none';
-            if(type === 'vault') { updateVaultDropdown(); renderVault(); }
+            
+            if(type === 'vault') { 
+                updateVaultDropdown(); 
+                renderVault(); 
+            }
         }
 
         function toggleTheme() {
             const isDark = document.documentElement.classList.toggle('dark');
             db.settings.theme = isDark ? 'dark' : 'light';
             saveData();
-            initChart(); 
+            initChart(); // Redraw chart to match new color scheme
         }
 
         function openModal(id) {
-            const modal = document.getElementById(id); modal.style.display = 'flex';
-            setTimeout(() => { modal.classList.add('active'); const content = modal.children[0]; if(content && content.classList.contains('translate-y-full')) { content.classList.remove('translate-y-full'); } }, 10);
+            const modal = document.getElementById(id); 
+            modal.style.display = 'flex';
+            
+            setTimeout(() => { 
+                modal.classList.add('active'); 
+                const content = modal.children[0]; 
+                if(content && content.classList.contains('translate-y-full')) {
+                    content.classList.remove('translate-y-full'); 
+                }
+            }, 10);
         }
+
         function closeModal(id) {
-            const modal = document.getElementById(id); const content = modal.children[0];
-            if(content && !content.classList.contains('translate-y-full')) { content.classList.add('translate-y-full'); }
-            modal.classList.remove('active'); setTimeout(() => modal.style.display = 'none', 300);
+            const modal = document.getElementById(id); 
+            const content = modal.children[0];
+            
+            if(content && !content.classList.contains('translate-y-full')) {
+                content.classList.add('translate-y-full');
+            }
+            
+            modal.classList.remove('active'); 
+            setTimeout(() => modal.style.display = 'none', 300);
         }
+
+        // ==========================================
+        // 4. BACKUP, RESTORE & DATA MANAGEMENT
+        // ==========================================
 
         function exportData() {
             const dataStr = JSON.stringify(db);
             const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
             const exportFileDefaultName = `moaqib_backup_${new Date().getTime()}.json`;
+            
             const linkElement = document.createElement('a');
             linkElement.setAttribute('href', dataUri);
             linkElement.setAttribute('download', exportFileDefaultName);
             linkElement.click();
+            
             showToast('تم تصدير نسخة احتياطية بنجاح', 'success');
         }
 
         function importData(event) {
-            const file = event.target.files[0]; if (!file) return;
+            const file = event.target.files[0];
+            if (!file) return;
+            
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const importedDb = JSON.parse(e.target.result);
                     if(importedDb.settings && importedDb.transactions) {
                         customConfirm('استعادة البيانات', 'سيتم مسح البيانات الحالية واستبدالها ببيانات النسخة. هل أنت متأكد؟', () => {
-                            db = importedDb; saveData(); showToast('تمت استعادة البيانات بنجاح', 'success'); setTimeout(() => location.reload(), 1000);
+                            db = importedDb; 
+                            saveData(); 
+                            showToast('تمت استعادة البيانات بنجاح', 'success'); 
+                            setTimeout(() => location.reload(), 1000);
                         });
-                    } else { customAlert('ملف خاطئ', 'الملف المرفوع لا يحتوي على بيانات نظام المعقب.', 'error'); }
-                } catch (err) { customAlert('خطأ', 'تعذرت قراءة الملف. قد يكون تالفاً.', 'error'); }
+                    } else { 
+                        customAlert('ملف خاطئ', 'الملف المرفوع لا يحتوي على بيانات نظام المعقب.', 'error'); 
+                    }
+                } catch (err) { 
+                    customAlert('خطأ', 'تعذرت قراءة الملف. قد يكون تالفاً.', 'error'); 
+                }
             };
             reader.readAsText(file);
         }
@@ -776,213 +1140,741 @@
         function reqClearData() {
             customConfirm('تصفير جذري', 'تحذير: سيتم مسح كافة البيانات والصور والأرشيف نهائياً. تأكد من "تصدير البيانات" قبل هذه الخطوة. هل أنت متأكد؟', () => {
                 localStorage.clear(); 
-                if(supabase) supabase.from('app_data').update({ state: {} }).eq('id', 1).then(() => location.reload());
-                else location.reload();
+                location.reload();
             });
         }
 
-        function saveSettingsRealtime() { db.settings.name = document.getElementById('set-name').value; db.settings.address = document.getElementById('set-address').value; saveData(); }
+        // ==========================================
+        // 5. BUSINESS LOGIC & SETTINGS
+        // ==========================================
+
+        function saveSettingsRealtime() { 
+            db.settings.name = document.getElementById('set-name').value; 
+            db.settings.address = document.getElementById('set-address').value; 
+            saveData(); 
+        }
 
         function handleSignatureUpload(event) {
-            const file = event.target.files[0]; if(!file) return;
+            const file = event.target.files[0]; 
+            if(!file) return;
+            
             const reader = new FileReader();
             reader.onload = function(e) {
                 db.settings.signature = e.target.result;
                 document.getElementById('sig-preview-container').classList.remove('hidden'); 
                 document.getElementById('sig-preview').src = db.settings.signature;
-                saveData(); showToast('تم تحديث التوقيع بنجاح', 'success');
+                saveData(); 
+                showToast('تم تحديث التوقيع بنجاح', 'success');
             }; 
             reader.readAsDataURL(file);
         }
-        function removeSignature() { db.settings.signature = null; document.getElementById('sig-preview-container').classList.add('hidden'); document.getElementById('sig-preview').src = ''; document.getElementById('sig-upload').value = ''; saveData(); showToast('تم إزالة التوقيع'); }
+
+        function removeSignature() {
+            db.settings.signature = null; 
+            document.getElementById('sig-preview-container').classList.add('hidden'); 
+            document.getElementById('sig-preview').src = ''; 
+            document.getElementById('sig-upload').value = ''; 
+            saveData(); 
+            showToast('تم إزالة التوقيع');
+        }
 
         function saveLawyer() {
             const name = document.getElementById('in-lawyer-name').value;
             if(!name) return showToast('يرجى إدخال اسم العميل/المحامي', 'error');
-            db.lawyers.push({ id: Date.now(), name }); closeModal('addLawyerModal'); document.getElementById('in-lawyer-name').value = ''; saveData(); showToast('تمت إضافة العميل بنجاح', 'success');
+            
+            db.lawyers.push({ id: Date.now(), name });
+            closeModal('addLawyerModal'); 
+            document.getElementById('in-lawyer-name').value = ''; 
+            saveData(); 
+            showToast('تمت إضافة العميل بنجاح', 'success');
         }
+
         function reqDeleteLawyer(id) {
-            if(db.transactions.some(t => t.lawyerId === id)) return customAlert('تنبيه أمان', 'لا يمكن حذف عميل مرتبط بمعاملات سابقة أو جارية.', 'error');
-            customConfirm('حذف العميل', 'هل أنت متأكد من حذف هذا العميل وشركاته المرتبطة؟', () => { db.lawyers = db.lawyers.filter(l => l.id !== id); db.companies = db.companies.filter(c => c.lawyerId !== id); saveData(); showToast('تم الحذف بنجاح', 'success'); });
+            if(db.transactions.some(t => t.lawyerId === id)) {
+                return customAlert('تنبيه أمان', 'لا يمكن حذف عميل مرتبط بمعاملات سابقة أو جارية.', 'error');
+            }
+            
+            customConfirm('حذف العميل', 'هل أنت متأكد من حذف هذا العميل وشركاته المرتبطة؟', () => {
+                db.lawyers = db.lawyers.filter(l => l.id !== id); 
+                db.companies = db.companies.filter(c => c.lawyerId !== id); 
+                saveData(); 
+                showToast('تم الحذف بنجاح', 'success');
+            });
         }
 
         function saveCompany() {
-            const name = document.getElementById('in-comp-name').value; const lawyerId = document.getElementById('in-comp-lawyer').value;
+            const name = document.getElementById('in-comp-name').value; 
+            const lawyerId = document.getElementById('in-comp-lawyer').value;
+            
             if(!name || !lawyerId) return showToast('يرجى تعبئة كافة حقول الشركة', 'error');
-            db.companies.push({ id: Date.now(), name, lawyerId: parseInt(lawyerId) }); closeModal('addCompanyModal'); document.getElementById('in-comp-name').value = ''; document.getElementById('in-comp-lawyer').value = ''; saveData(); showToast('تمت إضافة الشركة', 'success');
+            
+            db.companies.push({ id: Date.now(), name, lawyerId: parseInt(lawyerId) });
+            closeModal('addCompanyModal'); 
+            document.getElementById('in-comp-name').value = ''; 
+            document.getElementById('in-comp-lawyer').value = '';
+            
+            saveData(); 
+            showToast('تمت إضافة الشركة', 'success');
         }
+
         function reqDeleteCompany(id) {
-            if(db.transactions.some(t => t.companyId === id)) return customAlert('تنبيه أمان', 'لا يمكن حذف شركة لها سجل معاملات.', 'error');
-            customConfirm('حذف الشركة', 'سيتم حذف الشركة ومستندات خزينتها، هل تستمر؟', () => { db.companies = db.companies.filter(c => c.id !== id); db.vault = db.vault.filter(v => v.companyId !== id); saveData(); showToast('تم حذف الشركة', 'success'); });
+            if(db.transactions.some(t => t.companyId === id)) {
+                return customAlert('تنبيه أمان', 'لا يمكن حذف شركة لها سجل معاملات.', 'error');
+            }
+            
+            customConfirm('حذف الشركة', 'سيتم حذف الشركة ومستندات خزينتها، هل تستمر؟', () => {
+                db.companies = db.companies.filter(c => c.id !== id); 
+                db.vault = db.vault.filter(v => v.companyId !== id);
+                saveData(); 
+                showToast('تم حذف الشركة', 'success');
+            });
         }
 
         function updateCompanyDropdown() {
-            const lIdStr = document.getElementById('new-tx-lawyer').value; const compSelect = document.getElementById('new-tx-company');
-            if(!lIdStr) { compSelect.innerHTML = '<option value="">- أختر محامي أولاً -</option>'; } else {
+            const lIdStr = document.getElementById('new-tx-lawyer').value; 
+            const compSelect = document.getElementById('new-tx-company');
+            
+            if(!lIdStr) { 
+                compSelect.innerHTML = '<option value="">- أختر محامي أولاً -</option>'; 
+            } else {
                 const comps = db.companies.filter(c => c.lawyerId === parseInt(lIdStr));
-                compSelect.innerHTML = '<option value="">- اختر الشركة -</option>' + comps.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+                compSelect.innerHTML = '<option value="">- اختر الشركة -</option>' + 
+                                       comps.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
             }
-            compSelect.value = ""; updateCustomSelectText('new-tx-company', '- اختر الشركة -');
+            
+            compSelect.value = ""; 
+            updateCustomSelectText('new-tx-company', '- اختر الشركة -');
         }
 
         function createNewTransaction() {
-            const compId = document.getElementById('new-tx-company').value; const lawyerId = document.getElementById('new-tx-lawyer').value;
-            const type = document.getElementById('new-tx-type').value; const fee = document.getElementById('new-tx-fee').value;
+            const compId = document.getElementById('new-tx-company').value; 
+            const lawyerId = document.getElementById('new-tx-lawyer').value;
+            const type = document.getElementById('new-tx-type').value; 
+            const fee = document.getElementById('new-tx-fee').value;
             const dept = document.querySelector('input[name="new-tx-dept"]:checked').value;
-            if(!compId || !lawyerId || !type || !fee) return customAlert('بيانات ناقصة', 'يرجى تعبئة كافة حقول المعاملة.', 'error');
-            db.transactions.push({ id: Date.now(), companyId: parseInt(compId), lawyerId: parseInt(lawyerId), type, dept, fee: parseInt(fee), status: 'active', stations: [], lastUpdate: Date.now() });
-            document.getElementById('new-tx-type').value = ''; document.getElementById('new-tx-fee').value = ''; document.getElementById('new-tx-company').value = ''; document.getElementById('new-tx-lawyer').value = '';
-            saveData(); switchTab('active'); showToast('تم تأسيس القيد بنجاح', 'success');
+            
+            if(!compId || !lawyerId || !type || !fee) {
+                return customAlert('بيانات ناقصة', 'يرجى تعبئة كافة حقول المعاملة.', 'error');
+            }
+
+            db.transactions.push({ 
+                id: Date.now(), 
+                companyId: parseInt(compId), 
+                lawyerId: parseInt(lawyerId), 
+                type, 
+                dept, 
+                fee: parseInt(fee), 
+                status: 'active', 
+                stations: [], 
+                lastUpdate: Date.now() 
+            });
+
+            document.getElementById('new-tx-type').value = ''; 
+            document.getElementById('new-tx-fee').value = ''; 
+            document.getElementById('new-tx-company').value = ''; 
+            document.getElementById('new-tx-lawyer').value = '';
+            
+            saveData(); 
+            switchTab('active'); 
+            showToast('تم تأسيس القيد بنجاح', 'success');
         }
+
+        // ==========================================
+        // 6. CHART, RENDER & SEARCH
+        // ==========================================
 
         function initChart() {
             const ctx = document.getElementById('performanceChart').getContext('2d');
             if(chartInstance) chartInstance.destroy();
+
             const isDark = document.documentElement.classList.contains('dark');
             const textColor = isDark ? '#cbd5e1' : '#475569';
             const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+
+            // Simplified Day distribution logic for visual UX
             const completedTxs = db.transactions.filter(t => t.status === 'completed');
-            const dataCounts = [0,0,0,0,0]; completedTxs.forEach((t, i) => { dataCounts[i % 5] += 1; }); 
+            const dataCounts = [0,0,0,0,0]; 
+            completedTxs.forEach((t, i) => { dataCounts[i % 5] += 1; }); 
+
             chartInstance = new Chart(ctx, {
-                type: 'line', data: { labels: ['الخميس', 'الأربعاء', 'الثلاثاء', 'الاثنين', 'الأحد'], datasets: [{ label: 'المعاملات المنجزة', data: dataCounts.length > 0 && Math.max(...dataCounts) > 0 ? dataCounts : [1, 3, 2, 5, 4], borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.1)', borderWidth: 3, tension: 0.4, fill: true, pointBackgroundColor: '#9333ea' }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: textColor, stepSize: 1 }, grid: { color: gridColor } }, x: { ticks: { color: textColor }, grid: { display: false } } } }
+                type: 'line',
+                data: {
+                    labels: ['الخميس', 'الأربعاء', 'الثلاثاء', 'الاثنين', 'الأحد'],
+                    datasets: [{
+                        label: 'المعاملات المنجزة',
+                        data: dataCounts.length > 0 && Math.max(...dataCounts) > 0 ? dataCounts : [1, 3, 2, 5, 4], 
+                        borderColor: '#4f46e5', 
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        borderWidth: 3, 
+                        tension: 0.4, 
+                        fill: true, 
+                        pointBackgroundColor: '#9333ea'
+                    }]
+                },
+                options: {
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { ticks: { color: textColor, stepSize: 1 }, grid: { color: gridColor } },
+                        x: { ticks: { color: textColor }, grid: { display: false } }
+                    }
+                }
             });
         }
 
         function filterTransactions(status) {
             const term = document.getElementById(`search-${status}`).value.toLowerCase();
             const txs = db.transactions.filter(t => t.status === status);
-            const filtered = txs.filter(t => t.type.toLowerCase().includes(term) || (db.companies.find(c => c.id === t.companyId)?.name || '').toLowerCase().includes(term) || (db.lawyers.find(l => l.id === t.lawyerId)?.name || '').toLowerCase().includes(term));
+            
+            const filtered = txs.filter(t => 
+                t.type.toLowerCase().includes(term) || 
+                (db.companies.find(c => c.id === t.companyId)?.name || '').toLowerCase().includes(term) ||
+                (db.lawyers.find(l => l.id === t.lawyerId)?.name || '').toLowerCase().includes(term)
+            );
+            
             renderTxList(`${status}-list`, filtered, 'لا توجد نتائج بحث مطابقة');
         }
 
         function renderAll() {
-            ensureDbStructure();
-            const lOpts = '<option value="">- اختر العميل/المحامي -</option>' + db.lawyers.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
-            ['new-tx-lawyer', 'in-comp-lawyer'].forEach(id => { const el = document.getElementById(id); const prev = el.value; el.innerHTML = lOpts; el.value = prev; updateCustomSelectText(id); });
-            updateCompanyDropdown(); updateVaultDropdown();
+            // Update Select Lists
+            const lOpts = '<option value="">- اختر العميل/المحامي -</option>' + 
+                          db.lawyers.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
+            
+            ['new-tx-lawyer', 'in-comp-lawyer'].forEach(id => {
+                const el = document.getElementById(id); 
+                const prev = el.value; 
+                el.innerHTML = lOpts; 
+                el.value = prev; 
+                updateCustomSelectText(id);
+            });
+            
+            updateCompanyDropdown(); 
+            updateVaultDropdown();
 
-            const activeTxs = db.transactions.filter(t => t.status === 'active'); const stalledTxs = db.transactions.filter(t => t.status === 'stalled');
+            // Calculate Dashboard Stats
+            const activeTxs = db.transactions.filter(t => t.status === 'active');
+            const stalledTxs = db.transactions.filter(t => t.status === 'stalled');
+
             document.getElementById('home-weekly-profit').innerText = numFormat.format(activeTxs.reduce((sum, t) => sum + t.fee, 0));
-            document.getElementById('home-lawyers-count').innerText = db.lawyers.length; document.getElementById('home-companies-count').innerText = db.companies.length;
-            document.getElementById('home-active-count').innerText = activeTxs.length; document.getElementById('home-stalled-count').innerText = stalledTxs.length;
-            document.getElementById('badge-active').innerText = activeTxs.length; document.getElementById('badge-active').style.display = activeTxs.length > 0 ? 'flex' : 'none';
+            document.getElementById('home-lawyers-count').innerText = db.lawyers.length; 
+            document.getElementById('home-companies-count').innerText = db.companies.length;
+            document.getElementById('home-active-count').innerText = activeTxs.length; 
+            document.getElementById('home-stalled-count').innerText = stalledTxs.length;
+            
+            document.getElementById('badge-active').innerText = activeTxs.length; 
+            document.getElementById('badge-active').style.display = activeTxs.length > 0 ? 'flex' : 'none';
 
-            const genList = (arr, type) => arr.map((item, index) => `<div class="flex justify-between items-center glass-panel p-3 rounded-xl animate-item hover-lift mb-2" style="animation-delay: ${index * 0.05}s"><div><span class="font-bold text-sm block text-slate-800 dark:text-white">${item.name}</span>${type === 'comp' ? `<span class="text-[10px] text-slate-500 font-bold"><i class="fa-solid fa-link"></i> ${db.lawyers.find(l=>l.id==item.lawyerId)?.name || '?'}</span>` : ''}</div><button onclick="${type === 'comp' ? `reqDeleteCompany(${item.id})` : `reqDeleteLawyer(${item.id})`}" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 p-2 rounded-lg transition-colors"><i class="fa-solid fa-trash-can"></i></button></div>`).join('') || `<p class="text-xs text-slate-400 text-center py-2 font-bold">القائمة فارغة</p>`;
-            document.getElementById('settings-lawyers-list').innerHTML = genList(db.lawyers, 'lawyer'); document.getElementById('settings-companies-list').innerHTML = genList(db.companies, 'comp');
+            // Lists rendering helper
+            const genList = (arr, type) => arr.map((item, index) => `
+                <div class="flex justify-between items-center glass-panel p-3 rounded-xl animate-item hover-lift mb-2" style="animation-delay: ${index * 0.05}s">
+                    <div>
+                        <span class="font-bold text-sm block text-slate-800 dark:text-white">${item.name}</span>
+                        ${type === 'comp' 
+                            ? `<span class="text-[10px] text-slate-500 font-bold"><i class="fa-solid fa-link"></i> ${db.lawyers.find(l=>l.id==item.lawyerId)?.name || '?'}</span>` 
+                            : ''}
+                    </div>
+                    <button onclick="${type === 'comp' ? `reqDeleteCompany(${item.id})` : `reqDeleteLawyer(${item.id})`}" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 p-2 rounded-lg transition-colors">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+            `).join('') || `<p class="text-xs text-slate-400 text-center py-2 font-bold">القائمة فارغة</p>`;
 
-            if(!document.getElementById('search-active').value) renderTxList('active-list', activeTxs, 'صندوق المعاملات الجارية فارغ');
-            if(!document.getElementById('search-stalled').value) renderTxList('stalled-list', stalledTxs, 'ممتاز، لا توجد معاملات متلكئة');
-            renderArchive(); renderAccounting(); if(document.getElementById('archive-vault-content').style.display === 'block') renderVault();
+            document.getElementById('settings-lawyers-list').innerHTML = genList(db.lawyers, 'lawyer');
+            document.getElementById('settings-companies-list').innerHTML = genList(db.companies, 'comp');
+
+            // Render TX lists (only if user isn't searching)
+            if(!document.getElementById('search-active').value) {
+                renderTxList('active-list', activeTxs, 'صندوق المعاملات الجارية فارغ');
+            }
+            if(!document.getElementById('search-stalled').value) {
+                renderTxList('stalled-list', stalledTxs, 'ممتاز، لا توجد معاملات متلكئة');
+            }
+            
+            renderArchive(); 
+            renderAccounting();
+            
+            if(document.getElementById('archive-vault-content').style.display === 'block') {
+                renderVault();
+            }
+            
             initChart();
         }
 
         function renderTxList(containerId, txs, emptyMsg) {
             const container = document.getElementById(containerId);
-            if(txs.length === 0) { container.innerHTML = `<div class="text-center py-12 opacity-50 animate-item"><i class="fa-regular fa-folder-open text-5xl mb-4 text-slate-400"></i><p class="font-bold">${emptyMsg}</p></div>`; return; }
+            
+            if(txs.length === 0) { 
+                container.innerHTML = `
+                    <div class="text-center py-12 opacity-50 animate-item">
+                        <i class="fa-regular fa-folder-open text-5xl mb-4 text-slate-400"></i>
+                        <p class="font-bold">${emptyMsg}</p>
+                    </div>`; 
+                return; 
+            }
+
             container.innerHTML = txs.sort((a,b)=> b.lastUpdate - a.lastUpdate).map((tx, index) => {
-                const comp = db.companies.find(c => c.id === tx.companyId)?.name || 'غير معروف'; const lawyer = db.lawyers.find(l => l.id === tx.lawyerId)?.name || '';
+                const comp = db.companies.find(c => c.id === tx.companyId)?.name || 'غير معروف';
+                const lawyer = db.lawyers.find(l => l.id === tx.lawyerId)?.name || '';
+                
+                // Alert if stalled manually or untouched for 48 hours
                 const isStagnant = (Date.now() - tx.lastUpdate) > (48 * 60 * 60 * 1000) && tx.status === 'active'; 
-                const bgClass = isStagnant ? 'card-stagnant text-white shadow-red-500/20' : 'card-gradient text-white shadow-indigo-500/20';
-                return `<div onclick="openTxDetails(${tx.id})" class="${bgClass} p-5 rounded-2xl relative cursor-pointer active:scale-95 hover-lift transition-all overflow-hidden shadow-lg animate-item" style="animation-delay: ${index * 0.05}s"><div class="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>${isStagnant ? `<div class="absolute top-0 right-0 bg-yellow-400 text-black text-[10px] font-black px-3 py-1 rounded-bl-xl"><i class="fa-solid fa-clock"></i> توقف طويل</div>` : ''}<h3 class="text-lg font-black mb-2 mt-1">${tx.type}</h3><p class="text-xs font-bold opacity-90 flex items-center gap-2 mb-4"><i class="fa-regular fa-building opacity-70"></i> ${comp} | ${lawyer}</p><div class="flex justify-between items-end border-t border-white/20 pt-3"><div class="text-xs font-bold bg-black/20 px-2.5 py-1.5 rounded-lg backdrop-blur-md border border-white/10"><i class="fa-solid fa-location-dot text-indigo-200"></i> ${tx.stations.length > 0 ? tx.stations[tx.stations.length-1].name : 'المحطة الأولى'}</div><div class="font-extrabold text-xl" dir="ltr">${numFormat.format(tx.fee)}</div></div></div>`;
+                const bgClass = isStagnant 
+                    ? 'card-stagnant text-white shadow-red-500/20' 
+                    : 'card-gradient text-white shadow-indigo-500/20';
+                
+                return `
+                <div onclick="openTxDetails(${tx.id})" class="${bgClass} p-5 rounded-2xl relative cursor-pointer active:scale-95 hover-lift transition-all overflow-hidden shadow-lg animate-item" style="animation-delay: ${index * 0.05}s">
+                    <div class="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                    
+                    ${isStagnant ? `
+                        <div class="absolute top-0 right-0 bg-yellow-400 text-black text-[10px] font-black px-3 py-1 rounded-bl-xl">
+                            <i class="fa-solid fa-clock"></i> توقف طويل
+                        </div>
+                    ` : ''}
+                    
+                    <h3 class="text-lg font-black mb-2 mt-1">${tx.type}</h3>
+                    
+                    <p class="text-xs font-bold opacity-90 flex items-center gap-2 mb-4">
+                        <i class="fa-regular fa-building opacity-70"></i> ${comp} | ${lawyer}
+                    </p>
+                    
+                    <div class="flex justify-between items-end border-t border-white/20 pt-3">
+                        <div class="text-xs font-bold bg-black/20 px-2.5 py-1.5 rounded-lg backdrop-blur-md border border-white/10">
+                            <i class="fa-solid fa-location-dot text-indigo-200"></i> 
+                            ${tx.stations.length > 0 ? tx.stations[tx.stations.length-1].name : 'المحطة الأولى'}
+                        </div>
+                        <div class="font-extrabold text-xl" dir="ltr">
+                            ${numFormat.format(tx.fee)}
+                        </div>
+                    </div>
+                </div>`;
             }).join('');
         }
 
+        // ==========================================
+        // 7. VAULT LOGIC (STORAGE & LIGHTBOX)
+        // ==========================================
+
         function updateVaultDropdown() {
-            const select = document.getElementById('vault-company-select'); const prevVal = select.value;
-            select.innerHTML = `<option value="">- اختر الشركة -</option>` + db.companies.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-            select.value = prevVal; updateCustomSelectText('vault-company-select', '- اختر الشركة -');
+            const select = document.getElementById('vault-company-select'); 
+            const prevVal = select.value;
+            
+            select.innerHTML = `<option value="">- اختر الشركة -</option>` + 
+                               db.companies.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+                               
+            select.value = prevVal; 
+            updateCustomSelectText('vault-company-select', '- اختر الشركة -');
         }
 
         function renderVault() {
-            const compId = document.getElementById('vault-company-select').value; const btnUpload = document.getElementById('btn-vault-upload'); const gallery = document.getElementById('vault-gallery');
-            if(!compId) { btnUpload.classList.add('hidden'); gallery.innerHTML = `<div class="col-span-2 text-center py-10 opacity-50"><i class="fa-solid fa-building-lock text-4xl mb-3 text-slate-400"></i><p class="font-bold text-sm">يرجى اختيار شركة لفتح خزينتها</p></div>`; return; }
-            btnUpload.classList.remove('hidden'); const companyDocs = db.vault.filter(v => v.companyId === parseInt(compId)).sort((a,b) => b.date - a.date);
-            if(companyDocs.length === 0) { gallery.innerHTML = `<div class="col-span-2 text-center py-8 opacity-50"><i class="fa-regular fa-images text-4xl mb-3 text-slate-400"></i><p class="font-bold text-xs">لا توجد مستندات لهذه الشركة</p></div>`; return; }
-            gallery.innerHTML = companyDocs.map((doc, index) => `<div class="relative bg-white dark:bg-darkcard rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 hover-lift animate-item" style="animation-delay: ${index * 0.05}s"><div class="h-32 w-full bg-slate-100 dark:bg-slate-900 cursor-pointer" onclick="openLightbox('${doc.data}')"><img src="${doc.data}" class="w-full h-full object-cover"></div><div class="p-2.5 flex justify-between items-center"><span class="text-[9px] font-bold text-slate-500 truncate">${formatDate(doc.date).split(' -')[0]}</span><button onclick="reqDeleteVaultItem(${doc.id})" class="text-red-500 bg-red-50 dark:bg-red-900/30 w-7 h-7 rounded-lg flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors"><i class="fa-solid fa-trash-can text-xs"></i></button></div></div>`).join('');
+            const compId = document.getElementById('vault-company-select').value; 
+            const btnUpload = document.getElementById('btn-vault-upload'); 
+            const gallery = document.getElementById('vault-gallery');
+            
+            if(!compId) { 
+                btnUpload.classList.add('hidden'); 
+                gallery.innerHTML = `
+                    <div class="col-span-2 text-center py-10 opacity-50">
+                        <i class="fa-solid fa-building-lock text-4xl mb-3 text-slate-400"></i>
+                        <p class="font-bold text-sm">يرجى اختيار شركة لفتح خزينتها</p>
+                    </div>`; 
+                return; 
+            }
+            
+            btnUpload.classList.remove('hidden'); 
+            const companyDocs = db.vault.filter(v => v.companyId === parseInt(compId)).sort((a,b) => b.date - a.date);
+            
+            if(companyDocs.length === 0) { 
+                gallery.innerHTML = `
+                    <div class="col-span-2 text-center py-8 opacity-50">
+                        <i class="fa-regular fa-images text-4xl mb-3 text-slate-400"></i>
+                        <p class="font-bold text-xs">لا توجد مستندات لهذه الشركة</p>
+                    </div>`; 
+                return; 
+            }
+
+            gallery.innerHTML = companyDocs.map((doc, index) => `
+                <div class="relative bg-white dark:bg-darkcard rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 hover-lift animate-item" style="animation-delay: ${index * 0.05}s">
+                    <div class="h-32 w-full bg-slate-100 dark:bg-slate-900 cursor-pointer" onclick="openLightbox('${doc.data}')">
+                        <img src="${doc.data}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-2.5 flex justify-between items-center">
+                        <span class="text-[9px] font-bold text-slate-500 truncate">${formatDate(doc.date).split(' -')[0]}</span>
+                        <button onclick="reqDeleteVaultItem(${doc.id})" class="text-red-500 bg-red-50 dark:bg-red-900/30 w-7 h-7 rounded-lg flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                    </div>
+                </div>`).join('');
         }
 
         function handleVaultUpload(event) {
-            const compId = document.getElementById('vault-company-select').value; const file = event.target.files[0]; if(!file || !compId) return;
+            const compId = document.getElementById('vault-company-select').value; 
+            const file = event.target.files[0]; 
+            if(!file || !compId) return;
+            
             const reader = new FileReader();
             reader.onload = function(e) {
                 const img = new Image(); 
                 img.onload = function() {
-                    const canvas = document.createElement('canvas'); const MAX_WIDTH = 1000; const MAX_HEIGHT = 1000; let width = img.width; let height = img.height;
-                    if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } } else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
-                    canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
+                    const canvas = document.createElement('canvas'); 
+                    
+                    // Image Compression to save localStorage space
+                    const MAX_WIDTH = 1000; 
+                    const MAX_HEIGHT = 1000; 
+                    let width = img.width; 
+                    let height = img.height;
+                    
+                    if (width > height) { 
+                        if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } 
+                    } else { 
+                        if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } 
+                    }
+                    
+                    canvas.width = width; 
+                    canvas.height = height; 
+                    const ctx = canvas.getContext('2d'); 
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
                     const dataUrl = canvas.toDataURL('image/jpeg', 0.7); 
-                    db.vault.push({ id: Date.now(), companyId: parseInt(compId), data: dataUrl, date: Date.now() }); saveData(); document.getElementById('vault-file-upload').value = ''; renderVault(); showToast('تم الحفظ في الخزنة', 'success');
-                }; img.src = e.target.result;
-            }; reader.readAsDataURL(file);
+                    
+                    db.vault.push({ id: Date.now(), companyId: parseInt(compId), data: dataUrl, date: Date.now() });
+                    saveData(); 
+                    document.getElementById('vault-file-upload').value = ''; 
+                    renderVault(); 
+                    showToast('تم الحفظ في الخزنة', 'success');
+                }; 
+                img.src = e.target.result;
+            }; 
+            reader.readAsDataURL(file);
         }
 
-        function reqDeleteVaultItem(id) { customConfirm('حذف الصورة', 'حذف هذه الصورة من الخزنة لا يمكن التراجع عنه.', () => { db.vault = db.vault.filter(v => v.id !== id); saveData(); renderVault(); }); }
-        function openLightbox(src) { document.getElementById('lightboxImage').src = src; const modal = document.getElementById('lightboxModal'); modal.style.display = 'flex'; setTimeout(() => { modal.classList.add('opacity-100'); document.getElementById('lightboxImage').classList.remove('scale-95'); document.getElementById('lightboxImage').classList.add('scale-100'); }, 10); }
-        function closeLightbox() { const modal = document.getElementById('lightboxModal'); document.getElementById('lightboxImage').classList.remove('scale-100'); document.getElementById('lightboxImage').classList.add('scale-95'); modal.classList.remove('opacity-100'); setTimeout(() => modal.style.display = 'none', 300); }
+        function reqDeleteVaultItem(id) { 
+            customConfirm('حذف الصورة', 'حذف هذه الصورة من الخزنة لا يمكن التراجع عنه.', () => { 
+                db.vault = db.vault.filter(v => v.id !== id); 
+                saveData(); 
+                renderVault(); 
+            }); 
+        }
+
+        function openLightbox(src) { 
+            document.getElementById('lightboxImage').src = src; 
+            const modal = document.getElementById('lightboxModal'); 
+            modal.style.display = 'flex'; 
+            
+            setTimeout(() => { 
+                modal.classList.add('opacity-100'); 
+                document.getElementById('lightboxImage').classList.remove('scale-95'); 
+                document.getElementById('lightboxImage').classList.add('scale-100'); 
+            }, 10); 
+        }
+        
+        function closeLightbox() { 
+            const modal = document.getElementById('lightboxModal'); 
+            document.getElementById('lightboxImage').classList.remove('scale-100'); 
+            document.getElementById('lightboxImage').classList.add('scale-95'); 
+            modal.classList.remove('opacity-100'); 
+            
+            setTimeout(() => modal.style.display = 'none', 300); 
+        }
+
+        // ==========================================
+        // 8. TRANSACTIONS DETAILS LOGIC
+        // ==========================================
 
         function openTxDetails(id) {
-            currentTxId = id; const tx = db.transactions.find(t => t.id === id);
-            document.getElementById('det-fee').innerText = numFormat.format(tx.fee) + ' د.ع'; document.getElementById('det-type').innerText = tx.type;
-            document.getElementById('det-comp').innerText = db.companies.find(c => c.id === tx.companyId)?.name; document.getElementById('det-lawyer').innerText = db.lawyers.find(l => l.id === tx.lawyerId)?.name; document.getElementById('det-dept').innerText = tx.dept;
-            const badge = document.getElementById('det-status-badge'); badge.innerText = tx.status === 'active' ? 'قيد العمل' : (tx.status === 'stalled' ? 'متلكئة' : 'منجزة');
-            badge.className = `text-xs px-3 py-1 rounded-full font-bold shadow-sm ${tx.status === 'active' ? 'bg-primary text-white pulse-badge' : (tx.status === 'stalled' ? 'bg-red-500 text-white' : 'bg-emerald-500 text-white')}`;
+            currentTxId = id; 
+            const tx = db.transactions.find(t => t.id === id);
+            
+            document.getElementById('det-fee').innerText = numFormat.format(tx.fee) + ' د.ع'; 
+            document.getElementById('det-type').innerText = tx.type;
+            document.getElementById('det-comp').innerText = db.companies.find(c => c.id === tx.companyId)?.name; 
+            document.getElementById('det-lawyer').innerText = db.lawyers.find(l => l.id === tx.lawyerId)?.name;
+            document.getElementById('det-dept').innerText = tx.dept;
+
+            const badge = document.getElementById('det-status-badge');
+            badge.innerText = tx.status === 'active' ? 'قيد العمل' : (tx.status === 'stalled' ? 'متلكئة' : 'منجزة');
+            badge.className = `text-xs px-3 py-1 rounded-full font-bold shadow-sm ${
+                tx.status === 'active' 
+                    ? 'bg-primary text-white pulse-badge' 
+                    : (tx.status === 'stalled' ? 'bg-red-500 text-white' : 'bg-emerald-500 text-white')
+            }`;
+            
             const btnStall = document.getElementById('btn-toggle-stall');
-            if(tx.status === 'stalled') { btnStall.innerHTML = `<i class="fa-solid fa-rotate-left"></i> تفعيل المعاملة (إلغاء التلكؤ)`; btnStall.className = "bg-primary text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 col-span-2 shadow-lg hover-lift active:scale-95 transition-all"; } 
-            else { btnStall.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> إيقاف مؤقت (تلكؤ)`; btnStall.className = "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 col-span-2 border border-red-200 dark:border-red-800 hover-lift active:scale-95 transition-colors"; }
+            if(tx.status === 'stalled') { 
+                btnStall.innerHTML = `<i class="fa-solid fa-rotate-left"></i> تفعيل المعاملة (إلغاء التلكؤ)`; 
+                btnStall.className = "bg-primary text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 col-span-2 shadow-lg hover-lift active:scale-95 transition-all"; 
+            } else { 
+                btnStall.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> إيقاف مؤقت (تلكؤ)`; 
+                btnStall.className = "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 col-span-2 border border-red-200 dark:border-red-800 hover-lift active:scale-95 transition-colors"; 
+            }
+
             const statContainer = document.getElementById('det-stations');
-            if(tx.stations.length === 0) { statContainer.innerHTML = `<p class="text-xs font-bold text-slate-400 text-center py-6">لم يتم تحديث أي محطة بعد</p>`; } 
-            else { statContainer.innerHTML = [...tx.stations].reverse().map((s, i) => `<div class="relative animate-item" style="animation-delay: ${i * 0.05}s"><div class="absolute -right-[23px] top-1 w-4 h-4 ${i===0 ? 'bg-primary ring-4 ring-primary/20 pulse-badge' : 'bg-slate-300 border-2 border-white dark:border-[#0B1121]'} rounded-full"></div><div class="${i===0 ? 'bg-white dark:bg-darkcard p-4 rounded-xl shadow-md border border-indigo-100 dark:border-indigo-900/50 relative overflow-hidden' : 'opacity-70 bg-transparent p-3 rounded-xl border border-slate-200 dark:border-slate-800'}">${i===0 ? '<div class="absolute left-0 top-0 w-1 h-full bg-primary"></div>' : ''}<h5 class="font-extrabold text-sm ${i===0 ? 'text-primary' : 'text-slate-700 dark:text-slate-300'} mb-1">${s.name}</h5>${s.user ? `<p class="text-xs font-bold text-slate-600 dark:text-slate-400">${s.user}</p>` : ''}<p class="text-[10px] text-slate-400 mt-2 font-bold"><i class="fa-regular fa-clock"></i> ${formatDate(s.date)}</p></div></div>`).join(''); }
+            if(tx.stations.length === 0) { 
+                statContainer.innerHTML = `<p class="text-xs font-bold text-slate-400 text-center py-6">لم يتم تحديث أي محطة بعد</p>`; 
+            } else {
+                statContainer.innerHTML = [...tx.stations].reverse().map((s, i) => `
+                    <div class="relative animate-item" style="animation-delay: ${i * 0.05}s">
+                        <div class="absolute -right-[23px] top-1 w-4 h-4 ${
+                            i===0 
+                                ? 'bg-primary ring-4 ring-primary/20 pulse-badge' 
+                                : 'bg-slate-300 border-2 border-white dark:border-[#0B1121]'
+                        } rounded-full"></div>
+                        
+                        <div class="${
+                            i===0 
+                                ? 'bg-white dark:bg-darkcard p-4 rounded-xl shadow-md border border-indigo-100 dark:border-indigo-900/50 relative overflow-hidden' 
+                                : 'opacity-70 bg-transparent p-3 rounded-xl border border-slate-200 dark:border-slate-800'
+                        }">
+                            ${i===0 ? '<div class="absolute left-0 top-0 w-1 h-full bg-primary"></div>' : ''}
+                            
+                            <h5 class="font-extrabold text-sm ${i===0 ? 'text-primary' : 'text-slate-700 dark:text-slate-300'} mb-1">${s.name}</h5>
+                            
+                            ${s.user ? `<p class="text-xs font-bold text-slate-600 dark:text-slate-400">${s.user}</p>` : ''}
+                            
+                            <p class="text-[10px] text-slate-400 mt-2 font-bold">
+                                <i class="fa-regular fa-clock"></i> ${formatDate(s.date)}
+                            </p>
+                        </div>
+                    </div>
+                `).join('');
+            }
             openModal('txDetailsModal');
         }
         
         function saveStation() {
-            const name = document.getElementById('stat-name').value; const user = document.getElementById('stat-user').value;
+            const name = document.getElementById('stat-name').value; 
+            const user = document.getElementById('stat-user').value;
+            
             if(!name) return showToast('الرجاء كتابة اسم المحطة', 'error');
-            const tx = db.transactions.find(t => t.id === currentTxId); tx.stations.push({ name, user, date: Date.now() }); tx.lastUpdate = Date.now();
-            document.getElementById('stat-name').value = ''; document.getElementById('stat-user').value = ''; closeModal('addStationModal'); saveData(); openTxDetails(currentTxId); showToast('تم تحديث المسار', 'success');
+            
+            const tx = db.transactions.find(t => t.id === currentTxId); 
+            tx.stations.push({ name, user, date: Date.now() }); 
+            tx.lastUpdate = Date.now();
+            
+            document.getElementById('stat-name').value = ''; 
+            document.getElementById('stat-user').value = '';
+            
+            closeModal('addStationModal'); 
+            saveData(); 
+            openTxDetails(currentTxId); 
+            showToast('تم تحديث المسار', 'success');
         }
-        function toggleStallTx() { const tx = db.transactions.find(t => t.id === currentTxId); tx.status = tx.status === 'stalled' ? 'active' : 'stalled'; tx.lastUpdate = Date.now(); saveData(); closeModal('txDetailsModal'); showToast(tx.status === 'stalled' ? 'تم إيقاف المعاملة' : 'تم تفعيل المعاملة'); }
-        function reqMarkTxCompleted() { customConfirm('إنجاز للأرشيف', 'هل تم إنجاز المعاملة بالدوائر بالكامل؟', () => { const tx = db.transactions.find(t => t.id === currentTxId); tx.status = 'completed'; tx.lastUpdate = Date.now(); saveData(); closeModal('txDetailsModal'); showToast('تمت الأرشفة بنجاح', 'success'); }); }
-        function reqDeleteTx() { customConfirm('حذف قيد', 'حذف السجل نهائي ولن يظهر بالتحاسب أو الأرشيف!', () => { db.transactions = db.transactions.filter(t => t.id !== currentTxId); saveData(); closeModal('txDetailsModal'); showToast('تم الحذف بنجاح'); }); }
+
+        function toggleStallTx() { 
+            const tx = db.transactions.find(t => t.id === currentTxId); 
+            tx.status = tx.status === 'stalled' ? 'active' : 'stalled'; 
+            tx.lastUpdate = Date.now(); 
+            saveData(); 
+            closeModal('txDetailsModal'); 
+            showToast(tx.status === 'stalled' ? 'تم إيقاف المعاملة' : 'تم تفعيل المعاملة'); 
+        }
+
+        function reqMarkTxCompleted() { 
+            customConfirm('إنجاز للأرشيف', 'هل تم إنجاز المعاملة بالدوائر بالكامل؟', () => { 
+                const tx = db.transactions.find(t => t.id === currentTxId); 
+                tx.status = 'completed'; 
+                tx.lastUpdate = Date.now(); 
+                saveData(); 
+                closeModal('txDetailsModal'); 
+                showToast('تمت الأرشفة بنجاح', 'success'); 
+            }); 
+        }
+
+        function reqDeleteTx() { 
+            customConfirm('حذف قيد', 'حذف السجل نهائي ولن يظهر بالتحاسب أو الأرشيف!', () => { 
+                db.transactions = db.transactions.filter(t => t.id !== currentTxId); 
+                saveData(); 
+                closeModal('txDetailsModal'); 
+                showToast('تم الحذف بنجاح'); 
+            }); 
+        }
+
+        // ==========================================
+        // 9. ARCHIVE & ACCOUNTING LOGIC
+        // ==========================================
 
         function renderArchive() {
-            const q = document.getElementById('archive-search').value.toLowerCase(); let compTxs = db.transactions.filter(t => t.status === 'completed');
-            if(q) { compTxs = compTxs.filter(t => t.type.toLowerCase().includes(q) || (db.companies.find(c => c.id === t.companyId)?.name || '').toLowerCase().includes(q)); }
-            document.getElementById('archive-list').innerHTML = compTxs.map((tx, index) => `<div class="glass-panel p-4 rounded-xl border-r-4 border-emerald-500 shadow-sm flex justify-between items-center font-bold hover-lift animate-item" style="animation-delay: ${index * 0.05}s"><div><h4 class="text-sm text-slate-800 dark:text-white">${tx.type}</h4><p class="text-xs text-slate-500 mt-1">${db.companies.find(c => c.id === tx.companyId)?.name}</p></div><div class="text-left"><span class="text-[10px] bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 font-black px-2 py-1 rounded"><i class="fa-solid fa-check"></i> منجزة</span><p class="text-[9px] text-slate-400 mt-2">${formatDate(tx.lastUpdate).split(' -')[0]}</p></div></div>`).join('') || `<p class="text-center font-bold text-slate-400 py-10">الأرشيف فارغ</p>`;
+            const q = document.getElementById('archive-search').value.toLowerCase(); 
+            let compTxs = db.transactions.filter(t => t.status === 'completed');
+            
+            if(q) {
+                compTxs = compTxs.filter(t => 
+                    t.type.toLowerCase().includes(q) || 
+                    (db.companies.find(c => c.id === t.companyId)?.name || '').toLowerCase().includes(q)
+                );
+            }
+
+            document.getElementById('archive-list').innerHTML = compTxs.map((tx, index) => `
+                <div class="glass-panel p-4 rounded-xl border-r-4 border-emerald-500 shadow-sm flex justify-between items-center font-bold hover-lift animate-item" style="animation-delay: ${index * 0.05}s">
+                    <div>
+                        <h4 class="text-sm text-slate-800 dark:text-white">${tx.type}</h4>
+                        <p class="text-xs text-slate-500 mt-1">${db.companies.find(c => c.id === tx.companyId)?.name}</p>
+                    </div>
+                    <div class="text-left">
+                        <span class="text-[10px] bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 font-black px-2 py-1 rounded">
+                            <i class="fa-solid fa-check"></i> منجزة
+                        </span>
+                        <p class="text-[9px] text-slate-400 mt-2">${formatDate(tx.lastUpdate).split(' -')[0]}</p>
+                    </div>
+                </div>
+            `).join('') || `<p class="text-center font-bold text-slate-400 py-10">الأرشيف فارغ</p>`;
         }
 
         function renderAccounting() {
-            const activeTxs = db.transactions.filter(t => t.status === 'active' || t.status === 'completed'); let lawyerDues = {}; 
-            activeTxs.forEach(tx => { if(!lawyerDues[tx.lawyerId]) lawyerDues[tx.lawyerId] = []; lawyerDues[tx.lawyerId].push(tx); });
+            const activeTxs = db.transactions.filter(t => t.status === 'active' || t.status === 'completed'); 
+            let lawyerDues = {}; 
+            
+            activeTxs.forEach(tx => { 
+                if(!lawyerDues[tx.lawyerId]) lawyerDues[tx.lawyerId] = []; 
+                lawyerDues[tx.lawyerId].push(tx); 
+            });
+            
             document.getElementById('acc-total-dues').innerText = numFormat.format(activeTxs.reduce((a,b)=>a+b.fee,0));
+
             document.getElementById('accounting-list').innerHTML = Object.keys(lawyerDues).map((lId, index) => {
-                const lawyer = db.lawyers.find(l => l.id == lId); const txs = lawyerDues[lId]; const sum = txs.reduce((a,b) => a+b.fee, 0);
-                return `<div class="glass-panel rounded-3xl p-5 shadow-sm border border-slate-100 dark:border-slate-800/50 hover-lift animate-item" style="animation-delay: ${index * 0.1}s"><div class="flex justify-between items-center border-b dark:border-slate-700 pb-3 mb-3"><div><h3 class="font-extrabold text-lg text-primary">${lawyer?.name || 'مجهول'}</h3><p class="text-xs font-bold text-slate-500 mt-1">${txs.length} معاملات مقيدة</p></div><div class="text-xl font-extrabold text-slate-800 dark:text-white" dir="ltr">${numFormat.format(sum)}</div></div><div class="flex gap-2"><button onclick="triggerPDF(${lId}, 'receipt', ${sum})" class="flex-1 bg-white dark:bg-darkcard text-slate-800 dark:text-white py-3 rounded-xl text-xs font-extrabold active:scale-95 hover-lift transition-transform shadow border border-slate-200 dark:border-slate-700"><i class="fa-solid fa-receipt text-primary"></i> طباعة إيصال</button><button onclick="triggerPDF(${lId}, 'report', ${sum})" class="flex-1 bg-primary text-white py-3 rounded-xl text-xs font-extrabold active:scale-95 hover-lift transition-transform shadow-md shadow-indigo-500/30"><i class="fa-solid fa-file-pdf"></i> كشف تفصيلي</button></div></div>`;
+                const lawyer = db.lawyers.find(l => l.id == lId); 
+                const txs = lawyerDues[lId]; 
+                const sum = txs.reduce((a,b) => a+b.fee, 0);
+                
+                return `
+                <div class="glass-panel rounded-3xl p-5 shadow-sm border border-slate-100 dark:border-slate-800/50 hover-lift animate-item" style="animation-delay: ${index * 0.1}s">
+                    <div class="flex justify-between items-center border-b dark:border-slate-700 pb-3 mb-3">
+                        <div>
+                            <h3 class="font-extrabold text-lg text-primary">${lawyer?.name || 'مجهول'}</h3>
+                            <p class="text-xs font-bold text-slate-500 mt-1">${txs.length} معاملات مقيدة</p>
+                        </div>
+                        <div class="text-xl font-extrabold text-slate-800 dark:text-white" dir="ltr">
+                            ${numFormat.format(sum)}
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <button onclick="triggerPDF(${lId}, 'receipt', ${sum})" class="flex-1 bg-white dark:bg-darkcard text-slate-800 dark:text-white py-3 rounded-xl text-xs font-extrabold active:scale-95 hover-lift transition-transform shadow border border-slate-200 dark:border-slate-700">
+                            <i class="fa-solid fa-receipt text-primary"></i> طباعة إيصال
+                        </button>
+                        <button onclick="triggerPDF(${lId}, 'report', ${sum})" class="flex-1 bg-primary text-white py-3 rounded-xl text-xs font-extrabold active:scale-95 hover-lift transition-transform shadow-md shadow-indigo-500/30">
+                            <i class="fa-solid fa-file-pdf"></i> كشف تفصيلي
+                        </button>
+                    </div>
+                </div>`;
             }).join('');
         }
 
+        // ==========================================
+        // 10. PDF & EXPORT ENGINE
+        // ==========================================
+
         function triggerPDF(lawyerId, type, amount) {
-            try {
-                const lawyer = db.lawyers.find(l => l.id == lawyerId) || { name: 'عميل غير معروف' }; const dateStr = new Date().toLocaleDateString('ar-IQ'); const refNo = 'REF-' + Date.now().toString().slice(-6);
-                document.getElementById('pdf-title').innerText = type === 'receipt' ? 'سند استلام مالي رسمي' : 'كشف حساب معاملات تفصيلي'; document.getElementById('pdf-date').innerText = dateStr; document.getElementById('pdf-ref').innerText = refNo; document.getElementById('pdf-issuer-name').innerText = db.settings.name || 'مكتب تخليص المعاملات'; document.getElementById('pdf-issuer-address').innerText = db.settings.address || 'بغداد - العراق'; document.getElementById('pdf-sig-name').innerText = db.settings.name || 'التوقيع والختم المعتمد'; document.getElementById('pdf-lawyer-name').innerText = lawyer.name; document.getElementById('pdf-doc-type').innerText = type === 'receipt' ? 'قيد قبض أتعاب مالية' : 'تقرير مسارات المعاملات الأسبوعية'; document.getElementById('pdf-amount').innerText = numFormat.format(amount) + ' د.ع';
-                const sigImg = document.getElementById('pdf-signature-img'); if(db.settings.signature) { sigImg.src = db.settings.signature; sigImg.style.display = 'block'; } else { sigImg.style.display = 'none'; }
-                const listContainer = document.getElementById('pdf-tx-list-container');
-                if(type === 'report') {
-                    const txs = db.transactions.filter(t => t.lawyerId == lawyerId);
-                    document.getElementById('pdf-tx-list').innerHTML = `<table style="width:100%; border-collapse: collapse; margin-top: 10px;"><thead><tr style="background-color: #f1f5f9; color: #334155; font-size: 13px; text-align: right;"><th style="padding: 10px; border-bottom: 2px solid #cbd5e1;">نوع المعاملة</th><th style="padding: 10px; border-bottom: 2px solid #cbd5e1;">الشركة المعنية</th><th style="padding: 10px; border-bottom: 2px solid #cbd5e1; text-align: left;">الأتعاب</th></tr></thead><tbody>${txs.map(t => `<tr style="border-bottom: 1px solid #e2e8f0; font-size: 13px;"><td style="padding: 10px; font-weight: 700; color: #1e293b;">${t.type}</td><td style="padding: 10px; color: #64748b;">${db.companies.find(c=>c.id==t.companyId)?.name || 'غير مسجلة'}</td><td style="padding: 10px; text-align: left; direction: ltr; font-weight: 800; color: #4f46e5;">${numFormat.format(t.fee)} IQD</td></tr>`).join('')}</tbody></table>`;
-                    listContainer.style.display = 'block';
-                } else { listContainer.style.display = 'none'; }
-                const qrTarget = document.getElementById("qr-target"); qrTarget.innerHTML = "";
-                if (typeof QRCode !== 'undefined') { try { new QRCode(qrTarget, { text: `Ref:${refNo}|Client:${lawyer.name}|Total:${amount}`, width: 85, height: 85, colorDark : "#0f172a", colorLight : "#ffffff" }); } catch (e) { console.log("QR skipped safely"); } }
-                customAlert('جاري التجهيز', 'يتم تصدير المستند الاحترافي الآن...', 'info');
-                const wrapper = document.getElementById('pdf-export-wrapper'); wrapper.style.opacity = '1'; wrapper.style.top = '-10000px'; wrapper.style.zIndex = '9999';
-                const opt = { margin: 0, filename: `${type}_${lawyer.name}.pdf`, image: { type: 'jpeg', quality: 1 }, html2canvas: { scale: 2, useCORS: true, logging: false }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } };
-                html2pdf().set(opt).from(document.getElementById('pdf-content')).save().then(() => { wrapper.style.opacity = '0.01'; wrapper.style.top = '0'; wrapper.style.zIndex = '-9999'; closeUiAlert(); showToast('تم تصدير المستند بنجاح', 'success'); }).catch(err => { wrapper.style.opacity = '0.01'; wrapper.style.top = '0'; closeUiAlert(); alert('خطأ في التصدير: ' + err.message); });
-            } catch (error) { alert('حدث خطأ في النظام: ' + error.message); }
+    try {
+        const lawyer = db.lawyers.find(l => l.id == lawyerId) || { name: 'عميل غير معروف' };
+        const dateStr = new Date().toLocaleDateString('ar-IQ'); 
+        const refNo = 'REF-' + Date.now().toString().slice(-6);
+        
+        // 1. تعبئة البيانات الأساسية
+        document.getElementById('pdf-title').innerText = type === 'receipt' ? 'سند استلام مالي رسمي' : 'كشف حساب معاملات تفصيلي';
+        document.getElementById('pdf-date').innerText = dateStr; 
+        document.getElementById('pdf-ref').innerText = refNo;
+        document.getElementById('pdf-issuer-name').innerText = db.settings.name || 'مكتب تخليص المعاملات'; 
+        document.getElementById('pdf-issuer-address').innerText = db.settings.address || 'بغداد - العراق';
+        document.getElementById('pdf-sig-name').innerText = db.settings.name || 'التوقيع والختم المعتمد';
+        document.getElementById('pdf-lawyer-name').innerText = lawyer.name; 
+        document.getElementById('pdf-doc-type').innerText = type === 'receipt' ? 'قيد قبض أتعاب مالية' : 'تقرير مسارات المعاملات الأسبوعية';
+        document.getElementById('pdf-amount').innerText = numFormat.format(amount) + ' د.ع';
+
+        // 2. معالجة التوقيع الإلكتروني
+        const sigImg = document.getElementById('pdf-signature-img');
+        if(db.settings.signature) { 
+            sigImg.src = db.settings.signature; 
+            sigImg.style.display = 'block'; 
+        } else { 
+            sigImg.style.display = 'none'; 
         }
 
+        // 3. تصميم جدول تفاصيل المعاملات (احترافي ومنظم)
+        const listContainer = document.getElementById('pdf-tx-list-container');
+        if(type === 'report') {
+            const txs = db.transactions.filter(t => t.lawyerId == lawyerId);
+            document.getElementById('pdf-tx-list').innerHTML = `
+                <table style="width:100%; border-collapse: collapse; margin-top: 10px;">
+                    <thead>
+                        <tr style="background-color: #f1f5f9; color: #334155; font-size: 13px; text-align: right;">
+                            <th style="padding: 10px; border-bottom: 2px solid #cbd5e1;">نوع المعاملة</th>
+                            <th style="padding: 10px; border-bottom: 2px solid #cbd5e1;">الشركة المعنية</th>
+                            <th style="padding: 10px; border-bottom: 2px solid #cbd5e1; text-align: left;">الأتعاب</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${txs.map(t => `
+                            <tr style="border-bottom: 1px solid #e2e8f0; font-size: 13px;">
+                                <td style="padding: 10px; font-weight: 700; color: #1e293b;">${t.type}</td>
+                                <td style="padding: 10px; color: #64748b;">${db.companies.find(c=>c.id==t.companyId)?.name || 'غير مسجلة'}</td>
+                                <td style="padding: 10px; text-align: left; direction: ltr; font-weight: 800; color: #4f46e5;">${numFormat.format(t.fee)} IQD</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            listContainer.style.display = 'block';
+        } else { 
+            listContainer.style.display = 'none'; 
+        }
+
+        // 4. إعادة تفعيل الباركود بشكل آمن
+        const qrTarget = document.getElementById("qr-target");
+        qrTarget.innerHTML = "";
+        if (typeof QRCode !== 'undefined') {
+            try {
+                new QRCode(qrTarget, { 
+                    text: `Ref:${refNo}|Client:${lawyer.name}|Total:${amount}`, 
+                    width: 85, 
+                    height: 85, 
+                    colorDark : "#0f172a", 
+                    colorLight : "#ffffff" 
+                });
+            } catch (e) {
+                console.log("QR skipped safely");
+            }
+        }
+
+        customAlert('جاري التجهيز', 'يتم تصدير المستند الاحترافي الآن...', 'info');
+        
+        // إخراج القالب لمعالجة الصورة
+        const wrapper = document.getElementById('pdf-export-wrapper');
+        wrapper.style.opacity = '1';
+        wrapper.style.top = '-10000px'; 
+        wrapper.style.zIndex = '9999';
+
+        const opt = { 
+            margin: 0, 
+            filename: `${type}_${lawyer.name}.pdf`, 
+            image: { type: 'jpeg', quality: 1 }, 
+            html2canvas: { scale: 2, useCORS: true, logging: false }, 
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } 
+        };
+
+        html2pdf().set(opt).from(document.getElementById('pdf-content')).save().then(() => {
+            wrapper.style.opacity = '0.01';
+            wrapper.style.top = '0';
+            wrapper.style.zIndex = '-9999';
+            closeUiAlert(); 
+            showToast('تم تصدير المستند بنجاح', 'success');
+        }).catch(err => {
+            wrapper.style.opacity = '0.01';
+            wrapper.style.top = '0';
+            closeUiAlert();
+            alert('خطأ في التصدير: ' + err.message);
+        });
+
+    } catch (error) {
+        alert('حدث خطأ في النظام: ' + error.message);
+    }
+}
+
+
+        // Initialize App
         init();
+
     </script>
 </body>
 </html>
