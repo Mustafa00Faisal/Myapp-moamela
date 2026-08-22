@@ -33,15 +33,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- ========================================== -->
-    <!-- بداية إضافة مكتبة قاعدة البيانات السحابية -->
-    <!-- ========================================== -->
-    <!-- 
-      هذا السطر هو الذي يجلب مكتبة Supabase من الإنترنت.
-      بدون هذا السطر، المتصفح لن يفهم أي أوامر تخص قاعدة البيانات السحابية.
-      نضعه هنا في قسم الـ <head> لكي يتم تحميله وتجهيزه قبل أن يبدأ التطبيق بالعمل.
-    -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         body { 
@@ -419,49 +410,21 @@
                     </div>
                 </div>
                 
-           <div class="animate-item" style="animation-delay: 0.3s">
-                    <label class="block text-sm font-bold mb-1 text-slate-700 dark:text-slate-300">الدائرة المستهدفة</label>
-                    
-                    <!-- شريط سحب أفقي مع مساحات إضافية لمنع قص الظل -->
-                    <div class="flex gap-4 overflow-x-auto py-4 px-2 scroll-smooth snap-x custom-scrollbar">
-                        
-                        <!-- 1. مسجل الشركات -->
-                        <label class="group relative snap-start shrink-0 min-w-[130px] border-2 border-slate-200 dark:border-slate-700 rounded-xl p-4 text-center cursor-pointer flex flex-col items-center justify-center gap-3 transition-all duration-300 bg-white dark:bg-darkcard has-[:checked]:border-primary has-[:checked]:bg-indigo-50 dark:has-[:checked]:bg-indigo-900/20 has-[:checked]:scale-105 has-[:checked]:shadow-xl has-[:checked]:shadow-indigo-500/20 has-[:checked]:z-10">
+                <div class="animate-item" style="animation-delay: 0.3s">
+                    <label class="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">الدائرة المستهدفة</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="border-2 dark:border-slate-700 rounded-xl p-3 text-center cursor-pointer flex flex-col items-center gap-2 has-[:checked]:border-primary has-[:checked]:bg-primary/10 transition-all hover-lift bg-white dark:bg-darkcard">
                             <input type="radio" name="new-tx-dept" value="دائرة مسجل الشركات" class="hidden" checked>
-                            <i class="fa-solid fa-building-columns text-2xl text-slate-400 group-has-[:checked]:text-primary transition-all duration-300"></i>
-                            <span class="text-xs font-bold whitespace-nowrap text-slate-500 dark:text-slate-400 group-has-[:checked]:text-primary group-has-[:checked]:font-black transition-colors">مسجل الشركات</span>
-                            
-                            <!-- علامة الصح المنبثقة -->
-                            <div class="absolute -top-2 -right-2 bg-primary text-white text-[10px] w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-has-[:checked]:opacity-100 transition-all duration-300 shadow-md scale-0 group-has-[:checked]:scale-100">
-                                <i class="fa-solid fa-check"></i>
-                            </div>
+                            <i class="fa-solid fa-building-columns text-xl text-slate-400"></i>
+                            <span class="text-xs font-bold">مسجل الشركات</span>
                         </label>
-                        
-                        <!-- 2. الاستيراد والتصدير -->
-                        <label class="group relative snap-start shrink-0 min-w-[130px] border-2 border-slate-200 dark:border-slate-700 rounded-xl p-4 text-center cursor-pointer flex flex-col items-center justify-center gap-3 transition-all duration-300 bg-white dark:bg-darkcard has-[:checked]:border-primary has-[:checked]:bg-indigo-50 dark:has-[:checked]:bg-indigo-900/20 has-[:checked]:scale-105 has-[:checked]:shadow-xl has-[:checked]:shadow-indigo-500/20 has-[:checked]:z-10">
+                        <label class="border-2 dark:border-slate-700 rounded-xl p-3 text-center cursor-pointer flex flex-col items-center gap-2 has-[:checked]:border-primary has-[:checked]:bg-primary/10 transition-all hover-lift bg-white dark:bg-darkcard">
                             <input type="radio" name="new-tx-dept" value="دائرة الاستيراد والتصدير" class="hidden">
-                            <i class="fa-solid fa-ship text-2xl text-slate-400 group-has-[:checked]:text-primary transition-all duration-300"></i>
-                            <span class="text-xs font-bold whitespace-nowrap text-slate-500 dark:text-slate-400 group-has-[:checked]:text-primary group-has-[:checked]:font-black transition-colors">الاستيراد والتصدير</span>
-                            
-                            <div class="absolute -top-2 -right-2 bg-primary text-white text-[10px] w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-has-[:checked]:opacity-100 transition-all duration-300 shadow-md scale-0 group-has-[:checked]:scale-100">
-                                <i class="fa-solid fa-check"></i>
-                            </div>
+                            <i class="fa-solid fa-ship text-xl text-slate-400"></i>
+                            <span class="text-xs font-bold">الاستيراد والتصدير</span>
                         </label>
-
-                        <!-- 3. هيئة الإعلام والاتصالات -->
-                        <label class="group relative snap-start shrink-0 min-w-[130px] border-2 border-slate-200 dark:border-slate-700 rounded-xl p-4 text-center cursor-pointer flex flex-col items-center justify-center gap-3 transition-all duration-300 bg-white dark:bg-darkcard has-[:checked]:border-primary has-[:checked]:bg-indigo-50 dark:has-[:checked]:bg-indigo-900/20 has-[:checked]:scale-105 has-[:checked]:shadow-xl has-[:checked]:shadow-indigo-500/20 has-[:checked]:z-10">
-                            <input type="radio" name="new-tx-dept" value="هيئة الاعلام والاتصالات" class="hidden">
-                            <i class="fa-solid fa-tower-broadcast text-2xl text-slate-400 group-has-[:checked]:text-primary transition-all duration-300"></i>
-                            <span class="text-xs font-bold whitespace-nowrap text-slate-500 dark:text-slate-400 group-has-[:checked]:text-primary group-has-[:checked]:font-black transition-colors">الإعلام والاتصالات</span>
-                            
-                            <div class="absolute -top-2 -right-2 bg-primary text-white text-[10px] w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-has-[:checked]:opacity-100 transition-all duration-300 shadow-md scale-0 group-has-[:checked]:scale-100">
-                                <i class="fa-solid fa-check"></i>
-                            </div>
-                        </label>
-                        
                     </div>
                 </div>
-
                 
                 <div class="animate-item" style="animation-delay: 0.4s">
                     <label class="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">نوع المعاملة</label>
@@ -845,24 +808,11 @@
         </div>
     </div>
 
-
-    
     <!-- Scripts Area -->
     <script>
         // ==========================================
-        // 1. نظام البيانات الأساسي والربط السحابي (CORE DATA SYSTEM & SUPABASE)
+        // 1. CORE DATA SYSTEM & MIGRATION
         // ==========================================
-        
-        const supabaseUrl = 'https://test-project.supabase.co'; // سنضع الرابط الحقيقي لاحقاً
-        const supabaseKey = 'dummy-key-123'; // سنضع المفتاح الحقيقي لاحقاً
-        
-        let supabase = null;
-        try {
-            if (window.supabase) {
-                supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-            }
-        } catch(e) { console.warn("مكتبة السحابة لم تحمل بعد"); }
-
         let db = { 
             settings: { name: '', address: '', theme: 'light', signature: null }, 
             lawyers: [], 
@@ -876,55 +826,13 @@
         let chartInstance = null;
         
         const numFormat = new Intl.NumberFormat('en-US');
-        
         const formatDate = (ts) => { 
             let d = new Date(ts); 
             return d.toLocaleDateString('ar-IQ', {month: 'short', day: 'numeric'}) + ' - ' + d.toLocaleTimeString('ar-IQ', {hour: '2-digit', minute:'2-digit'}); 
         };
 
-        async function init() {
-            try {
-                if (!supabase || supabaseUrl.includes('test-project')) {
-                    throw new Error("السحابة غير مفعلة بعد");
-                }
-
-                showToast('جاري الاتصال بالسحابة...', 'info');
-
-                const [lawyersRes, companiesRes, txsRes] = await Promise.all([
-                    supabase.from('lawyers').select('*'),
-                    supabase.from('companies').select('*'),
-                    supabase.from('transactions').select('*')
-                ]);
-
-                if (lawyersRes.error) throw lawyersRes.error;
-                if (companiesRes.error) throw companiesRes.error;
-                if (txsRes.error) throw txsRes.error;
-
-                db.lawyers = lawyersRes.data || [];
-                db.companies = companiesRes.data || [];
-                db.transactions = txsRes.data || [];
-                
-                let savedSettings = localStorage.getItem('moaqib_settings');
-                if(savedSettings) db.settings = JSON.parse(savedSettings);
-
-                if(db.settings.theme === 'dark') document.documentElement.classList.add('dark');
-                
-                document.getElementById('set-name').value = db.settings.name || '';
-                document.getElementById('set-address').value = db.settings.address || '';
-                if(db.settings.signature) {
-                    document.getElementById('sig-preview-container').classList.remove('hidden');
-                    document.getElementById('sig-preview').src = db.settings.signature;
-                }
-
-                renderAll();
-                showToast('تم جلب البيانات السحابية بنجاح!', 'success');
-
-            } catch (error) {
-                fallbackToLocal(); 
-            }
-        }
-
-        function fallbackToLocal() {
+        function init() {
+            // Smart Migration logic V4 -> V5
             let saved = localStorage.getItem('moaqib_db_v5'); 
             
             if(!saved) {
@@ -932,6 +840,7 @@
                 if(oldDataV4) { 
                     saved = oldDataV4; 
                     localStorage.setItem('moaqib_db_v5', oldDataV4); 
+                    showToast('تم ترقية بياناتك للإصدار الخامس بنجاح!', 'success'); 
                 }
             }
 
@@ -940,13 +849,17 @@
                     const parsed = JSON.parse(saved);
                     db = { ...db, ...parsed };
                     if(!db.vault) db.vault = []; 
-                } catch(e) { console.error("Error parsing db", e); }
+                } catch(e) { 
+                    console.error("Error parsing db", e); 
+                }
             }
             
+            // Set Theme
             if(db.settings.theme === 'dark') {
                 document.documentElement.classList.add('dark');
             }
             
+            // Load Settings Data
             document.getElementById('set-name').value = db.settings.name || '';
             document.getElementById('set-address').value = db.settings.address || '';
             if(db.settings.signature) {
@@ -955,7 +868,6 @@
             }
 
             renderAll();
-            showToast('يعمل على النسخة المحلية', 'error');
         }
 
         function saveData() { 
@@ -968,13 +880,6 @@
                 }
             }
         }
-
-
-    
-
-
-    
-
 
         // ==========================================
         // 2. UI / UX SYSTEMS (TOASTS, MODALS, SELECTS)
